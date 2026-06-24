@@ -1,0 +1,33 @@
+# Environment secrets and credentials
+.env
+*.pem
+*.key
+*private_key*
+
+# Python caches and compiler outputs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Local database/trading state (optional, ignored to prevent git churn)
+data/processed/paper_trading.json
+data/processed/elo_ratings.json
+data/processed/master_dataset.csv
+data/models/
+data/cache/
+
+
+# IDE configurations
+.vscode/
+.idea/
+.project
+.pydevproject
