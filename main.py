@@ -7,6 +7,7 @@ from src.market.kalshi_client import KalshiClient
 from src.parlay.parlay_engine import ParlayEngine
 from src.data.scrapers import fbref, player_stats, news, fixtures
 from src.market.llm import generate_debate, GEMINI_AVAILABLE
+from src.data.team_mapping import normalize_team_name, is_team_match
 import os
 import requests
 from rich.console import Console
@@ -47,6 +48,8 @@ def run_predict(query: str):
         return
 
     home, away = parts[0].strip(), parts[1].strip()
+    home = normalize_team_name(home)
+    away = normalize_team_name(away)
     console.print(f"\n[cyan]Predicting match: {home.title()} vs {away.title()}...[/cyan]")
     
     # Run public search on Kalshi for current prices to serve as feature input
@@ -56,20 +59,24 @@ def run_predict(query: str):
     kalshi_probs = None
     for ev in markets:
         title = ev["event_title"].lower()
-        if home in title and away in title:
-            # Map probabilities
-            probs = {}
-            for m in ev["markets"]:
-                t = m["title"].lower()
-                if home in t:
-                    probs["home_win"] = m["yes_price"]
-                elif away in t:
-                    probs["away_win"] = m["yes_price"]
-                elif "draw" in t or "tie" in t:
-                    probs["draw"] = m["yes_price"]
-            if len(probs) >= 2:
-                kalshi_probs = probs
-                break
+        if " vs " in title:
+            t_parts = title.split(" vs ")
+            t_home = normalize_team_name(t_parts[0])
+            t_away = normalize_team_name(t_parts[1])
+            if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                # Map probabilities
+                probs = {}
+                for m in ev["markets"]:
+                    t = m["title"].lower()
+                    if is_team_match(home, t):
+                        probs["home_win"] = m["yes_price"]
+                    elif is_team_match(away, t):
+                        probs["away_win"] = m["yes_price"]
+                    elif "draw" in t or "tie" in t:
+                        probs["draw"] = m["yes_price"]
+                if len(probs) >= 2:
+                    kalshi_probs = probs
+                    break
                 
     result = predict_match(home, away, kalshi_probs)
     
@@ -167,15 +174,19 @@ def run_predict(query: str):
         live_p = None
         for ev in markets:
             title = ev["event_title"].lower()
-            if home in title and away in title:
-                for m in ev["markets"]:
-                    t = m["title"].lower()
-                    if outcome == "over_1.5" and "over 1.5" in t:
-                        live_p = m["yes_price"]
-                    elif outcome == "over_2.5" and "over 2.5" in t:
-                        live_p = m["yes_price"]
-                    elif outcome == "btts" and "both teams" in t:
-                        live_p = m["yes_price"]
+            if " vs " in title:
+                t_parts = title.split(" vs ")
+                t_home = normalize_team_name(t_parts[0])
+                t_away = normalize_team_name(t_parts[1])
+                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                    for m in ev["markets"]:
+                        t = m["title"].lower()
+                        if outcome == "over_1.5" and "over 1.5" in t:
+                            live_p = m["yes_price"]
+                        elif outcome == "over_2.5" and "over 2.5" in t:
+                            live_p = m["yes_price"]
+                        elif outcome == "btts" and "both teams" in t:
+                            live_p = m["yes_price"]
         
         if live_p:
             live_game_lines[outcome] = live_p
@@ -190,11 +201,15 @@ def run_predict(query: str):
         live_p = None
         for ev in markets:
             title = ev["event_title"].lower()
-            if home in title and away in title:
-                for m in ev["markets"]:
-                    t = m["title"].lower()
-                    if name in t and ("score" in t or "goal" in t):
-                        live_p = m["yes_price"]
+            if " vs " in title:
+                t_parts = title.split(" vs ")
+                t_home = normalize_team_name(t_parts[0])
+                t_away = normalize_team_name(t_parts[1])
+                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                    for m in ev["markets"]:
+                        t = m["title"].lower()
+                        if name in t and ("score" in t or "goal" in t):
+                            live_p = m["yes_price"]
                         
         label = f"{name.title()} to Score"
         if live_p:
@@ -693,6 +708,8 @@ def run_ask(query: str, user_model: str):
         return
 
     home, away = parts[0].strip(), parts[1].strip()
+    home = normalize_team_name(home)
+    away = normalize_team_name(away)
     console.print(f"\n[cyan]Running forecasting pipeline for: {home.title()} vs {away.title()}...[/cyan]")
     
     # Run public search on Kalshi for current prices to serve as feature input
@@ -702,20 +719,24 @@ def run_ask(query: str, user_model: str):
     kalshi_probs = None
     for ev in markets:
         title = ev["event_title"].lower()
-        if home in title and away in title:
-            # Map probabilities
-            probs = {}
-            for m in ev["markets"]:
-                t = m["title"].lower()
-                if home in t:
-                    probs["home_win"] = m["yes_price"]
-                elif away in t:
-                    probs["away_win"] = m["yes_price"]
-                elif "draw" in t or "tie" in t:
-                    probs["draw"] = m["yes_price"]
-            if len(probs) >= 2:
-                kalshi_probs = probs
-                break
+        if " vs " in title:
+            t_parts = title.split(" vs ")
+            t_home = normalize_team_name(t_parts[0])
+            t_away = normalize_team_name(t_parts[1])
+            if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                # Map probabilities
+                probs = {}
+                for m in ev["markets"]:
+                    t = m["title"].lower()
+                    if is_team_match(home, t):
+                        probs["home_win"] = m["yes_price"]
+                    elif is_team_match(away, t):
+                        probs["away_win"] = m["yes_price"]
+                    elif "draw" in t or "tie" in t:
+                        probs["draw"] = m["yes_price"]
+                if len(probs) >= 2:
+                    kalshi_probs = probs
+                    break
                 
     result = predict_match(home, away, kalshi_probs)
     
@@ -758,15 +779,19 @@ def run_ask(query: str, user_model: str):
         live_p = None
         for ev in markets:
             title = ev["event_title"].lower()
-            if home in title and away in title:
-                for m in ev["markets"]:
-                    t = m["title"].lower()
-                    if outcome == "over_1.5" and "over 1.5" in t:
-                        live_p = m["yes_price"]
-                    elif outcome == "over_2.5" and "over 2.5" in t:
-                        live_p = m["yes_price"]
-                    elif outcome == "btts" and "both teams" in t:
-                        live_p = m["yes_price"]
+            if " vs " in title:
+                t_parts = title.split(" vs ")
+                t_home = normalize_team_name(t_parts[0])
+                t_away = normalize_team_name(t_parts[1])
+                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                    for m in ev["markets"]:
+                        t = m["title"].lower()
+                        if outcome == "over_1.5" and "over 1.5" in t:
+                            live_p = m["yes_price"]
+                        elif outcome == "over_2.5" and "over 2.5" in t:
+                            live_p = m["yes_price"]
+                        elif outcome == "btts" and "both teams" in t:
+                            live_p = m["yes_price"]
         if live_p:
             edge = prob - live_p
             rec = f"{label} (Kalshi: ${live_p:.2f}, Model: {prob*100:.1f}%, Edge: {edge*100:+.1f}%)"
@@ -810,11 +835,15 @@ def run_ask(query: str, user_model: str):
         live_p = None
         for ev in markets:
             title = ev["event_title"].lower()
-            if home in title and away in title:
-                for m in ev["markets"]:
-                    t = m["title"].lower()
-                    if name in t and ("score" in t or "goal" in t):
-                        live_p = m["yes_price"]
+            if " vs " in title:
+                t_parts = title.split(" vs ")
+                t_home = normalize_team_name(t_parts[0])
+                t_away = normalize_team_name(t_parts[1])
+                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                    for m in ev["markets"]:
+                        t = m["title"].lower()
+                        if name in t and ("score" in t or "goal" in t):
+                            live_p = m["yes_price"]
         label = f"{name.title()} to Score"
         if live_p:
             edge = p_prob - live_p

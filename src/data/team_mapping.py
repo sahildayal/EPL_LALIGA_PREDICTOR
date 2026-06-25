@@ -94,6 +94,11 @@ for team in NATIONAL_TEAM_ELO.keys():
 
 ALIASES_SORTED = sorted(ALL_ALIASES_MAP.keys(), key=len, reverse=True)
 
+ALIASES_PATTERNS = {
+    alias: re.compile(r'(?<!\w)' + re.escape(alias) + r'(?!\w)')
+    for alias in ALIASES_SORTED
+}
+
 
 def normalize_team_name(name: str) -> str:
     """Standardizes a country name to its lowercase canonical form."""
@@ -128,8 +133,7 @@ def is_team_match(team: str, text: str) -> bool:
     matched_intervals = []
     for alias in ALIASES_SORTED:
         canonical = ALL_ALIASES_MAP[alias]
-        pattern = r'(?<!\w)' + re.escape(alias) + r'(?!\w)'
-        for match in re.finditer(pattern, txt_norm):
+        for match in ALIASES_PATTERNS[alias].finditer(txt_norm):
             start, end = match.start(), match.end()
             overlap = False
             for m_start, m_end, _ in matched_intervals:
