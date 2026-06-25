@@ -926,12 +926,20 @@ def run_ask(query: str, user_model: str):
         ))
     
     # Format their active bet summary for this match
-    d_active_match = next((b for b in d_sum["active_bets"] if b.get("home") == home.lower().strip() and b.get("away") == away.lower().strip()), None)
+    d_active_match = next((
+        b for b in d_sum["active_bets"]
+        if (b.get("home") == home and b.get("away") == away) or
+           (b.get("home") == away and b.get("away") == home)
+    ), None)
     d_bet_str = "No bet placed"
     if d_active_match:
         d_bet_str = f"RISKING ${d_active_match['stake']:.2f} on '{d_active_match['bet_type']}' at {d_active_match['odds']:.2f}x"
         
-    s_active_match = next((b for b in s_sum["active_bets"] if b.get("home") == home.lower().strip() and b.get("away") == away.lower().strip()), None)
+    s_active_match = next((
+        b for b in s_sum["active_bets"]
+        if (b.get("home") == home and b.get("away") == away) or
+           (b.get("home") == away and b.get("away") == home)
+    ), None)
     s_bet_str = "No bet placed"
     if s_active_match:
         s_bet_str = f"RISKING ${s_active_match['stake']:.2f} on '{s_active_match['bet_type']}' at {s_active_match['odds']:.2f}x"

@@ -71,6 +71,7 @@ def save_state(state: dict):
 
 def place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: str, stake: float, odds: float, is_parlay: bool = False, legs: list = None) -> bool:
     """Places a paper bet for a personality within a specific portfolio."""
+    from src.data.team_mapping import normalize_team_name
     state = load_state()
     if portfolio not in state:
         state[portfolio] = {
@@ -88,8 +89,8 @@ def place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: 
     p_data["bankroll"] = round(p_data["bankroll"] - stake, 2)
     
     bet_obj = {
-        "home": home.lower().strip() if home else None,
-        "away": away.lower().strip() if away else None,
+        "home": normalize_team_name(home) if home else None,
+        "away": normalize_team_name(away) if away else None,
         "bet_type": bet_type,
         "stake": round(stake, 2),
         "odds": round(odds, 2)
@@ -108,6 +109,7 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
     If the new bet is identical to the active one, does nothing.
     If the new bet is different, refunds the old stake and places the new bet.
     """
+    from src.data.team_mapping import normalize_team_name
     state = load_state()
     if portfolio not in state:
         state[portfolio] = {
@@ -118,18 +120,25 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
     if not p_data:
         return {"action": "error", "message": "Invalid personality"}
 
-    home_clean = home.lower().strip() if home else None
-    away_clean = away.lower().strip() if away else None
+    home_clean = normalize_team_name(home) if home else None
+    away_clean = normalize_team_name(away) if away else None
 
     # Find if there is an active bet for this match
     active_idx = -1
     for idx, bet in enumerate(p_data["active_bets"]):
+        b_home = normalize_team_name(bet.get("home"))
+        b_away = normalize_team_name(bet.get("away"))
+        
+        # Match regardless of team order
+        match_normal = (b_home == home_clean and b_away == away_clean)
+        match_swapped = (b_home == away_clean and b_away == home_clean)
+        
         if is_parlay:
-            if bet.get("is_parlay") and bet.get("home") == home_clean and bet.get("away") == away_clean:
+            if bet.get("is_parlay") and (match_normal or match_swapped):
                 active_idx = idx
                 break
         else:
-            if not bet.get("is_parlay") and bet.get("home") == home_clean and bet.get("away") == away_clean:
+            if not bet.get("is_parlay") and (match_normal or match_swapped):
                 active_idx = idx
                 break
 
@@ -192,9 +201,10 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
 
 def _check_bet_win(bet_type: str, home: str, away: str, home_goals: int, away_goals: int) -> bool:
     """Helper to check if a specific bet type won based on goals scored."""
+    from src.data.team_mapping import normalize_team_name
     b_type = bet_type.lower()
-    home_lower = home.lower().strip()
-    away_lower = away.lower().strip()
+    home_lower = normalize_team_name(home)
+    away_lower = normalize_team_name(away)
     
     if "moneyline" in b_type:
         if home_lower in b_type and home_goals > away_goals:
@@ -227,9 +237,10 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
     Resolves pending single bets and parlay legs across all portfolios.
     Updates bankrolls and moves resolved bets to history.
     """
+    from src.data.team_mapping import normalize_team_name
     state = load_state()
-    home_lower = home.lower().strip()
-    away_lower = away.lower().strip()
+    home_norm = normalize_team_name(home)
+    away_norm = normalize_team_name(away)
     
     results = []
     
@@ -249,11 +260,16 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
                     all_legs_won = True
                     
                     for leg in legs:
-                        l_home = leg.get("home", "").lower().strip()
-                        l_away = leg.get("away", "").lower().strip()
+                        l_home_norm = normalize_team_name(leg.get("home", ""))
+                        l_away_norm = normalize_team_name(leg.get("away", ""))
                         
-                        if l_home == home_lower and l_away == away_lower:
-                            won = _check_bet_win(leg["bet_type"], home, away, home_goals, away_goals)
+                        match_normal = (l_home_norm == home_norm and l_away_norm == away_norm)
+                        match_swapped = (l_home_norm == away_norm and l_away_norm == home_norm)
+                        
+                        if match_normal or match_swapped:
+                            h_goals = home_goals if match_normal else away_goals
+                            a_goals = away_goals if match_normal else home_goals
+                            won = _check_bet_win(leg["bet_type"], leg["home"], leg["away"], h_goals, a_goals)
                             leg["result"] = "WIN" if won else "LOSS"
                             
                         if leg.get("result") == "LOSS":
@@ -298,11 +314,16 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
                         still_active.append(bet)
                 else:
                     # Standard single bet
-                    b_home = bet.get("home", "").lower().strip()
-                    b_away = bet.get("away", "").lower().strip()
+                    b_home_norm = normalize_team_name(bet.get("home", ""))
+                    b_away_norm = normalize_team_name(bet.get("away", ""))
                     
-                    if b_home == home_lower and b_away == away_lower:
-                        won = _check_bet_win(bet["bet_type"], home, away, home_goals, away_goals)
+                    match_normal = (b_home_norm == home_norm and b_away_norm == away_norm)
+                    match_swapped = (b_home_norm == away_norm and b_away_norm == home_norm)
+                    
+                    if match_normal or match_swapped:
+                        h_goals = home_goals if match_normal else away_goals
+                        a_goals = away_goals if match_normal else home_goals
+                        won = _check_bet_win(bet["bet_type"], bet["home"], bet["away"], h_goals, a_goals)
                         pnl = -bet["stake"]
                         if won:
                             payout = bet["stake"] * bet["odds"]

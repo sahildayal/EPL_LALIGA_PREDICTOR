@@ -1,6 +1,86 @@
 import re
 
 TEAM_ALIASES = {
+    # Common 2-letter and 3-letter abbreviations / acronyms
+    "sk": "south korea",
+    "sa": "south africa",
+    "nk": "north korea",
+    "eng": "england",
+    "fra": "france",
+    "arg": "argentina",
+    "bra": "brazil",
+    "por": "portugal",
+    "esp": "spain",
+    "ger": "germany",
+    "ned": "netherlands",
+    "cro": "croatia",
+    "ita": "italy",
+    "mor": "morocco",
+    "mar": "morocco",
+    "uru": "uruguay",
+    "col": "colombia",
+    "mex": "mexico",
+    "jpn": "japan",
+    "aus": "australia",
+    "irn": "iran",
+    "can": "canada",
+    "ecu": "ecuador",
+    "sco": "scotland",
+    "pol": "poland",
+    "tur": "turkey",
+    "nz": "new zealand",
+    "nzl": "new zealand",
+    "bel": "belgium",
+    "den": "denmark",
+    "sui": "switzerland",
+    "sen": "senegal",
+    "nga": "nigeria",
+    "egy": "egypt",
+    "chi": "chile",
+    "per": "peru",
+    "aut": "austria",
+    "wal": "wales",
+    "irl": "republic of ireland",
+    "cze": "czech republic",
+    "svk": "slovakia",
+    "hun": "hungary",
+    "rou": "romania",
+    "ukr": "ukraine",
+    "rus": "russia",
+    "srb": "serbia",
+    "swe": "sweden",
+    "nor": "norway",
+    "fin": "finland",
+    "gre": "greece",
+    "alb": "albania",
+    "geo": "georgia",
+    "par": "paraguay",
+    "ven": "venezuela",
+    "bol": "bolivia",
+    "crc": "costa rica",
+    "pan": "panama",
+    "hon": "honduras",
+    "slv": "el salvador",
+    "cmr": "cameroon",
+    "gha": "ghana",
+    "civ": "ivory coast",
+    "mli": "mali",
+    "alg": "algeria",
+    "tun": "tunisia",
+    "rsa": "south africa",
+    "ksa": "saudi arabia",
+    "qat": "qatar",
+    "irq": "iraq",
+    "jor": "jordan",
+    "uzb": "uzbekistan",
+    "chn": "china",
+    "ind": "india",
+    "jam": "jamaica",
+    "dprk": "north korea",
+    "uae": "uae",
+    "usa": "usa",
+
+    # Naming variations and standardizations
     "korea republic": "south korea",
     "korea": "south korea",
     "republic of korea": "south korea",
@@ -9,12 +89,10 @@ TEAM_ALIASES = {
     "north korea": "north korea",
     "democratic people's republic of korea": "north korea",
     "dpr korea": "north korea",
-    "dprk": "north korea",
     
     "united states": "usa",
     "united states of america": "usa",
     "us of a": "usa",
-    "usa": "usa",
     
     "czechia": "czech republic",
     "czech": "czech republic",
@@ -44,17 +122,14 @@ TEAM_ALIASES = {
     "democratic republic of the congo": "congo dr",
     "dr congo": "congo dr",
     "congo dr": "congo dr",
+    "congo": "congo",
     
     "united arab emirates": "uae",
-    "uae": "uae",
     
     "ir iran": "iran",
-    "iran": "iran",
     
     "republic of south africa": "south africa",
-    "south africa": "south africa",
     
-    # Preventing potential country collisions for other similar names
     "south sudan": "south sudan",
     "sudan": "sudan",
     
@@ -76,12 +151,11 @@ TEAM_ALIASES = {
     "papua new guinea": "papua new guinea",
     "new guinea": "papua new guinea",
     "guinea": "guinea",
-    "congo": "congo",
 }
 
+# Precompute alias mapping and sorted order at module level
 from src.data.scrapers.elo_db import NATIONAL_TEAM_ELO
 
-# Precompute alias mapping and sorted order at module level
 ALL_ALIASES_MAP = {}
 for alias, canonical in TEAM_ALIASES.items():
     ALL_ALIASES_MAP[alias] = canonical
@@ -98,7 +172,6 @@ ALIASES_PATTERNS = {
     alias: re.compile(r'(?<!\w)' + re.escape(alias) + r'(?!\w)')
     for alias in ALIASES_SORTED
 }
-
 
 def normalize_team_name(name: str) -> str:
     """Standardizes a country name to its lowercase canonical form."""
@@ -117,7 +190,6 @@ def normalize_team_name(name: str) -> str:
     
     return TEAM_ALIASES.get(name_clean, name_clean)
 
-
 def is_team_match(team: str, text: str) -> bool:
     """Robustly checks if a team name is referenced in a market title/text."""
     t_norm = normalize_team_name(team)
@@ -129,12 +201,15 @@ def is_team_match(team: str, text: str) -> bool:
     if t_norm == txt_norm:
         return True
         
-    # Main interval-based matching loop
-    matched_intervals = []
+    # Find all non-overlapping matches in txt_norm using precompiled patterns
+    matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
+    
     for alias in ALIASES_SORTED:
         canonical = ALL_ALIASES_MAP[alias]
-        for match in ALIASES_PATTERNS[alias].finditer(txt_norm):
+        pattern = ALIASES_PATTERNS[alias]
+        for match in pattern.finditer(txt_norm):
             start, end = match.start(), match.end()
+            # Check for overlap with any existing matched intervals
             overlap = False
             for m_start, m_end, _ in matched_intervals:
                 if not (end <= m_start or start >= m_end):
@@ -143,5 +218,6 @@ def is_team_match(team: str, text: str) -> bool:
             if not overlap:
                 matched_intervals.append((start, end, canonical))
                 
+    # Get all canonical names that were successfully matched in the text
     matched_canonicals = {canonical for _, _, canonical in matched_intervals}
     return t_norm in matched_canonicals
