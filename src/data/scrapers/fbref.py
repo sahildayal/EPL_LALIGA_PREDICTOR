@@ -93,7 +93,7 @@ def get_team_data(team_name: str) -> dict:
 ESPN_TEAMS_CACHE = {}
 
 def _get_espn_intl_form(team_name: str) -> dict:
-    name_lower = team_name.lower()
+    t_name_norm = normalize_team_name(team_name)
     for league in ESPN_LEAGUES:
         try:
             if league not in ESPN_TEAMS_CACHE:
@@ -111,8 +111,9 @@ def _get_espn_intl_form(team_name: str) -> dict:
 
             for team_entry in teams:
                 t = team_entry.get("team", {})
-                display = t.get("displayName", "").lower()
-                if name_lower in display or display in name_lower:
+                display = t.get("displayName", "")
+                t_display_norm = normalize_team_name(display)
+                if t_name_norm == t_display_norm or t_name_norm in t_display_norm or t_display_norm in t_name_norm:
                     team_id = t.get("id")
                     form = _get_espn_team_form(league, team_id)
                     return {"form": form, "data_sources": [f"ESPN ({league})"]}

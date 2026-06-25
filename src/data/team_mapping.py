@@ -114,16 +114,22 @@ def is_team_match(team: str, text: str) -> bool:
     if t_norm == txt_norm:
         return True
         
-    # Get the aliases mapping and sorted list to use.
-    # In the rare event that the query team's normalized name isn't already 
-    # in the precomputed map, we fall back to a dynamic map.
     if t_norm not in ALL_ALIASES_MAP:
-        aliases_map = ALL_ALIASES_MAP.copy()
-        aliases_map[t_norm] = t_norm
-        aliases_sorted = sorted(aliases_map.keys(), key=len, reverse=True)
-    else:
-        aliases_map = ALL_ALIASES_MAP
-        aliases_sorted = ALIASES_SORTED
+        pattern = r'(?<!\w)' + re.escape(t_norm) + r'(?!\w)'
+        match = re.search(pattern, txt_norm)
+        if match:
+            start, end = match.start(), match.end()
+            for alias in ALIASES_SORTED:
+                if len(alias) > len(t_norm) and alias in txt_norm:
+                    for m in re.finditer(r'(?<!\w)' + re.escape(alias) + r'(?!\w)', txt_norm):
+                        if not (end <= m.start() or start >= m.end()):
+                            return False
+            return True
+        return False
+        
+    # Get the aliases mapping and sorted list to use.
+    aliases_map = ALL_ALIASES_MAP
+    aliases_sorted = ALIASES_SORTED
         
     # Find all non-overlapping matches in txt_norm using word boundaries
     matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
