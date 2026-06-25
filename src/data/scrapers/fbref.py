@@ -4,6 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from src.data import cache
 from src.data.scrapers.elo_db import get_national_elo
+from src.data.team_mapping import normalize_team_name
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -53,7 +54,7 @@ def get_team_data(team_name: str) -> dict:
     """
     Retrieves team form, ELO, and scoring averages.
     """
-    name_lower = team_name.lower().strip()
+    name_lower = normalize_team_name(team_name)
     cached = cache.get("fbref_team", {"team": name_lower})
     if cached:
         return cached

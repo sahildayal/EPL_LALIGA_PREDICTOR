@@ -44,7 +44,6 @@ TEAM_ALIASES = {
     "democratic republic of the congo": "congo dr",
     "dr congo": "congo dr",
     "congo dr": "congo dr",
-    "congo": "congo dr",
     
     "united arab emirates": "uae",
     "uae": "uae",
@@ -75,8 +74,17 @@ TEAM_ALIASES = {
     "guinea-bissau": "guinea-bissau",
     "equatorial guinea": "equatorial guinea",
     "papua new guinea": "papua new guinea",
+    "new guinea": "papua new guinea",
     "guinea": "guinea",
 }
+
+# Precompute alias mapping and sorted order at module level
+ALL_ALIASES_MAP = {}
+for alias, canonical in TEAM_ALIASES.items():
+    ALL_ALIASES_MAP[alias] = canonical
+    ALL_ALIASES_MAP[canonical] = canonical
+
+ALIASES_SORTED = sorted(ALL_ALIASES_MAP.keys(), key=len, reverse=True)
 
 def normalize_team_name(name: str) -> str:
     """Standardizes a country name to its lowercase canonical form."""
@@ -87,8 +95,8 @@ def normalize_team_name(name: str) -> str:
     # Remove question marks
     name_clean = name_clean.replace("?", "")
     
-    # Use word boundaries to strip common suffixes/terms: winner, win, to score, goal
-    name_clean = re.sub(r'\b(winner|win|to score|goal)\b', '', name_clean)
+    # Use word boundaries to strip common suffixes/terms: winner, to win, win, to score, goal
+    name_clean = re.sub(r'\b(winner|to win|win|to score|goal)\b', '', name_clean)
     
     # Collapse multiple spaces and strip
     name_clean = re.sub(r'\s+', ' ', name_clean).strip()
@@ -106,26 +114,22 @@ def is_team_match(team: str, text: str) -> bool:
     if t_norm == txt_norm:
         return True
         
-    # Build a complete map of all known aliases to their canonical forms
-    all_aliases_map = {}
-    for alias, canonical in TEAM_ALIASES.items():
-        all_aliases_map[alias] = canonical
-        all_aliases_map[canonical] = canonical
+    # Get the aliases mapping and sorted list to use.
+    # In the rare event that the query team's normalized name isn't already 
+    # in the precomputed map, we fall back to a dynamic map.
+    if t_norm not in ALL_ALIASES_MAP:
+        aliases_map = ALL_ALIASES_MAP.copy()
+        aliases_map[t_norm] = t_norm
+        aliases_sorted = sorted(aliases_map.keys(), key=len, reverse=True)
+    else:
+        aliases_map = ALL_ALIASES_MAP
+        aliases_sorted = ALIASES_SORTED
         
-    # Ensure the query team's normalized name is mapped to itself (if not already present)
-    if t_norm not in all_aliases_map:
-        all_aliases_map[t_norm] = t_norm
-        
-    # Sort aliases by length in descending order to perform greedy matching.
-    # This prevents shorter aliases (e.g. "korea") from matching when a longer 
-    # alias (e.g. "north korea") matches at the same position.
-    aliases_sorted = sorted(all_aliases_map.keys(), key=len, reverse=True)
-    
     # Find all non-overlapping matches in txt_norm using word boundaries
     matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
     
     for alias in aliases_sorted:
-        canonical = all_aliases_map[alias]
+        canonical = aliases_map[alias]
         # Match using word boundaries.
         pattern = r'(?<!\w)' + re.escape(alias) + r'(?!\w)'
         for match in re.finditer(pattern, txt_norm):

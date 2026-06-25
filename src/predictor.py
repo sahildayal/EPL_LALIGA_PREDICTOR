@@ -3,6 +3,7 @@ import numpy as np
 from src.data.scrapers import fbref, news, fixtures, elo_db
 from src.data.preprocessor import get_match_features
 from src.models.statistical import DixonColesModel, EloModel
+from src.data.team_mapping import normalize_team_name
 from src.models.machine_learning import (
     LogisticRegressionModel, SVMModel, GDAModel,
     RandomForestModel, XGBoostModel, NeuralNetworkModel
@@ -56,8 +57,8 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     Orchestrates the 8 models to predict a single match.
     Blends ELO + Dixon-Coles + 6 ML models.
     """
-    home_lower = home_team.lower().strip()
-    away_lower = away_team.lower().strip()
+    home_lower = normalize_team_name(home_team)
+    away_lower = normalize_team_name(away_team)
     
     # 1. Fetch team ELOs and averages
     h_elo = ELO_PREDICTOR.get(home_lower)

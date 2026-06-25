@@ -31,8 +31,19 @@ def run_tests():
     # Suffix normalization boundaries
     assert normalize_team_name("win") == ""
     assert normalize_team_name("winner") == ""
+    assert normalize_team_name("to win") == ""
+    assert normalize_team_name("team to win") == "team"
     assert normalize_team_name("team to score") == "team"
     assert normalize_team_name("team goal") == "team"
+    
+    # New Guinea alias
+    assert normalize_team_name("new guinea") == "papua new guinea"
+    
+    # Congo collision tests
+    assert normalize_team_name("congo") == "congo"
+    assert is_team_match("congo dr", "congo") == False
+    assert is_team_match("congo", "congo dr") == False
+    assert is_team_match("congo dr", "Democratic Republic of the Congo") == True
     
     print("ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!")
 
