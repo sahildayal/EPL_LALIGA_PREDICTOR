@@ -45,8 +45,8 @@ class ParlayEngine:
                     self.memo_player_stats[name] = player_stats.get_player_stats(name)
                 p_stats = self.memo_player_stats[name]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
-                # Player share of team goals
-                share = p_g90 / h_avg if is_home else p_g90 / a_avg
+                # Player share of team goals safely avoiding division by zero
+                share = p_g90 / max(h_avg, 0.01) if is_home else p_g90 / max(a_avg, 0.01)
                 player_shares.append((share, is_home))
 
         joint_prob = 0.0
@@ -150,7 +150,7 @@ class ParlayEngine:
                     self.memo_player_stats[name] = player_stats.get_player_stats(name)
                 p_stats = self.memo_player_stats[name]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
-                share = p_g90 / (h_avg if is_home else a_avg)
+                share = p_g90 / max(h_avg if is_home else a_avg, 0.01)
                 
                 # P(Player scores) = sum_h,a matrix[h,a] * (1 - (1-share)^team_goals)
                 p_prob = 0.0

@@ -151,15 +151,16 @@ Example format:
             if "[Personal Bets JSON]" in text:
                 consensus_part = text.split("[Consensus Bet]")[1].split("[Personal Bets JSON]")[0].strip()
                 json_str = text.split("[Personal Bets JSON]")[1].strip()
-                # Clean up code blocks if LLM wrapped it
-                if json_str.startswith("```"):
-                    json_str = json_str.split("\n", 1)[1]
-                if json_str.endswith("```"):
-                    json_str = json_str.rsplit("\n", 1)[0]
-                json_str = json_str.strip()
                 
                 try:
-                    parts["personal_bets"] = json.loads(json_str)
+                    # Find the first '{' and last '}' to extract valid JSON robustly
+                    start_idx = json_str.find("{")
+                    end_idx = json_str.rfind("}")
+                    if start_idx != -1 and end_idx != -1:
+                        json_clean = json_str[start_idx:end_idx+1]
+                        parts["personal_bets"] = json.loads(json_clean)
+                    else:
+                        parts["personal_bets"] = json.loads(json_str)
                 except Exception:
                     pass
             else:

@@ -68,12 +68,14 @@ def run_predict(query: str):
                 probs = {}
                 for m in ev["markets"]:
                     t = m["title"].lower()
-                    if is_team_match(home, t):
-                        probs["home_win"] = m["yes_price"]
-                    elif is_team_match(away, t):
-                        probs["away_win"] = m["yes_price"]
-                    elif "draw" in t or "tie" in t:
-                        probs["draw"] = m["yes_price"]
+                    ticker = m.get("ticker", "").upper()
+                    if "KXWCGAME" in ticker:
+                        if is_team_match(home, t):
+                            probs["home_win"] = m["yes_price"]
+                        elif is_team_match(away, t):
+                            probs["away_win"] = m["yes_price"]
+                        elif "draw" in t or "tie" in t:
+                            probs["draw"] = m["yes_price"]
                 if len(probs) >= 2:
                     kalshi_probs = probs
                     break
@@ -320,17 +322,20 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
             title = ev["event_title"].lower()
             if " vs " in title:
                 parts = title.split(" vs ")
-                h, a = parts[0].strip(), parts[1].strip()
+                h = normalize_team_name(parts[0].strip())
+                a = normalize_team_name(parts[1].strip())
                 # Parse odds
                 odds = {}
                 for m in ev["markets"]:
                     t = m["title"].lower()
-                    if h in t and "score" not in t and "goal" not in t:
-                        odds["home_win"] = m["yes_price"]
-                    elif a in t and "score" not in t and "goal" not in t:
-                        odds["away_win"] = m["yes_price"]
-                    elif "draw" in t or "tie" in t:
-                        odds["draw"] = m["yes_price"]
+                    ticker = m.get("ticker", "").upper()
+                    if "KXWCGAME" in ticker:
+                        if is_team_match(h, t):
+                            odds["home_win"] = m["yes_price"]
+                        elif is_team_match(a, t):
+                            odds["away_win"] = m["yes_price"]
+                        elif "draw" in t or "tie" in t:
+                            odds["draw"] = m["yes_price"]
                     elif "over 1.5" in t:
                         odds["over_1.5"] = m["yes_price"]
                     elif "over 2.5" in t:
@@ -622,6 +627,8 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
 
 
 def run_complete(home: str, away: str, home_goals: int, away_goals: int):
+    home = normalize_team_name(home)
+    away = normalize_team_name(away)
     console.print(f"\n[cyan]Ingesting completed match result: {home.title()} {home_goals} - {away_goals} {away.title()}[/cyan]")
     
     # Calculate result
@@ -728,12 +735,14 @@ def run_ask(query: str, user_model: str):
                 probs = {}
                 for m in ev["markets"]:
                     t = m["title"].lower()
-                    if is_team_match(home, t):
-                        probs["home_win"] = m["yes_price"]
-                    elif is_team_match(away, t):
-                        probs["away_win"] = m["yes_price"]
-                    elif "draw" in t or "tie" in t:
-                        probs["draw"] = m["yes_price"]
+                    ticker = m.get("ticker", "").upper()
+                    if "KXWCGAME" in ticker:
+                        if is_team_match(home, t):
+                            probs["home_win"] = m["yes_price"]
+                        elif is_team_match(away, t):
+                            probs["away_win"] = m["yes_price"]
+                        elif "draw" in t or "tie" in t:
+                            probs["draw"] = m["yes_price"]
                 if len(probs) >= 2:
                     kalshi_probs = probs
                     break
@@ -1022,8 +1031,8 @@ def run_update():
         home = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
         away = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
         
-        home_team = home.get("team", {}).get("displayName", "")
-        away_team = away.get("team", {}).get("displayName", "")
+        home_team = normalize_team_name(home.get("team", {}).get("displayName", ""))
+        away_team = normalize_team_name(away.get("team", {}).get("displayName", ""))
         
         try:
             home_goals = int(home.get("score", 0))

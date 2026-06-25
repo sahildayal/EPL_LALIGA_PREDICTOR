@@ -43,7 +43,7 @@ def get_sentiment(entity: str) -> dict:
         if resp.status_code != 200:
             return {"score": 0.0, "flags": []}
         
-        root = ET.fromstring(resp.text)
+        root = ET.fromstring(resp.content)
         score = 0.0
         flags = []
         

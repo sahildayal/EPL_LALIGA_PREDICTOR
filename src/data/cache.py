@@ -29,12 +29,16 @@ def _key(namespace: str, params: dict) -> str:
 def get(namespace: str, params: dict):
     k = _key(namespace, params)
     try:
-        with _conn() as conn:
-            row = conn.execute(
-                "SELECT value, expires_at FROM cache WHERE key = ?", (k,)
-            ).fetchone()
-        if row and row[1] > time.time():
-            return json.loads(row[0])
+        conn = _conn()
+        try:
+            with conn:
+                row = conn.execute(
+                    "SELECT value, expires_at FROM cache WHERE key = ?", (k,)
+                ).fetchone()
+            if row and row[1] > time.time():
+                return json.loads(row[0])
+        finally:
+            conn.close()
     except Exception:
         pass
     return None
@@ -43,11 +47,15 @@ def get(namespace: str, params: dict):
 def set(namespace: str, params: dict, value, ttl_seconds: int = 86400):
     k = _key(namespace, params)
     try:
-        with _conn() as conn:
-            conn.execute(
-                "INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)",
-                (k, json.dumps(value), time.time() + ttl_seconds),
-            )
+        conn = _conn()
+        try:
+            with conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)",
+                    (k, json.dumps(value), time.time() + ttl_seconds),
+                )
+        finally:
+            conn.close()
     except Exception:
         pass
 
@@ -55,15 +63,23 @@ def set(namespace: str, params: dict, value, ttl_seconds: int = 86400):
 def invalidate(namespace: str, params: dict):
     k = _key(namespace, params)
     try:
-        with _conn() as conn:
-            conn.execute("DELETE FROM cache WHERE key = ?", (k,))
+        conn = _conn()
+        try:
+            with conn:
+                conn.execute("DELETE FROM cache WHERE key = ?", (k,))
+        finally:
+            conn.close()
     except Exception:
         pass
 
 
 def purge_expired():
     try:
-        with _conn() as conn:
-            conn.execute("DELETE FROM cache WHERE expires_at <= ?", (time.time(),))
+        conn = _conn()
+        try:
+            with conn:
+                conn.execute("DELETE FROM cache WHERE expires_at <= ?", (time.time(),))
+        finally:
+            conn.close()
     except Exception:
         pass

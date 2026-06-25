@@ -135,7 +135,8 @@ class DixonColesModel:
             res = minimize(
                 neg_log_likelihood,
                 x0,
-                method="L-BFGS-B",
+                method="SLSQP",
+                constraints=constraints,
                 bounds=[(None, None)] * (2 * n) + [(-0.5, 0.5)],
                 options={"maxiter": 150},
             )
