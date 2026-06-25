@@ -11,12 +11,28 @@ def run_tests():
     assert normalize_team_name("United States") == "usa"
     assert normalize_team_name("usa") == "usa"
     assert normalize_team_name("Czechia") == "czech republic"
+    assert normalize_team_name("Twin") == "twin"  # Greedy substring test
     
     # Test matching
     assert is_team_match("South Korea", "Korea Republic Winner?") == True
     assert is_team_match("South Korea", "KXWCGAME-26JUN24RSAKOR-KOR") == False  # Suffixes should not match blindly, but event titles will
     assert is_team_match("South Africa", "South Africa vs Korea Republic") == True
     assert is_team_match("South Korea", "South Africa vs Korea Republic") == True
+    
+    # Crucial Bug / Country collisions test cases
+    assert is_team_match("South Korea", "North Korea") == False
+    assert is_team_match("Ireland", "Northern Ireland") == False
+    assert is_team_match("North Korea", "South Korea") == False
+    assert is_team_match("Northern Ireland", "Ireland") == False
+    assert is_team_match("Ireland", "Republic of Ireland") == True
+    assert is_team_match("Ireland", "Ireland vs Northern Ireland") == True
+    assert is_team_match("Northern Ireland", "Ireland vs Northern Ireland") == True
+    
+    # Suffix normalization boundaries
+    assert normalize_team_name("win") == ""
+    assert normalize_team_name("winner") == ""
+    assert normalize_team_name("team to score") == "team"
+    assert normalize_team_name("team goal") == "team"
     
     print("ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!")
 
