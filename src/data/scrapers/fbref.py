@@ -4,7 +4,6 @@ import re
 from bs4 import BeautifulSoup
 from src.data import cache
 from src.data.scrapers.elo_db import get_national_elo
-from src.data.team_mapping import normalize_team_name
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -54,6 +53,7 @@ def get_team_data(team_name: str) -> dict:
     """
     Retrieves team form, ELO, and scoring averages.
     """
+    from src.data.team_mapping import normalize_team_name
     name_lower = normalize_team_name(team_name)
     cached = cache.get("fbref_team", {"team": name_lower})
     if cached:
@@ -93,7 +93,7 @@ def get_team_data(team_name: str) -> dict:
 ESPN_TEAMS_CACHE = {}
 
 def _get_espn_intl_form(team_name: str) -> dict:
-    t_name_norm = normalize_team_name(team_name)
+    from src.data.team_mapping import is_team_match
     for league in ESPN_LEAGUES:
         try:
             if league not in ESPN_TEAMS_CACHE:
@@ -112,8 +112,7 @@ def _get_espn_intl_form(team_name: str) -> dict:
             for team_entry in teams:
                 t = team_entry.get("team", {})
                 display = t.get("displayName", "")
-                t_display_norm = normalize_team_name(display)
-                if t_name_norm == t_display_norm or t_name_norm in t_display_norm or t_display_norm in t_name_norm:
+                if is_team_match(team_name, display):
                     team_id = t.get("id")
                     form = _get_espn_team_form(league, team_id)
                     return {"form": form, "data_sources": [f"ESPN ({league})"]}

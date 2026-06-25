@@ -76,7 +76,10 @@ TEAM_ALIASES = {
     "papua new guinea": "papua new guinea",
     "new guinea": "papua new guinea",
     "guinea": "guinea",
+    "congo": "congo",
 }
+
+from src.data.scrapers.elo_db import NATIONAL_TEAM_ELO
 
 # Precompute alias mapping and sorted order at module level
 ALL_ALIASES_MAP = {}
@@ -84,7 +87,13 @@ for alias, canonical in TEAM_ALIASES.items():
     ALL_ALIASES_MAP[alias] = canonical
     ALL_ALIASES_MAP[canonical] = canonical
 
+for team in NATIONAL_TEAM_ELO.keys():
+    t_norm = team.lower().strip()
+    if t_norm not in ALL_ALIASES_MAP:
+        ALL_ALIASES_MAP[t_norm] = t_norm
+
 ALIASES_SORTED = sorted(ALL_ALIASES_MAP.keys(), key=len, reverse=True)
+
 
 def normalize_team_name(name: str) -> str:
     """Standardizes a country name to its lowercase canonical form."""
@@ -103,6 +112,7 @@ def normalize_team_name(name: str) -> str:
     
     return TEAM_ALIASES.get(name_clean, name_clean)
 
+
 def is_team_match(team: str, text: str) -> bool:
     """Robustly checks if a team name is referenced in a market title/text."""
     t_norm = normalize_team_name(team)
@@ -114,33 +124,13 @@ def is_team_match(team: str, text: str) -> bool:
     if t_norm == txt_norm:
         return True
         
-    if t_norm not in ALL_ALIASES_MAP:
-        pattern = r'(?<!\w)' + re.escape(t_norm) + r'(?!\w)'
-        match = re.search(pattern, txt_norm)
-        if match:
-            start, end = match.start(), match.end()
-            for alias in ALIASES_SORTED:
-                if len(alias) > len(t_norm) and alias in txt_norm:
-                    for m in re.finditer(r'(?<!\w)' + re.escape(alias) + r'(?!\w)', txt_norm):
-                        if not (end <= m.start() or start >= m.end()):
-                            return False
-            return True
-        return False
-        
-    # Get the aliases mapping and sorted list to use.
-    aliases_map = ALL_ALIASES_MAP
-    aliases_sorted = ALIASES_SORTED
-        
-    # Find all non-overlapping matches in txt_norm using word boundaries
-    matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
-    
-    for alias in aliases_sorted:
-        canonical = aliases_map[alias]
-        # Match using word boundaries.
+    # Main interval-based matching loop
+    matched_intervals = []
+    for alias in ALIASES_SORTED:
+        canonical = ALL_ALIASES_MAP[alias]
         pattern = r'(?<!\w)' + re.escape(alias) + r'(?!\w)'
         for match in re.finditer(pattern, txt_norm):
             start, end = match.start(), match.end()
-            # Check for overlap with any existing matched intervals
             overlap = False
             for m_start, m_end, _ in matched_intervals:
                 if not (end <= m_start or start >= m_end):
@@ -149,11 +139,5 @@ def is_team_match(team: str, text: str) -> bool:
             if not overlap:
                 matched_intervals.append((start, end, canonical))
                 
-    # Get all canonical names that were successfully matched in the text
     matched_canonicals = {canonical for _, _, canonical in matched_intervals}
-    
-    # Check if the query team's canonical name is in the matched canonical names
-    if t_norm in matched_canonicals:
-        return True
-        
-    return False
+    return t_norm in matched_canonicals

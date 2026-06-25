@@ -4,7 +4,6 @@ ELO database - seeding ELO ratings for national teams from eloratings.net.
 import requests
 import re
 from src.data import cache
-from src.data.team_mapping import normalize_team_name
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -36,6 +35,7 @@ NATIONAL_TEAM_ELO = {
 
 def get_national_elo(team_name: str) -> float:
     """Return ELO for a national team."""
+    from src.data.team_mapping import normalize_team_name
     key = normalize_team_name(team_name)
     if key in NATIONAL_TEAM_ELO:
         return float(NATIONAL_TEAM_ELO[key])

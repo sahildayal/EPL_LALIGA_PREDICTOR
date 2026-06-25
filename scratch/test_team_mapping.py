@@ -43,6 +43,7 @@ def run_tests():
     assert normalize_team_name("congo") == "congo"
     assert is_team_match("congo dr", "congo") == False
     assert is_team_match("congo", "congo dr") == False
+    assert is_team_match("congo", "congo dr vs congo") == True
     assert is_team_match("congo dr", "Democratic Republic of the Congo") == True
     
     print("ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!")
