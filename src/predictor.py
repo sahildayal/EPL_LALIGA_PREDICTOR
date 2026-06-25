@@ -68,8 +68,8 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     # 2. Dixon-Coles statistical prediction
     dc = DixonColesModel()
     # Simple fitting on team averages as base
-    h_data = fbref.get_team_data(home_team)
-    a_data = fbref.get_team_data(away_team)
+    h_data = fbref.get_team_data(home_lower)
+    a_data = fbref.get_team_data(away_lower)
     dc.attack[home_lower] = math_log(h_data.get("avg_goals", 1.4))
     dc.defense[home_lower] = -math_log(h_data.get("avg_conceded", 1.1))
     dc.attack[away_lower] = math_log(a_data.get("avg_goals", 1.4))
@@ -90,7 +90,7 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
         NeuralNetworkModel()
     ]
     
-    features = get_match_features(home_team, away_team, kalshi_probs)
+    features = get_match_features(home_lower, away_lower, kalshi_probs)
     
     ml_breakdown = {
         "Dixon-Coles": dc_prob,
@@ -135,8 +135,8 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     }
     
     # Sentiment
-    h_news = news.get_sentiment(home_team)
-    a_news = news.get_sentiment(away_team)
+    h_news = news.get_sentiment(home_lower)
+    a_news = news.get_sentiment(away_lower)
     sentiment_diff = h_news.get("score", 0.0) - a_news.get("score", 0.0)
     
     return PredictionResult(
