@@ -34,5 +34,56 @@ class TestLineups(unittest.TestCase):
         res = _fetch_team_recent_lineup("invalid_team_name")
         self.assertEqual(res, [])
 
+    def test_get_lineups_mocked_espn(self):
+        from unittest.mock import patch, MagicMock
+        
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "rosters": [
+                {
+                    "team": {"displayName": "Colombia"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "James Rodriguez"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Luis Diaz"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Jhon Cordoba"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Arias"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Rios"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Lerma"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Mojica"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Cuesta"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Sanchez"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Munoz"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Vargas"}},
+                    ]
+                },
+                {
+                    "team": {"displayName": "Portugal"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "Cristiano Ronaldo"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Joao Neves"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Bruno Fernandes"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Bernardo Silva"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Rafael Leao"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Vitinha"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Joao Cancelo"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Pepe"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Ruben Dias"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Diogo Dalot"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Diogo Costa"}},
+                    ]
+                }
+            ]
+        }
+        
+        with patch("requests.get", return_value=mock_response) as mock_get:
+            res = get_match_lineups("Colombia", "Portugal", event_id="mock_event_123")
+            mock_get.assert_called()
+            self.assertEqual(res["source"], "live_espn_announcement")
+            self.assertIn("james rodriguez", res["home_lineup"])
+            self.assertIn("cristiano ronaldo", res["away_lineup"])
+            self.assertEqual(len(res["home_lineup"]), 11)
+            self.assertEqual(len(res["away_lineup"]), 11)
+
 if __name__ == "__main__":
     unittest.main()

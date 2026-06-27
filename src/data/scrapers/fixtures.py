@@ -192,14 +192,20 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
                     active = entry.get("active", False)
                     # Roster can list everyone, filter starters or active 11
                     if starter or active:
-                        name = entry.get("athlete", {}).get("displayName", "")
+                        ath = entry.get("athlete")
+                        name = ath.get("displayName") if ath else None
                         if name:
                             players.append(name.lower().strip())
                 
                 # Take starters if present (len == 11), else all active
                 starters_only = [p for p in entries if p.get("starter", False)]
                 if len(starters_only) >= 11:
-                    players = [p.get("athlete", {}).get("displayName", "").lower().strip() for p in starters_only]
+                    players = []
+                    for entry in starters_only:
+                        ath = entry.get("athlete")
+                        name = ath.get("displayName") if ath else None
+                        if name:
+                            players.append(name.lower().strip())
                 
                 if is_home:
                     h_players = players[:11] if len(players) > 11 else players
@@ -216,27 +222,60 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
         pass
     return None
 
+def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
+    from src.data.team_mapping import is_team_match
+    url = f"{ESPN_BASE}/fifa.world/summary?event={event_id}"
+    try:
+        resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
+        if resp.status_code == 200:
+            data = resp.json()
+            for roster in data.get("rosters", []):
+                team_name = roster.get("team", {}).get("displayName", "").lower()
+                if is_team_match(team_norm, team_name):
+                    entries = roster.get("roster", [])
+                    players = []
+                    # Filter starters or active
+                    starters = [e for e in entries if e.get("starter", False)]
+                    if len(starters) >= 11:
+                        entries_to_use = starters
+                    else:
+                        entries_to_use = [e for e in entries if e.get("starter", False) or e.get("active", False)]
+                    
+                    for entry in entries_to_use:
+                        ath = entry.get("athlete")
+                        name = ath.get("displayName") if ath else None
+                        if name:
+                            players.append(name.lower().strip())
+                    if players:
+                        return players
+    except Exception:
+        pass
+    return []
+
 def _fetch_team_recent_lineup(team_norm: str) -> list:
     from src.data.team_mapping import is_team_match
+    today = datetime.utcnow()
     # Query team schedule to find recent completed matches
-    for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
-        url = f"{ESPN_BASE}/{league}/scoreboard"
-        try:
-            # Get scoreboards for past few days
-            resp = requests.get(url, timeout=5)
-            if resp.status_code == 200:
-                events = resp.json().get("events", [])
-                for ev in events:
-                    status = ev.get("status", {}).get("type", {}).get("name", "")
-                    if status == "STATUS_FINAL":
-                        comps = ev.get("competitions", [{}])
-                        competitors = comps[0].get("competitors", []) if comps else []
-                        names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
-                        if any(is_team_match(team_norm, n) for n in names):
-                            ev_id = ev.get("id")
-                            lineups = _fetch_espn_event_lineup(ev_id, team_norm, "dummy")
-                            if lineups and lineups.get("home_lineup"):
-                                return lineups["home_lineup"]
-        except Exception:
-            pass
+    for offset in range(5):
+        date_str = (today - timedelta(days=offset)).strftime("%Y%m%d")
+        for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
+            url = f"{ESPN_BASE}/{league}/scoreboard"
+            try:
+                # Get scoreboards for past few days
+                resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=5)
+                if resp.status_code == 200:
+                    events = resp.json().get("events", [])
+                    for ev in events:
+                        status = ev.get("status", {}).get("type", {}).get("name", "")
+                        if status == "STATUS_FINAL":
+                            comps = ev.get("competitions", [{}])
+                            competitors = comps[0].get("competitors", []) if comps else []
+                            names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                            if any(is_team_match(team_norm, n) for n in names):
+                                ev_id = ev.get("id")
+                                players = _fetch_team_roster_from_event(ev_id, team_norm)
+                                if players:
+                                    return players
+            except Exception:
+                pass
     return []
