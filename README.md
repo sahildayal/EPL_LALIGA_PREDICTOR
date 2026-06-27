@@ -16,15 +16,16 @@ WorldCupPredictor/
 │   └── models/                # Saved weights/pickles for the 6 ML models
 ├── src/
 │   ├── data/
-│   │   ├── scrapers/          # Scrapers (FBRef stats, Google News sentiment, ESPN fixtures)
+│   │   ├── scrapers/          # Scrapers (FBRef stats, Google News, ESPN rosters, player_stats)
 │   │   └── preprocessor.py    # Feature engineering (17 team/sentiment variables)
 │   ├── models/
 │   │   ├── base.py            # Unified ML model wrapper interface
 │   │   ├── statistical.py     # Dixon-Coles and ELO models
+│   │   ├── player_props.py    # Player anytime goals/assists binomial predictor
 │   │   └── trainer.py         # ML training algorithms and master dataset appenders
 │   ├── market/
 │   │   ├── kalshi_client.py   # Kalshi V2 API authenticated portfolio client
-│   │   ├── paper_trading.py   # Fake bankroll manager and bet resolution engine
+│   │   ├── paper_trading.py   # Fake bankroll manager and completed match resolver
 │   │   └── llm.py             # Prompt constructor and model mappings for AI debates
 │   ├── parlay/
 │   │   └── parlay_engine.py   # Correlated same-game scoreline joint probabilities
@@ -32,6 +33,12 @@ WorldCupPredictor/
 ├── main.py                    # Main CLI Entrypoint
 ├── show_project_summary.py    # Interactive dashboard printing project stats
 ├── requirements.txt           # Required Python packages
+├── scratch/
+│   ├── test_bot_betting.py    # Bot betting candidates unit tests
+│   ├── test_player_scraping.py# Scraper mock testing
+│   ├── test_prop_math.py      # Player prop binomial prediction tests
+│   ├── test_player_prop_resolution.py # Completed match prop resolver tests
+│   └── test_player_props_integration.py # E2E CLI pipeline integration tests
 └── .env                       # Environment credentials and configurations
 ```
 
@@ -153,6 +160,43 @@ Connects to the live Kalshi elections endpoint (`https://api.elections.kalshi.co
 ```bash
 python main.py portfolio
 ```
+
+---
+
+## ⚽ Player Stats & Props Predictions
+
+The predictor features a complete pipeline for scraping starting lineups, blending player statistics, calculating anytime goals/assists binomial distributions, matching props to live Kalshi contracts, and resolving them automatically.
+
+### 1. Dynamic Starting Lineups Scraper
+- **ESPN Lineups Feed**: Automatically parses the starting lineups for the match.
+- **Recent Completed Game Fallback**: If the official starting lineups are not yet published for an upcoming match (e.g. earlier than 30 minutes before kickoff), the scraper automatically looks back through each country's previous completed matches (up to 8 days prior) to extract their most recent starting 11 roster.
+- **Default Squads Backup**: If no recent completed matches are found on ESPN, the system falls back to a curated roster seed containing each country's primary tournament squad.
+
+### 2. Tiered SQLite Caching & Storage
+To optimize performance and comply with API rate limits:
+- **General cache table**: Stores raw ESPN scoreboard JSON (6h TTL) and parsed event lineups (24h TTL).
+- **`player_statistics` table**: Persists scraped player stats from FBRef (Goals, Assists, Minutes played, Expected Goals xG, Position) with a 7-day TTL cache.
+- **Overhead Optimization**: Checks database initialization status locally on connection to avoid executing duplicate DDL (`CREATE TABLE IF NOT EXISTS`) statements on every query.
+
+### 3. Binomial Goal & Assist Prediction Math
+For every player in the starting lineups:
+- **Prior Blending**: Blends the player's club/country statistics (60% country stats weight, 40% club stats weight) or uses position-specific default profiles (e.g., forwards: 0.25 G/90, midfielders: 0.15 A/90) if no club data is scraped.
+- **Binomial Matrix Integration**: Conditional binomial probability distribution calculates the odds of the player scoring or assisting given the Dixon-Coles match-level scoreline expectation joint matrix:
+  $$P(\text{at least } k \text{ events}) = \sum_{g=k}^{6} P(\text{Team Goals} = g) \times \sum_{j=k}^{g} \binom{g}{j} s^j (1 - s)^{g - j}$$
+  where $s$ is the player's share of team goalscoring/assisting per 90.
+- **Categories Predicted**:
+  - **Player Goals**: `1+ Goals`, `2+ Goals`
+  - **Player Assists**: `1+ Assists`, `2+ Assists`
+  - **Player G/A**: `Score or Assist` (any goal or assist contribution)
+
+### 4. Word-Boundary Regex Market Matching
+- Matches predicted player prop statistics against live Kalshi contracts using case-insensitive pre-compiled regex matching with clear word boundaries:
+  `r'(?<!\w)' + re.escape(player_name) + r'(?!\w)'`
+- This ensures full-word matching and completely avoids substring collision bugs (such as matching "Ed" inside "Edward").
+
+### 5. Automated Completed Match Props Settlement
+- **Match Ingestion**: During `complete` or `update` commands, the resolver queries the completed match summary page on ESPN.
+- **Boxscore Rosters**: Extracts the actual goals and assists stats for each player in that specific match to settle player prop bets (WIN/LOSS) and update bot bankrolls accordingly.
 
 ---
 
