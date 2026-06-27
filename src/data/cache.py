@@ -2,6 +2,7 @@ import sqlite3
 import json
 import time
 import hashlib
+import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "cache" / "worldcup.db"
@@ -91,6 +92,7 @@ def purge_expired():
         try:
             with conn:
                 conn.execute("DELETE FROM cache WHERE expires_at <= ?", (time.time(),))
+                conn.execute("DELETE FROM player_statistics WHERE last_updated < ?", (time.time() - 604800,))
         finally:
             conn.close()
     except Exception:
@@ -113,8 +115,8 @@ def save_player_stats(player_name: str, position: str, xg_per_90: float, goals_p
                       time.time()))
         finally:
             conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Cache database error: {e}", file=sys.stderr)
 
 
 def get_player_stats_cache(player_name: str) -> dict | None:
@@ -141,6 +143,6 @@ def get_player_stats_cache(player_name: str) -> dict | None:
                     }
         finally:
             conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Cache database error: {e}", file=sys.stderr)
     return None
