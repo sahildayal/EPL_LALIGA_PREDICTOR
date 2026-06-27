@@ -152,9 +152,8 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None, leag
 
 def _find_espn_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
     from src.data.team_mapping import is_team_match
-    from datetime import datetime, timedelta
     today = datetime.utcnow()
-    for offset in range(3):
+    for offset in range(7):
         date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
         for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
             cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})
@@ -208,27 +207,15 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, leag
                 is_home = is_team_match(home_norm, team_name)
                 is_away = is_team_match(away_norm, team_name)
                 
+                starters_only = [e for e in entries if e.get("starter", False)]
+                if len(starters_only) < 11:
+                    return None
                 players = []
-                for entry in entries:
-                    # If lineup is announced, look for starting players
-                    starter = entry.get("starter", False)
-                    active = entry.get("active", False)
-                    # Roster can list everyone, filter starters or active 11
-                    if starter or active:
-                        ath = entry.get("athlete")
-                        name = ath.get("displayName") if ath else None
-                        if name:
-                            players.append(name.lower().strip())
-                
-                # Take starters if present (len == 11), else all active
-                starters_only = [p for p in entries if p.get("starter", False)]
-                if len(starters_only) >= 11:
-                    players = []
-                    for entry in starters_only:
-                        ath = entry.get("athlete")
-                        name = ath.get("displayName") if ath else None
-                        if name:
-                            players.append(name.lower().strip())
+                for entry in starters_only:
+                    ath = entry.get("athlete")
+                    name = ath.get("displayName") if ath else None
+                    if name:
+                        players.append(name.lower().strip())
                 
                 if is_home:
                     h_players = players[:11] if len(players) > 11 else players
@@ -292,7 +279,7 @@ def _fetch_team_recent_lineup(team_norm: str) -> list:
 
     today = datetime.utcnow()
     # Query team schedule to find recent completed matches
-    for offset in range(5):
+    for offset in range(8):
         date_str = (today - timedelta(days=offset)).strftime("%Y%m%d")
         for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
             cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})

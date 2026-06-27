@@ -270,5 +270,125 @@ class TestLineups(unittest.TestCase):
             self.cache_get_patcher.start()
             self.cache_set_patcher.start()
 
+    def test_fetch_espn_event_lineup_insufficient_starters(self):
+        from src.data.scrapers.fixtures import _fetch_espn_event_lineup
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "rosters": [
+                {
+                    "team": {"displayName": "Colombia"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "James Rodriguez"}},
+                    ]
+                },
+                {
+                    "team": {"displayName": "Portugal"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "Cristiano Ronaldo"}},
+                    ]
+                }
+            ]
+        }
+        self.mock_get.return_value = mock_response
+        res = _fetch_espn_event_lineup("mock_event_insufficient", "colombia", "portugal")
+        self.assertIsNone(res)
+
+    def test_find_espn_event_id_extended_lookahead(self):
+        from src.data.scrapers.fixtures import _find_espn_event_id
+        from datetime import datetime, timedelta
+        
+        requested_dates = []
+        def mock_get_side_effect(url, params=None, *args, **kwargs):
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            
+            date_str = params.get("dates") if params else None
+            if date_str:
+                requested_dates.append(date_str)
+                
+            target_date = (datetime.utcnow() + timedelta(days=6)).strftime("%Y%m%d")
+            if date_str == target_date:
+                mock_resp.json.return_value = {
+                    "events": [
+                        {
+                            "id": "lookahead_event_123",
+                            "name": "United States vs Colombia",
+                            "competitions": [
+                                {
+                                    "competitors": [
+                                        {"team": {"displayName": "United States"}},
+                                        {"team": {"displayName": "Colombia"}}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            else:
+                mock_resp.json.return_value = {"events": []}
+            return mock_resp
+
+        self.mock_get.side_effect = mock_get_side_effect
+        
+        event_res = _find_espn_event_id("usa", "colombia")
+        self.assertIsNotNone(event_res)
+        event_id, league = event_res
+        self.assertEqual(event_id, "lookahead_event_123")
+        self.assertTrue(len(requested_dates) > 5)
+
+    def test_fetch_team_recent_lineup_extended_lookback(self):
+        from src.data.scrapers.fixtures import _fetch_team_recent_lineup
+        from datetime import datetime, timedelta
+        
+        requested_dates = []
+        def mock_get_side_effect(url, params=None, *args, **kwargs):
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            if "scoreboard" in url:
+                date_str = params.get("dates") if params else None
+                if date_str:
+                    requested_dates.append(date_str)
+                target_date = (datetime.utcnow() - timedelta(days=7)).strftime("%Y%m%d")
+                if date_str == target_date:
+                    mock_resp.json.return_value = {
+                        "events": [
+                            {
+                                "status": {"type": {"name": "STATUS_FINAL"}},
+                                "competitions": [
+                                    {
+                                        "competitors": [
+                                            {"team": {"displayName": "United States"}},
+                                            {"team": {"displayName": "Colombia"}}
+                                        ]
+                                    }
+                                ],
+                                "id": "lookback_event_999"
+                            }
+                        ]
+                    }
+                else:
+                    mock_resp.json.return_value = {"events": []}
+            elif "summary" in url:
+                mock_resp.json.return_value = {
+                    "rosters": [
+                        {
+                            "team": {"displayName": "United States"},
+                            "roster": [
+                                {"starter": True, "active": True, "athlete": {"displayName": f"US Player {i}"}}
+                                for i in range(11)
+                            ]
+                        }
+                    ]
+                }
+            return mock_resp
+
+        self.mock_get.side_effect = mock_get_side_effect
+        
+        res = _fetch_team_recent_lineup("usa")
+        self.assertEqual(len(res), 11)
+        self.assertEqual(res[0], "us player 0")
+        self.assertTrue(len(requested_dates) > 5)
+
 if __name__ == "__main__":
     unittest.main()
