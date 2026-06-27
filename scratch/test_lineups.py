@@ -1,5 +1,6 @@
+from pathlib import Path
 import sys
-sys.path.append(r"C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor")
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import unittest
 from unittest.mock import patch, MagicMock
 from src.data.scrapers.fixtures import get_match_lineups
@@ -72,7 +73,7 @@ class TestLineups(unittest.TestCase):
         res = get_match_lineups("Colombia", "Portugal", event_id="401642878")
         self.assertIn("home_lineup", res)
         self.assertIn("away_lineup", res)
-        self.assertEqual(res["source"], "live_espn_announcement")
+        self.assertEqual(res["source"], "live_espn_announcement (fifa.world)")
         self.assertIn("james rodriguez", res["home_lineup"])
         self.assertIn("cristiano ronaldo", res["away_lineup"])
 
@@ -139,7 +140,7 @@ class TestLineups(unittest.TestCase):
         # Locally replace the active patch mock
         self.mock_get.return_value = mock_response
         res = get_match_lineups("Colombia", "Portugal", event_id="mock_event_123")
-        self.assertEqual(res["source"], "live_espn_announcement")
+        self.assertEqual(res["source"], "live_espn_announcement (fifa.world)")
         self.assertIn("james rodriguez", res["home_lineup"])
         self.assertIn("cristiano ronaldo", res["away_lineup"])
         self.assertEqual(len(res["home_lineup"]), 11)
@@ -170,8 +171,11 @@ class TestLineups(unittest.TestCase):
         
         # USA has alias "usa" which maps to "usa" (canonical for "united states")
         # Colombia has canonical "colombia"
-        event_id = _find_espn_event_id("usa", "colombia")
+        event_res = _find_espn_event_id("usa", "colombia")
+        self.assertIsNotNone(event_res)
+        event_id, league = event_res
         self.assertEqual(event_id, "mock_event_12345")
+        self.assertEqual(league, "fifa.world")
 
     def test_fetch_team_recent_lineup_success(self):
         from src.data.scrapers.fixtures import _fetch_team_recent_lineup

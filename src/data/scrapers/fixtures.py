@@ -115,9 +115,10 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None, leag
     fixture = search_wc_fixture(h_norm, a_norm)
     if fixture:
         # Search ESPN schedule to find event id
-        found_id = _find_espn_event_id(h_norm, a_norm)
-        if found_id:
-            lineups = _fetch_espn_event_lineup(found_id, h_norm, a_norm, league=league or "fifa.world")
+        found_res = _find_espn_event_id(h_norm, a_norm)
+        if found_res:
+            found_id, found_league = found_res
+            lineups = _fetch_espn_event_lineup(found_id, h_norm, a_norm, league=found_league)
             if lineups:
                 return lineups
 
@@ -149,32 +150,45 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None, leag
         "source": "fallback_recent_or_default"
     }
 
-def _find_espn_event_id(team1_norm: str, team2_norm: str) -> str | None:
+def _find_espn_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
     from src.data.team_mapping import is_team_match
     from datetime import datetime, timedelta
     today = datetime.utcnow()
     for offset in range(3):
         date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
         for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
-            url = f"{ESPN_BASE}/{league}/scoreboard"
-            try:
-                resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=8)
-                if resp.status_code == 200:
-                    events = resp.json().get("events", [])
-                    for ev in events:
-                        comps = ev.get("competitions", [{}])
-                        competitors = comps[0].get("competitors", []) if comps else []
-                        names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
-                        if len(names) >= 2:
-                            if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
-                               (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
-                                return ev.get("id")
-            except Exception:
-                pass
+            cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})
+            if cached_sb is not None:
+                events = cached_sb.get("events", [])
+            else:
+                url = f"{ESPN_BASE}/{league}/scoreboard"
+                try:
+                    resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=8)
+                    if resp.status_code == 200:
+                        response_json = resp.json()
+                        cache.set("espn_scoreboard", {"league": league, "date": date_str}, response_json, ttl_seconds=3600 * 6)
+                        events = response_json.get("events", [])
+                    else:
+                        events = []
+                except Exception:
+                    events = []
+
+            for ev in events:
+                comps = ev.get("competitions", [{}])
+                competitors = comps[0].get("competitors", []) if comps else []
+                names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                if len(names) >= 2:
+                    if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
+                       (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
+                        return ev.get("id"), league
     return None
 
 def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, league: str = "fifa.world") -> dict | None:
     from src.data.team_mapping import is_team_match
+    cached_lineups = cache.get("event_lineups", {"event_id": event_id, "home": home_norm, "away": away_norm})
+    if cached_lineups:
+        return cached_lineups
+
     url = f"{ESPN_BASE}/{league}/summary?event={event_id}"
     try:
         resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
@@ -222,11 +236,13 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, leag
                     a_players = players[:11] if len(players) > 11 else players
                     
             if h_players and a_players:
-                return {
+                result = {
                     "home_lineup": h_players,
                     "away_lineup": a_players,
-                    "source": "live_espn_announcement"
+                    "source": f"live_espn_announcement ({league})"
                 }
+                cache.set("event_lineups", {"event_id": event_id, "home": home_norm, "away": away_norm}, result, ttl_seconds=3600 * 24)
+                return result
     except Exception:
         pass
     return None
