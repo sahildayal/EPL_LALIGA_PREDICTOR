@@ -8,6 +8,8 @@ from src.parlay.parlay_engine import ParlayEngine
 from src.data.scrapers import fbref, player_stats, news, fixtures
 from src.market.llm import generate_debate, GEMINI_AVAILABLE
 from src.data.team_mapping import normalize_team_name, is_team_match
+from src.data.scrapers.fixtures import get_match_lineups
+from src.models.player_props import calculate_player_prop_probs
 import os
 import requests
 from rich.console import Console
@@ -116,37 +118,29 @@ def run_predict(query: str):
     over_25_prob = float(sum([matrix[h, a] for h in range(7) for a in range(7) if h + a >= 3]))
     btts_prob = float(sum([matrix[h, a] for h in range(7) for a in range(7) if h >= 1 and a >= 1]))
 
-    # Key Player Scoring Props lookup
-    KEY_PLAYERS = {
-        "england": ["harry kane", "jude bellingham", "bukayo saka"],
-        "france": ["kylian mbappe", "antoine griezmann"],
-        "argentina": ["lionel messi", "lautaro martinez"],
-        "brazil": ["vinicius jr"],
-        "portugal": ["cristiano ronaldo"],
-        "poland": ["robert lewandowski"],
-        "germany": ["jamal musiala", "florian wirtz"],
-        "spain": ["alvaro morata"],
-        "ghana": ["antoine semenyo", "mohammed kudus"],
-    }
-    
-    players = []
     h_avg = float(h_data.get("avg_goals", 1.4))
     a_avg = float(a_data.get("avg_goals", 1.4))
     
-    for team, p_names in KEY_PLAYERS.items():
-        if team in (home, away):
-            is_home = (team == home)
-            for name in p_names:
-                p_stats = player_stats.get_player_stats(name)
-                share = p_stats.get("goals_per_90", 0.25) / (h_avg if is_home else a_avg)
-                
-                # P(Player scores)
-                p_prob = 0.0
-                for h in range(7):
-                    for a in range(7):
-                        g = h if is_home else a
-                        p_prob += matrix[h, a] * (1.0 - (1.0 - share) ** g)
-                players.append((name, p_prob, is_home))
+    # Retrieve dynamic starting lineups from ESPN
+    lineups_res = get_match_lineups(home, away)
+    home_lineup = lineups_res.get("home_lineup", [])
+    away_lineup = lineups_res.get("away_lineup", [])
+    
+    console.print(f"[dim]Lineups sourced via: {lineups_res['source']}[/dim]")
+    
+    # Build predictions for all players in both lineups
+    player_prop_predictions = []
+    for is_home, lineup, team_avg in [(True, home_lineup, h_avg), (False, away_lineup, a_avg)]:
+        for name in lineup:
+            p_stats = player_stats.get_player_stats(name)
+            p_probs = calculate_player_prop_probs(p_stats, is_home, matrix, team_avg)
+            
+            # Map to prop formats
+            player_prop_predictions.append({
+                "name": name,
+                "is_home": is_home,
+                "probs": p_probs
+            })
 
     # Kalshi Betting Value Analysis Table
     bets_table = Table(title="Kalshi Value Bets & Target Prices", box=box.SIMPLE)
@@ -198,28 +192,55 @@ def run_predict(query: str):
         else:
             bets_table.add_row("Game Lines", label, f"{prob*100:.1f}%", "N/A", f"Buy YES < ${prob:.2f}")
 
-    # Add Player Props
-    for name, p_prob, is_home in players:
-        live_p = None
-        for ev in markets:
-            title = ev["event_title"].lower()
-            if " vs " in title:
-                t_parts = title.split(" vs ")
-                t_home = normalize_team_name(t_parts[0])
-                t_away = normalize_team_name(t_parts[1])
-                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
-                    for m in ev["markets"]:
-                        t = m["title"].lower()
-                        if name in t and ("score" in t or "goal" in t):
-                            live_p = m["yes_price"]
-                        
-        label = f"{name.title()} to Score"
-        if live_p:
-            edge = p_prob - live_p
-            edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
-            bets_table.add_row("Player Props", label, f"{p_prob*100:.1f}%", f"${live_p:.2f}", edge_str)
-        else:
-            bets_table.add_row("Player Props", label, f"{p_prob*100:.1f}%", "N/A", f"Buy YES < ${p_prob:.2f}")
+    # Add Player Props to the Kalshi Value Bets Table
+    for pred in player_prop_predictions:
+        name = pred["name"]
+        is_home = pred["is_home"]
+        p_probs = pred["probs"]
+        
+        # Match markets in Kalshi
+        for outcome_key, label_suffix, prob_val in [
+            ("goals_1", "1+ Goals", p_probs["goals_1"]),
+            ("goals_2", "2+ Goals", p_probs["goals_2"]),
+            ("assists_1", "1+ Assists", p_probs["assists_1"]),
+            ("assists_2", "2+ Assists", p_probs["assists_2"]),
+            ("goal_or_assist", "Score or Assist", p_probs["goal_or_assist"])
+        ]:
+            live_p = None
+            for ev in markets:
+                title = ev["event_title"].lower()
+                if " vs " in title:
+                    t_parts = title.split(" vs ")
+                    t_home = normalize_team_name(t_parts[0])
+                    t_away = normalize_team_name(t_parts[1])
+                    if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                        for m in ev["markets"]:
+                            t = m["title"].lower()
+                            
+                            # Check exact category and player name matches
+                            if name in t:
+                                if "goal" in label_suffix and "goal" in t:
+                                    if "1+" in label_suffix and "1+" in t:
+                                        live_p = m["yes_price"]
+                                    elif "2+" in label_suffix and "2+" in t:
+                                        live_p = m["yes_price"]
+                                elif "assist" in label_suffix and "assist" in t:
+                                    if "1+" in label_suffix and "1+" in t:
+                                        live_p = m["yes_price"]
+                                    elif "2+" in label_suffix and "2+" in t:
+                                        live_p = m["yes_price"]
+                                elif "score or assist" in label_suffix and "score or assist" in t:
+                                    live_p = m["yes_price"]
+            
+            category_str = "Player Goals" if "Goals" in label_suffix else ("Player Assists" if "Assists" in label_suffix else "Player G/A")
+            market_label = f"{name.title()} {label_suffix}"
+            
+            if live_p:
+                edge = prob_val - live_p
+                edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
+                bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", f"${live_p:.2f}", edge_str)
+            else:
+                bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", "N/A", f"Buy YES < ${prob_val:.2f}")
 
     console.print()
     console.print(bets_table)

@@ -201,6 +201,13 @@ def is_team_match(team: str, text: str) -> bool:
     if t_norm == txt_norm:
         return True
         
+    # If the team name is not a known country/team alias, perform fallback word-boundary match
+    if t_norm not in ALL_ALIASES_MAP:
+        pattern = re.compile(r'(?<!\w)' + re.escape(t_norm) + r'(?!\w)')
+        if pattern.search(txt_norm):
+            return True
+        return False
+        
     # Find all non-overlapping matches in txt_norm using precompiled patterns
     matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
     

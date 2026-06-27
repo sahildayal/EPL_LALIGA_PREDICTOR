@@ -187,7 +187,7 @@ class KalshiClient:
         Fetches open soccer markets (using public API, doesn't require signature).
         Queries trade-api/v2/markets directly for sports tickers to bypass event exclusions.
         """
-        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL"]
+        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL", "KXWCAST", "KXWCSOA"]
         raw_markets = []
         for ticker in series_tickers:
             url = f"{KALSHI_BASE_URL}/trade-api/v2/markets"
