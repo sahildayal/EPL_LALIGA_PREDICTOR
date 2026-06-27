@@ -80,6 +80,7 @@ def get_world_cup_fixtures(days_ahead: int = 3) -> list:
 
 
 def search_wc_fixture(team1: str, team2: str, days_ahead: int = 7) -> dict | None:
+    from src.data.team_mapping import is_team_match
     all_fixtures = get_world_cup_fixtures(days_ahead=days_ahead)
     t1 = team1.lower()
     t2 = team2.lower()
@@ -87,12 +88,12 @@ def search_wc_fixture(team1: str, team2: str, days_ahead: int = 7) -> dict | Non
     for f in all_fixtures:
         h = f["home"].lower()
         a = f["away"].lower()
-        if (t1 in h or t1 in a) and (t2 in h or t2 in a):
+        if (is_team_match(t1, h) or is_team_match(t1, a)) and (is_team_match(t2, h) or is_team_match(t2, a)):
             return f
     return None
 
 
-def get_match_lineups(home_team: str, away_team: str, event_id: str = None) -> dict:
+def get_match_lineups(home_team: str, away_team: str, event_id: str = None, league: str = None) -> dict:
     """
     Gets lineups for the given match. If lineups aren't published,
     falls back to the lineups of each team's most recent completed game.
@@ -101,9 +102,12 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None) -> d
     h_norm = normalize_team_name(home_team)
     a_norm = normalize_team_name(away_team)
     
+    if event_id and not league:
+        league = "fifa.world"
+    
     # Try to fetch lineups directly for this match event
     if event_id:
-        lineups = _fetch_espn_event_lineup(event_id, h_norm, a_norm)
+        lineups = _fetch_espn_event_lineup(event_id, h_norm, a_norm, league=league)
         if lineups:
             return lineups
 
@@ -113,7 +117,7 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None) -> d
         # Search ESPN schedule to find event id
         found_id = _find_espn_event_id(h_norm, a_norm)
         if found_id:
-            lineups = _fetch_espn_event_lineup(found_id, h_norm, a_norm)
+            lineups = _fetch_espn_event_lineup(found_id, h_norm, a_norm, league=league or "fifa.world")
             if lineups:
                 return lineups
 
@@ -154,21 +158,20 @@ def _find_espn_event_id(team1_norm: str, team2_norm: str) -> str | None:
         if resp.status_code == 200:
             events = resp.json().get("events", [])
             for ev in events:
-                title = ev.get("name", "").lower()
-                if team1_norm in title or team2_norm in title:
-                    # Double check match
-                    comps = ev.get("competitions", [{}])
-                    competitors = comps[0].get("competitors", []) if comps else []
-                    names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
-                    if any(is_team_match(team1_norm, n) for n in names) and any(is_team_match(team2_norm, n) for n in names):
+                comps = ev.get("competitions", [{}])
+                competitors = comps[0].get("competitors", []) if comps else []
+                names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                if len(names) >= 2:
+                    if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
+                       (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
                         return ev.get("id")
     except Exception:
         pass
     return None
 
-def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> dict | None:
+def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, league: str = "fifa.world") -> dict | None:
     from src.data.team_mapping import is_team_match
-    url = f"{ESPN_BASE}/fifa.world/summary?event={event_id}"
+    url = f"{ESPN_BASE}/{league}/summary?event={event_id}"
     try:
         resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
         if resp.status_code == 200:
@@ -223,13 +226,13 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
         pass
     return None
 
-def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
+def _fetch_team_roster_from_event(event_id: str, team_norm: str, league: str = "fifa.world") -> list:
     from src.data.team_mapping import is_team_match
     cached_roster = cache.get("event_roster", {"event_id": event_id, "team": team_norm})
     if cached_roster is not None:
-        return cached_roster
+        return cached_roster[:11]
 
-    url = f"{ESPN_BASE}/fifa.world/summary?event={event_id}"
+    url = f"{ESPN_BASE}/{league}/summary?event={event_id}"
     players = []
     try:
         resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
@@ -253,10 +256,11 @@ def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
                             players.append(name.lower().strip())
                     break
             if players:
+                players = players[:11]
                 cache.set("event_roster", {"event_id": event_id, "team": team_norm}, players, ttl_seconds=3600 * 24)
     except Exception:
         pass
-    return players
+    return players[:11]
 
 def _fetch_team_recent_lineup(team_norm: str) -> list:
     from src.data.team_mapping import is_team_match
@@ -293,7 +297,7 @@ def _fetch_team_recent_lineup(team_norm: str) -> list:
                     names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
                     if any(is_team_match(team_norm, n) for n in names):
                         ev_id = ev.get("id")
-                        players = _fetch_team_roster_from_event(ev_id, team_norm)
+                        players = _fetch_team_roster_from_event(ev_id, team_norm, league=league)
                         if players:
                             cache.set("team_recent_lineup", {"team": team_norm}, players, ttl_seconds=3600 * 24)
                             return players

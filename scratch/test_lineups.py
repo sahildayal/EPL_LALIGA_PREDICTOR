@@ -10,6 +10,12 @@ class TestLineups(unittest.TestCase):
         self.patcher = patch("requests.get")
         self.mock_get = self.patcher.start()
         
+        # Start patching cache get and set globally to keep tests offline/isolated
+        self.cache_get_patcher = patch("src.data.cache.get", return_value=None)
+        self.cache_set_patcher = patch("src.data.cache.set")
+        self.cache_get_patcher.start()
+        self.cache_set_patcher.start()
+        
         # Default mock response is empty/404 to simulate offline or no data, forcing default fallback instantly
         self.default_mock_response = MagicMock()
         self.default_mock_response.status_code = 404
@@ -18,6 +24,8 @@ class TestLineups(unittest.TestCase):
 
     def tearDown(self):
         self.patcher.stop()
+        self.cache_get_patcher.stop()
+        self.cache_set_patcher.stop()
 
     def test_get_lineups_with_stubbed_id(self):
         # Patch requests.get to return a mock response that simulates the rosters structure
@@ -136,6 +144,81 @@ class TestLineups(unittest.TestCase):
         self.assertIn("cristiano ronaldo", res["away_lineup"])
         self.assertEqual(len(res["home_lineup"]), 11)
         self.assertEqual(len(res["away_lineup"]), 11)
+
+    def test_find_espn_event_id_success(self):
+        from src.data.scrapers.fixtures import _find_espn_event_id
+        
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "events": [
+                {
+                    "id": "mock_event_12345",
+                    "name": "United States vs Colombia",
+                    "competitions": [
+                        {
+                            "competitors": [
+                                {"team": {"displayName": "United States"}},
+                                {"team": {"displayName": "Colombia"}}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+        self.mock_get.return_value = mock_response
+        
+        # USA has alias "usa" which maps to "usa" (canonical for "united states")
+        # Colombia has canonical "colombia"
+        event_id = _find_espn_event_id("usa", "colombia")
+        self.assertEqual(event_id, "mock_event_12345")
+
+    def test_fetch_team_recent_lineup_success(self):
+        from src.data.scrapers.fixtures import _fetch_team_recent_lineup
+        
+        def mock_get_side_effect(url, *args, **kwargs):
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            if "scoreboard" in url:
+                mock_resp.json.return_value = {
+                    "events": [
+                        {
+                            "status": {"type": {"name": "STATUS_FINAL"}},
+                            "competitions": [
+                                {
+                                    "competitors": [
+                                        {"team": {"displayName": "United States"}},
+                                        {"team": {"displayName": "Colombia"}}
+                                    ]
+                                }
+                            ],
+                            "id": "mock_event_999"
+                        }
+                    ]
+                }
+            elif "summary" in url:
+                mock_resp.json.return_value = {
+                    "rosters": [
+                        {
+                            "team": {"displayName": "United States"},
+                            "roster": [
+                                {"starter": True, "active": True, "athlete": {"displayName": f"US Player {i}"}}
+                                for i in range(15)
+                            ]
+                        }
+                    ]
+                }
+            else:
+                mock_resp.status_code = 404
+                mock_resp.json.return_value = {}
+            return mock_resp
+
+        self.mock_get.side_effect = mock_get_side_effect
+        
+        res = _fetch_team_recent_lineup("usa")
+        self.assertEqual(len(res), 11)
+        self.assertEqual(res[0], "us player 0")
+        self.assertEqual(res[-1], "us player 10")
 
 if __name__ == "__main__":
     unittest.main()
