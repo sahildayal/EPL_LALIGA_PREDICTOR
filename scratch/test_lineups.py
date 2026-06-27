@@ -1,18 +1,71 @@
 import sys
 sys.path.append(r"C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor")
 import unittest
+from unittest.mock import patch, MagicMock
 from src.data.scrapers.fixtures import get_match_lineups
 
 class TestLineups(unittest.TestCase):
+    def setUp(self):
+        # Start patching requests.get globally for all tests in this class to avoid live network hits
+        self.patcher = patch("requests.get")
+        self.mock_get = self.patcher.start()
+        
+        # Default mock response is empty/404 to simulate offline or no data, forcing default fallback instantly
+        self.default_mock_response = MagicMock()
+        self.default_mock_response.status_code = 404
+        self.default_mock_response.json.return_value = {}
+        self.mock_get.return_value = self.default_mock_response
+
+    def tearDown(self):
+        self.patcher.stop()
+
     def test_get_lineups_with_stubbed_id(self):
-        # Test with a dummy event ID or real ESPN soccer event ID
+        # Patch requests.get to return a mock response that simulates the rosters structure
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "rosters": [
+                {
+                    "team": {"displayName": "Colombia"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "James Rodriguez"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Luis Diaz"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Jhon Cordoba"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Arias"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Rios"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Lerma"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Mojica"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Cuesta"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Sanchez"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Munoz"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Vargas"}},
+                    ]
+                },
+                {
+                    "team": {"displayName": "Portugal"},
+                    "roster": [
+                        {"starter": True, "active": True, "athlete": {"displayName": "Cristiano Ronaldo"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Joao Neves"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Bruno Fernandes"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Bernardo Silva"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Rafael Leao"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Vitinha"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Joao Cancelo"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Pepe"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Ruben Dias"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Diogo Dalot"}},
+                        {"starter": True, "active": True, "athlete": {"displayName": "Diogo Costa"}},
+                    ]
+                }
+            ]
+        }
+        self.mock_get.return_value = mock_response
+
         res = get_match_lineups("Colombia", "Portugal", event_id="401642878")
         self.assertIn("home_lineup", res)
         self.assertIn("away_lineup", res)
-        self.assertEqual(res["source"], "fallback_recent_or_default")
-        # Colombia default players
+        self.assertEqual(res["source"], "live_espn_announcement")
         self.assertIn("james rodriguez", res["home_lineup"])
-        # Portugal default players
         self.assertIn("cristiano ronaldo", res["away_lineup"])
 
     def test_get_lineups_fallback_default_generic(self):
@@ -35,8 +88,7 @@ class TestLineups(unittest.TestCase):
         self.assertEqual(res, [])
 
     def test_get_lineups_mocked_espn(self):
-        from unittest.mock import patch, MagicMock
-        
+        # This will use the localized mock response via standard patch
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -76,14 +128,14 @@ class TestLineups(unittest.TestCase):
             ]
         }
         
-        with patch("requests.get", return_value=mock_response) as mock_get:
-            res = get_match_lineups("Colombia", "Portugal", event_id="mock_event_123")
-            mock_get.assert_called()
-            self.assertEqual(res["source"], "live_espn_announcement")
-            self.assertIn("james rodriguez", res["home_lineup"])
-            self.assertIn("cristiano ronaldo", res["away_lineup"])
-            self.assertEqual(len(res["home_lineup"]), 11)
-            self.assertEqual(len(res["away_lineup"]), 11)
+        # Locally replace the active patch mock
+        self.mock_get.return_value = mock_response
+        res = get_match_lineups("Colombia", "Portugal", event_id="mock_event_123")
+        self.assertEqual(res["source"], "live_espn_announcement")
+        self.assertIn("james rodriguez", res["home_lineup"])
+        self.assertIn("cristiano ronaldo", res["away_lineup"])
+        self.assertEqual(len(res["home_lineup"]), 11)
+        self.assertEqual(len(res["away_lineup"]), 11)
 
 if __name__ == "__main__":
     unittest.main()

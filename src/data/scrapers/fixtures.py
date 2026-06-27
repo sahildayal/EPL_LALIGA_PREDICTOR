@@ -108,7 +108,7 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None) -> d
             return lineups
 
     # Fallback: Find the event ID for the match, then fetch
-    fixture = search_wc_fixture(home_team, away_team)
+    fixture = search_wc_fixture(h_norm, a_norm)
     if fixture:
         # Search ESPN schedule to find event id
         found_id = _find_espn_event_id(h_norm, a_norm)
@@ -184,6 +184,7 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
                 team_name = roster.get("team", {}).get("displayName", "").lower()
                 entries = roster.get("roster", [])
                 is_home = is_team_match(home_norm, team_name)
+                is_away = is_team_match(away_norm, team_name)
                 
                 players = []
                 for entry in entries:
@@ -209,7 +210,7 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
                 
                 if is_home:
                     h_players = players[:11] if len(players) > 11 else players
-                else:
+                elif is_away:
                     a_players = players[:11] if len(players) > 11 else players
                     
             if h_players and a_players:
@@ -224,7 +225,12 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str) -> d
 
 def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
     from src.data.team_mapping import is_team_match
+    cached_roster = cache.get("event_roster", {"event_id": event_id, "team": team_norm})
+    if cached_roster is not None:
+        return cached_roster
+
     url = f"{ESPN_BASE}/fifa.world/summary?event={event_id}"
+    players = []
     try:
         resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
         if resp.status_code == 200:
@@ -233,7 +239,6 @@ def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
                 team_name = roster.get("team", {}).get("displayName", "").lower()
                 if is_team_match(team_norm, team_name):
                     entries = roster.get("roster", [])
-                    players = []
                     # Filter starters or active
                     starters = [e for e in entries if e.get("starter", False)]
                     if len(starters) >= 11:
@@ -246,36 +251,50 @@ def _fetch_team_roster_from_event(event_id: str, team_norm: str) -> list:
                         name = ath.get("displayName") if ath else None
                         if name:
                             players.append(name.lower().strip())
-                    if players:
-                        return players
+                    break
+            if players:
+                cache.set("event_roster", {"event_id": event_id, "team": team_norm}, players, ttl_seconds=3600 * 24)
     except Exception:
         pass
-    return []
+    return players
 
 def _fetch_team_recent_lineup(team_norm: str) -> list:
     from src.data.team_mapping import is_team_match
+    cached = cache.get("team_recent_lineup", {"team": team_norm})
+    if cached:
+        return cached
+
     today = datetime.utcnow()
     # Query team schedule to find recent completed matches
     for offset in range(5):
         date_str = (today - timedelta(days=offset)).strftime("%Y%m%d")
         for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
-            url = f"{ESPN_BASE}/{league}/scoreboard"
-            try:
-                # Get scoreboards for past few days
-                resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=5)
-                if resp.status_code == 200:
-                    events = resp.json().get("events", [])
-                    for ev in events:
-                        status = ev.get("status", {}).get("type", {}).get("name", "")
-                        if status == "STATUS_FINAL":
-                            comps = ev.get("competitions", [{}])
-                            competitors = comps[0].get("competitors", []) if comps else []
-                            names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
-                            if any(is_team_match(team_norm, n) for n in names):
-                                ev_id = ev.get("id")
-                                players = _fetch_team_roster_from_event(ev_id, team_norm)
-                                if players:
-                                    return players
-            except Exception:
-                pass
+            cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})
+            if cached_sb is not None:
+                events = cached_sb.get("events", [])
+            else:
+                url = f"{ESPN_BASE}/{league}/scoreboard"
+                try:
+                    resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=5)
+                    if resp.status_code == 200:
+                        response_json = resp.json()
+                        cache.set("espn_scoreboard", {"league": league, "date": date_str}, response_json, ttl_seconds=3600 * 6)
+                        events = response_json.get("events", [])
+                    else:
+                        events = []
+                except Exception:
+                    events = []
+
+            for ev in events:
+                status = ev.get("status", {}).get("type", {}).get("name", "")
+                if status == "STATUS_FINAL":
+                    comps = ev.get("competitions", [{}])
+                    competitors = comps[0].get("competitors", []) if comps else []
+                    names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                    if any(is_team_match(team_norm, n) for n in names):
+                        ev_id = ev.get("id")
+                        players = _fetch_team_roster_from_event(ev_id, team_norm)
+                        if players:
+                            cache.set("team_recent_lineup", {"team": team_norm}, players, ttl_seconds=3600 * 24)
+                            return players
     return []
