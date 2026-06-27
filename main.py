@@ -134,7 +134,7 @@ def run_predict(query: str):
     home_lineup = lineups_res.get("home_lineup", [])
     away_lineup = lineups_res.get("away_lineup", [])
     
-    console.print(f"[dim]Lineups sourced via: {lineups_res['source']}[/dim]")
+    console.print(f"[dim]Lineups sourced via: {lineups_res.get('source', 'unknown')}[/dim]")
     
     # Build predictions for all players in both lineups
     player_prop_predictions = []
