@@ -112,3 +112,26 @@ Ran 5 tests in 0.057s
 
 OK
 ```
+
+## Additional Re-Review Fixes (June 27, 2026)
+
+We implemented the following fixes identified in the Task 2 re-review:
+1. **Alias-Robust Event Matching in `src/data/scrapers/fixtures.py`**:
+   - Replaced substring checks in `search_wc_fixture` with the robust boundary-matching `is_team_match`.
+   - Removed the strict `team1_norm in title or team2_norm in title` pre-filter check in `_find_espn_event_id`, evaluating competitor names directly via `is_team_match` to support aliases (e.g. `"usa"` vs `"united states"`).
+2. **Dynamic League Summary URL**:
+   - Parameterized `_fetch_team_roster_from_event` and `_fetch_espn_event_lineup` to support a `league: str` argument, defaulting to `"fifa.world"`.
+   - Propagated the league parameter from `_fetch_team_recent_lineup`'s inner loop and from `get_match_lineups`.
+3. **Roster Slicing**:
+   - Ensured `_fetch_team_roster_from_event` returns players sliced to 11.
+4. **Mock Unit Tests in `scratch/test_lineups.py`**:
+   - Added test cases `test_find_espn_event_id_success` and `test_fetch_team_recent_lineup_success` mocking the scoreboard and event summary API responses to test success paths completely offline.
+   - Mocked the cache globally in tests to keep unit tests fully isolated from local SQLite caches.
+
+### Verified Test Results:
+All 7 tests run completely offline and pass instantly:
+```
+Ran 7 tests in 0.018s
+
+OK
+```
