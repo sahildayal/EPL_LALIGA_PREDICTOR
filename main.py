@@ -200,6 +200,7 @@ def run_predict(query: str):
         else:
             bets_table.add_row("Game Lines", label, f"{prob*100:.1f}%", "N/A", f"Buy YES < ${prob:.2f}")
 
+    candidates = []
     # Add Player Props to the Kalshi Value Bets Table
     for pred in player_prop_predictions:
         name = pred["name"]
@@ -245,6 +246,8 @@ def run_predict(query: str):
                 edge = prob_val - live_p
                 edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
                 bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", f"${live_p:.2f}", edge_str)
+                if edge > 0.02:
+                    candidates.append((edge, f"Player Props - {name.title()} {label_suffix}", live_p))
             else:
                 bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", "N/A", f"Buy YES < ${prob_val:.2f}")
 
@@ -274,7 +277,6 @@ def run_predict(query: str):
             big_d_bet_type = "Moneyline - Draw"
             big_d_odds = 1.0 / live_price
             
-    candidates = []
     for outcome, label in [("home_win", f"Moneyline - {home.title()} Win"),
                            ("draw", "Moneyline - Draw"),
                            ("away_win", f"Moneyline - {away.title()} Win")]:
