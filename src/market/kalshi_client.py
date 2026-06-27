@@ -187,6 +187,44 @@ class KalshiClient:
         Fetches open soccer markets (using public API, doesn't require signature).
         Queries trade-api/v2/markets directly for sports tickers to bypass event exclusions.
         """
+        if self.mock_mode:
+            # Return realistic mock soccer events immediately to prevent network timeouts/delays
+            return [
+                {
+                    "event_title": "Portugal vs France",
+                    "subtitle": None,
+                    "category": "Sports",
+                    "occurrence_time": "2026-06-27T18:00:00Z",
+                    "markets": [
+                        {"ticker": "KXWCGAME-26JUN27-POR-FRA-YES", "title": "Portugal Win", "yes_price": 0.33, "no_price": 0.67, "status": "open"},
+                        {"ticker": "KXWCGAME-26JUN27-POR-FRA-NO", "title": "France Win", "yes_price": 0.34, "no_price": 0.66, "status": "open"},
+                        {"ticker": "KXWCGAME-26JUN27-POR-FRA-DRAW", "title": "Draw", "yes_price": 0.33, "no_price": 0.67, "status": "open"},
+                        {"ticker": "KXWCBTTS-26JUN27-POR-FRA", "title": "Both Teams to Score", "yes_price": 0.60, "no_price": 0.40, "status": "open"},
+                        {"ticker": "KXWCTOTAL-26JUN27-POR-FRA-O1.5", "title": "Over 1.5 Goals", "yes_price": 0.80, "no_price": 0.20, "status": "open"},
+                        {"ticker": "KXWCTOTAL-26JUN27-POR-FRA-O2.5", "title": "Over 2.5 Goals", "yes_price": 0.50, "no_price": 0.50, "status": "open"},
+                        {"ticker": "KXWCGOAL-26JUN27-POR-FRA-CR7-1", "title": "Cristiano Ronaldo: 1+ goals?", "yes_price": 0.40, "no_price": 0.60, "status": "open"},
+                        {"ticker": "KXWCGOAL-26JUN27-POR-FRA-CR7-2", "title": "Cristiano Ronaldo: 2+ goals?", "yes_price": 0.15, "no_price": 0.85, "status": "open"},
+                        {"ticker": "KXWCAST-26JUN27-POR-FRA-CR7-1", "title": "Cristiano Ronaldo: 1+ assists?", "yes_price": 0.25, "no_price": 0.75, "status": "open"},
+                        {"ticker": "KXWCAST-26JUN27-POR-FRA-CR7-2", "title": "Cristiano Ronaldo: 2+ assists?", "yes_price": 0.05, "no_price": 0.95, "status": "open"},
+                        {"ticker": "KXWCSOA-26JUN27-POR-FRA-CR7-1", "title": "Cristiano Ronaldo: score or assist?", "yes_price": 0.55, "no_price": 0.45, "status": "open"},
+                    ]
+                },
+                {
+                    "event_title": "South Africa vs Canada",
+                    "subtitle": None,
+                    "category": "Sports",
+                    "occurrence_time": "2026-06-27T20:00:00Z",
+                    "markets": [
+                        {"ticker": "KXWCGAME-26JUN27-RSA-CAN-YES", "title": "South Africa Win", "yes_price": 0.18, "no_price": 0.82, "status": "open"},
+                        {"ticker": "KXWCGAME-26JUN27-RSA-CAN-NO", "title": "Canada Win", "yes_price": 0.60, "no_price": 0.40, "status": "open"},
+                        {"ticker": "KXWCGAME-26JUN27-RSA-CAN-DRAW", "title": "Draw", "yes_price": 0.22, "no_price": 0.78, "status": "open"},
+                        {"ticker": "KXWCBTTS-26JUN27-RSA-CAN", "title": "Both Teams to Score", "yes_price": 0.55, "no_price": 0.45, "status": "open"},
+                        {"ticker": "KXWCTOTAL-26JUN27-RSA-CAN-O1.5", "title": "Over 1.5 Goals", "yes_price": 0.78, "no_price": 0.22, "status": "open"},
+                        {"ticker": "KXWCTOTAL-26JUN27-RSA-CAN-O2.5", "title": "Over 2.5 Goals", "yes_price": 0.45, "no_price": 0.55, "status": "open"},
+                    ]
+                }
+            ]
+
         series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL", "KXWCAST", "KXWCSOA"]
         raw_markets = []
         for ticker in series_tickers:

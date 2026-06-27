@@ -11,7 +11,8 @@ from src.data.scrapers.elo_db import get_national_elo
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 MASTER_CSV_PATH = DATA_DIR / "processed" / "master_dataset.csv"
-RAW_SOURCE_CSV = Path("C:/Users/Bikash/Desktop/CSCI635/CSCI635_MLProject/src/final_ml_dataset.csv")
+RAW_SOURCE_CSV = DATA_DIR / "raw" / "final_ml_dataset.csv"
+USER_BACKUP_CSV = Path("C:/Users/Bikash/Desktop/CSCI635/CSCI635_MLProject/src/final_ml_dataset.csv")
 
 
 def initialize_master_dataset():
@@ -26,6 +27,10 @@ def initialize_master_dataset():
             df = pd.read_csv(RAW_SOURCE_CSV)
             df.to_csv(MASTER_CSV_PATH, index=False)
             print(f"Initialized master dataset at {MASTER_CSV_PATH}")
+        elif USER_BACKUP_CSV.exists():
+            df = pd.read_csv(USER_BACKUP_CSV)
+            df.to_csv(MASTER_CSV_PATH, index=False)
+            print(f"Initialized master dataset at {MASTER_CSV_PATH} from backup source")
         else:
             # Create standard blank fallback dataset if not found
             df = pd.DataFrame(columns=["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "FTR"] + FEATURE_NAMES)

@@ -199,13 +199,146 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
         save_state(state)
         return {"action": "placed", "new": new_bet}
 
-def _check_bet_win(bet_type: str, home: str, away: str, home_goals: int, away_goals: int) -> bool:
-    """Helper to check if a specific bet type won based on goals scored."""
+def _find_completed_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
+    from datetime import datetime, timedelta
+    from src.data.team_mapping import is_team_match
+    from src.data import cache
+    import requests
+    
+    today = datetime.utcnow()
+    # Search scoreboard from 3 days ago to today
+    for offset in range(-3, 1):
+        date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
+        for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
+            cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})
+            if cached_sb is not None:
+                events = cached_sb.get("events", [])
+            else:
+                url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{league}/scoreboard"
+                try:
+                    resp = requests.get(url, params={"dates": date_str}, timeout=8)
+                    if resp.status_code == 200:
+                        response_json = resp.json()
+                        cache.set("espn_scoreboard", {"league": league, "date": date_str}, response_json, ttl_seconds=3600 * 6)
+                        events = response_json.get("events", [])
+                    else:
+                        events = []
+                except Exception:
+                    events = []
+            
+            for ev in events:
+                comps = ev.get("competitions", [{}])
+                competitors = comps[0].get("competitors", []) if comps else []
+                names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                if len(names) >= 2:
+                    if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
+                       (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
+                        return ev.get("id"), league
+    return None
+
+def _fetch_completed_match_stats(home: str, away: str) -> dict:
     from src.data.team_mapping import normalize_team_name
+    from src.data import cache
+    import requests
+    
+    home_norm = normalize_team_name(home)
+    away_norm = normalize_team_name(away)
+    
+    cached_stats = cache.get("completed_match_player_stats", {"home": home_norm, "away": away_norm})
+    if cached_stats is not None:
+        return cached_stats
+        
+    res = _find_completed_event_id(home_norm, away_norm)
+    if not res:
+        return {"goals": {}, "assists": {}}
+        
+    event_id, league = res
+    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{league}/summary?event={event_id}"
+    
+    player_goals = {}
+    player_assists = {}
+    
+    try:
+        resp = requests.get(url, timeout=8)
+        if resp.status_code == 200:
+            data = resp.json()
+            for roster in data.get("rosters", []):
+                for entry in roster.get("roster", []):
+                    ath = entry.get("athlete", {})
+                    name = ath.get("displayName", "").lower().strip()
+                    if not name:
+                        continue
+                    
+                    stats_list = entry.get("statistics", [])
+                    for s in stats_list:
+                        s_name = s.get("name", "").lower()
+                        s_val = float(s.get("value", 0.0) or 0.0)
+                        if s_name == "goals" and s_val > 0:
+                            player_goals[name] = int(s_val)
+                        elif s_name == "assists" and s_val > 0:
+                            player_assists[name] = int(s_val)
+            
+            result = {"goals": player_goals, "assists": player_assists}
+            cache.set("completed_match_player_stats", {"home": home_norm, "away": away_norm}, result, ttl_seconds=3600 * 24 * 30)
+            return result
+    except Exception:
+        pass
+        
+    return {"goals": {}, "assists": {}}
+
+def _check_bet_win(bet_type: str, home: str, away: str, home_goals: int, away_goals: int, match_stats: dict = None) -> bool:
+    """Helper to check if a specific bet type won based on goals scored and player stats."""
+    from src.data.team_mapping import normalize_team_name
+    import re
     b_type = bet_type.lower()
     home_lower = normalize_team_name(home)
     away_lower = normalize_team_name(away)
     
+    # 1. Player Props Resolution
+    if "player goals" in b_type or "player assists" in b_type or "player g/a" in b_type or "player props" in b_type:
+        if not match_stats:
+            return False
+            
+        clean_prop = b_type.replace("player props - ", "").replace("player goals - ", "").replace("player assists - ", "").replace("player g/a - ", "").strip()
+        
+        is_g1 = "1+ goal" in clean_prop
+        is_g2 = "2+ goal" in clean_prop
+        is_a1 = "1+ assist" in clean_prop
+        is_a2 = "2+ assist" in clean_prop
+        is_ga = "score or assist" in clean_prop
+        
+        name_clean = clean_prop
+        for suffix in ["1+ goals", "2+ goals", "1+ assists", "2+ assists", "score or assist", "goals", "assists"]:
+            name_clean = name_clean.replace(suffix, "").strip()
+            
+        player_pattern = re.compile(r'(?<!\w)' + re.escape(name_clean) + r'(?!\w)')
+        
+        p_goals = 0
+        p_assists = 0
+        
+        for p_name, g_count in match_stats.get("goals", {}).items():
+            if player_pattern.search(p_name):
+                p_goals = g_count
+                break
+                
+        for p_name, a_count in match_stats.get("assists", {}).items():
+            if player_pattern.search(p_name):
+                p_assists = a_count
+                break
+                
+        if is_g1:
+            return p_goals >= 1
+        elif is_g2:
+            return p_goals >= 2
+        elif is_a1:
+            return p_assists >= 1
+        elif is_a2:
+            return p_assists >= 2
+        elif is_ga:
+            return (p_goals >= 1) or (p_assists >= 1)
+        return False
+
+    # 2. Standard game lines resolution
     if "moneyline" in b_type:
         if home_lower in b_type and home_goals > away_goals:
             return True
@@ -242,6 +375,7 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
     home_norm = normalize_team_name(home)
     away_norm = normalize_team_name(away)
     
+    match_stats = _fetch_completed_match_stats(home_norm, away_norm)
     results = []
     
     for portfolio in ["predict", "ask", "parlay_standard", "parlay_longshot"]:
@@ -269,7 +403,7 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
                         if match_normal or match_swapped:
                             h_goals = home_goals if match_normal else away_goals
                             a_goals = away_goals if match_normal else home_goals
-                            won = _check_bet_win(leg["bet_type"], leg["home"], leg["away"], h_goals, a_goals)
+                            won = _check_bet_win(leg["bet_type"], leg["home"], leg["away"], h_goals, a_goals, match_stats)
                             leg["result"] = "WIN" if won else "LOSS"
                             
                         if leg.get("result") == "LOSS":
@@ -323,7 +457,7 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
                     if match_normal or match_swapped:
                         h_goals = home_goals if match_normal else away_goals
                         a_goals = away_goals if match_normal else home_goals
-                        won = _check_bet_win(bet["bet_type"], bet["home"], bet["away"], h_goals, a_goals)
+                        won = _check_bet_win(bet["bet_type"], bet["home"], bet["away"], h_goals, a_goals, match_stats)
                         pnl = -bet["stake"]
                         if won:
                             payout = bet["stake"] * bet["odds"]

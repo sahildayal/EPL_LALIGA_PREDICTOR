@@ -8,29 +8,35 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "cache" / "worldcup.db"
 
 
+_db_initialized = False
+
+
 def _conn():
+    global _db_initialized
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS cache (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL,
-            expires_at REAL NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS player_statistics (
-            player_name TEXT PRIMARY KEY,
-            position TEXT NOT NULL,
-            xg_per_90 REAL NOT NULL,
-            goals_per_90 REAL NOT NULL,
-            assists_per_90 REAL NOT NULL,
-            club_team TEXT,
-            intl_team TEXT,
-            last_updated REAL NOT NULL
-        )
-    """)
-    conn.commit()
+    if not _db_initialized:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS cache (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                expires_at REAL NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS player_statistics (
+                player_name TEXT PRIMARY KEY,
+                position TEXT NOT NULL,
+                xg_per_90 REAL NOT NULL,
+                goals_per_90 REAL NOT NULL,
+                assists_per_90 REAL NOT NULL,
+                club_team TEXT,
+                intl_team TEXT,
+                last_updated REAL NOT NULL
+            )
+        """)
+        conn.commit()
+        _db_initialized = True
     return conn
 
 
