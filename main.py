@@ -122,7 +122,15 @@ def run_predict(query: str):
     a_avg = float(a_data.get("avg_goals", 1.4))
     
     # Retrieve dynamic starting lineups from ESPN
-    lineups_res = get_match_lineups(home, away)
+    try:
+        lineups_res = get_match_lineups(home, away)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Failed to fetch lineups dynamically: {e}[/yellow]")
+        lineups_res = {
+            "home_lineup": [],
+            "away_lineup": [],
+            "source": "error_fallback_empty"
+        }
     home_lineup = lineups_res.get("home_lineup", [])
     away_lineup = lineups_res.get("away_lineup", [])
     
@@ -217,19 +225,17 @@ def run_predict(query: str):
                         for m in ev["markets"]:
                             t = m["title"].lower()
                             
-                            # Check exact category and player name matches
-                            if name in t:
-                                if "goal" in label_suffix and "goal" in t:
-                                    if "1+" in label_suffix and "1+" in t:
-                                        live_p = m["yes_price"]
-                                    elif "2+" in label_suffix and "2+" in t:
-                                        live_p = m["yes_price"]
-                                elif "assist" in label_suffix and "assist" in t:
-                                    if "1+" in label_suffix and "1+" in t:
-                                        live_p = m["yes_price"]
-                                    elif "2+" in label_suffix and "2+" in t:
-                                        live_p = m["yes_price"]
-                                elif "score or assist" in label_suffix and "score or assist" in t:
+                            # Check player name match robustly (case-insensitive and word-boundary safe)
+                            if is_team_match(name, t):
+                                if outcome_key == "goals_1" and "goal" in t and "1+" in t:
+                                    live_p = m["yes_price"]
+                                elif outcome_key == "goals_2" and "goal" in t and "2+" in t:
+                                    live_p = m["yes_price"]
+                                elif outcome_key == "assists_1" and "assist" in t and "1+" in t:
+                                    live_p = m["yes_price"]
+                                elif outcome_key == "assists_2" and "assist" in t and "2+" in t:
+                                    live_p = m["yes_price"]
+                                elif outcome_key == "goal_or_assist" and "score or assist" in t:
                                     live_p = m["yes_price"]
             
             category_str = "Player Goals" if "Goals" in label_suffix else ("Player Assists" if "Assists" in label_suffix else "Player G/A")

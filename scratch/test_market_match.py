@@ -1,5 +1,6 @@
+from pathlib import Path
 import sys
-sys.path.append(r"C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor")
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import unittest
 from src.data.team_mapping import is_team_match
 
