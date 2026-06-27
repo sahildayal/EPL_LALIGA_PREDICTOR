@@ -220,5 +220,51 @@ class TestLineups(unittest.TestCase):
         self.assertEqual(res[0], "us player 0")
         self.assertEqual(res[-1], "us player 10")
 
+    def test_caching_behavior(self):
+        # Stop global cache patches for this test to use real cache
+        self.cache_get_patcher.stop()
+        self.cache_set_patcher.stop()
+        try:
+            from src.data.scrapers.fixtures import _fetch_team_roster_from_event
+            from src.data import cache
+            
+            # Invalidate any cache entry first to ensure a clean state
+            cache.invalidate("event_roster", {"event_id": "test_event_caching", "team": "argentina"})
+            
+            # Setup patched requests.get
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = {
+                "rosters": [
+                    {
+                        "team": {"displayName": "Argentina"},
+                        "roster": [
+                            {"starter": True, "active": True, "athlete": {"displayName": f"Player {i}"}}
+                            for i in range(11)
+                        ]
+                    }
+                ]
+            }
+            self.mock_get.return_value = mock_resp
+            
+            # First call: should hit requests.get
+            roster1 = _fetch_team_roster_from_event("test_event_caching", "argentina")
+            self.assertEqual(len(roster1), 11)
+            self.assertEqual(roster1[0], "player 0")
+            self.assertEqual(self.mock_get.call_count, 1)
+            
+            # Reset mock to track call counts easily
+            self.mock_get.reset_mock()
+            self.mock_get.return_value = mock_resp
+            
+            # Second call: should hit cache and NOT hit requests.get
+            roster2 = _fetch_team_roster_from_event("test_event_caching", "argentina")
+            self.assertEqual(roster2, roster1)
+            self.mock_get.assert_not_called()
+        finally:
+            # Restart the patchers so tearDown doesn't raise error on double stop
+            self.cache_get_patcher.start()
+            self.cache_set_patcher.start()
+
 if __name__ == "__main__":
     unittest.main()

@@ -151,22 +151,26 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None, leag
 
 def _find_espn_event_id(team1_norm: str, team2_norm: str) -> str | None:
     from src.data.team_mapping import is_team_match
-    # Query fifa.world scoreboard for active event IDs
-    url = f"{ESPN_BASE}/fifa.world/scoreboard"
-    try:
-        resp = requests.get(url, headers=ESPN_HEADERS, timeout=8)
-        if resp.status_code == 200:
-            events = resp.json().get("events", [])
-            for ev in events:
-                comps = ev.get("competitions", [{}])
-                competitors = comps[0].get("competitors", []) if comps else []
-                names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
-                if len(names) >= 2:
-                    if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
-                       (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
-                        return ev.get("id")
-    except Exception:
-        pass
+    from datetime import datetime, timedelta
+    today = datetime.utcnow()
+    for offset in range(3):
+        date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
+        for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
+            url = f"{ESPN_BASE}/{league}/scoreboard"
+            try:
+                resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=8)
+                if resp.status_code == 200:
+                    events = resp.json().get("events", [])
+                    for ev in events:
+                        comps = ev.get("competitions", [{}])
+                        competitors = comps[0].get("competitors", []) if comps else []
+                        names = [c.get("team", {}).get("displayName", "").lower() for c in competitors]
+                        if len(names) >= 2:
+                            if (is_team_match(team1_norm, names[0]) and is_team_match(team2_norm, names[1])) or \
+                               (is_team_match(team1_norm, names[1]) and is_team_match(team2_norm, names[0])):
+                                return ev.get("id")
+            except Exception:
+                pass
     return None
 
 def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, league: str = "fifa.world") -> dict | None:
@@ -184,7 +188,8 @@ def _fetch_espn_event_lineup(event_id: str, home_norm: str, away_norm: str, leag
             a_players = []
             
             for roster in rosters:
-                team_name = roster.get("team", {}).get("displayName", "").lower()
+                team_obj = roster.get("team")
+                team_name = team_obj.get("displayName", "").lower() if team_obj else ""
                 entries = roster.get("roster", [])
                 is_home = is_team_match(home_norm, team_name)
                 is_away = is_team_match(away_norm, team_name)
@@ -239,7 +244,8 @@ def _fetch_team_roster_from_event(event_id: str, team_norm: str, league: str = "
         if resp.status_code == 200:
             data = resp.json()
             for roster in data.get("rosters", []):
-                team_name = roster.get("team", {}).get("displayName", "").lower()
+                team_obj = roster.get("team")
+                team_name = team_obj.get("displayName", "").lower() if team_obj else ""
                 if is_team_match(team_norm, team_name):
                     entries = roster.get("roster", [])
                     # Filter starters or active
