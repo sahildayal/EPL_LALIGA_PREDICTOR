@@ -3,6 +3,7 @@ import re
 from bs4 import BeautifulSoup
 from src.data import cache
 from src.data.scrapers.elo_db import get_national_elo
+from src.data.cache import save_player_stats, get_player_stats_cache
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -117,58 +118,65 @@ POSITION_DEFAULTS = {
 def get_player_stats(name: str) -> dict:
     """
     Get composite player stats. Blends 60% national team stats + 40% club stats.
+    Caches values in SQLite player_statistics table.
     """
     key = name.lower().strip()
-    # Check seeds first
+    
+    # 1. Check local SQLite cache first
+    cached = get_player_stats_cache(key)
+    if cached:
+        return cached
+
+    # 2. Check static seeds
     for seed_name, data in PLAYER_SEEDS.items():
-        if seed_name in key or key in seed_name:
+        if seed_name == key or seed_name in key or key in seed_name:
             xg_blend = 0.60 * data["xg_per_90_intl"] + 0.40 * data["xg_per_90_club"]
             goals_blend = 0.60 * data["goals_per_90_intl"] + 0.40 * data["goals_per_90_club"]
-            return {
-                "name": name,
+            
+            result = {
+                "name": key,
                 "position": data["position"],
                 "xg_per_90": round(xg_blend, 3),
                 "goals_per_90": round(goals_blend, 3),
                 "assists_per_90": data["assists_per_90"],
-                "source": "seeded_blend",
+                "source": "seeded_blend"
             }
+            save_player_stats(key, result["position"], result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], data.get("club_team"), data.get("intl_team"))
+            return result
 
-    # Try cached scraped stats
-    cached = cache.get("player_stats", {"name": key})
-    if cached:
-        return cached
-
-    # Attempt to scrape club stats from FBRef and blend with position defaults for intl
+    # 3. Dynamic FBRef Scraper
     scraped = _scrape_fbref_player(name)
     if scraped:
-        # Assuming scraped stats are club-based; blend with default intl profile
         pos = scraped.get("position", "FW")
         defaults = POSITION_DEFAULTS.get(pos, POSITION_DEFAULTS["FW"])
         
         # Blend: 60% default intl profile, 40% club scraped
         xg_blend = 0.60 * defaults["xg"] + 0.40 * scraped["xg_per_90"]
         goals_blend = 0.60 * defaults["goals"] + 0.40 * scraped["goals_per_90"]
+        assists_blend = 0.60 * defaults["assists"] + 0.40 * scraped["assists_per_90"]
         
         result = {
-            "name": name,
+            "name": key,
             "position": pos,
             "xg_per_90": round(xg_blend, 3),
             "goals_per_90": round(goals_blend, 3),
-            "assists_per_90": scraped.get("assists_per_90", 0.15),
-            "source": "scraped_blend",
+            "assists_per_90": round(assists_blend, 3),
+            "source": "scraped_blend"
         }
-        cache.set("player_stats", {"name": key}, result, ttl_seconds=3600 * 24)
+        save_player_stats(key, pos, result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], "", "")
         return result
 
-    # Standard fallback
-    return {
-        "name": name,
+    # 4. Standard position default fallback
+    result = {
+        "name": key,
         "position": "FW",
         "xg_per_90": POSITION_DEFAULTS["FW"]["xg"],
         "goals_per_90": POSITION_DEFAULTS["FW"]["goals"],
         "assists_per_90": POSITION_DEFAULTS["FW"]["assists"],
-        "source": "position_default",
+        "source": "position_default"
     }
+    save_player_stats(key, "FW", result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], "", "")
+    return result
 
 
 def _scrape_fbref_player(name: str) -> dict:
