@@ -154,7 +154,7 @@ def get_player_stats(name: str) -> dict:
         # Blend: 60% default intl profile, 40% club scraped
         xg_blend = 0.60 * defaults["xg"] + 0.40 * scraped["xg_per_90"]
         goals_blend = 0.60 * defaults["goals"] + 0.40 * scraped["goals_per_90"]
-        assists_blend = 0.60 * defaults["assists"] + 0.40 * scraped.get("assists_per_90", 0.15)
+        assists_blend = 0.60 * defaults["assists"] + 0.40 * scraped.get("assists_per_90", defaults["assists"])
         
         result = {
             "name": key,
