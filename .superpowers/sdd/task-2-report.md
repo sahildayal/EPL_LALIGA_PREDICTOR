@@ -135,3 +135,70 @@ Ran 7 tests in 0.018s
 
 OK
 ```
+
+## Final Fixes & Cache Verification (June 27, 2026)
+
+We implemented the final fixes for Task 2 to address scoreboard league/date lookups, safe attribute lookups for team names, and cache correctness verification:
+1. **Scoreboard League and Date in `_find_espn_event_id`**:
+   - Modified `_find_espn_event_id` to search across multiple leagues (`"fifa.world"`, `"uefa.nations"`, `"uefa.euro"`) and look ahead up to 3 days (from today to 2 days ahead).
+2. **Safe Attribute Lookup for Team Names**:
+   - Updated `_fetch_espn_event_lineup` and `_fetch_team_roster_from_event` to safely retrieve `roster.get("team")` before accessing `"displayName"`, preventing `AttributeError` when the team object is null.
+3. **Verification of Cache Correctness**:
+   - Added a new unit test `test_caching_behavior` to [scratch/test_lineups.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_lineups.py).
+   - The test does NOT mock the `cache` module, temporarily unpatching it within the test context, calling `_fetch_team_roster_from_event` with a mock server response, verifying the cache is populated, and asserting that the second call hits the cache without triggering `requests.get`.
+
+### Verified Test Results:
+All 8 tests run completely offline and pass instantly:
+```
+Ran 8 tests in 0.038s
+
+OK
+```
+
+## Task 2 Final Cache & Portability Fixes (June 27, 2026)
+
+We implemented the final cache integration and test suite portability fixes:
+1. **Scoreboard Cache Integration in `_find_espn_event_id`**:
+   - Modified `_find_espn_event_id` in `src/data/scrapers/fixtures.py` to check the `espn_scoreboard` cache before performing any ESPN network requests.
+   - Updated the return structure of `_find_espn_event_id` to return the `(event_id, league)` tuple upon successfully finding a match, enabling dynamically fetching lineups using the correct league endpoint in fallback paths.
+   - Updated `get_match_lineups` to unpack the returned `(found_id, found_league)` tuple and pass the dynamic league parameter when calling `_fetch_espn_event_lineup`.
+2. **Lineup Query Caching in `_fetch_espn_event_lineup`**:
+   - Integrated cache check and storage (`event_lineups`) in `_fetch_espn_event_lineup` using a unique key comprised of the event ID, home team, and away team.
+   - Cached parsed lineup results for 24 hours to prevent repeated scrapes.
+   - Added the league name to the source description: `f"live_espn_announcement ({league})"`.
+3. **Path Portability in `scratch/test_lineups.py`**:
+   - Replaced the absolute folder path import with dynamic `pathlib.Path` parent resolving, ensuring the test script is portable across different environments.
+   - Updated unit test assertions expecting the updated `live_espn_announcement` source format and the `_find_espn_event_id` return value structure.
+
+### Verified Test Results:
+All 8 tests run completely offline and pass instantly:
+```
+Ran 8 tests in 0.048s
+
+OK
+```
+
+## Task 2 Final Adjustments & Lookahead/Lookback Window Fixes (June 27, 2026)
+
+We implemented the final fixes for Task 2 to adjust lookahead/lookback windows and enforce starters check constraints:
+1. **Lookahead Window Modification**:
+   - Increased the lookahead range in `_find_espn_event_id` from 3 days to 7 days (`range(7)`) to capture upcoming matches further in advance.
+2. **Scoreboard Lookback Window Expansion**:
+   - Increased the lookback range in `_fetch_team_recent_lineup` from 5 days to 8 days (`range(8)`) to correctly match games spaced a week apart.
+3. **Starters Check constraint in `_fetch_espn_event_lineup`**:
+   - Enforced a rule in `_fetch_espn_event_lineup` to return `None` immediately if the event starters count is less than 11. This prevents slicing active/incomplete players and ensures we correctly fall back to the team's most recent completed game roster.
+4. **Removal of Redundant Imports**:
+   - Cleaned up redundant local `datetime` and `timedelta` imports from `_find_espn_event_id` as they are already imported at the module level.
+5. **Additional Unit Tests**:
+   - Added `test_fetch_espn_event_lineup_insufficient_starters` to verify the starters count check.
+   - Added `test_find_espn_event_id_extended_lookahead` to verify that `_find_espn_event_id` supports scanning up to 7 days ahead.
+   - Added `test_fetch_team_recent_lineup_extended_lookback` to verify that `_fetch_team_recent_lineup` scans up to 8 days back.
+
+### Verified Test Results:
+All 11 tests run completely offline and pass instantly:
+```
+Ran 11 tests in 0.085s
+
+OK
+```
+
