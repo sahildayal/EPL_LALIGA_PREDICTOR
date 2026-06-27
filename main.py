@@ -208,6 +208,9 @@ def run_predict(query: str):
         is_home = pred["is_home"]
         p_probs = pred["probs"]
         
+        name_lower = name.lower().strip()
+        player_pattern = re.compile(r'(?<!\w)' + re.escape(name_lower) + r'(?!\w)')
+        
         # Match markets in Kalshi
         for outcome_key, label_suffix, prob_val in [
             ("goals_1", "1+ Goals", p_probs["goals_1"]),
@@ -227,9 +230,7 @@ def run_predict(query: str):
                         for m in ev["markets"]:
                             t = m["title"].lower()
                             
-                            name_lower = name.lower().strip()
-                            pattern = r'(?<!\w)' + re.escape(name_lower) + r'(?!\w)'
-                            if re.search(pattern, t):
+                            if player_pattern.search(t):
                                 if outcome_key == "goals_1" and "goal" in t and "1+" in t:
                                     live_p = m["yes_price"]
                                 elif outcome_key == "goals_2" and "goal" in t and "2+" in t:
