@@ -90,3 +90,25 @@ Ran 5 tests in 37.878s
 
 OK
 ```
+
+## Re-Review Fixes (June 27, 2026)
+
+We implemented the following fixes identified in the Task 2 re-review:
+1. **Performance / Caching in `fixtures.py`**:
+   - Integrated `src.data.cache` to cache scoreboard responses (`espn_scoreboard`) for 6 hours.
+   - Caching parsed recent lineups (`team_recent_lineup`) for 24 hours (1 day).
+   - Caching individual event rosters (`event_roster`) for 24 hours (1 day).
+2. **Removed Live Network Requests in `scratch/test_lineups.py`**:
+   - Patched `requests.get` globally in `setUp` using `unittest.mock.patch` to return 404/empty responses by default, ensuring offline testing and preventing live internet calls.
+   - Configured `test_get_lineups_with_stubbed_id` to patch `requests.get` returning a mock response simulating the ESPN rosters structure.
+3. **Minor Code Improvement**:
+   - Explicitly checked if non-home team matches `away_norm` rather than assuming it in an `else` block in `_fetch_espn_event_lineup`.
+   - Passed normalized names `h_norm` and `a_norm` to `search_wc_fixture` in `get_match_lineups`.
+
+### Verified Test Results after Re-Review Fixes:
+All 5 tests run completely offline and pass instantly:
+```
+Ran 5 tests in 0.057s
+
+OK
+```
