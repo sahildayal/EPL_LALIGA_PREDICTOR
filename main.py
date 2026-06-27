@@ -293,6 +293,47 @@ def run_predict(query: str):
             if edge > 0:
                 candidates.append((edge, label, live_price))
                 
+    # Evaluate player props for automated bot betting
+    for pred in player_prop_predictions:
+        name = pred["name"]
+        p_probs = pred["probs"]
+        for outcome_key, label_suffix, prob_val in [
+            ("goals_1", "1+ Goals", p_probs["goals_1"]),
+            ("goals_2", "2+ Goals", p_probs["goals_2"]),
+            ("assists_1", "1+ Assists", p_probs["assists_1"]),
+            ("assists_2", "2+ Assists", p_probs["assists_2"]),
+            ("goal_or_assist", "Score or Assist", p_probs["goal_or_assist"])
+        ]:
+            live_price = None
+            for ev in markets:
+                title = ev["event_title"].lower()
+                if " vs " in title:
+                    t_parts = title.split(" vs ")
+                    t_home = normalize_team_name(t_parts[0])
+                    t_away = normalize_team_name(t_parts[1])
+                    if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+                        for m in ev["markets"]:
+                            t = m["title"].lower()
+                            if is_team_match(name, t):
+                                if "score or assist" in label_suffix.lower() and "score or assist" in t:
+                                    live_price = m["yes_price"]
+                                elif "goal" in label_suffix.lower() and "goal" in t:
+                                    if "1+" in label_suffix.lower() and "1+" in t:
+                                        live_price = m["yes_price"]
+                                    elif "2+" in label_suffix.lower() and "2+" in t:
+                                        live_price = m["yes_price"]
+                                elif "assist" in label_suffix.lower() and "assist" in t:
+                                    if "1+" in label_suffix.lower() and "1+" in t:
+                                        live_price = m["yes_price"]
+                                    elif "2+" in label_suffix.lower() and "2+" in t:
+                                        live_price = m["yes_price"]
+            
+            if live_price and live_price > 0:
+                edge = prob_val - live_price
+                if edge > 0.02:  # Positive edge threshold
+                    label = f"Player Props - {name.title()} {label_suffix}"
+                    candidates.append((edge, label, live_price))
+                
     sigmaballs_bet_type = None
     sigmaballs_odds = None
     if candidates:
