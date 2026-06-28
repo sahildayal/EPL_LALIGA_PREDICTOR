@@ -63,10 +63,30 @@ class DixonColesRegressor:
         return -nll
 
     def fit(self, df):
+        if df.empty or 'home_team' not in df.columns or 'away_team' not in df.columns:
+            self.teams = []
+            self.team_indices = {}
+            self.params['alphas'] = np.zeros(0)
+            self.params['betas'] = np.full(0, -0.1)
+            self.params['gamma'] = 0.2
+            self.params['rho'] = 0.05
+            return
+            
+        df = df.copy()
+        df['home_team'] = df['home_team'].astype(str).str.lower().str.strip()
+        df['away_team'] = df['away_team'].astype(str).str.lower().str.strip()
+        
         self.teams = sorted(list(set(df['home_team']).union(set(df['away_team']))))
         self.team_indices = {team: idx for idx, team in enumerate(self.teams)}
         n_teams = len(self.teams)
         
+        if n_teams <= 1:
+            self.params['alphas'] = np.zeros(n_teams)
+            self.params['betas'] = np.full(n_teams, -0.1)
+            self.params['gamma'] = 0.2
+            self.params['rho'] = 0.05
+            return
+            
         init_params = np.concatenate([
             np.zeros(n_teams - 1),
             np.full(n_teams, -0.1),
@@ -95,11 +115,16 @@ class DixonColesRegressor:
             self.params['gamma'] = 0.2
             self.params['rho'] = 0.05
 
-    def predict_match_probs(self, home_team, away_team, max_goals=8):
-        if home_team not in self.team_indices or away_team not in self.team_indices:
+    def predict_match_probs(self, home, away, max_goals=8):
+        if isinstance(home, str):
+            home = home.lower().strip()
+        if isinstance(away, str):
+            away = away.lower().strip()
+
+        if home not in self.team_indices or away not in self.team_indices:
             return 0.33, 0.33, 0.34
-        h_idx = self.team_indices[home_team]
-        a_idx = self.team_indices[away_team]
+        h_idx = self.team_indices[home]
+        a_idx = self.team_indices[away]
         
         alpha_h = self.params['alphas'][h_idx]
         beta_h = self.params['betas'][h_idx]
@@ -120,6 +145,8 @@ class DixonColesRegressor:
                 poisson_h = (np.power(lam, x) * np.exp(-lam)) / math.factorial(x)
                 poisson_a = (np.power(mu, y) * np.exp(-mu)) / math.factorial(y)
                 tau_val = self._tau(x, y, lam, mu, rho)
+                if tau_val <= 0:
+                    tau_val = 1e-10
                 prob_matrix[x, y] = tau_val * poisson_h * poisson_a
                 
         p_home = np.sum(np.tril(prob_matrix, -1))
@@ -130,3 +157,4 @@ class DixonColesRegressor:
         if total <= 0:
             return 0.33, 0.33, 0.34
         return p_home / total, p_draw / total, p_away / total
+
