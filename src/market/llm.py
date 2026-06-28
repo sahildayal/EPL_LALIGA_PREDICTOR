@@ -40,6 +40,15 @@ def map_model_name(friendly_name: str) -> str:
     return friendly_name
 
 
+def get_tournament_stage() -> str:
+    from datetime import datetime
+    # World Cup 2026 Group Stage: June 11 to June 27. Knockout Stage: June 28 to July 19.
+    today = datetime.utcnow()
+    if today.year > 2026 or (today.year == 2026 and (today.month > 6 or (today.month == 6 and today.day >= 28))):
+        return "Knockout Stage (Single Elimination - Extra Time & Penalties apply if tied at 120 mins. Note: Kalshi Moneyline markets still resolve based on regulation 90 mins + injury time scoreline)."
+    return "Group Stage (Round Robin - Matches can end in a Draw/Tie after 90 mins + injury time)."
+
+
 def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None) -> dict:
     """
     Calls Gemini API to generate a debate between Big D and SIGMABALLS.
@@ -81,9 +90,11 @@ def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentimen
     raw_model = user_model or os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
     model_name = map_model_name(raw_model)
     
+    stage = get_tournament_stage()
+    
     prompt = f"""
 You are staging a debate between two sports sports betting personalities analyzing the upcoming match: {home.title()} vs {away.title()}.
-
+ 
 Personalities:
 1. **Big D (The Eye-Test Scout)**:
    - Personality: A grizzled, old-school veteran football scout. Doesn't know what a CSV file is and doesn't want to. He has watched 10,000 matches.
@@ -96,29 +107,30 @@ Personalities:
    - Current Bankroll & Performance: {s_str}
    - Analysis: He only trusts data: ELO ratings, Dixon-Coles Poisson goals, and the machine learning model ensemble. 
    - Style: Highly logical, quotes percentages and edges. He only bets when the model shows a positive edge against Kalshi market odds.
-
+ 
 Match Data:
+- Current Tournament Stage: {stage}
 - Blended Probabilities: {probs}
 - ELO Difference: {elo_diff:+.1f} pts
 - News Sentiment: {sentiment:+.2f}
 - Key News Flags: {news_flags}
 - Live/Target Bets Options (Odds/Margins): {target_bets}
 {prev_bet_prompt}
-
+ 
 Generate a short, punchy, realistic dialogue debate where they analyze the game and try to align on a consensus recommendation. Refer to their current bankroll status or recent bet performance if relevant (e.g. if they are on a winning/losing streak).
-
+ 
 Format your output exactly with these headers:
 [Big D's Take]
 <his paragraphs>
-
+ 
 [SIGMABALLS' Take]
 <his paragraphs>
-
+ 
 [Consensus Bet]
 <what bet they recommend placing (from the target list) and how they size it>
-
+ 
 Additionally, on its own lines at the very end of your response, output a structured JSON block representing the personal paper bets they choose to place from the target list for this game. They must select a bet category/description from the options provided, select a stake (up to 10% of their bankroll), and extract the corresponding odds/multiplier.
-
+ 
 Example format:
 [Personal Bets JSON]
 {{
@@ -134,7 +146,7 @@ Example format:
   }}
 }}
 """
-
+ 
     try:
         model = genai.GenerativeModel(model_name)
         response = model.generate_content(prompt)
@@ -181,14 +193,16 @@ Example format:
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         return _get_fallback_debate(home, away, probs, elo_diff, sentiment, d_sum, s_sum)
-
-
+ 
+ 
 def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, d_summary: dict, s_summary: dict) -> dict:
     """
     Fallback mock dialogue if Gemini is not configured/errored.
     """
     h_title = home.title()
     a_title = away.title()
+    stage = get_tournament_stage()
+    is_knockout = "Knockout" in stage
     
     # Simple logic-based mock debate
     if elo_diff > 100:
@@ -219,10 +233,11 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
             }
         }
     else:
+        stage_desc = "Nobody wants to risk elimination in the knockouts." if is_knockout else "Nobody wants to lose the group stages."
         big_d = (
             f"This is a classic trap match. {h_title} and {a_title} are too close in form. "
             f"I see both teams playing safe, keeping it compact in the first half. It's going to be a slugfest. "
-            f"I smell a Draw all over this. Nobody wants to lose the group stages. Let's place a gut bet on the Draw!"
+            f"I smell a Draw all over this. {stage_desc} Let's place a gut bet on the Draw!"
         )
         sigma = (
             f"The model agrees the Draw probability is elevated at {probs.get('draw', 0.3)*100:.1f}%. "
@@ -242,7 +257,7 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
                 "odds": 1.85
             }
         }
-
+ 
     return {
         "big_d": big_d,
         "sigmaballs": sigma,

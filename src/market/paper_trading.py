@@ -365,6 +365,54 @@ def _check_bet_win(bet_type: str, home: str, away: str, home_goals: int, away_go
             return True
     return False
 
+def _update_player_stats_from_completed_match(home_norm: str, away_norm: str, match_stats: dict, event_id: str = None, league: str = "fifa.world"):
+    from src.data.scrapers.fixtures import _fetch_espn_event_lineup
+    from src.data.scrapers.player_stats import get_player_stats
+    from src.data.cache import save_player_stats
+    
+    if not event_id:
+        return
+        
+    lineups = _fetch_espn_event_lineup(event_id, home_norm, away_norm, league=league)
+    if not lineups:
+        # Fallback: only update stats for players who scored or assisted
+        all_players = set(list(match_stats.get("goals", {}).keys()) + list(match_stats.get("assists", {}).keys()))
+        for p_name in all_players:
+            p_name_clean = p_name.lower().strip()
+            p_stats = get_player_stats(p_name_clean)
+            goals_scored = match_stats.get("goals", {}).get(p_name_clean, 0)
+            assists_made = match_stats.get("assists", {}).get(p_name_clean, 0)
+            
+            old_g = float(p_stats.get("goals_per_90", 0.25))
+            old_a = float(p_stats.get("assists_per_90", 0.15))
+            old_xg = float(p_stats.get("xg_per_90", 0.30))
+            
+            new_g = round((old_g * 10.0 + goals_scored) / 11.0, 3)
+            new_a = round((old_a * 10.0 + assists_made) / 11.0, 3)
+            new_xg = round((old_xg * 10.0 + max(goals_scored, 0.1)) / 11.0, 3)
+            
+            save_player_stats(p_name_clean, p_stats.get("position", "FW"), new_xg, new_g, new_a, p_stats.get("club_team", ""), p_stats.get("intl_team", ""))
+        return
+
+    # Update stats for both teams' starting lineups
+    for is_home, lineup in [(True, lineups.get("home_lineup", [])), (False, lineups.get("away_lineup", []))]:
+        for p_name in lineup:
+            p_name_clean = p_name.lower().strip()
+            p_stats = get_player_stats(p_name_clean)
+            goals_scored = match_stats.get("goals", {}).get(p_name_clean, 0)
+            assists_made = match_stats.get("assists", {}).get(p_name_clean, 0)
+            
+            old_g = float(p_stats.get("goals_per_90", 0.25))
+            old_a = float(p_stats.get("assists_per_90", 0.15))
+            old_xg = float(p_stats.get("xg_per_90", 0.30))
+            
+            new_g = round((old_g * 10.0 + goals_scored) / 11.0, 3)
+            new_a = round((old_a * 10.0 + assists_made) / 11.0, 3)
+            new_xg = round((old_xg * 10.0 + max(goals_scored, 0.1)) / 11.0, 3)
+            
+            save_player_stats(p_name_clean, p_stats.get("position", "FW"), new_xg, new_g, new_a, p_stats.get("club_team", ""), p_stats.get("intl_team", ""))
+
+
 def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int) -> list:
     """
     Resolves pending single bets and parlay legs across all portfolios.
@@ -376,6 +424,13 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
     away_norm = normalize_team_name(away)
     
     match_stats = _fetch_completed_match_stats(home_norm, away_norm)
+    
+    # Update player statistics dynamically based on match performances
+    res = _find_completed_event_id(home_norm, away_norm)
+    if res:
+        event_id, league = res
+        _update_player_stats_from_completed_match(home_norm, away_norm, match_stats, event_id, league)
+        
     results = []
     
     for portfolio in ["predict", "ask", "parlay_standard", "parlay_longshot"]:

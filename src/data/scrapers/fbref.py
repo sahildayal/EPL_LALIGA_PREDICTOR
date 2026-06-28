@@ -49,6 +49,64 @@ ESPN_LEAGUES = [
 ]
 
 
+def compute_dynamic_team_stats(team_name: str) -> dict:
+    import pandas as pd
+    from pathlib import Path
+    from src.data.team_mapping import normalize_team_name
+    
+    team_norm = normalize_team_name(team_name)
+    master_csv_path = Path(__file__).parent.parent.parent.parent / "data" / "processed" / "master_dataset.csv"
+    
+    default_priors = INTL_SCORING_PRIORS.get(team_norm, {"avg_goals": 1.4, "avg_conceded": 1.1})
+    default_priors = dict(default_priors)
+    default_priors["form"] = 0.60
+    default_priors["data_sources"] = ["Historical priors (fallback)"]
+    
+    if not master_csv_path.exists():
+        return default_priors
+        
+    try:
+        df = pd.read_csv(master_csv_path)
+        if df.empty:
+            return default_priors
+            
+        team_matches = df[(df["HomeTeam"].str.lower() == team_norm) | (df["AwayTeam"].str.lower() == team_norm)]
+        if len(team_matches) < 2:
+            return default_priors
+            
+        if "Date" in team_matches.columns:
+            team_matches = team_matches.sort_values(by="Date", ascending=False)
+            
+        recent = team_matches.head(10)
+        goals_scored = 0.0
+        goals_conceded = 0.0
+        points = 0.0
+        
+        for _, row in recent.iterrows():
+            is_home = row["HomeTeam"].lower() == team_norm
+            scored = row["FTHG"] if is_home else row["FTAG"]
+            conceded = row["FTAG"] if is_home else row["FTHG"]
+            ftr = row["FTR"]
+            
+            goals_scored += scored
+            goals_conceded += conceded
+            
+            if ftr == "D":
+                points += 1.0
+            elif (ftr == "H" and is_home) or (ftr == "A" and not is_home):
+                points += 3.0
+                
+        num_games = len(recent)
+        return {
+            "avg_goals": round(goals_scored / num_games, 2),
+            "avg_conceded": round(goals_conceded / num_games, 2),
+            "form": round(points / (3.0 * num_games), 3),
+            "data_sources": [f"Dynamic master_dataset (last {num_games} matches)"]
+        }
+    except Exception:
+        return default_priors
+
+
 def get_team_data(team_name: str) -> dict:
     """
     Retrieves team form, ELO, and scoring averages.
@@ -58,7 +116,7 @@ def get_team_data(team_name: str) -> dict:
     cached = cache.get("fbref_team", {"team": name_lower})
     if cached:
         return cached
-
+ 
     # Try Understat (in case it is a club for mapping player details)
     understat_data = get_understat_team(team_name)
     if understat_data:
@@ -66,26 +124,26 @@ def get_team_data(team_name: str) -> dict:
         understat_data["data_sources"] = ["Understat (live xG)"]
         cache.set("fbref_team", {"team": name_lower}, understat_data, ttl_seconds=3600 * 6)
         return understat_data
-
+ 
     # Try ESPN for international team form
-    priors = INTL_SCORING_PRIORS.get(name_lower, {"avg_goals": 1.4, "avg_conceded": 1.1})
+    dyn_stats = compute_dynamic_team_stats(team_name)
     elo = get_national_elo(team_name)
-
+ 
     result = {
         "team": team_name,
         "elo": elo,
-        "avg_goals": priors["avg_goals"],
-        "avg_conceded": priors["avg_conceded"],
-        "form": 0.60,
+        "avg_goals": dyn_stats["avg_goals"],
+        "avg_conceded": dyn_stats["avg_conceded"],
+        "form": dyn_stats["form"],
         "is_national": True,
-        "data_sources": ["FIFA/EloRatings", "Historical priors"],
+        "data_sources": dyn_stats["data_sources"] + ["FIFA/EloRatings"],
     }
-
+ 
     # Fetch form
     espn_form = _get_espn_intl_form(team_name)
     if espn_form:
         result.update(espn_form)
-
+ 
     cache.set("fbref_team", {"team": name_lower}, result, ttl_seconds=3600 * 6)
     return result
 
