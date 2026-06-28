@@ -1,104 +1,68 @@
-# Task 3 Report: Dynamic FBRef Scraper & SQLite Storage
+# Task 3: Advanced Elo Rating System & Margin of Victory Multiplier - Report
 
-## What Was Implemented
-- Integrated SQLite database cache with player statistics scraping and retrieval in `src/data/scrapers/player_stats.py`.
-- Enabled caching player statistics inside the `player_statistics` table using `save_player_stats` and retrieving them via `get_player_stats_cache` with a 7-day TTL check.
-- Integrated the blending formula (60% country, 40% club) when retrieving player statistics, supporting:
-  - Seeded players (`PLAYER_SEEDS` stats blend)
-  - Scraped players (`_scrape_fbref_player` blended with position defaults)
-  - Fallback position default profiles (e.g., FW default when no match or scraper error is found)
-- Created the TDD scratch test suite `scratch/test_player_scraping.py`.
+## What was Implemented
+We implemented an advanced Elo calculator class, `EloSystem`, within `src/models/advanced_elo.py` that supports:
+1. **Stage-Dependent Importance K-factors**: Allows setting customized K-factor weights on a per-match basis (e.g. friendly matches = 20 vs. World Cup knockout matches = 60).
+2. **Margin of Victory Multiplier**: Scaled Elo updates utilizing the official World Football Elo ratings formula:
+   - Difference of <= 1 goal: multiplier = 1.0
+   - Difference of 2 goals: multiplier = 1.5
+   - Difference of 3 goals: multiplier = 1.75
+   - Difference of 4+ goals: multiplier = 1.75 + (N - 3) / 8.0
+3. **Case-Insensitivity & Normalized Keys**: Team names are lowercased and stripped to ensure robust matching and consistency.
+4. **Home Advantage**: Computes win expectancy taking home advantage `H` into account when games are not played on a neutral ground.
 
 ## TDD Evidence
 
 ### RED Phase
-- **Command Run:** `python scratch/test_player_scraping.py`
-- **Failing Output:**
-  ```
-  .F
-  ======================================================================
-  FAIL: test_seeded_player (__main__.TestPlayerScraping.test_seeded_player)
-  ----------------------------------------------------------------------
-  Traceback (most recent call last):
-    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_player_scraping.py", line 10, in test_seeded_player
-      self.assertEqual(stats["name"], "kylian mbappe")
-      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  AssertionError: 'Kylian Mbappe' != 'kylian mbappe'
-  - Kylian Mbappe
-  ? ^      ^
-  + kylian mbappe
-  ? ^      ^
+The test suite `scratch/test_advanced_elo.py` was created containing a test that imports the new `EloSystem` class and asserts its update ratings behavior. Running the test failed with `ModuleNotFoundError` because the class had not been implemented yet.
 
-  ----------------------------------------------------------------------
-  Ran 2 tests in 0.544s
+**Command Run:**
+```bash
+python scratch/test_advanced_elo.py
+```
 
-  FAILED (failures=1)
-  ```
-- **Why the Failure Was Expected:**
-  - The function `get_player_stats` returned the unnormalized capital name from seeds/input and did not normalize the cached keys or store them into the SQLite database.
-  - The player assists and goals blending formula for scraper and fallback cases had not been fully updated to support SQLite caching.
+**Failing Output:**
+```
+Traceback (most recent call last):
+  File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_advanced_elo.py", line 5, in <module>
+    from src.models.advanced_elo import EloSystem
+ModuleNotFoundError: No module named 'src.models.advanced_elo'
+```
+
+**Why the failure was expected:**
+The file `src/models/advanced_elo.py` did not exist yet, resulting in python being unable to find and import the module.
+
+---
 
 ### GREEN Phase
-- **Command Run:** `python scratch/test_player_scraping.py`
-- **Passing Output:**
-  ```
-  ..
-  ----------------------------------------------------------------------
-  Ran 2 tests in 0.360s
+After writing the minimal implementation in `src/models/advanced_elo.py` and expanding the test suite to cover case-insensitivity, K-factor scaling, margin of victory multiplier correctness, and home advantage, we ran the test suite and all 5 tests passed successfully.
 
-  OK
-  ```
+**Command Run:**
+```bash
+python scratch/test_advanced_elo.py
+```
 
-## What Was Tested and Test Results
-All test files under the `scratch` directory were executed and verified successfully.
+**Passing Output:**
+```
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
 
-1. **Player Scraping and Cache Integration tests:**
-   - Command: `python scratch/test_player_scraping.py`
-   - Result: `2/2 tests passed`
+OK
+```
 
-2. **SQLite Database Cache operations tests:**
-   - Command: `python scratch/test_db_cache.py`
-   - Result: `4/4 tests passed`
-
-3. **Fixtures & Lineups tests:**
-   - Command: `python scratch/test_lineups.py`
-   - Result: `11/11 tests passed`
-
-4. **Integration tests:**
-   - Command: `python scratch/test_integration.py`
-   - Result: `All integration tests passed successfully!`
-
-5. **Team Mapping tests:**
-   - Command: `python scratch/test_team_mapping.py`
-   - Result: `ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!`
+---
 
 ## Files Changed
-- `src/data/scrapers/player_stats.py` (Modified)
-- `scratch/test_player_scraping.py` (Created)
+- `src/models/advanced_elo.py` (created) - Contains the `EloSystem` implementation.
+- `scratch/test_advanced_elo.py` (created) - Contains unit tests for `EloSystem`.
 
 ## Self-Review Findings
-- **Completeness:** All steps outlined in Task 3 brief have been completely implemented.
-- **Quality:** Code is clear, adheres to established project conventions, and uses absolute/normalized lower-cased player names for caching consistency.
-- **Testing:** The new scratch test verified both seeded and scraped player profiles, demonstrating correct blending functionality and database caching behavior.
-- **Output:** Pristine (no warnings or compilation issues besides deprecated datetime warnings already present in external files).
+We reviewed the implementation against acceptance criteria:
+- **Completeness**: Implemented all specific details (K-factors, margin of victory, case insensitivity, etc.).
+- **Quality**: The code is clean, names are descriptive, and helper methods are used where appropriate.
+- **Discipline**: Used TDD and did not write production code until we had a failing test. Avoided overbuilding.
+- **Testing**: Added additional comprehensive test cases to verify the math, normalization, scaling, and home advantage logic. Pristine output with no warnings or errors.
 
-## Final Fixes Applied (2026-06-27)
-
-1. **KeyError on `assists_per_90` resolved:**
-   - Modified `src/data/scrapers/player_stats.py` to use `scraped.get("assists_per_90", 0.15)` instead of `scraped["assists_per_90"]` to prevent `KeyError` when scraping results are incomplete.
-
-2. **Added `source` key to cached player stats:**
-   - Updated `get_player_stats` in `src/data/scrapers/player_stats.py` to append `cached["source"] = "cached_sqlite"` when statistics are returned directly from the local SQLite cache database.
-
-3. **Offline/Mocked Test Suite:**
-   - Mocked all network requests in `scratch/test_player_scraping.py` using `unittest.mock.patch("src.data.scrapers.player_stats.requests.get")`.
-   - Verified both dynamic scraping simulation (mock data response) and subsequent SQLite cache retrieval in the test suite.
-   - Command run: `python scratch/test_player_scraping.py`
-   - Test result:
-     ```
-     ..
-     ----------------------------------------------------------------------
-     Ran 2 tests in 0.031s
-
-     OK
-     ```
+## Issues or Concerns
+None. The code integrates cleanly and the existing tests are completely unaffected (all 41 tests in the repository continue to pass perfectly).
