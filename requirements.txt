@@ -3,6 +3,7 @@ pandas
 scipy
 scikit-learn
 xgboost
+lightgbm
 requests
 beautifulsoup4
 lxml
