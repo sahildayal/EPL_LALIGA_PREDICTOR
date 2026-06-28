@@ -1,14 +1,34 @@
 import unittest
 import sys
+import os
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+import src.data.cache as cache
 from src.data.preprocessor import calculate_distance_km, get_match_features, FEATURE_NAMES
 from src.data.cache import save_team_travel
 
 class TestFatigueTravel(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.orig_db_path = cache.DB_PATH
+        cls.orig_db_init = cache._db_initialized
+        cls.temp_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+        cls.temp_db.close()
+        cache.DB_PATH = Path(cls.temp_db.name)
+        cache._db_initialized = False
+
+    @classmethod
+    def tearDownClass(cls):
+        cache.DB_PATH = cls.orig_db_path
+        cache._db_initialized = cls.orig_db_init
+        try:
+            os.remove(cls.temp_db.name)
+        except Exception:
+            pass
     def test_haversine_distance(self):
         # Distance between London (51.5, -0.1) and Paris (48.8, 2.3)
         dist = calculate_distance_km(51.5, -0.1, 48.8, 2.3)

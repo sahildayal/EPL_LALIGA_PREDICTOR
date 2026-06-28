@@ -46,10 +46,10 @@ class StackingEnsembleModel(BaseModel):
         ]
         self.clf = StackingClassifier(
             estimators=base_estimators,
-            final_estimator=LogisticRegression(penalty='l2', C=1.0),
+            final_estimator=make_pipeline(StandardScaler(), LogisticRegression(penalty='l2', C=1.0)),
             cv=3,
             n_jobs=-1,
-            passthrough=True
+            passthrough=False
         )
 
     def train(self, X: np.ndarray, y: np.ndarray):
@@ -64,7 +64,8 @@ class StackingEnsembleModel(BaseModel):
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """Predict probabilities for classes: [Home Win, Draw, Away Win]."""
         if not self.is_fitted:
-            return np.array([[0.38, 0.28, 0.34]])
+            X_2d = X.reshape(1, -1) if X.ndim == 1 else X
+            return np.tile([0.38, 0.28, 0.34], (len(X_2d), 1))
         X_2d = X.reshape(1, -1) if X.ndim == 1 else X
         return self.clf.predict_proba(X_2d)
 

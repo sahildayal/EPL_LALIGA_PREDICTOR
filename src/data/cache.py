@@ -37,11 +37,12 @@ def _conn():
         """)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS team_travel (
-                team TEXT PRIMARY KEY,
+                team TEXT NOT NULL,
                 city TEXT NOT NULL,
                 date TEXT NOT NULL,
                 latitude REAL NOT NULL,
-                longitude REAL NOT NULL
+                longitude REAL NOT NULL,
+                PRIMARY KEY (team, date)
             )
         """)
         conn.commit()
@@ -175,12 +176,14 @@ def save_team_travel(team: str, city: str, date: str, lat: float, lon: float):
         conn.close()
 
 
-def get_team_last_travel(team: str) -> dict:
+def get_team_last_travel(team: str, before_date: str) -> dict:
     conn = _conn()
     try:
         cursor = conn.execute("""
-            SELECT city, date, latitude, longitude FROM team_travel WHERE team = ?
-        """, (team.lower().strip(),))
+            SELECT city, date, latitude, longitude FROM team_travel 
+            WHERE team = ? AND date < ? 
+            ORDER BY date DESC LIMIT 1
+        """, (team.lower().strip(), before_date))
         row = cursor.fetchone()
         if row:
             return {"city": row[0], "date": row[1], "lat": row[2], "lon": row[3]}

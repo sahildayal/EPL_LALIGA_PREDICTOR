@@ -54,6 +54,7 @@ def calculate_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) ->
     d_lat = math.radians(lat2 - lat1)
     d_lon = math.radians(lon2 - lon1)
     a = math.sin(d_lat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2)**2
+    a = np.clip(a, 0.0, 1.0)
     c = 2 * math.asin(math.sqrt(a))
     return R * c
 
@@ -72,7 +73,11 @@ def calculate_team_fatigue_travel(team: str, current_date_str: str, current_coor
     """
     Returns (rest_days, travel_dist_km, extreme_fatigue_flag).
     """
-    last_travel = get_team_last_travel(team)
+    try:
+        last_travel = get_team_last_travel(team, current_date_str)
+    except Exception:
+        last_travel = None
+
     if not last_travel:
         # Default: fully rested (7 days), no travel
         return 7.0, 0.0, 0.0
@@ -91,10 +96,13 @@ def calculate_team_fatigue_travel(team: str, current_date_str: str, current_coor
 
     # Calculate travel distance
     travel_dist = 0.0
-    if current_coords:
-        lat1, lon1 = last_travel["lat"], last_travel["lon"]
-        lat2, lon2 = current_coords
-        travel_dist = calculate_distance_km(lat1, lon1, lat2, lon2)
+    try:
+        if current_coords:
+            lat1, lon1 = last_travel["lat"], last_travel["lon"]
+            lat2, lon2 = current_coords
+            travel_dist = calculate_distance_km(lat1, lon1, lat2, lon2)
+    except Exception:
+        travel_dist = 0.0
 
     extreme_fatigue = 1.0 if rest_days <= 3.0 else 0.0
     return rest_days, travel_dist, extreme_fatigue

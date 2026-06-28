@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 import math
+import warnings
 
 class DixonColesRegressor:
     def __init__(self, xi=0.0019):
@@ -47,18 +48,16 @@ class DixonColesRegressor:
             
             weight = np.exp(-self.xi * t)
             
-            poisson_h = (np.power(lam, x) * np.exp(-lam)) / math.factorial(x)
-            poisson_a = (np.power(mu, y) * np.exp(-mu)) / math.factorial(y)
+            lam_clipped = np.clip(lam, 1e-10, None)
+            mu_clipped = np.clip(mu, 1e-10, None)
+            log_poisson_h = x * np.log(lam_clipped) - lam - math.log(math.factorial(x))
+            log_poisson_a = y * np.log(mu_clipped) - mu - math.log(math.factorial(y))
             tau_val = self._tau(x, y, lam, mu, rho)
             
             if tau_val <= 0:
                 tau_val = 1e-10
-            if poisson_h <= 0:
-                poisson_h = 1e-10
-            if poisson_a <= 0:
-                poisson_a = 1e-10
                 
-            nll += weight * (np.log(tau_val) + np.log(poisson_h) + np.log(poisson_a))
+            nll += weight * (np.log(tau_val) + log_poisson_h + log_poisson_a)
             
         return -nll
 
@@ -109,6 +108,7 @@ class DixonColesRegressor:
             self.params['gamma'] = fitted[2*n_teams-1]
             self.params['rho'] = fitted[2*n_teams]
         else:
+            warnings.warn("Optimization failed to converge; using fallback parameters.")
             # Fallback params
             self.params['alphas'] = np.zeros(n_teams)
             self.params['betas'] = np.full(n_teams, -0.1)
