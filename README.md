@@ -119,7 +119,7 @@ python main.py init
 ```
 
 ### 2. `update` - Scoreboard Auto-Sync & Retraining
-Fetches completed World Cup matches from ESPN. It updates ELOs, resolves active paper trades across all four portfolios, appends new rows to the training set, and retrains all models.
+Fetches completed World Cup matches from ESPN. It updates ELOs, resolves active paper trades across all portfolios, appends new rows to the training set, and retrains all models.
 ```bash
 python main.py update
 ```
@@ -197,6 +197,27 @@ For every player in the starting lineups:
 ### 5. Automated Completed Match Props Settlement
 - **Match Ingestion**: During `complete` or `update` commands, the resolver queries the completed match summary page on ESPN.
 - **Boxscore Rosters**: Extracts the actual goals and assists stats for each player in that specific match to settle player prop bets (WIN/LOSS) and update bot bankrolls accordingly.
+
+---
+
+## 📈 Real-Time Tournament Self-Learning
+
+The system dynamically adapts to the progression of the tournament and continuously updates its parameters as games are played.
+
+### 1. Dynamic Tournament Stage Detection
+- **Date-Based Progression**: The engine automatically detects the tournament phase. Starting June 28, 2026, the stage changes to **Knockout Stage (Single Elimination)**.
+- **Debate Prompt Context**: Informs the scout and quant AI personalities (**Big D** and **SIGMABALLS**) during LLM debates that matches are in single elimination, but explicitly highlights that Kalshi moneyline markets still resolve based on the scoreline at the end of regulation (90 mins + injury time).
+
+### 2. Rolling Team Averages from Completed Matches
+- **Decoupled from Static Priors**: Rather than relying on pre-tournament static team stats, the Dixon-Coles goal expectation parameters (`avg_goals`, `avg_conceded`) and form indexes are computed dynamically from `master_dataset.csv`.
+- **Tournament Form**: The scraper uses the last 10 games involving the team to update their offensive and defensive baselines, ensuring the model ensemble adapts to their current tournament form.
+
+### 3. Decaying/Boosting Player Form Updates
+- **Feedback Loop**: When a completed match is resolved (`complete` or `update`), the starting players' statistics are updated in the SQLite `player_statistics` table.
+- **Rolling Math**: Adjusts player expectations (Goals, Assists, xG) using a rolling average formula:
+  $$\text{New Stat} = \frac{\text{Old Stat} \times 10 + \text{Match Performance}}{11}$$
+  - **Boost**: Players who score or assist receive an expectation boost.
+  - **Decay**: Players who do not score or assist have their expectations decay naturally.
 
 ---
 
