@@ -35,6 +35,15 @@ def _conn():
                 last_updated REAL NOT NULL
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS team_travel (
+                team TEXT PRIMARY KEY,
+                city TEXT NOT NULL,
+                date TEXT NOT NULL,
+                latitude REAL NOT NULL,
+                longitude REAL NOT NULL
+            )
+        """)
         conn.commit()
         _db_initialized = True
     return conn
@@ -152,3 +161,29 @@ def get_player_stats_cache(player_name: str) -> dict | None:
     except Exception as e:
         print(f"Cache database error: {e}", file=sys.stderr)
     return None
+
+
+def save_team_travel(team: str, city: str, date: str, lat: float, lon: float):
+    conn = _conn()
+    try:
+        conn.execute("""
+            INSERT OR REPLACE INTO team_travel (team, city, date, latitude, longitude)
+            VALUES (?, ?, ?, ?, ?)
+        """, (team.lower().strip(), city.lower().strip(), date, lat, lon))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_team_last_travel(team: str) -> dict:
+    conn = _conn()
+    try:
+        cursor = conn.execute("""
+            SELECT city, date, latitude, longitude FROM team_travel WHERE team = ?
+        """, (team.lower().strip(),))
+        row = cursor.fetchone()
+        if row:
+            return {"city": row[0], "date": row[1], "lat": row[2], "lon": row[3]}
+        return None
+    finally:
+        conn.close()
