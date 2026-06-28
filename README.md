@@ -200,6 +200,35 @@ For every player in the starting lineups:
 
 ---
 
+## 🧠 Advanced Model & Algorithm Refinements
+
+To maximize forecasting accuracy, the orchestrator incorporates advanced statistical and machine learning modeling techniques:
+
+### 1. Time-Decayed Dixon-Coles Regressor
+- **Dynamic Weighting**: Incorporates an exponential time-decay parameter ($\xi = 0.0019$, equivalent to a half-life of ~365 days) that discounts older matches relative to the match forecast date:
+  $$\phi(t) = \exp(-\xi t)$$
+- **Numerical Stability**: Re-formulates maximum likelihood estimation directly in log-probability space, utilizing `np.clip` on scoring intensities to completely prevent numeric overflow or underflow under SciPy optimization.
+- **Robust Fallbacks**: Automatically falls back to safe prior parameters if a team has insufficient history or if the optimizer fails to converge.
+
+### 2. Advanced Elo Rating System
+- **Stage-Dependent K-factors**: Scales match importance based on the official FIFA/eloratings.net weights (e.g., friendly matches = 20 weight, World Cup qualifiers = 40 weight, World Cup knockout matches = 60 weight).
+- **Margin of Victory Multiplier**: Updates ratings using a goal-difference scaling factor:
+  $$R_{\text{new}} = R_{\text{old}} + K \times M(N) \times (W - W_e)$$
+  where $M(N) = 1.75 + \frac{N-3}{8}$ for absolute goal differences $N \ge 4$.
+- **Regional Home Advantage**: Dynamically applies a +100 ELO home advantage boost for non-neutral fixtures, defaulting to 0 for neutral tournament grounds.
+
+### 3. Rest Days, Fatigue Index, and Travel Distance Preprocessing
+- **Haversine Distance**: Calculates exact travel distances in kilometers between match venues using the Haversine formula, clipping values to avoid math domain exceptions.
+- **Fatigue Tracking**: Computes rest days ($\Delta t_{\text{rest}}$) between consecutive fixtures and marks an **Extreme Fatigue** indicator if a team recovery window is $\le 3$ days.
+- **SQLite Travel Log**: Persists coordinates and travel histories using a composite key `PRIMARY KEY (team, date)` to query travel states chronologically.
+
+### 4. Two-Stage Stacking Classifier Ensemble
+- **Stage 1 Base Learners**: Combines predictions from an XGBoost classifier, a LightGBM classifier, and a Multi-Layer Perceptron (MLP) Neural Network.
+- **Stage 2 Meta-Learner**: Fits a Ridge Logistic Regression classifier using standard scaling on the concatenated out-of-fold predicted probabilities, preventing data leakage and stabilizing outputs.
+- **Fallback predictions**: Safely yields dynamically-tiled uniform probability distributions if the stacking classifier is not yet trained.
+
+---
+
 ## 📈 Real-Time Tournament Self-Learning
 
 The system dynamically adapts to the progression of the tournament and continuously updates its parameters as games are played.
