@@ -1,0 +1,156 @@
+# Review package: 1d1b852..20f9864
+
+## Commits
+20f9864 feat: add SQLite player statistics table and CRUD cache methods
+
+## Files changed
+ scratch/test_db_cache.py | 42 +++++++++++++++++++++++++++++++++
+ src/data/cache.py        | 61 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 103 insertions(+)
+
+## Diff
+diff --git a/scratch/test_db_cache.py b/scratch/test_db_cache.py
+new file mode 100644
+index 0000000..950039f
+--- /dev/null
++++ b/scratch/test_db_cache.py
+@@ -0,0 +1,42 @@
++import sys
++sys.path.append(r"C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor")
++import unittest
++import time
++from src.data.cache import save_player_stats, get_player_stats_cache
++
++class TestDbCache(unittest.TestCase):
++    def test_save_and_retrieve_stats(self):
++        save_player_stats("Joao Neves", "CM", 0.12, 0.10, 0.22, "PSG", "Portugal")
++        stats = get_player_stats_cache("Joao Neves")
++        self.assertIsNotNone(stats)
++        self.assertEqual(stats["position"], "CM")
++        self.assertEqual(stats["goals_per_90"], 0.10)
++        self.assertEqual(stats["assists_per_90"], 0.22)
++        self.assertEqual(stats["club_team"], "psg")
++        self.assertEqual(stats["intl_team"], "portugal")
++        
++    def test_missing_stats(self):
++        self.assertIsNone(get_player_stats_cache("Non Existent Player"))
++
++    def test_expiration(self):
++        # Save a player
++        save_player_stats("Expired Player", "ST", 0.5, 0.4, 0.1, "FCB", "France")
++        # Verify it exists
++        self.assertIsNotNone(get_player_stats_cache("Expired Player"))
++        
++        # Manually update last_updated in the database to be older than 7 days
++        import sqlite3
++        from src.data.cache import DB_PATH
++        conn = sqlite3.connect(DB_PATH)
++        with conn:
++            conn.execute(
++                "UPDATE player_statistics SET last_updated = ? WHERE player_name = ?",
++                (time.time() - 604800 - 10, "expired player")
++            )
++        conn.close()
++        
++        # Verify that it is now considered expired and returns None
++        self.assertIsNone(get_player_stats_cache("Expired Player"))
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/src/data/cache.py b/src/data/cache.py
+index 25882c4..e2c90fb 100644
+--- a/src/data/cache.py
++++ b/src/data/cache.py
+@@ -10,20 +10,32 @@ DB_PATH = Path(__file__).parent.parent.parent / "data" / "cache" / "worldcup.db"
+ def _conn():
+     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+     conn = sqlite3.connect(DB_PATH)
+     conn.execute("""
+         CREATE TABLE IF NOT EXISTS cache (
+             key TEXT PRIMARY KEY,
+             value TEXT NOT NULL,
+             expires_at REAL NOT NULL
+         )
+     """)
++    conn.execute("""
++        CREATE TABLE IF NOT EXISTS player_statistics (
++            player_name TEXT PRIMARY KEY,
++            position TEXT NOT NULL,
++            xg_per_90 REAL NOT NULL,
++            goals_per_90 REAL NOT NULL,
++            assists_per_90 REAL NOT NULL,
++            club_team TEXT,
++            intl_team TEXT,
++            last_updated REAL NOT NULL
++        )
++    """)
+     conn.commit()
+     return conn
+ 
+ 
+ def _key(namespace: str, params: dict) -> str:
+     raw = namespace + json.dumps(params, sort_keys=True)
+     return hashlib.sha256(raw.encode()).hexdigest()
+ 
+ 
+ def get(namespace: str, params: dict):
+@@ -76,10 +88,59 @@ def invalidate(namespace: str, params: dict):
+ def purge_expired():
+     try:
+         conn = _conn()
+         try:
+             with conn:
+                 conn.execute("DELETE FROM cache WHERE expires_at <= ?", (time.time(),))
+         finally:
+             conn.close()
+     except Exception:
+         pass
++
++
++def save_player_stats(player_name: str, position: str, xg_per_90: float, goals_per_90: float, assists_per_90: float, club_team: str, intl_team: str):
++    name_lower = player_name.lower().strip()
++    try:
++        conn = _conn()
++        try:
++            with conn:
++                conn.execute("""
++                    INSERT OR REPLACE INTO player_statistics 
++                    (player_name, position, xg_per_90, goals_per_90, assists_per_90, club_team, intl_team, last_updated)
++                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
++                """, (name_lower, position, xg_per_90, goals_per_90, assists_per_90, 
++                      club_team.lower().strip() if club_team else "", 
++                      intl_team.lower().strip() if intl_team else "", 
++                      time.time()))
++        finally:
++            conn.close()
++    except Exception:
++        pass
++
++
++def get_player_stats_cache(player_name: str) -> dict | None:
++    name_lower = player_name.lower().strip()
++    try:
++        conn = _conn()
++        try:
++            with conn:
++                row = conn.execute("""
++                    SELECT position, xg_per_90, goals_per_90, assists_per_90, club_team, intl_team, last_updated
++                    FROM player_statistics WHERE player_name = ?
++                """, (name_lower,)).fetchone()
++            if row:
++                # Check TTL of 7 days (604800 seconds)
++                if time.time() - row[6] < 604800:
++                    return {
++                        "name": name_lower,
++                        "position": row[0],
++                        "xg_per_90": row[1],
++                        "goals_per_90": row[2],
++                        "assists_per_90": row[3],
++                        "club_team": row[4],
++                        "intl_team": row[5]
++                    }
++        finally:
++            conn.close()
++    except Exception:
++        pass
++    return None

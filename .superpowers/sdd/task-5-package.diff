@@ -1,0 +1,282 @@
+# Review package: 7282870..3a0fd1c
+
+## Commits
+3a0fd1c feat: integrate dynamic lineup fetching and player goals/assists/GA props in CLI table
+
+## Files changed
+ main.py                      | 121 +++++++++++++++++++++++++------------------
+ scratch/test_market_match.py |  13 +++++
+ src/data/team_mapping.py     |   7 +++
+ src/market/kalshi_client.py  |   2 +-
+ 4 files changed, 92 insertions(+), 51 deletions(-)
+
+## Diff
+diff --git a/main.py b/main.py
+index eda1f57..1d2a398 100644
+--- a/main.py
++++ b/main.py
+@@ -1,20 +1,22 @@
+ #!/usr/bin/env python3
+ import sys
+ import argparse
+ from src.models import trainer, statistical
+ from src.predictor import predict_match, ELO_PREDICTOR, math_log, save_elo
+ from src.market.kalshi_client import KalshiClient
+ from src.parlay.parlay_engine import ParlayEngine
+ from src.data.scrapers import fbref, player_stats, news, fixtures
+ from src.market.llm import generate_debate, GEMINI_AVAILABLE
+ from src.data.team_mapping import normalize_team_name, is_team_match
++from src.data.scrapers.fixtures import get_match_lineups
++from src.models.player_props import calculate_player_prop_probs
+ import os
+ import requests
+ from rich.console import Console
+ from rich.panel import Panel
+ from rich.table import Table
+ from rich import box
+ 
+ console = Console()
+ 
+ 
+@@ -109,51 +111,43 @@ def run_predict(query: str):
+     dc.defense[away] = -math_log(a_data.get("avg_conceded", 1.1))
+     dc.is_fitted = True
+     
+     matrix = dc.predict_score_matrix(home, away, max_goals=6)
+     
+     # Calculate probabilities
+     over_15_prob = float(sum([matrix[h, a] for h in range(7) for a in range(7) if h + a >= 2]))
+     over_25_prob = float(sum([matrix[h, a] for h in range(7) for a in range(7) if h + a >= 3]))
+     btts_prob = float(sum([matrix[h, a] for h in range(7) for a in range(7) if h >= 1 and a >= 1]))
+ 
+-    # Key Player Scoring Props lookup
+-    KEY_PLAYERS = {
+-        "england": ["harry kane", "jude bellingham", "bukayo saka"],
+-        "france": ["kylian mbappe", "antoine griezmann"],
+-        "argentina": ["lionel messi", "lautaro martinez"],
+-        "brazil": ["vinicius jr"],
+-        "portugal": ["cristiano ronaldo"],
+-        "poland": ["robert lewandowski"],
+-        "germany": ["jamal musiala", "florian wirtz"],
+-        "spain": ["alvaro morata"],
+-        "ghana": ["antoine semenyo", "mohammed kudus"],
+-    }
+-    
+-    players = []
+     h_avg = float(h_data.get("avg_goals", 1.4))
+     a_avg = float(a_data.get("avg_goals", 1.4))
+     
+-    for team, p_names in KEY_PLAYERS.items():
+-        if team in (home, away):
+-            is_home = (team == home)
+-            for name in p_names:
+-                p_stats = player_stats.get_player_stats(name)
+-                share = p_stats.get("goals_per_90", 0.25) / (h_avg if is_home else a_avg)
+-                
+-                # P(Player scores)
+-                p_prob = 0.0
+-                for h in range(7):
+-                    for a in range(7):
+-                        g = h if is_home else a
+-                        p_prob += matrix[h, a] * (1.0 - (1.0 - share) ** g)
+-                players.append((name, p_prob, is_home))
++    # Retrieve dynamic starting lineups from ESPN
++    lineups_res = get_match_lineups(home, away)
++    home_lineup = lineups_res.get("home_lineup", [])
++    away_lineup = lineups_res.get("away_lineup", [])
++    
++    console.print(f"[dim]Lineups sourced via: {lineups_res['source']}[/dim]")
++    
++    # Build predictions for all players in both lineups
++    player_prop_predictions = []
++    for is_home, lineup, team_avg in [(True, home_lineup, h_avg), (False, away_lineup, a_avg)]:
++        for name in lineup:
++            p_stats = player_stats.get_player_stats(name)
++            p_probs = calculate_player_prop_probs(p_stats, is_home, matrix, team_avg)
++            
++            # Map to prop formats
++            player_prop_predictions.append({
++                "name": name,
++                "is_home": is_home,
++                "probs": p_probs
++            })
+ 
+     # Kalshi Betting Value Analysis Table
+     bets_table = Table(title="Kalshi Value Bets & Target Prices", box=box.SIMPLE)
+     bets_table.add_column("Category", style="cyan")
+     bets_table.add_column("Bet / Market", style="white")
+     bets_table.add_column("Model Prob", style="bold green")
+     bets_table.add_column("Kalshi Price", style="yellow")
+     bets_table.add_column("Edge / Recommendation", style="bold magenta")
+     
+     # Add Moneylines
+@@ -191,42 +185,69 @@ def run_predict(query: str):
+                             live_p = m["yes_price"]
+         
+         if live_p:
+             live_game_lines[outcome] = live_p
+             edge = prob - live_p
+             edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
+             bets_table.add_row("Game Lines", label, f"{prob*100:.1f}%", f"${live_p:.2f}", edge_str)
+         else:
+             bets_table.add_row("Game Lines", label, f"{prob*100:.1f}%", "N/A", f"Buy YES < ${prob:.2f}")
+ 
+-    # Add Player Props
+-    for name, p_prob, is_home in players:
+-        live_p = None
+-        for ev in markets:
+-            title = ev["event_title"].lower()
+-            if " vs " in title:
+-                t_parts = title.split(" vs ")
+-                t_home = normalize_team_name(t_parts[0])
+-                t_away = normalize_team_name(t_parts[1])
+-                if (home == t_home and away == t_away) or (home == t_away and away == t_home):
+-                    for m in ev["markets"]:
+-                        t = m["title"].lower()
+-                        if name in t and ("score" in t or "goal" in t):
+-                            live_p = m["yes_price"]
+-                        
+-        label = f"{name.title()} to Score"
+-        if live_p:
+-            edge = p_prob - live_p
+-            edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
+-            bets_table.add_row("Player Props", label, f"{p_prob*100:.1f}%", f"${live_p:.2f}", edge_str)
+-        else:
+-            bets_table.add_row("Player Props", label, f"{p_prob*100:.1f}%", "N/A", f"Buy YES < ${p_prob:.2f}")
++    # Add Player Props to the Kalshi Value Bets Table
++    for pred in player_prop_predictions:
++        name = pred["name"]
++        is_home = pred["is_home"]
++        p_probs = pred["probs"]
++        
++        # Match markets in Kalshi
++        for outcome_key, label_suffix, prob_val in [
++            ("goals_1", "1+ Goals", p_probs["goals_1"]),
++            ("goals_2", "2+ Goals", p_probs["goals_2"]),
++            ("assists_1", "1+ Assists", p_probs["assists_1"]),
++            ("assists_2", "2+ Assists", p_probs["assists_2"]),
++            ("goal_or_assist", "Score or Assist", p_probs["goal_or_assist"])
++        ]:
++            live_p = None
++            for ev in markets:
++                title = ev["event_title"].lower()
++                if " vs " in title:
++                    t_parts = title.split(" vs ")
++                    t_home = normalize_team_name(t_parts[0])
++                    t_away = normalize_team_name(t_parts[1])
++                    if (home == t_home and away == t_away) or (home == t_away and away == t_home):
++                        for m in ev["markets"]:
++                            t = m["title"].lower()
++                            
++                            # Check exact category and player name matches
++                            if name in t:
++                                if "goal" in label_suffix and "goal" in t:
++                                    if "1+" in label_suffix and "1+" in t:
++                                        live_p = m["yes_price"]
++                                    elif "2+" in label_suffix and "2+" in t:
++                                        live_p = m["yes_price"]
++                                elif "assist" in label_suffix and "assist" in t:
++                                    if "1+" in label_suffix and "1+" in t:
++                                        live_p = m["yes_price"]
++                                    elif "2+" in label_suffix and "2+" in t:
++                                        live_p = m["yes_price"]
++                                elif "score or assist" in label_suffix and "score or assist" in t:
++                                    live_p = m["yes_price"]
++            
++            category_str = "Player Goals" if "Goals" in label_suffix else ("Player Assists" if "Assists" in label_suffix else "Player G/A")
++            market_label = f"{name.title()} {label_suffix}"
++            
++            if live_p:
++                edge = prob_val - live_p
++                edge_str = f"+{edge*100:.1f}% [STRONG VALUE]" if edge > 0.05 else (f"+{edge*100:.1f}% [VALUE]" if edge > 0 else f"{edge*100:.1f}%")
++                bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", f"${live_p:.2f}", edge_str)
++            else:
++                bets_table.add_row(category_str, market_label, f"{prob_val*100:.1f}%", "N/A", f"Buy YES < ${prob_val:.2f}")
+ 
+     console.print()
+     console.print(bets_table)
+ 
+     # Automated Bot Betting for 'predict' portfolio
+     from src.market import paper_trading
+     d_sum = paper_trading.get_personality_summary("predict", "big_d")
+     s_sum = paper_trading.get_personality_summary("predict", "sigmaballs")
+     
+     big_d_bet_type = None
+diff --git a/scratch/test_market_match.py b/scratch/test_market_match.py
+new file mode 100644
+index 0000000..fc53cbe
+--- /dev/null
++++ b/scratch/test_market_match.py
+@@ -0,0 +1,13 @@
++import sys
++sys.path.append(r"C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor")
++import unittest
++from src.data.team_mapping import is_team_match
++
++class TestMarketMatch(unittest.TestCase):
++    def test_market_title_checks(self):
++        self.assertTrue(is_team_match("Joao Neves", "Joao Neves: 1+ assists?"))
++        self.assertTrue(is_team_match("Joao Neves", "Joao Neves: score or assist?"))
++        self.assertTrue(is_team_match("Joao Neves", "Joao Neves: 2+ goals"))
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/src/data/team_mapping.py b/src/data/team_mapping.py
+index a396c8b..30a5f4e 100644
+--- a/src/data/team_mapping.py
++++ b/src/data/team_mapping.py
+@@ -194,20 +194,27 @@ def is_team_match(team: str, text: str) -> bool:
+     """Robustly checks if a team name is referenced in a market title/text."""
+     t_norm = normalize_team_name(team)
+     txt_norm = normalize_team_name(text)
+     
+     if not t_norm or not txt_norm:
+         return False
+         
+     if t_norm == txt_norm:
+         return True
+         
++    # If the team name is not a known country/team alias, perform fallback word-boundary match
++    if t_norm not in ALL_ALIASES_MAP:
++        pattern = re.compile(r'(?<!\w)' + re.escape(t_norm) + r'(?!\w)')
++        if pattern.search(txt_norm):
++            return True
++        return False
++        
+     # Find all non-overlapping matches in txt_norm using precompiled patterns
+     matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
+     
+     for alias in ALIASES_SORTED:
+         canonical = ALL_ALIASES_MAP[alias]
+         pattern = ALIASES_PATTERNS[alias]
+         for match in pattern.finditer(txt_norm):
+             start, end = match.start(), match.end()
+             # Check for overlap with any existing matched intervals
+             overlap = False
+diff --git a/src/market/kalshi_client.py b/src/market/kalshi_client.py
+index ef6c36b..3af250e 100644
+--- a/src/market/kalshi_client.py
++++ b/src/market/kalshi_client.py
+@@ -179,21 +179,21 @@ class KalshiClient:
+                 print(f"Kalshi request failed (Status: {resp.status_code}): {resp.text}")
+         except Exception as e:
+             print(f"Kalshi request error: {e}")
+         return []
+ 
+     def get_soccer_markets(self) -> list:
+         """
+         Fetches open soccer markets (using public API, doesn't require signature).
+         Queries trade-api/v2/markets directly for sports tickers to bypass event exclusions.
+         """
+-        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL"]
++        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL", "KXWCAST", "KXWCSOA"]
+         raw_markets = []
+         for ticker in series_tickers:
+             url = f"{KALSHI_BASE_URL}/trade-api/v2/markets"
+             params = {"series_ticker": ticker, "status": "open", "limit": 100}
+             try:
+                 resp = requests.get(url, params=params, headers={"Accept": "application/json"}, timeout=10)
+                 if resp.status_code == 200:
+                     markets = resp.json().get("markets", [])
+                     raw_markets.extend(markets)
+             except Exception as e:

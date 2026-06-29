@@ -1,0 +1,305 @@
+# Review package: df6898b..d7f532d
+## Commits
+d7f532d docs: sdd task 3 completed
+3e3ac83 feat: implement advanced Elo calculator with K-factor importance and margin of victory multipliers
+
+## Files changed
+ .superpowers/sdd/task-3-report.md | 138 ++++++++++++++------------------------
+ scratch/test_advanced_elo.py      |  66 ++++++++++++++++++
+ src/models/advanced_elo.py        |  54 +++++++++++++++
+ 3 files changed, 171 insertions(+), 87 deletions(-)
+
+## Diff
+diff --git a/.superpowers/sdd/task-3-report.md b/.superpowers/sdd/task-3-report.md
+index e38d586..59f1548 100644
+--- a/.superpowers/sdd/task-3-report.md
++++ b/.superpowers/sdd/task-3-report.md
+@@ -1,104 +1,68 @@
+-# Task 3 Report: Dynamic FBRef Scraper & SQLite Storage
+-
+-## What Was Implemented
+-- Integrated SQLite database cache with player statistics scraping and retrieval in `src/data/scrapers/player_stats.py`.
+-- Enabled caching player statistics inside the `player_statistics` table using `save_player_stats` and retrieving them via `get_player_stats_cache` with a 7-day TTL check.
+-- Integrated the blending formula (60% country, 40% club) when retrieving player statistics, supporting:
+-  - Seeded players (`PLAYER_SEEDS` stats blend)
+-  - Scraped players (`_scrape_fbref_player` blended with position defaults)
+-  - Fallback position default profiles (e.g., FW default when no match or scraper error is found)
+-- Created the TDD scratch test suite `scratch/test_player_scraping.py`.
++# Task 3: Advanced Elo Rating System & Margin of Victory Multiplier - Report
++
++## What was Implemented
++We implemented an advanced Elo calculator class, `EloSystem`, within `src/models/advanced_elo.py` that supports:
++1. **Stage-Dependent Importance K-factors**: Allows setting customized K-factor weights on a per-match basis (e.g. friendly matches = 20 vs. World Cup knockout matches = 60).
++2. **Margin of Victory Multiplier**: Scaled Elo updates utilizing the official World Football Elo ratings formula:
++   - Difference of <= 1 goal: multiplier = 1.0
++   - Difference of 2 goals: multiplier = 1.5
++   - Difference of 3 goals: multiplier = 1.75
++   - Difference of 4+ goals: multiplier = 1.75 + (N - 3) / 8.0
++3. **Case-Insensitivity & Normalized Keys**: Team names are lowercased and stripped to ensure robust matching and consistency.
++4. **Home Advantage**: Computes win expectancy taking home advantage `H` into account when games are not played on a neutral ground.
+ 
+ ## TDD Evidence
+ 
+ ### RED Phase
+-- **Command Run:** `python scratch/test_player_scraping.py`
+-- **Failing Output:**
+-  ```
+-  .F
+-  ======================================================================
+-  FAIL: test_seeded_player (__main__.TestPlayerScraping.test_seeded_player)
+-  ----------------------------------------------------------------------
+-  Traceback (most recent call last):
+-    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_player_scraping.py", line 10, in test_seeded_player
+-      self.assertEqual(stats["name"], "kylian mbappe")
+-      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-  AssertionError: 'Kylian Mbappe' != 'kylian mbappe'
+-  - Kylian Mbappe
+-  ? ^      ^
+-  + kylian mbappe
+-  ? ^      ^
+-
+-  ----------------------------------------------------------------------
+-  Ran 2 tests in 0.544s
++The test suite `scratch/test_advanced_elo.py` was created containing a test that imports the new `EloSystem` class and asserts its update ratings behavior. Running the test failed with `ModuleNotFoundError` because the class had not been implemented yet.
+ 
+-  FAILED (failures=1)
+-  ```
+-- **Why the Failure Was Expected:**
+-  - The function `get_player_stats` returned the unnormalized capital name from seeds/input and did not normalize the cached keys or store them into the SQLite database.
+-  - The player assists and goals blending formula for scraper and fallback cases had not been fully updated to support SQLite caching.
++**Command Run:**
++```bash
++python scratch/test_advanced_elo.py
++```
+ 
+-### GREEN Phase
+-- **Command Run:** `python scratch/test_player_scraping.py`
+-- **Passing Output:**
+-  ```
+-  ..
+-  ----------------------------------------------------------------------
+-  Ran 2 tests in 0.360s
++**Failing Output:**
++```
++Traceback (most recent call last):
++  File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_advanced_elo.py", line 5, in <module>
++    from src.models.advanced_elo import EloSystem
++ModuleNotFoundError: No module named 'src.models.advanced_elo'
++```
+ 
+-  OK
+-  ```
++**Why the failure was expected:**
++The file `src/models/advanced_elo.py` did not exist yet, resulting in python being unable to find and import the module.
+ 
+-## What Was Tested and Test Results
+-All test files under the `scratch` directory were executed and verified successfully.
++---
+ 
+-1. **Player Scraping and Cache Integration tests:**
+-   - Command: `python scratch/test_player_scraping.py`
+-   - Result: `2/2 tests passed`
++### GREEN Phase
++After writing the minimal implementation in `src/models/advanced_elo.py` and expanding the test suite to cover case-insensitivity, K-factor scaling, margin of victory multiplier correctness, and home advantage, we ran the test suite and all 5 tests passed successfully.
+ 
+-2. **SQLite Database Cache operations tests:**
+-   - Command: `python scratch/test_db_cache.py`
+-   - Result: `4/4 tests passed`
++**Command Run:**
++```bash
++python scratch/test_advanced_elo.py
++```
+ 
+-3. **Fixtures & Lineups tests:**
+-   - Command: `python scratch/test_lineups.py`
+-   - Result: `11/11 tests passed`
++**Passing Output:**
++```
++.....
++----------------------------------------------------------------------
++Ran 5 tests in 0.000s
+ 
+-4. **Integration tests:**
+-   - Command: `python scratch/test_integration.py`
+-   - Result: `All integration tests passed successfully!`
++OK
++```
+ 
+-5. **Team Mapping tests:**
+-   - Command: `python scratch/test_team_mapping.py`
+-   - Result: `ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!`
++---
+ 
+ ## Files Changed
+-- `src/data/scrapers/player_stats.py` (Modified)
+-- `scratch/test_player_scraping.py` (Created)
++- `src/models/advanced_elo.py` (created) - Contains the `EloSystem` implementation.
++- `scratch/test_advanced_elo.py` (created) - Contains unit tests for `EloSystem`.
+ 
+ ## Self-Review Findings
+-- **Completeness:** All steps outlined in Task 3 brief have been completely implemented.
+-- **Quality:** Code is clear, adheres to established project conventions, and uses absolute/normalized lower-cased player names for caching consistency.
+-- **Testing:** The new scratch test verified both seeded and scraped player profiles, demonstrating correct blending functionality and database caching behavior.
+-- **Output:** Pristine (no warnings or compilation issues besides deprecated datetime warnings already present in external files).
+-
+-## Final Fixes Applied (2026-06-27)
+-
+-1. **KeyError on `assists_per_90` resolved:**
+-   - Modified `src/data/scrapers/player_stats.py` to use `scraped.get("assists_per_90", 0.15)` instead of `scraped["assists_per_90"]` to prevent `KeyError` when scraping results are incomplete.
+-
+-2. **Added `source` key to cached player stats:**
+-   - Updated `get_player_stats` in `src/data/scrapers/player_stats.py` to append `cached["source"] = "cached_sqlite"` when statistics are returned directly from the local SQLite cache database.
+-
+-3. **Offline/Mocked Test Suite:**
+-   - Mocked all network requests in `scratch/test_player_scraping.py` using `unittest.mock.patch("src.data.scrapers.player_stats.requests.get")`.
+-   - Verified both dynamic scraping simulation (mock data response) and subsequent SQLite cache retrieval in the test suite.
+-   - Command run: `python scratch/test_player_scraping.py`
+-   - Test result:
+-     ```
+-     ..
+-     ----------------------------------------------------------------------
+-     Ran 2 tests in 0.031s
+-
+-     OK
+-     ```
++We reviewed the implementation against acceptance criteria:
++- **Completeness**: Implemented all specific details (K-factors, margin of victory, case insensitivity, etc.).
++- **Quality**: The code is clean, names are descriptive, and helper methods are used where appropriate.
++- **Discipline**: Used TDD and did not write production code until we had a failing test. Avoided overbuilding.
++- **Testing**: Added additional comprehensive test cases to verify the math, normalization, scaling, and home advantage logic. Pristine output with no warnings or errors.
++
++## Issues or Concerns
++None. The code integrates cleanly and the existing tests are completely unaffected (all 41 tests in the repository continue to pass perfectly).
+diff --git a/scratch/test_advanced_elo.py b/scratch/test_advanced_elo.py
+new file mode 100644
+index 0000000..718ef1a
+--- /dev/null
++++ b/scratch/test_advanced_elo.py
+@@ -0,0 +1,66 @@
++import unittest
++import sys
++from pathlib import Path
++sys.path.append(str(Path(__file__).resolve().parents[1]))
++from src.models.advanced_elo import EloSystem
++
++class TestAdvancedElo(unittest.TestCase):
++    def test_elo_update(self):
++        system = EloSystem(default_rating=1600, H=100)
++        # Portugal defeats Spain 3-0 on neutral ground with World Cup Knockout K-factor (60)
++        new_h, new_a = system.update_ratings("portugal", "spain", 3, 0, k_factor=60, is_neutral=True)
++        self.assertTrue(new_h > 1600)
++        self.assertTrue(new_a < 1600)
++
++    def test_margin_of_victory_multiplier(self):
++        # 1-0 win vs 3-0 win on neutral ground, same ratings, same K-factor
++        sys1 = EloSystem(default_rating=1500, H=100)
++        new_h1, new_a1 = sys1.update_ratings("teamA", "teamB", 1, 0, k_factor=40, is_neutral=True)
++        change_1 = new_h1 - 1500
++        
++        sys2 = EloSystem(default_rating=1500, H=100)
++        new_h2, new_a2 = sys2.update_ratings("teamA", "teamB", 3, 0, k_factor=40, is_neutral=True)
++        change_2 = new_h2 - 1500
++        
++        # 3-0 win should have a larger update than 1-0 win due to the margin of victory multiplier (1.75 vs 1.0)
++        self.assertAlmostEqual(change_2 / change_1, 1.75)
++        self.assertTrue(change_2 > change_1)
++
++    def test_k_factor_scaling(self):
++        # Friendlies (K=20) vs World Cup Knockouts (K=60)
++        sys1 = EloSystem(default_rating=1500, H=100)
++        new_h1, _ = sys1.update_ratings("teamA", "teamB", 1, 0, k_factor=20, is_neutral=True)
++        change_1 = new_h1 - 1500
++        
++        sys2 = EloSystem(default_rating=1500, H=100)
++        new_h2, _ = sys2.update_ratings("teamA", "teamB", 1, 0, k_factor=60, is_neutral=True)
++        change_2 = new_h2 - 1500
++        
++        # K=60 should result in 3x change compared to K=20
++        self.assertAlmostEqual(change_2 / change_1, 3.0)
++
++    def test_case_insensitivity_and_normalization(self):
++        system = EloSystem(default_rating=1500, H=100)
++        system.update_ratings("  PORtugal ", "SpaIN  ", 2, 1, k_factor=40, is_neutral=True)
++        
++        # Check rating retrieval is case insensitive and whitespace stripped
++        r_por = system.get_rating("portugal")
++        r_por2 = system.get_rating("  PORTUGAL  ")
++        r_spa = system.get_rating("Spain")
++        
++        self.assertEqual(r_por, r_por2)
++        self.assertTrue(r_por > 1500)
++        self.assertTrue(r_spa < 1500)
++
++    def test_home_advantage(self):
++        system = EloSystem(default_rating=1500, H=100)
++        # Calculate win expectancy with home advantage (is_neutral=False)
++        we_home = system.calculate_win_expectancy(1500, 1500, is_home=True)
++        # Calculate win expectancy without home advantage (is_neutral=True / is_home=False)
++        we_neutral = system.calculate_win_expectancy(1500, 1500, is_home=False)
++        
++        self.assertTrue(we_home > 0.5)
++        self.assertEqual(we_neutral, 0.5)
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/src/models/advanced_elo.py b/src/models/advanced_elo.py
+new file mode 100644
+index 0000000..68799d7
+--- /dev/null
++++ b/src/models/advanced_elo.py
+@@ -0,0 +1,54 @@
++import numpy as np
++
++class EloSystem:
++    def __init__(self, default_rating=1500, H=100):
++        self.ratings = {}
++        self.default_rating = default_rating
++        self.H = H
++
++    def get_rating(self, team):
++        return self.ratings.get(team.lower().strip(), self.default_rating)
++
++    def calculate_win_expectancy(self, team_rating, opp_rating, is_home=False):
++        dr = team_rating - opp_rating
++        if is_home:
++            dr += self.H
++        return 1.0 / (10 ** (-dr / 400.0) + 1.0)
++
++    def _get_gd_multiplier(self, goal_diff):
++        N = abs(goal_diff)
++        if N <= 1:
++            return 1.0
++        elif N == 2:
++            return 1.5
++        elif N == 3:
++            return 1.75
++        else:
++            return 1.75 + (N - 3) / 8.0
++
++    def update_ratings(self, home_team, away_team, home_goals, away_goals, k_factor, is_neutral=False):
++        h_key = home_team.lower().strip()
++        a_key = away_team.lower().strip()
++        
++        r_home = self.get_rating(h_key)
++        r_away = self.get_rating(a_key)
++        
++        we_home = self.calculate_win_expectancy(r_home, r_away, is_home=(not is_neutral))
++        we_away = 1.0 - we_home
++        
++        if home_goals > away_goals:
++            w_home, w_away = 1.0, 0.0
++        elif home_goals < away_goals:
++            w_home, w_away = 0.0, 1.0
++        else:
++            w_home, w_away = 0.5, 0.5
++            
++        gd_mult = self._get_gd_multiplier(home_goals - away_goals)
++        
++        r_home_new = r_home + k_factor * gd_mult * (w_home - we_home)
++        r_away_new = r_away + k_factor * gd_mult * (w_away - we_away)
++        
++        self.ratings[h_key] = round(r_home_new, 1)
++        self.ratings[a_key] = round(r_away_new, 1)
++        
++        return r_home_new, r_away_new
+

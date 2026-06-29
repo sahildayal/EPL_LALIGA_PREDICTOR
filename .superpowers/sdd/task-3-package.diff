@@ -1,0 +1,159 @@
+# Review package: f0dbcae..96b84bf
+
+## Commits
+96b84bf feat: store blended player stats in SQLite cache with 7-day TTL
+
+## Files changed
+ scratch/test_player_scraping.py   | 22 ++++++++++++++++++
+ src/data/scrapers/player_stats.py | 48 +++++++++++++++++++++++----------------
+ 2 files changed, 50 insertions(+), 20 deletions(-)
+
+## Diff
+diff --git a/scratch/test_player_scraping.py b/scratch/test_player_scraping.py
+new file mode 100644
+index 0000000..c25e74b
+--- /dev/null
++++ b/scratch/test_player_scraping.py
+@@ -0,0 +1,22 @@
++import sys
++from pathlib import Path
++sys.path.append(str(Path(__file__).resolve().parents[1]))
++import unittest
++from src.data.scrapers.player_stats import get_player_stats
++
++class TestPlayerScraping(unittest.TestCase):
++    def test_seeded_player(self):
++        stats = get_player_stats("Kylian Mbappe")
++        self.assertEqual(stats["name"], "kylian mbappe")
++        self.assertEqual(stats["position"], "FW")
++        self.assertGreater(stats["goals_per_90"], 0.4)
++
++    def test_scrape_fallback(self):
++        # Test a non-seeded player to trigger scraping/defaults
++        stats = get_player_stats("Declan Rice")
++        self.assertIsNotNone(stats)
++        self.assertIn("goals_per_90", stats)
++        self.assertIn("assists_per_90", stats)
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/src/data/scrapers/player_stats.py b/src/data/scrapers/player_stats.py
+index 1a683d9..31e8e1a 100644
+--- a/src/data/scrapers/player_stats.py
++++ b/src/data/scrapers/player_stats.py
+@@ -1,14 +1,15 @@
+ import requests
+ import re
+ from bs4 import BeautifulSoup
+ from src.data import cache
++from src.data.cache import save_player_stats, get_player_stats_cache
+ 
+ HEADERS = {
+     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+ }
+ 
+ # Seeds containing player club form and national team coefficients
+ PLAYER_SEEDS = {
+     "erling haaland": {
+         "club_team": "manchester city", "intl_team": "norway",
+@@ -109,72 +110,79 @@ POSITION_DEFAULTS = {
+     "RW": {"xg": 0.28, "goals": 0.25, "assists": 0.25},
+     "AM": {"xg": 0.22, "goals": 0.18, "assists": 0.32},
+     "CM": {"xg": 0.12, "goals": 0.10, "assists": 0.22},
+     "DEF": {"xg": 0.04, "goals": 0.03, "assists": 0.06},
+ }
+ 
+ 
+ def get_player_stats(name: str) -> dict:
+     """
+     Get composite player stats. Blends 60% national team stats + 40% club stats.
++    Caches values in SQLite player_statistics table.
+     """
+     key = name.lower().strip()
+-    # Check seeds first
++    
++    # 1. Check local SQLite cache first
++    cached = get_player_stats_cache(key)
++    if cached:
++        return cached
++
++    # 2. Check static seeds
+     for seed_name, data in PLAYER_SEEDS.items():
+-        if seed_name in key or key in seed_name:
++        if seed_name == key or seed_name in key or key in seed_name:
+             xg_blend = 0.60 * data["xg_per_90_intl"] + 0.40 * data["xg_per_90_club"]
+             goals_blend = 0.60 * data["goals_per_90_intl"] + 0.40 * data["goals_per_90_club"]
+-            return {
+-                "name": name,
++            
++            result = {
++                "name": key,
+                 "position": data["position"],
+                 "xg_per_90": round(xg_blend, 3),
+                 "goals_per_90": round(goals_blend, 3),
+                 "assists_per_90": data["assists_per_90"],
+-                "source": "seeded_blend",
++                "source": "seeded_blend"
+             }
++            save_player_stats(key, result["position"], result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], data.get("club_team"), data.get("intl_team"))
++            return result
+ 
+-    # Try cached scraped stats
+-    cached = cache.get("player_stats", {"name": key})
+-    if cached:
+-        return cached
+-
+-    # Attempt to scrape club stats from FBRef and blend with position defaults for intl
++    # 3. Dynamic FBRef Scraper
+     scraped = _scrape_fbref_player(name)
+     if scraped:
+-        # Assuming scraped stats are club-based; blend with default intl profile
+         pos = scraped.get("position", "FW")
+         defaults = POSITION_DEFAULTS.get(pos, POSITION_DEFAULTS["FW"])
+         
+         # Blend: 60% default intl profile, 40% club scraped
+         xg_blend = 0.60 * defaults["xg"] + 0.40 * scraped["xg_per_90"]
+         goals_blend = 0.60 * defaults["goals"] + 0.40 * scraped["goals_per_90"]
++        assists_blend = 0.60 * defaults["assists"] + 0.40 * scraped["assists_per_90"]
+         
+         result = {
+-            "name": name,
++            "name": key,
+             "position": pos,
+             "xg_per_90": round(xg_blend, 3),
+             "goals_per_90": round(goals_blend, 3),
+-            "assists_per_90": scraped.get("assists_per_90", 0.15),
+-            "source": "scraped_blend",
++            "assists_per_90": round(assists_blend, 3),
++            "source": "scraped_blend"
+         }
+-        cache.set("player_stats", {"name": key}, result, ttl_seconds=3600 * 24)
++        save_player_stats(key, pos, result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], "", "")
+         return result
+ 
+-    # Standard fallback
+-    return {
+-        "name": name,
++    # 4. Standard position default fallback
++    result = {
++        "name": key,
+         "position": "FW",
+         "xg_per_90": POSITION_DEFAULTS["FW"]["xg"],
+         "goals_per_90": POSITION_DEFAULTS["FW"]["goals"],
+         "assists_per_90": POSITION_DEFAULTS["FW"]["assists"],
+-        "source": "position_default",
++        "source": "position_default"
+     }
++    save_player_stats(key, "FW", result["xg_per_90"], result["goals_per_90"], result["assists_per_90"], "", "")
++    return result
+ 
+ 
+ def _scrape_fbref_player(name: str) -> dict:
+     try:
+         search_url = f"https://fbref.com/search/search.fcgi?search={name.replace(' ', '+')}"
+         resp = requests.get(search_url, headers=HEADERS, timeout=8, allow_redirects=True)
+         if resp.status_code == 200:
+             soup = BeautifulSoup(resp.text, "lxml")
+             if "/players/" in resp.url:
+                 return _parse_player_page(soup)

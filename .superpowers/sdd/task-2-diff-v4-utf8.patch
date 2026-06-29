@@ -1,0 +1,504 @@
+﻿84d0304 fix: resolve Congo matching bug and use is_team_match in ESPN scraper
+4edde7b fix: resolve ESPN form scraper matching and optimize is_team_match
+5388c7b fix: pass normalized team names to feature extractors and scrapers in predictor
+8787fb3 feat: integrate team name normalization into scrapers, ELO db, and predictor
+ .superpowers/sdd/task-2-report.md | 57 ++++++++++++++++++++++++++++++++++++++
+ scratch/test_integration.py       | 51 ++++++++++++++++++++++++++++++++++
+ scratch/test_team_mapping.py      | 12 ++++++++
+ src/data/scrapers/elo_db.py       |  3 +-
+ src/data/scrapers/fbref.py        |  9 +++---
+ src/data/team_mapping.py          | 58 ++++++++++++++++++---------------------
+ src/predictor.py                  | 15 +++++-----
+ 7 files changed, 161 insertions(+), 44 deletions(-)
+diff --git a/.superpowers/sdd/task-2-report.md b/.superpowers/sdd/task-2-report.md
+new file mode 100644
+index 0000000..aea0e02
+--- /dev/null
++++ b/.superpowers/sdd/task-2-report.md
+@@ -0,0 +1,57 @@
++# Task 2 Completion Report: Integrations in Scrapers and Models
++
++## Accomplishments
++
++1. **Optimized and Fixed `src/data/team_mapping.py`**:
++   - Precomputed `ALL_ALIASES_MAP` and `ALIASES_SORTED` at the module level to eliminate redundant dictionary copies and sorting in `is_team_match`.
++   - Populated `ALL_ALIASES_MAP` with all teams from the ELO database (`NATIONAL_TEAM_ELO`) at the module level to ensure comprehensive coverage.
++   - Added `"congo": "congo"` to `TEAM_ALIASES` to ensure it resolves correctly and does not collide with `"congo dr"`.
++   - Removed the fallback fast-path logic in `is_team_match` since all teams (including ELO database teams) are now present in `ALL_ALIASES_MAP`.
++   - Updated the suffix stripping regex inside `normalize_team_name` to `r'\b(winner|to win|win|to score|goal)\b'` to successfully clean phrases like "to win".
++   - Added `"new guinea": "papua new guinea"` to the alias list to properly canonicalize Papua New Guinea's variations.
++   - Removed the `"congo": "congo dr"` alias to prevent false positives when matching Republic of the Congo, retaining strict mappings for `"democratic republic of the congo"`, `"dr congo"`, and `"congo dr"`.
++
++2. **Integrated in ELO Database Scraper (`src/data/scrapers/elo_db.py`)**:
++   - Moved the `normalize_team_name` import inside `get_national_elo` to prevent module-level circular imports, since `team_mapping.py` imports `NATIONAL_TEAM_ELO` at the module level.
++   - Updated `get_national_elo` to utilize `normalize_team_name` prior to key checks, ensuring standard names resolve to their canonical ratings.
++
++3. **Integrated and Fixed FBRef Scraper (`src/data/scrapers/fbref.py`)**:
++   - Replaced custom substring matching checks in the ESPN scraper function `_get_espn_intl_form` with the robust `is_team_match` logic.
++   - Moved `normalize_team_name` and `is_team_match` imports to function-level local scopes to eliminate packaging circular dependencies.
++   - Cleaned the queried name via `normalize_team_name` in `get_team_data`, correcting scoring priors lookup for aliases.
++
++4. **Integrated in Predictor Orchestrator (`src/predictor.py`)**:
++   - Updated `predict_match` to run `normalize_team_name` on both home and away input parameters, ensuring that the entire prediction flow operates on standardized country names.
++   - Fixed an integration bug where raw (un-normalized) team names were passed to `fbref.get_team_data`, `get_match_features`, and `news.get_sentiment`. The normalized names (`home_lower` and `away_lower`) are now passed, while preserving display names in `PredictionResult`.
++
++## Testing and Verification
++
++- **Unit Tests**: Ran `python scratch/test_team_mapping.py` which was updated to assert:
++  - `"to win"` stripping works correctly.
++  - `"new guinea"` maps to `"papua new guinea"`.
++  - `"congo"` and `"congo dr"` no longer collide.
++  - `is_team_match("congo", "congo dr vs congo")` returns `True`.
++  - `is_team_match("congo", "congo dr")` returns `False`.
++  - All unit tests passed.
++
++- **Integration Tests**: Updated `scratch/test_integration.py` to assert:
++  - `get_national_elo("Korea Republic")` correctly returns South Korea's rating of `1832.0`.
++  - `get_team_data("Korea Republic")` correctly retrieves the South Korea averages.
++  - `predict_match("Korea Republic", "United States")` correctly predicts the match result, verifying that passing un-normalized names resolves to normalized names in `predict_match`.
++  - `_get_espn_intl_form("Korea Republic")` and `_get_espn_intl_form("United States")` return form data successfully from the ESPN API.
++  - All integration checks passed successfully.
++
++## Git Commit
++All changes have been successfully committed:
++- **Commits**:
++  - `feat: integrate team name normalization into scrapers, ELO db, and predictor`
++  - `fix: pass normalized team names to feature extractors and scrapers in predictor`
++  - `fix: resolve ESPN form scraper matching and optimize is_team_match`
++  - `fix: resolve Congo matching bug and use is_team_match in ESPN scraper`
++- **Files Modified/Created**:
++  - `src/data/team_mapping.py`
++  - `src/data/scrapers/elo_db.py`
++  - `src/data/scrapers/fbref.py`
++  - `src/predictor.py`
++  - `scratch/test_team_mapping.py`
++  - `scratch/test_integration.py`
+diff --git a/scratch/test_integration.py b/scratch/test_integration.py
+new file mode 100644
+index 0000000..7c59754
+--- /dev/null
++++ b/scratch/test_integration.py
+@@ -0,0 +1,51 @@
++import sys
++import os
++sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
++
++from src.data.scrapers.elo_db import get_national_elo
++from src.data.scrapers.fbref import get_team_data, _get_espn_intl_form
++from src.predictor import predict_match, PredictionResult
++
++def test_integration():
++    print("Running integration tests...")
++    
++    # 1. get_national_elo("Korea Republic") -> ELO score of South Korea (1832.0)
++    elo = get_national_elo("Korea Republic")
++    print(f"get_national_elo('Korea Republic') returned: {elo}")
++    assert elo == 1832.0, f"Expected 1832.0, got {elo}"
++    
++    # 2. get_team_data("Korea Republic") -> South Korea averages
++    team_data = get_team_data("Korea Republic")
++    print(f"get_team_data('Korea Republic') returned: {team_data}")
++    assert isinstance(team_data, dict), "Expected a dictionary"
++    assert team_data.get("avg_goals") == 1.5, f"Expected avg_goals 1.5, got {team_data.get('avg_goals')}"
++    assert team_data.get("avg_conceded") == 1.0, f"Expected avg_conceded 1.0, got {team_data.get('avg_conceded')}"
++    
++    # 3. predict_match("Korea Republic", "United States") -> prediction result
++    pred = predict_match("Korea Republic", "United States")
++    print(f"predict_match('Korea Republic', 'United States') returned: {pred}")
++    assert isinstance(pred, PredictionResult), "Expected a PredictionResult instance"
++    assert pred.home == "Korea Republic", f"Expected home 'Korea Republic', got {pred.home}"
++    assert pred.away == "United States", f"Expected away 'United States', got {pred.away}"
++    assert "home_win" in pred.probabilities, "Expected 'home_win' in probabilities"
++    assert "draw" in pred.probabilities, "Expected 'draw' in probabilities"
++    assert "away_win" in pred.probabilities, "Expected 'away_win' in probabilities"
++    
++    # 4. _get_espn_intl_form("Korea Republic") -> form data success
++    korea_form = _get_espn_intl_form("Korea Republic")
++    print(f"_get_espn_intl_form('Korea Republic') returned: {korea_form}")
++    assert isinstance(korea_form, dict), "Expected a dictionary"
++    assert "form" in korea_form, "Expected 'form' in korea_form dict"
++    assert any("ESPN" in ds for ds in korea_form.get("data_sources", [])), f"Expected ESPN data source, got {korea_form.get('data_sources')}"
++
++    # 5. _get_espn_intl_form("United States") -> form data success
++    usa_form = _get_espn_intl_form("United States")
++    print(f"_get_espn_intl_form('United States') returned: {usa_form}")
++    assert isinstance(usa_form, dict), "Expected a dictionary"
++    assert "form" in usa_form, "Expected 'form' in usa_form dict"
++    assert any("ESPN" in ds for ds in usa_form.get("data_sources", [])), f"Expected ESPN data source, got {usa_form.get('data_sources')}"
++    
++    print("\nALL INTEGRATION TESTS PASSED SUCCESSFULLY!")
++
++if __name__ == "__main__":
++    test_integration()
+diff --git a/scratch/test_team_mapping.py b/scratch/test_team_mapping.py
+index f405bbc..872c68e 100644
+--- a/scratch/test_team_mapping.py
++++ b/scratch/test_team_mapping.py
+@@ -24,17 +24,29 @@ def run_tests():
+     assert is_team_match("Ireland", "Northern Ireland") == False
+     assert is_team_match("North Korea", "South Korea") == False
+     assert is_team_match("Northern Ireland", "Ireland") == False
+     assert is_team_match("Ireland", "Republic of Ireland") == True
+     assert is_team_match("Ireland", "Ireland vs Northern Ireland") == True
+     assert is_team_match("Northern Ireland", "Ireland vs Northern Ireland") == True
+     
+     # Suffix normalization boundaries
+     assert normalize_team_name("win") == ""
+     assert normalize_team_name("winner") == ""
++    assert normalize_team_name("to win") == ""
++    assert normalize_team_name("team to win") == "team"
+     assert normalize_team_name("team to score") == "team"
+     assert normalize_team_name("team goal") == "team"
+     
++    # New Guinea alias
++    assert normalize_team_name("new guinea") == "papua new guinea"
++    
++    # Congo collision tests
++    assert normalize_team_name("congo") == "congo"
++    assert is_team_match("congo dr", "congo") == False
++    assert is_team_match("congo", "congo dr") == False
++    assert is_team_match("congo", "congo dr vs congo") == True
++    assert is_team_match("congo dr", "Democratic Republic of the Congo") == True
++    
+     print("ALL TEAM MAPPING TESTS PASSED SUCCESSFULLY!")
+ 
+ if __name__ == "__main__":
+     run_tests()
+diff --git a/src/data/scrapers/elo_db.py b/src/data/scrapers/elo_db.py
+index 7c81410..eab8539 100644
+--- a/src/data/scrapers/elo_db.py
++++ b/src/data/scrapers/elo_db.py
+@@ -28,18 +28,19 @@ NATIONAL_TEAM_ELO = {
+     "costa rica": 1808, "panama": 1797, "honduras": 1788, "el salvador": 1780,
+     "cameroon": 1826, "ghana": 1822, "ivory coast": 1834, "mali": 1821,
+     "algeria": 1832, "tunisia": 1821, "south africa": 1808, "saudi arabia": 1808,
+     "qatar": 1798, "iraq": 1805, "jordan": 1798, "uae": 1792, "uzbekistan": 1808,
+     "china": 1794, "india": 1781, "new zealand": 1793, "jamaica": 1803,
+ }
+ 
+ 
+ def get_national_elo(team_name: str) -> float:
+     """Return ELO for a national team."""
+-    key = team_name.lower().strip()
++    from src.data.team_mapping import normalize_team_name
++    key = normalize_team_name(team_name)
+     if key in NATIONAL_TEAM_ELO:
+         return float(NATIONAL_TEAM_ELO[key])
+     # Fuzzy match
+     for name, elo in NATIONAL_TEAM_ELO.items():
+         if name in key or key in name:
+             return float(elo)
+     return 1700.0
+diff --git a/src/data/scrapers/fbref.py b/src/data/scrapers/fbref.py
+index 45bb04a..5e50b31 100644
+--- a/src/data/scrapers/fbref.py
++++ b/src/data/scrapers/fbref.py
+@@ -46,21 +46,22 @@ INTL_SCORING_PRIORS = {
+ ESPN_LEAGUES = [
+     "fifa.world", "uefa.nations", "uefa.euro", "fifa.worldq.uefa",
+     "fifa.worldq.conmebol", "fifa.worldq.concacaf", "eng.1", "esp.1", "ger.1"
+ ]
+ 
+ 
+ def get_team_data(team_name: str) -> dict:
+     """
+     Retrieves team form, ELO, and scoring averages.
+     """
+-    name_lower = team_name.lower().strip()
++    from src.data.team_mapping import normalize_team_name
++    name_lower = normalize_team_name(team_name)
+     cached = cache.get("fbref_team", {"team": name_lower})
+     if cached:
+         return cached
+ 
+     # Try Understat (in case it is a club for mapping player details)
+     understat_data = get_understat_team(team_name)
+     if understat_data:
+         understat_data["elo"] = get_national_elo(team_name)
+         understat_data["data_sources"] = ["Understat (live xG)"]
+         cache.set("fbref_team", {"team": name_lower}, understat_data, ttl_seconds=3600 * 6)
+@@ -85,40 +86,40 @@ def get_team_data(team_name: str) -> dict:
+     if espn_form:
+         result.update(espn_form)
+ 
+     cache.set("fbref_team", {"team": name_lower}, result, ttl_seconds=3600 * 6)
+     return result
+ 
+ 
+ ESPN_TEAMS_CACHE = {}
+ 
+ def _get_espn_intl_form(team_name: str) -> dict:
+-    name_lower = team_name.lower()
++    from src.data.team_mapping import is_team_match
+     for league in ESPN_LEAGUES:
+         try:
+             if league not in ESPN_TEAMS_CACHE:
+                 url = f"{ESPN_BASE}/{league}/teams"
+                 resp = requests.get(url, timeout=5)
+                 if resp.status_code == 200:
+                     ESPN_TEAMS_CACHE[league] = resp.json()
+                 else:
+                     ESPN_TEAMS_CACHE[league] = {}
+ 
+             data = ESPN_TEAMS_CACHE[league]
+             sports = data.get("sports", [{}])
+             leagues_data = sports[0].get("leagues", [{}]) if sports else [{}]
+             teams = leagues_data[0].get("teams", []) if leagues_data else []
+ 
+             for team_entry in teams:
+                 t = team_entry.get("team", {})
+-                display = t.get("displayName", "").lower()
+-                if name_lower in display or display in name_lower:
++                display = t.get("displayName", "")
++                if is_team_match(team_name, display):
+                     team_id = t.get("id")
+                     form = _get_espn_team_form(league, team_id)
+                     return {"form": form, "data_sources": [f"ESPN ({league})"]}
+         except Exception:
+             continue
+     return {}
+ 
+ 
+ def _get_espn_team_form(league: str, team_id: str) -> float:
+     try:
+diff --git a/src/data/team_mapping.py b/src/data/team_mapping.py
+index 0206c2d..1a96b0d 100644
+--- a/src/data/team_mapping.py
++++ b/src/data/team_mapping.py
+@@ -37,21 +37,20 @@ TEAM_ALIASES = {
+     "bosnia": "bosnia-herzegovina",
+     "herzegovina": "bosnia-herzegovina",
+     "bosnia-herzegovina": "bosnia-herzegovina",
+     
+     "cura├ºao": "curacao",
+     "curacao": "curacao",
+     
+     "democratic republic of the congo": "congo dr",
+     "dr congo": "congo dr",
+     "congo dr": "congo dr",
+-    "congo": "congo dr",
+     
+     "united arab emirates": "uae",
+     "uae": "uae",
+     
+     "ir iran": "iran",
+     "iran": "iran",
+     
+     "republic of south africa": "south africa",
+     "south africa": "south africa",
+     
+@@ -68,82 +67,77 @@ TEAM_ALIASES = {
+     
+     "north macedonia": "north macedonia",
+     "macedonia": "macedonia",
+     
+     "northern cyprus": "northern cyprus",
+     "cyprus": "cyprus",
+     
+     "guinea-bissau": "guinea-bissau",
+     "equatorial guinea": "equatorial guinea",
+     "papua new guinea": "papua new guinea",
++    "new guinea": "papua new guinea",
+     "guinea": "guinea",
++    "congo": "congo",
+ }
+ 
++from src.data.scrapers.elo_db import NATIONAL_TEAM_ELO
++
++# Precompute alias mapping and sorted order at module level
++ALL_ALIASES_MAP = {}
++for alias, canonical in TEAM_ALIASES.items():
++    ALL_ALIASES_MAP[alias] = canonical
++    ALL_ALIASES_MAP[canonical] = canonical
++
++for team in NATIONAL_TEAM_ELO.keys():
++    t_norm = team.lower().strip()
++    if t_norm not in ALL_ALIASES_MAP:
++        ALL_ALIASES_MAP[t_norm] = t_norm
++
++ALIASES_SORTED = sorted(ALL_ALIASES_MAP.keys(), key=len, reverse=True)
++
++
+ def normalize_team_name(name: str) -> str:
+     """Standardizes a country name to its lowercase canonical form."""
+     if not name:
+         return ""
+     name_clean = name.lower().strip()
+     
+     # Remove question marks
+     name_clean = name_clean.replace("?", "")
+     
+-    # Use word boundaries to strip common suffixes/terms: winner, win, to score, goal
+-    name_clean = re.sub(r'\b(winner|win|to score|goal)\b', '', name_clean)
++    # Use word boundaries to strip common suffixes/terms: winner, to win, win, to score, goal
++    name_clean = re.sub(r'\b(winner|to win|win|to score|goal)\b', '', name_clean)
+     
+     # Collapse multiple spaces and strip
+     name_clean = re.sub(r'\s+', ' ', name_clean).strip()
+     
+     return TEAM_ALIASES.get(name_clean, name_clean)
+ 
++
+ def is_team_match(team: str, text: str) -> bool:
+     """Robustly checks if a team name is referenced in a market title/text."""
+     t_norm = normalize_team_name(team)
+     txt_norm = normalize_team_name(text)
+     
+     if not t_norm or not txt_norm:
+         return False
+         
+     if t_norm == txt_norm:
+         return True
+         
+-    # Build a complete map of all known aliases to their canonical forms
+-    all_aliases_map = {}
+-    for alias, canonical in TEAM_ALIASES.items():
+-        all_aliases_map[alias] = canonical
+-        all_aliases_map[canonical] = canonical
+-        
+-    # Ensure the query team's normalized name is mapped to itself (if not already present)
+-    if t_norm not in all_aliases_map:
+-        all_aliases_map[t_norm] = t_norm
+-        
+-    # Sort aliases by length in descending order to perform greedy matching.
+-    # This prevents shorter aliases (e.g. "korea") from matching when a longer 
+-    # alias (e.g. "north korea") matches at the same position.
+-    aliases_sorted = sorted(all_aliases_map.keys(), key=len, reverse=True)
+-    
+-    # Find all non-overlapping matches in txt_norm using word boundaries
+-    matched_intervals = [] # list of tuples: (start_idx, end_idx, canonical_name)
+-    
+-    for alias in aliases_sorted:
+-        canonical = all_aliases_map[alias]
+-        # Match using word boundaries.
++    # Main interval-based matching loop
++    matched_intervals = []
++    for alias in ALIASES_SORTED:
++        canonical = ALL_ALIASES_MAP[alias]
+         pattern = r'(?<!\w)' + re.escape(alias) + r'(?!\w)'
+         for match in re.finditer(pattern, txt_norm):
+             start, end = match.start(), match.end()
+-            # Check for overlap with any existing matched intervals
+             overlap = False
+             for m_start, m_end, _ in matched_intervals:
+                 if not (end <= m_start or start >= m_end):
+                     overlap = True
+                     break
+             if not overlap:
+                 matched_intervals.append((start, end, canonical))
+                 
+-    # Get all canonical names that were successfully matched in the text
+     matched_canonicals = {canonical for _, _, canonical in matched_intervals}
+-    
+-    # Check if the query team's canonical name is in the matched canonical names
+-    if t_norm in matched_canonicals:
+-        return True
+-        
+-    return False
++    return t_norm in matched_canonicals
+diff --git a/src/predictor.py b/src/predictor.py
+index 5f6f96c..333653d 100644
+--- a/src/predictor.py
++++ b/src/predictor.py
+@@ -1,15 +1,16 @@
+ import math
+ import numpy as np
+ from src.data.scrapers import fbref, news, fixtures, elo_db
+ from src.data.preprocessor import get_match_features
+ from src.models.statistical import DixonColesModel, EloModel
++from src.data.team_mapping import normalize_team_name
+ from src.models.machine_learning import (
+     LogisticRegressionModel, SVMModel, GDAModel,
+     RandomForestModel, XGBoostModel, NeuralNetworkModel
+ )
+ 
+ import json
+ from pathlib import Path
+ 
+ # Default ELO model initialized with our ratings seed
+ ELO_PREDICTOR = EloModel()
+@@ -49,54 +50,54 @@ class PredictionResult:
+         self.model_breakdown = model_breakdown
+         self.sentiment = sentiment
+         self.elo_diff = elo_diff
+ 
+ 
+ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neutral: bool = True) -> PredictionResult:
+     """
+     Orchestrates the 8 models to predict a single match.
+     Blends ELO + Dixon-Coles + 6 ML models.
+     """
+-    home_lower = home_team.lower().strip()
+-    away_lower = away_team.lower().strip()
++    home_lower = normalize_team_name(home_team)
++    away_lower = normalize_team_name(away_team)
+     
+     # 1. Fetch team ELOs and averages
+     h_elo = ELO_PREDICTOR.get(home_lower)
+     a_elo = ELO_PREDICTOR.get(away_lower)
+     elo_diff = h_elo - a_elo
+     
+     # 2. Dixon-Coles statistical prediction
+     dc = DixonColesModel()
+     # Simple fitting on team averages as base
+-    h_data = fbref.get_team_data(home_team)
+-    a_data = fbref.get_team_data(away_team)
++    h_data = fbref.get_team_data(home_lower)
++    a_data = fbref.get_team_data(away_lower)
+     dc.attack[home_lower] = math_log(h_data.get("avg_goals", 1.4))
+     dc.defense[home_lower] = -math_log(h_data.get("avg_conceded", 1.1))
+     dc.attack[away_lower] = math_log(a_data.get("avg_goals", 1.4))
+     dc.defense[away_lower] = -math_log(a_data.get("avg_conceded", 1.1))
+     dc.is_fitted = True
+     
+     dc_prob = dc.predict(home_lower, away_lower, neutral=neutral)
+     elo_prob = ELO_PREDICTOR.predict(home_lower, away_lower, home_advantage=(0 if neutral else 65))
+     
+     # 3. Load & Run the 6 ML models
+     ml_probs = []
+     ml_models = [
+         LogisticRegressionModel(),
+         SVMModel(),
+         GDAModel(),
+         RandomForestModel(),
+         XGBoostModel(),
+         NeuralNetworkModel()
+     ]
+     
+-    features = get_match_features(home_team, away_team, kalshi_probs)
++    features = get_match_features(home_lower, away_lower, kalshi_probs)
+     
+     ml_breakdown = {
+         "Dixon-Coles": dc_prob,
+         "ELO": elo_prob
+     }
+     
+     for model in ml_models:
+         if model.load():
+             try:
+                 p = model.predict_proba(features)[0]
+@@ -127,22 +128,22 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
+         
+     # Re-normalize
+     total = final_home + final_draw + final_away
+     blended = {
+         "home_win": round(final_home / total, 4),
+         "draw": round(final_draw / total, 4),
+         "away_win": round(final_away / total, 4)
+     }
+     
+     # Sentiment
+-    h_news = news.get_sentiment(home_team)
+-    a_news = news.get_sentiment(away_team)
++    h_news = news.get_sentiment(home_lower)
++    a_news = news.get_sentiment(away_lower)
+     sentiment_diff = h_news.get("score", 0.0) - a_news.get("score", 0.0)
+     
+     return PredictionResult(
+         home=home_team,
+         away=away_team,
+         probabilities=blended,
+         model_breakdown=ml_breakdown,
+         sentiment=sentiment_diff,
+         elo_diff=elo_diff
+     )

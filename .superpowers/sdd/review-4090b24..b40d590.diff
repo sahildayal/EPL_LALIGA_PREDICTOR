@@ -1,0 +1,226 @@
+# Review package: 4090b24..b40d590
+## Commits
+b40d590 feat: implement StackingEnsembleModel integrating XGBoost, LightGBM, and MLP
+
+## Files changed
+ .superpowers/sdd/task-5-report.md | 67 +++++++++++++++++++++++++++++++
+ requirements.txt                  |  1 +
+ scratch/test_stacking_ensemble.py | 24 +++++++++++
+ src/models/stacking_ensemble.py   | 83 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 175 insertions(+)
+
+## Diff
+diff --git a/.superpowers/sdd/task-5-report.md b/.superpowers/sdd/task-5-report.md
+new file mode 100644
+index 0000000..3290c92
+--- /dev/null
++++ b/.superpowers/sdd/task-5-report.md
+@@ -0,0 +1,67 @@
++# Task 5 Report: Two-Stage Stacking Classifier ML Ensemble
++
++## 1. What was Implemented
++- **StackingEnsembleModel Class**: Implemented the two-stage stacking ensemble model in `src/models/stacking_ensemble.py` that inherits from `BaseModel`.
++- **Integrated Base Estimators**:
++  - `XGBClassifier`: Configured with hyper-parameters from the specification.
++  - `LGBMClassifier`: Configured with hyper-parameters and `verbose=-1` to ensure clean logging.
++  - `MLPClassifier` pipeline: Wrapped with a `StandardScaler` to normalize features for the neural network.
++- **Ridge Meta-Learner**: Configured `LogisticRegression` with `penalty='l2'` (Ridge penalty) and `C=1.0`.
++- **Standardized Interfaces**:
++  - Implemented `train(X, y)` and an alias `fit(X, y)` to satisfy both the internal codebase design patterns and external testing requirements.
++  - Implemented `predict_proba(X)` returning probability predictions (handling 1D and 2D arrays, with standard fallback array if not fitted).
++  - Implemented standard `save()` and `load()` methods to save and load model checkpoints from `data/models/stacking_clf.pkl` using `joblib`.
++- **Requirements Update**: Appended `lightgbm` to `requirements.txt`.
++
++---
++
++## 2. TDD Evidence
++
++### RED (Failing Test Execution)
++- **Command Run**: `python scratch/test_stacking_ensemble.py`
++- **Output**:
++  ```
++  Traceback (most recent call last):
++    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_stacking_ensemble.py", line 9, in <module>
++      from src.models.stacking_ensemble import StackingEnsembleModel
++  ModuleNotFoundError: No module named 'src.models.stacking_ensemble'
++  ```
++- **Why Failure Was Expected**: The module file `src/models/stacking_ensemble.py` was not yet created, so Python was unable to import the class `StackingEnsembleModel` in the test script.
++
++### GREEN (Passing Test Execution)
++- **Command Run**: `python -W ignore scratch/test_stacking_ensemble.py`
++- **Output**:
++  ```
++  .
++  ----------------------------------------------------------------------
++  Ran 1 test in 9.137s
++
++  OK
++  ```
++- **Why Success Was Confirmed**: The `StackingEnsembleModel` successfully trained the stacked base models and meta-learner, and produced output probabilities of correct shape `(2, 3)` when evaluating on test inputs. Suppressing warnings keeps the output clean and pristine.
++
++---
++
++## 3. Full Test Suite Validation
++- **Command Run**: `python -W ignore -m unittest discover -s scratch -p "test_*.py"`
++- **Output**:
++  ```
++  Ran 44 tests in 10.495s
++
++  OK
++  ```
++- **Verification**: All 44 tests in the project suite are fully passing, confirming that the new model has zero regression impacts.
++
++---
++
++## 4. Files Changed/Created
++- **Created**: [src/models/stacking_ensemble.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/models/stacking_ensemble.py)
++- **Created**: [scratch/test_stacking_ensemble.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_stacking_ensemble.py)
++- **Modified**: [requirements.txt](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/requirements.txt)
++
++---
++
++## 5. Self-Review Findings
++- **Completeness**: Implemented all base models (XGBoost, LightGBM, MLP) and meta-learner (Ridge Logistic Regression) precisely as specified in the instructions and the task brief.
++- **Aesthetics & Quality**: Cleaned up the execution output by using `verbose=-1` on LightGBM and `warnings.filterwarnings("ignore")` / global ignore flag on the test runner.
++- **Consistency**: Followed the structural subclassing of `BaseModel` used by all other model scripts in `src/models/machine_learning.py`.
+diff --git a/requirements.txt b/requirements.txt
+index 3362de3..eeae11b 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -1,15 +1,16 @@
+ numpy
+ pandas
+ scipy
+ scikit-learn
+ xgboost
++lightgbm
+ requests
+ beautifulsoup4
+ lxml
+ python-dotenv
+ rich
+ fastapi
+ uvicorn
+ joblib
+ matplotlib
+ google-generativeai
+diff --git a/scratch/test_stacking_ensemble.py b/scratch/test_stacking_ensemble.py
+new file mode 100644
+index 0000000..70f21e1
+--- /dev/null
++++ b/scratch/test_stacking_ensemble.py
+@@ -0,0 +1,24 @@
++import unittest
++import numpy as np
++import sys
++import warnings
++from pathlib import Path
++
++warnings.filterwarnings("ignore")
++
++# Add project root to path
++sys.path.append(str(Path(__file__).resolve().parents[1]))
++
++from src.models.stacking_ensemble import StackingEnsembleModel
++
++class TestStackingEnsemble(unittest.TestCase):
++    def test_ensemble_prediction(self):
++        X = np.random.rand(50, 10)
++        y = np.random.choice([0, 1, 2], size=50) # 0: Home, 1: Draw, 2: Away
++        model = StackingEnsembleModel()
++        model.fit(X, y)
++        probs = model.predict_proba(X[:2])
++        self.assertEqual(probs.shape, (2, 3))
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/src/models/stacking_ensemble.py b/src/models/stacking_ensemble.py
+new file mode 100644
+index 0000000..fdeb523
+--- /dev/null
++++ b/src/models/stacking_ensemble.py
+@@ -0,0 +1,83 @@
++import numpy as np
++import joblib
++from pathlib import Path
++from sklearn.ensemble import StackingClassifier
++from sklearn.linear_model import LogisticRegression
++from sklearn.preprocessing import StandardScaler
++from sklearn.pipeline import make_pipeline
++from xgboost import XGBClassifier
++from lightgbm import LGBMClassifier
++from sklearn.neural_network import MLPClassifier
++
++from src.models.base import BaseModel
++
++MODELS_DIR = Path(__file__).parent.parent.parent / "data" / "models"
++
++
++class StackingEnsembleModel(BaseModel):
++    def __init__(self):
++        super().__init__("StackingEnsemble")
++        base_estimators = [
++            ('xgb', XGBClassifier(
++                n_estimators=100,
++                max_depth=3,
++                learning_rate=0.1,
++                subsample=0.8,
++                random_state=42,
++                eval_metric='mlogloss'
++            )),
++            ('lgbm', LGBMClassifier(
++                n_estimators=100,
++                max_depth=3,
++                learning_rate=0.1,
++                subsample=0.8,
++                random_state=42,
++                verbose=-1
++            )),
++            ('mlp', make_pipeline(
++                StandardScaler(),
++                MLPClassifier(
++                    hidden_layer_sizes=(32, 16),
++                    activation='relu',
++                    max_iter=300,
++                    random_state=42
++                )
++            ))
++        ]
++        self.clf = StackingClassifier(
++            estimators=base_estimators,
++            final_estimator=LogisticRegression(penalty='l2', C=1.0),
++            cv=3,
++            n_jobs=-1,
++            passthrough=True
++        )
++
++    def train(self, X: np.ndarray, y: np.ndarray):
++        """Train the stacking ensemble model."""
++        self.clf.fit(X, y)
++        self.is_fitted = True
++
++    def fit(self, X: np.ndarray, y: np.ndarray):
++        """Fit alias to match Scikit-Learn style interface and tests."""
++        self.train(X, y)
++
++    def predict_proba(self, X: np.ndarray) -> np.ndarray:
++        """Predict probabilities for classes: [Home Win, Draw, Away Win]."""
++        if not self.is_fitted:
++            return np.array([[0.38, 0.28, 0.34]])
++        X_2d = X.reshape(1, -1) if X.ndim == 1 else X
++        return self.clf.predict_proba(X_2d)
++
++    def save(self):
++        """Save the fitted stacking classifier to disk."""
++        MODELS_DIR.mkdir(parents=True, exist_ok=True)
++        joblib.dump(self.clf, MODELS_DIR / "stacking_clf.pkl")
++
++    def load(self) -> bool:
++        """Load the stacked classifier model from disk."""
++        try:
++            self.clf = joblib.load(MODELS_DIR / "stacking_clf.pkl")
++            self.is_fitted = True
++            return True
++        except Exception:
++            return False
+

@@ -1,204 +1,81 @@
-# Task 2 Report: ESPN Lineup Scraper & Lineup Fetching
+# Task 2 Report: Dixon-Coles Time Decay Model & Parameter Estimator
 
-## What was Implemented
-We implemented dynamic starting XI and roster fetching from ESPN APIs:
-1. **`get_match_lineups(home_team, away_team, event_id=None) -> dict`**:
-   - Standardizes the team names using `normalize_team_name` from `src/data/team_mapping.py`.
-   - Fetches live starting lineups using `_fetch_espn_event_lineup` if an `event_id` is supplied.
-   - Falls back to finding the match via `search_wc_fixture` and searching the ESPN schedule using `_find_espn_event_id` to fetch lineups.
-   - Falls back to fetching starting lineups from each team's most recent completed game via `_fetch_team_recent_lineup`.
-   - Finally, falls back to a curated default backup list of standard squad lineups for major nations, or a generic placeholder list for other countries.
-2. **`_find_espn_event_id(team1_norm, team2_norm) -> str | None`**:
-   - Queries the active `fifa.world` scoreboard on ESPN to retrieve event IDs, using robust `is_team_match` checks on competitor display names.
-3. **`_fetch_espn_event_lineup(event_id, home_norm, away_norm) -> dict | None`**:
-   - Queries the ESPN summary API for the specified event ID.
-   - Extracts active and starting rosters, falling back to all active players if formal starters are not marked.
-   - Normalizes player names to lowercase and strips whitespaces.
-4. **`_fetch_team_recent_lineup(team_norm) -> list`**:
-   - Scans scoreboards of major soccer leagues (`fifa.world`, `uefa.nations`, `uefa.euro`) for the most recent completed match (`STATUS_FINAL`) containing the team.
-   - Fetches and parses that match's lineups to retrieve the team's starting lineup.
+## Implementation Details
+We implemented the Dixon-Coles goal expectation regressor model with dynamic parameter estimation and exponential time-decay weighting.
+Specifically, the class `DixonColesRegressor` in `src/models/dixon_coles_decay.py` includes:
+- Attacking parameters (`alpha`), defensive parameters (`beta`), home advantage (`gamma`), and correlation adjustment (`rho`).
+- Exponential time weighting of log-likelihood using parameters `xi` and match age `days_ago`.
+- Numerical stability improvements using `np.clip` on the exponent terms to prevent potential overflow/underflow during parameter optimization under SciPy `minimize`.
+- A fallback system in the event optimization doesn't converge or encounters issues, defaulting to safe parameter estimates.
 
-## What was Tested and Test Results
-We created a comprehensive unit test suite in [scratch/test_lineups.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_lineups.py) containing:
-1. `test_get_lineups_with_stubbed_id`: Verifies lineup retrieval using an event ID and checks fallbacks to default player lists.
-2. `test_get_lineups_fallback_default_generic`: Verifies fallback to generic players (`player1`, `player2`, `player3`) for teams not present in the pre-defined dictionary.
-3. `test_get_lineups_case_insensitive_normalization`: Verifies that casing variations and aliases (e.g., `COLOMBIA` or `portugal`) normalize correctly.
-4. `test_fetch_team_recent_lineup_invalid_team`: Verifies graceful failure (empty list returned) when trying to fetch recent lineups for non-existent/invalid teams.
+## Test Results
+We ran the unit tests locally under `scratch/test_dixon_coles_decay.py` and all tests passed successfully.
 
-All 4 tests run and pass successfully.
-
-We also ran the existing team mapping tests, DB cache tests, and integration tests to verify no regressions:
-- `scratch/test_team_mapping.py`: Passed successfully.
-- `scratch/test_db_cache.py`: Passed successfully (4/4 tests).
-- `scratch/test_integration.py`: Passed successfully.
+### Test suite details:
+- `test_regressor_fit`: Verifies parameter estimation converges and produces valid probabilities within the `[0, 1]` range.
+- `test_unknown_teams`: Verifies that predicting matches containing teams not present in the training set falls back to the default probability split `(0.33, 0.33, 0.34)`.
+- `test_fallback_fit_failure`: Verifies that minimal input datasets still fit without error, and output probabilities continue to sum to 1.0.
 
 ## TDD Evidence
 ### RED Phase
-- **Command:** `python scratch/test_lineups.py`
+- **Command Run:** `python scratch/test_dixon_coles_decay.py`
 - **Output:**
-```
-Traceback (most recent call last):
-  File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_lineups.py", line 4, in <module>
-    from src.data.scrapers.fixtures import get_match_lineups
-ImportError: cannot import name 'get_match_lineups' from 'src.data.scrapers.fixtures' (C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\src\data\scrapers\fixtures.py)
-```
-- **Explanation:** The test failed as expected with `ImportError` because `get_match_lineups` was not yet defined in `src/data/scrapers/fixtures.py`.
+  ```
+  Traceback (most recent call last):
+    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_dixon_coles_decay.py", line 6, in <module>
+      from src.models.dixon_coles_decay import DixonColesRegressor
+  ModuleNotFoundError: No module named 'src.models.dixon_coles_decay'
+  ```
+- **Why Failure Expected:** The target module `src.models.dixon_coles_decay` did not exist yet, causing the initial import to fail.
 
 ### GREEN Phase
-- **Command:** `python scratch/test_lineups.py`
+- **Command Run:** `python scratch/test_dixon_coles_decay.py`
 - **Output:**
-```
-....
-----------------------------------------------------------------------
-Ran 4 tests in 7.947s
+  ```
+  ...
+  ----------------------------------------------------------------------
+  Ran 3 tests in 0.065s
 
-OK
-```
-- **Explanation:** After implementing the lineup scraping and fallback helper logic, the tests run successfully and pass.
+  OK
+  ```
 
 ## Files Changed
-- **Modified:** `src/data/scrapers/fixtures.py` (added get_match_lineups and helper functions)
-- **Created:** `scratch/test_lineups.py` (added tests)
+- Created: [src/models/dixon_coles_decay.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/models/dixon_coles_decay.py)
+- Created: [scratch/test_dixon_coles_decay.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_dixon_coles_decay.py)
 
 ## Self-Review Findings
-- **Completeness:** Implemented all ESPN API scraping, schedule checks, completed match lookups, and default lists as specified in the task description.
-- **Quality:** Variable naming and code style are clean, readable, and align with existing patterns (using lowercase normalization, precompiled regex, robust error boundaries).
-- **Discipline:** No overbuilding/YAGNI. Kept it strictly focused on the required scraping logic and fallbacks.
-- **Testing:** Comprehensive test suite covers edge cases, normalization, generic fallbacks, and invalid teams. Output is pristine and regression-free.
+- **Completeness:** Implemented all required interfaces (`DixonColesRegressor(xi=0.0019)`, `DixonColesRegressor.fit(df)`, `DixonColesRegressor.predict_match_probs(home, away)`).
+- **Quality:** Capped exponent terms using `np.clip` to prevent potential numeric overflow warnings during scipy optimization.
+- **Testing:** The tests cover typical success paths, unknown team fallback paths, minimal datasets, and verify that the output probabilities are properly normalized and sum to 1.0.
 
-## Issues or Concerns
-None. The ESPN API integration works beautifully across different leagues.
+## Fixes Applied
 
-## Code Review Fixes (June 27, 2026)
+1. **ValueError on Empty Fitting**:
+   - Added checks in `fit()` in `src/models/dixon_coles_decay.py` to check if `df` is empty, or lacks `home_team`/`away_team` columns, or if `n_teams <= 1`.
+   - If any of these are true, immediately populates fallback parameters and returns early without causing a `ValueError` in SciPy parameter initialization.
 
-We implemented the following fixes identified in the code review:
-1. **Scoreboard Date Parameters in `_fetch_team_recent_lineup`**:
-   - Modified `_fetch_team_recent_lineup` to look back day-by-day for the last 5 days (today and 4 days prior) by passing `dates=YYYYMMDD` via query parameters to ensure we find the most recent completed game.
-2. **Missing headers in `requests.get`**:
-   - Passed `headers=ESPN_HEADERS` to all `requests.get` calls in `fixtures.py`.
-3. **Safe attribute lookup in `_fetch_espn_event_lineup`**:
-   - Handled cases where `athlete` or `displayName` might be `None` to prevent `AttributeError` using safe lookup logic.
-4. **Match roster lookup by team name directly**:
-   - Added a clean helper `_fetch_team_roster_from_event` to directly extract and match the team roster instead of calling `_fetch_espn_event_lineup` with a `"dummy"` team name placeholder.
-5. **Unit Test Mocking**:
-   - Added a new mock unit test `test_get_lineups_mocked_espn` to `scratch/test_lineups.py` which mocks `requests.get` response structures and validates line-up extraction correctness.
+2. **Negative Probability Protection in Prediction**:
+   - In `predict_match_probs()`, added protection checking `tau_val <= 0` and setting it to `1e-10` to avoid potential non-positive/negative probabilities during calculation.
 
-### Verified Test Results after Fixes:
-All 5 tests run and pass successfully:
-```
-Ran 5 tests in 37.878s
+3. **Method Signature Rename**:
+   - Renamed parameter names from `home_team` and `away_team` to `home` and `away` inside `predict_match_probs()` to match the expected signature in the task brief.
 
-OK
-```
+4. **Test Exception Swallowing Removal & Empty Fit Assertion**:
+   - Updated `scratch/test_dixon_coles_decay.py` to remove the `try/except` block swallowing exceptions during empty fit checks.
+   - Added assertions verifying that fitting empty data runs without raising exceptions and correctly populates the fallback params.
 
-## Re-Review Fixes (June 27, 2026)
+5. **Case Insensitivity Support**:
+   - Handled case-insensitive input by lowercasing and stripping team names in both `fit()` and `predict_match_probs()`.
+   - Added a new unit test `test_case_insensitivity_and_whitespace` to verify correct behavior.
 
-We implemented the following fixes identified in the Task 2 re-review:
-1. **Performance / Caching in `fixtures.py`**:
-   - Integrated `src.data.cache` to cache scoreboard responses (`espn_scoreboard`) for 6 hours.
-   - Caching parsed recent lineups (`team_recent_lineup`) for 24 hours (1 day).
-   - Caching individual event rosters (`event_roster`) for 24 hours (1 day).
-2. **Removed Live Network Requests in `scratch/test_lineups.py`**:
-   - Patched `requests.get` globally in `setUp` using `unittest.mock.patch` to return 404/empty responses by default, ensuring offline testing and preventing live internet calls.
-   - Configured `test_get_lineups_with_stubbed_id` to patch `requests.get` returning a mock response simulating the ESPN rosters structure.
-3. **Minor Code Improvement**:
-   - Explicitly checked if non-home team matches `away_norm` rather than assuming it in an `else` block in `_fetch_espn_event_lineup`.
-   - Passed normalized names `h_norm` and `a_norm` to `search_wc_fixture` in `get_match_lineups`.
+## Updated Test Results
+- **Command Run:** `python scratch/test_dixon_coles_decay.py`
+- **Output:**
+  ```
+  ....
+  ----------------------------------------------------------------------
+  Ran 4 tests in 0.106s
 
-### Verified Test Results after Re-Review Fixes:
-All 5 tests run completely offline and pass instantly:
-```
-Ran 5 tests in 0.057s
-
-OK
-```
-
-## Additional Re-Review Fixes (June 27, 2026)
-
-We implemented the following fixes identified in the Task 2 re-review:
-1. **Alias-Robust Event Matching in `src/data/scrapers/fixtures.py`**:
-   - Replaced substring checks in `search_wc_fixture` with the robust boundary-matching `is_team_match`.
-   - Removed the strict `team1_norm in title or team2_norm in title` pre-filter check in `_find_espn_event_id`, evaluating competitor names directly via `is_team_match` to support aliases (e.g. `"usa"` vs `"united states"`).
-2. **Dynamic League Summary URL**:
-   - Parameterized `_fetch_team_roster_from_event` and `_fetch_espn_event_lineup` to support a `league: str` argument, defaulting to `"fifa.world"`.
-   - Propagated the league parameter from `_fetch_team_recent_lineup`'s inner loop and from `get_match_lineups`.
-3. **Roster Slicing**:
-   - Ensured `_fetch_team_roster_from_event` returns players sliced to 11.
-4. **Mock Unit Tests in `scratch/test_lineups.py`**:
-   - Added test cases `test_find_espn_event_id_success` and `test_fetch_team_recent_lineup_success` mocking the scoreboard and event summary API responses to test success paths completely offline.
-   - Mocked the cache globally in tests to keep unit tests fully isolated from local SQLite caches.
-
-### Verified Test Results:
-All 7 tests run completely offline and pass instantly:
-```
-Ran 7 tests in 0.018s
-
-OK
-```
-
-## Final Fixes & Cache Verification (June 27, 2026)
-
-We implemented the final fixes for Task 2 to address scoreboard league/date lookups, safe attribute lookups for team names, and cache correctness verification:
-1. **Scoreboard League and Date in `_find_espn_event_id`**:
-   - Modified `_find_espn_event_id` to search across multiple leagues (`"fifa.world"`, `"uefa.nations"`, `"uefa.euro"`) and look ahead up to 3 days (from today to 2 days ahead).
-2. **Safe Attribute Lookup for Team Names**:
-   - Updated `_fetch_espn_event_lineup` and `_fetch_team_roster_from_event` to safely retrieve `roster.get("team")` before accessing `"displayName"`, preventing `AttributeError` when the team object is null.
-3. **Verification of Cache Correctness**:
-   - Added a new unit test `test_caching_behavior` to [scratch/test_lineups.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_lineups.py).
-   - The test does NOT mock the `cache` module, temporarily unpatching it within the test context, calling `_fetch_team_roster_from_event` with a mock server response, verifying the cache is populated, and asserting that the second call hits the cache without triggering `requests.get`.
-
-### Verified Test Results:
-All 8 tests run completely offline and pass instantly:
-```
-Ran 8 tests in 0.038s
-
-OK
-```
-
-## Task 2 Final Cache & Portability Fixes (June 27, 2026)
-
-We implemented the final cache integration and test suite portability fixes:
-1. **Scoreboard Cache Integration in `_find_espn_event_id`**:
-   - Modified `_find_espn_event_id` in `src/data/scrapers/fixtures.py` to check the `espn_scoreboard` cache before performing any ESPN network requests.
-   - Updated the return structure of `_find_espn_event_id` to return the `(event_id, league)` tuple upon successfully finding a match, enabling dynamically fetching lineups using the correct league endpoint in fallback paths.
-   - Updated `get_match_lineups` to unpack the returned `(found_id, found_league)` tuple and pass the dynamic league parameter when calling `_fetch_espn_event_lineup`.
-2. **Lineup Query Caching in `_fetch_espn_event_lineup`**:
-   - Integrated cache check and storage (`event_lineups`) in `_fetch_espn_event_lineup` using a unique key comprised of the event ID, home team, and away team.
-   - Cached parsed lineup results for 24 hours to prevent repeated scrapes.
-   - Added the league name to the source description: `f"live_espn_announcement ({league})"`.
-3. **Path Portability in `scratch/test_lineups.py`**:
-   - Replaced the absolute folder path import with dynamic `pathlib.Path` parent resolving, ensuring the test script is portable across different environments.
-   - Updated unit test assertions expecting the updated `live_espn_announcement` source format and the `_find_espn_event_id` return value structure.
-
-### Verified Test Results:
-All 8 tests run completely offline and pass instantly:
-```
-Ran 8 tests in 0.048s
-
-OK
-```
-
-## Task 2 Final Adjustments & Lookahead/Lookback Window Fixes (June 27, 2026)
-
-We implemented the final fixes for Task 2 to adjust lookahead/lookback windows and enforce starters check constraints:
-1. **Lookahead Window Modification**:
-   - Increased the lookahead range in `_find_espn_event_id` from 3 days to 7 days (`range(7)`) to capture upcoming matches further in advance.
-2. **Scoreboard Lookback Window Expansion**:
-   - Increased the lookback range in `_fetch_team_recent_lineup` from 5 days to 8 days (`range(8)`) to correctly match games spaced a week apart.
-3. **Starters Check constraint in `_fetch_espn_event_lineup`**:
-   - Enforced a rule in `_fetch_espn_event_lineup` to return `None` immediately if the event starters count is less than 11. This prevents slicing active/incomplete players and ensures we correctly fall back to the team's most recent completed game roster.
-4. **Removal of Redundant Imports**:
-   - Cleaned up redundant local `datetime` and `timedelta` imports from `_find_espn_event_id` as they are already imported at the module level.
-5. **Additional Unit Tests**:
-   - Added `test_fetch_espn_event_lineup_insufficient_starters` to verify the starters count check.
-   - Added `test_find_espn_event_id_extended_lookahead` to verify that `_find_espn_event_id` supports scanning up to 7 days ahead.
-   - Added `test_fetch_team_recent_lineup_extended_lookback` to verify that `_fetch_team_recent_lineup` scans up to 8 days back.
-
-### Verified Test Results:
-All 11 tests run completely offline and pass instantly:
-```
-Ran 11 tests in 0.085s
-
-OK
-```
+  OK
+  ```
 
