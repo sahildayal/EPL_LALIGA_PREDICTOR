@@ -118,7 +118,27 @@ class TestBotBetting(unittest.TestCase):
                 if port == "predict" and name == "sigmaballs" and bet_type == expected_bet_type:
                     self.assertEqual(home, "portugal")
                     self.assertEqual(away, "france")
-                    self.assertEqual(stake, 50.0)
+                    # Calculate expected Kelly stake
+                    p_val = 0.05
+                    if "1+ Goals" in expected_bet_type:
+                        p_val = test_probs["goals_1"]
+                    elif "2+ Goals" in expected_bet_type:
+                        p_val = test_probs["goals_2"]
+                    elif "1+ Assists" in expected_bet_type:
+                        p_val = test_probs["assists_1"]
+                    elif "2+ Assists" in expected_bet_type:
+                        p_val = test_probs["assists_2"]
+                    elif "Score or Assist" in expected_bet_type:
+                        p_val = test_probs["goal_or_assist"]
+                        
+                    expected_b = expected_odds - 1.0
+                    if expected_b > 0:
+                        expected_f_star = (p_val * expected_b - (1.0 - p_val)) / expected_b
+                        expected_fraction = max(0.02, min(0.15, 0.25 * expected_f_star))
+                    else:
+                        expected_fraction = 0.05
+                    expected_stake = round(1000.0 * expected_fraction, 2)
+                    self.assertAlmostEqual(stake, expected_stake, places=2)
                     self.assertAlmostEqual(odds, expected_odds, places=4)
                     matched_call = True
                     break

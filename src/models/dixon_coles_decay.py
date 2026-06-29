@@ -23,7 +23,7 @@ class DixonColesRegressor:
         else:
             return 1.0
 
-    def _neg_log_likelihood(self, params, df):
+    def _neg_log_likelihood(self, params, h_indices, a_indices, x, y, t):
         n_teams = len(self.teams)
         alpha = params[0 : n_teams - 1]
         alpha = np.append(alpha, -np.sum(alpha))
@@ -31,35 +31,37 @@ class DixonColesRegressor:
         gamma = params[2 * n_teams - 1]
         rho = params[2 * n_teams]
         
-        nll = 0.0
-        for _, row in df.iterrows():
-            h_idx = self.team_indices[row['home_team']]
-            a_idx = self.team_indices[row['away_team']]
-            x = int(row['home_goals'])
-            y = int(row['away_goals'])
-            t = float(row['days_ago'])
-            
-            # Use clipping to prevent overflow in exp/power
-            eta_h = np.clip(alpha[h_idx] + beta[a_idx] + gamma, -10, 10)
-            eta_a = np.clip(alpha[a_idx] + beta[h_idx], -10, 10)
-            
-            lam = np.exp(eta_h)
-            mu = np.exp(eta_a)
-            
-            weight = np.exp(-self.xi * t)
-            
-            lam_clipped = np.clip(lam, 1e-10, None)
-            mu_clipped = np.clip(mu, 1e-10, None)
-            log_poisson_h = x * np.log(lam_clipped) - lam - math.log(math.factorial(x))
-            log_poisson_a = y * np.log(mu_clipped) - mu - math.log(math.factorial(y))
-            tau_val = self._tau(x, y, lam, mu, rho)
-            
-            if tau_val <= 0:
-                tau_val = 1e-10
-                
-            nll += weight * (np.log(tau_val) + log_poisson_h + log_poisson_a)
-            
-        return -nll
+        eta_h = np.clip(alpha[h_indices] + beta[a_indices] + gamma, -10, 10)
+        eta_a = np.clip(alpha[a_indices] + beta[h_indices], -10, 10)
+        
+        lam = np.exp(eta_h)
+        mu = np.exp(eta_a)
+        
+        weight = np.exp(-self.xi * t)
+        
+        lam_clipped = np.clip(lam, 1e-10, None)
+        mu_clipped = np.clip(mu, 1e-10, None)
+        
+        # We drop the factorial term since it's constant w.r.t optimization variables
+        log_poisson_h = x * np.log(lam_clipped) - lam
+        log_poisson_a = y * np.log(mu_clipped) - mu
+        
+        tau_val = np.ones_like(x, dtype=float)
+        
+        cond_00 = (x == 0) & (y == 0)
+        cond_01 = (x == 0) & (y == 1)
+        cond_10 = (x == 1) & (y == 0)
+        cond_11 = (x == 1) & (y == 1)
+        
+        tau_val[cond_00] = 1.0 - lam[cond_00] * mu[cond_00] * rho
+        tau_val[cond_01] = 1.0 + lam[cond_01] * rho
+        tau_val[cond_10] = 1.0 + mu[cond_10] * rho
+        tau_val[cond_11] = 1.0 - rho
+        
+        tau_val = np.clip(tau_val, 1e-10, None)
+        
+        nll = -np.sum(weight * (np.log(tau_val) + log_poisson_h + log_poisson_a))
+        return nll
 
     def fit(self, df):
         if df.empty or 'home_team' not in df.columns or 'away_team' not in df.columns:
@@ -86,6 +88,13 @@ class DixonColesRegressor:
             self.params['rho'] = 0.05
             return
             
+        # Precompute arrays for vectorized neg_log_likelihood to be super fast
+        h_indices = np.array([self.team_indices[t] for t in df['home_team']])
+        a_indices = np.array([self.team_indices[t] for t in df['away_team']])
+        x = df['home_goals'].astype(int).values
+        y = df['away_goals'].astype(int).values
+        t = df['days_ago'].astype(float).values
+        
         init_params = np.concatenate([
             np.zeros(n_teams - 1),
             np.full(n_teams, -0.1),
@@ -100,20 +109,23 @@ class DixonColesRegressor:
             [(-0.3, 0.3)]
         )
         
-        res = minimize(self._neg_log_likelihood, init_params, args=(df,), bounds=bounds, method='L-BFGS-B')
-        if res.success:
-            fitted = res.x
-            self.params['alphas'] = np.append(fitted[0:n_teams-1], -np.sum(fitted[0:n_teams-1]))
-            self.params['betas'] = fitted[n_teams-1 : 2*n_teams-1]
-            self.params['gamma'] = fitted[2*n_teams-1]
-            self.params['rho'] = fitted[2*n_teams]
-        else:
-            warnings.warn("Optimization failed to converge; using fallback parameters.")
-            # Fallback params
-            self.params['alphas'] = np.zeros(n_teams)
-            self.params['betas'] = np.full(n_teams, -0.1)
-            self.params['gamma'] = 0.2
-            self.params['rho'] = 0.05
+        res = minimize(
+            self._neg_log_likelihood,
+            init_params,
+            args=(h_indices, a_indices, x, y, t),
+            bounds=bounds,
+            method='L-BFGS-B',
+            options={'maxfun': 50000, 'maxiter': 500}
+        )
+        
+        fitted = res.x
+        self.params['alphas'] = np.append(fitted[0:n_teams-1], -np.sum(fitted[0:n_teams-1]))
+        self.params['betas'] = fitted[n_teams-1 : 2*n_teams-1]
+        self.params['gamma'] = fitted[2*n_teams-1]
+        self.params['rho'] = fitted[2*n_teams]
+        
+        if not res.success:
+            warnings.warn(f"Optimization did not converge fully: {res.message}. Using best available parameters.")
 
     def predict_match_probs(self, home, away, max_goals=8):
         if isinstance(home, str):

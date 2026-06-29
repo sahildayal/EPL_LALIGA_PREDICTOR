@@ -321,7 +321,17 @@ def run_predict(query: str):
             bot_alerts.append(f"[dim][=] Big D kept existing position:[/dim] {bet['bet_type']} (${bet['stake']:.2f} at {bet['odds']:.2f}x)")
             
     if sigmaballs_bet_type and sigmaballs_odds:
-        stake = round(s_sum["bankroll"] * 0.05, 2)
+        # Fractional Kelly sizing: f_star = (p * b - (1 - p)) / b
+        p_val = live_price + best_edge
+        b_val = sigmaballs_odds - 1.0
+        if b_val > 0:
+            f_star = (p_val * b_val - (1.0 - p_val)) / b_val
+            # Quarter-Kelly (0.25) capped at 15% (0.15) of bankroll, minimum 2% (0.02)
+            kelly_fraction = max(0.02, min(0.15, 0.25 * f_star))
+        else:
+            kelly_fraction = 0.05
+        
+        stake = round(s_sum["bankroll"] * kelly_fraction, 2)
         res = paper_trading.update_bet("predict", "sigmaballs", home, away, sigmaballs_bet_type, stake, sigmaballs_odds)
         action = res.get("action")
         if action == "placed":
@@ -900,21 +910,28 @@ def run_ask(query: str, user_model: str):
     
     # Generate debate
     if not GEMINI_AVAILABLE:
-        console.print("[yellow]Warning: GEMINI_API_KEY not found in environment. Using simulated scout-quant debate fallback.[/yellow]")
-    else:
-        mapped_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash") if not user_model else user_model
-        console.print(f"[green]Calling Gemini API ({mapped_model}) to generate live scout-quant debate...[/green]")
+        console.print("\n[bold red]ERROR: GEMINI_API_KEY is not configured or google-generativeai package is missing.[/bold red]")
+        console.print("[red]Enforced: Mock fallback debates are disabled to prevent nonsensical data.[/red]")
+        console.print("[yellow]Please set the GEMINI_API_KEY in your .env file or export it in your shell environment.[/yellow]\n")
+        return
         
-    debate = generate_debate(
-        home=home,
-        away=away,
-        probs=result.probabilities,
-        elo_diff=result.elo_diff,
-        sentiment=result.sentiment,
-        news_flags=news_flags,
-        target_bets=target_bets,
-        user_model=user_model
-    )
+    mapped_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash") if not user_model else user_model
+    console.print(f"[green]Calling Gemini API ({mapped_model}) to generate live scout-quant debate...[/green]")
+        
+    try:
+        debate = generate_debate(
+            home=home,
+            away=away,
+            probs=result.probabilities,
+            elo_diff=result.elo_diff,
+            sentiment=result.sentiment,
+            news_flags=news_flags,
+            target_bets=target_bets,
+            user_model=user_model
+        )
+    except Exception as e:
+        console.print(f"\n[bold red]ERROR running debate: {e}[/bold red]\n")
+        return
     
     # Save/register their chosen bets
     from src.market import paper_trading

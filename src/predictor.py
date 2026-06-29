@@ -1,8 +1,10 @@
 import math
 import numpy as np
+import pandas as pd
 from src.data.scrapers import fbref, news, fixtures, elo_db
 from src.data.preprocessor import get_match_features
 from src.models.statistical import DixonColesModel, EloModel
+from src.models.dixon_coles_decay import DixonColesRegressor
 from src.data.team_mapping import normalize_team_name
 from src.models.machine_learning import (
     LogisticRegressionModel, SVMModel, GDAModel,
@@ -42,6 +44,72 @@ def save_elo():
 load_elo()
 
 
+def get_fitted_dixon_coles() -> DixonColesRegressor:
+    """
+    Retrieves or fits the time-decayed Dixon-Coles regressor.
+    Caches parameters in the SQLite database to avoid fitting on every prediction.
+    """
+    from src.data import cache
+    master_csv_path = Path(__file__).parent.parent / "data" / "processed" / "master_dataset.csv"
+    
+    # Calculate a simple cache key key based on CSV modification time/size
+    mtime = 0.0
+    size = 0
+    if master_csv_path.exists():
+        stat = master_csv_path.stat()
+        mtime = stat.st_mtime
+        size = stat.st_size
+    cache_key = f"dixon_coles_params_{mtime}_{size}"
+    
+    cached_data = cache.get("dixon_coles_model", {"key": cache_key})
+    reg = DixonColesRegressor(xi=0.0019)
+    
+    if cached_data:
+        reg.teams = cached_data["teams"]
+        reg.team_indices = {t: idx for idx, t in enumerate(reg.teams)}
+        reg.params = {
+            "alphas": np.array(cached_data["alphas"]),
+            "betas": np.array(cached_data["betas"]),
+            "gamma": cached_data["gamma"],
+            "rho": cached_data["rho"]
+        }
+        return reg
+        
+    # Fit the regressor
+    if master_csv_path.exists():
+        try:
+            df = pd.read_csv(master_csv_path)
+            if not df.empty:
+                df = df.rename(columns={
+                    "HomeTeam": "home_team",
+                    "AwayTeam": "away_team",
+                    "FTHG": "home_goals",
+                    "FTAG": "away_goals"
+                })
+                df["Date"] = pd.to_datetime(df["Date"])
+                ref_date = pd.Timestamp.now()
+                df["days_ago"] = (ref_date - df["Date"]).dt.days
+                
+                reg.fit(df)
+                
+                # Cache parameters (convert np arrays to lists for JSON serialization)
+                cache_payload = {
+                    "teams": reg.teams,
+                    "alphas": reg.params["alphas"].tolist(),
+                    "betas": reg.params["betas"].tolist(),
+                    "gamma": float(reg.params["gamma"]),
+                    "rho": float(reg.params["rho"])
+                }
+                cache.set("dixon_coles_model", {"key": cache_key}, cache_payload, ttl_seconds=3600 * 24)
+                return reg
+        except Exception:
+            pass
+            
+    # Fallback/Empty fit if error or file doesn't exist
+    reg.fit(pd.DataFrame())
+    return reg
+
+
 class PredictionResult:
     def __init__(self, home: str, away: str, probabilities: dict, model_breakdown: dict, sentiment: float, elo_diff: float):
         self.home = home
@@ -66,17 +134,13 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     elo_diff = h_elo - a_elo
     
     # 2. Dixon-Coles statistical prediction
-    dc = DixonColesModel()
-    # Simple fitting on team averages as base
-    h_data = fbref.get_team_data(home_lower)
-    a_data = fbref.get_team_data(away_lower)
-    dc.attack[home_lower] = math_log(h_data.get("avg_goals", 1.4))
-    dc.defense[home_lower] = -math_log(h_data.get("avg_conceded", 1.1))
-    dc.attack[away_lower] = math_log(a_data.get("avg_goals", 1.4))
-    dc.defense[away_lower] = -math_log(a_data.get("avg_conceded", 1.1))
-    dc.is_fitted = True
-    
-    dc_prob = dc.predict(home_lower, away_lower, neutral=neutral)
+    dc_reg = get_fitted_dixon_coles()
+    p_h, p_d, p_a = dc_reg.predict_match_probs(home_lower, away_lower)
+    dc_prob = {
+        "home_win": round(p_h, 4),
+        "draw": round(p_d, 4),
+        "away_win": round(p_a, 4)
+    }
     elo_prob = ELO_PREDICTOR.predict(home_lower, away_lower, home_advantage=(0 if neutral else 65))
     
     # 3. Load & Run the 6 ML models

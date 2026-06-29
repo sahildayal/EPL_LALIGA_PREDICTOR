@@ -84,7 +84,10 @@ def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentimen
         )
 
     if not GEMINI_AVAILABLE:
-        return _get_fallback_debate(home, away, probs, elo_diff, sentiment, d_sum, s_sum)
+        raise RuntimeError(
+            "Gemini AI API Key ('GEMINI_API_KEY') is not configured or google-generativeai package is missing. "
+            "Enforced: Mock fallback debates are disabled to prevent nonsensical data."
+        )
 
     # Use the specified user model or fallback to env variable/default
     raw_model = user_model or os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
@@ -191,8 +194,7 @@ Example format:
                 "personal_bets": None
             }
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        return _get_fallback_debate(home, away, probs, elo_diff, sentiment, d_sum, s_sum)
+        raise RuntimeError(f"Error calling Gemini API: {e}. Enforced: Mock fallback debates are disabled to prevent nonsensical data.")
  
  
 def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, d_summary: dict, s_summary: dict) -> dict:
