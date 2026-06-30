@@ -935,7 +935,7 @@ def run_ask(query: str, user_model: str):
         console.print("[yellow]Please set the GEMINI_API_KEY in your .env file or export it in your shell environment.[/yellow]\n")
         return
         
-    mapped_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash") if not user_model else user_model
+    mapped_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash") if not user_model else user_model
     console.print(f"[green]Calling Gemini API ({mapped_model}) to generate live scout-quant debate...[/green]")
         
     try:

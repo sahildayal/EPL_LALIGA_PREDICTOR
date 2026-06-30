@@ -26,17 +26,17 @@ else:
 def map_model_name(friendly_name: str) -> str:
     """Maps friendly user models to Google API model keys."""
     if not friendly_name:
-        return "gemini-1.5-flash"
+        return "gemini-2.5-flash"
     f_lower = friendly_name.lower().strip()
     if "flash" in f_lower:
-        return "gemini-1.5-flash"
+        return "gemini-2.5-flash"
     elif "pro" in f_lower:
-        return "gemini-1.5-pro"
+        return "gemini-2.5-pro"
     elif "sonnet" in f_lower or "opus" in f_lower or "claude" in f_lower:
-        # Map to Gemini Pro for high-tier thinking since Claude isn't supported on Google AI SDK directly
-        return "gemini-1.5-pro"
+        # Map to Gemini Pro for high-tier thinking
+        return "gemini-2.5-pro"
     elif "gpt" in f_lower or "oss" in f_lower:
-        return "gemini-1.5-flash"
+        return "gemini-2.5-flash"
     return friendly_name
 
 
