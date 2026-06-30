@@ -7,8 +7,8 @@ class TestRosterFeatures(unittest.TestCase):
     def test_roster_strength_calculations(self):
         from src.data.preprocessor import get_match_features
         features = get_match_features("brazil", "japan")
-        # Verify extended feature length is 28 (original 25 + 3 new features)
-        self.assertEqual(len(features), 28)
+        # Verify extended feature length is 31 (original 28 + 3 new features)
+        self.assertEqual(len(features), 31)
         self.assertTrue(features[25] > 0.0) # HTRosterStrength
         self.assertTrue(features[26] > 0.0) # ATRosterStrength
 

@@ -69,3 +69,33 @@ def get_sentiment(entity: str) -> dict:
         return result
     except Exception:
         return {"score": 0.0, "flags": []}
+
+
+def get_roster_health(team: str, roster: list) -> float:
+    """
+    Queries news headlines involving the team and parses for player injury keywords.
+    """
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        url = f"https://news.google.com/rss/search?q={team.replace(' ', '+')}+football+injury"
+        resp = requests.get(url, timeout=5)
+        if resp.status_code != 200:
+            return 1.0
+        soup = BeautifulSoup(resp.text, "xml")
+        titles = [item.title.text.lower() for item in soup.find_all("item")]
+    except Exception:
+        titles = []
+        
+    injury_words = ["injury", "injured", "out", "suspended", "doubtful", "miss", "absent", "hamstring", "knee"]
+    flagged = 0
+    for player in roster:
+        p_name = player.lower().strip()
+        for title in titles:
+            if p_name in title and any(w in title for w in injury_words):
+                flagged += 1
+                break
+                
+    health = 1.0 - (flagged / 11)
+    return max(0.5, health)
+

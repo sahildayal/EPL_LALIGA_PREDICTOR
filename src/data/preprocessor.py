@@ -6,7 +6,7 @@ from src.data.scrapers import fbref, elo_db, news
 from src.data.cache import get_team_last_travel
 from src.data.scrapers.fixtures import search_wc_fixture
 
-# The 17 general features (no team-specific IDs) + 8 new fatigue/travel features (total 25)
+# The 17 general features (no team-specific IDs) + 8 new fatigue/travel features + 3 roster strength + 3 roster health (total 31)
 FEATURE_NAMES = [
     "B365H", "B365D", "B365A",
     "HTGS", "HTGC", "HTP", "HTGD",
@@ -17,7 +17,8 @@ FEATURE_NAMES = [
     "HTRestDays", "ATRestDays", "RestDisparity",
     "HTExtremeFatigue", "ATExtremeFatigue",
     "HTTravel", "ATTravel", "TravelDisparity",
-    "HTRosterStrength", "ATRosterStrength", "RosterStrengthDiff"
+    "HTRosterStrength", "ATRosterStrength", "RosterStrengthDiff",
+    "HTRosterHealth", "ATRosterHealth", "RosterHealthDiff"
 ]
 
 VENUE_COORDS = {
@@ -179,6 +180,7 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
 
     h_avg = h_avg_g
     a_avg = a_avg_g
+    h_lineup, a_lineup = [], []
     try:
         from src.data.scrapers.fixtures import get_match_lineups
         from src.data.scrapers.player_stats import get_player_stats
@@ -198,6 +200,15 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
         
     roster_strength_diff = h_roster_strength - a_roster_strength
 
+    try:
+        from src.data.scrapers.news import get_roster_health
+        h_health = get_roster_health(home_team, h_lineup)
+        a_health = get_roster_health(away_team, a_lineup)
+    except Exception:
+        h_health, a_health = 1.0, 1.0
+        
+    health_diff = h_health - a_health
+
     # 6. Assemble the array
     features = np.array([
         b365h, b365d, b365a,
@@ -209,7 +220,8 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
         ht_rest, at_rest, rest_disparity,
         ht_fatigue, at_fatigue,
         ht_travel, at_travel, travel_disparity,
-        h_roster_strength, a_roster_strength, roster_strength_diff
+        h_roster_strength, a_roster_strength, roster_strength_diff,
+        h_health, a_health, health_diff
     ], dtype=np.float32)
 
     return features
@@ -241,6 +253,8 @@ def clean_and_load_dataset(raw_filepath: str) -> tuple:
                 df[col] = 0.0
             elif "RosterStrength" in col:
                 df[col] = 1.5 if "Diff" not in col else 0.0
+            elif "RosterHealth" in col:
+                df[col] = 1.0 if "Diff" not in col else 0.0
             else:
                 df[col] = 0.0
 
