@@ -211,24 +211,26 @@ To maximize forecasting accuracy, the orchestrator incorporates advanced statist
 - **Numerical Stability**: Re-formulates maximum likelihood estimation directly in log-probability space, utilizing `np.clip` on scoring intensities to completely prevent numeric overflow or underflow under SciPy optimization.
 - **Robust Fallbacks**: Automatically falls back to safe prior parameters if a team has insufficient history or if the optimizer fails to converge.
 
-### 2. Advanced Elo Rating System
+### 2. Advanced Elo Rating System & Confederation Calibration
 - **Stage-Dependent K-factors**: Scales match importance based on the official FIFA/eloratings.net weights (e.g., friendly matches = 20 weight, World Cup qualifiers = 40 weight, World Cup knockout matches = 60 weight).
 - **Margin of Victory Multiplier**: Updates ratings using a goal-difference scaling factor:
   $$R_{\text{new}} = R_{\text{old}} + K \times M(N) \times (W - W_e)$$
   where $M(N) = 1.75 + \frac{N-3}{8}$ for absolute goal differences $N \ge 4$.
+- **Confederation Boosts**: Dynamically applies region-dependent adjustments to Elo differences before probability calculation (e.g., CONMEBOL: +50 ELO, UEFA: +40 ELO, AFC: -20 ELO, CONCACAF: -30 ELO, OFC: -80 ELO, defaulting to 0 for unknown teams), correcting cross-confederation rating gaps.
 - **Regional Home Advantage**: Dynamically applies a +100 ELO home advantage boost for non-neutral fixtures, defaulting to 0 for neutral tournament grounds.
 
-### 3. Rest Days, Fatigue Index, and Travel Distance Preprocessing
-- **Haversine Distance**: Calculates exact travel distances in kilometers between match venues using the Haversine formula, clipping values to avoid math domain exceptions.
-- **Fatigue Tracking**: Computes rest days ($\Delta t_{\text{rest}}$) between consecutive fixtures and marks an **Extreme Fatigue** indicator if a team recovery window is $\le 3$ days.
-- **SQLite Travel Log**: Persists coordinates and travel histories using a composite key `PRIMARY KEY (team, date)` to query travel states chronologically.
+### 3. Starting XI Quality Index & Roster Health Preprocessing
+- **Starting XI Strength**: Parses active match rosters and aggregates player-specific performance stats (club/country goals and xG per 90) to generate a dynamic team roster strength index (`HTRosterStrength`, `ATRosterStrength`, and `RosterStrengthDiff`), adjusting predictions if starting lineups are rotated or resting key players.
+- **Google News Injury RSS Parser**: Continuously scans live RSS search endpoints for team injury news and flags rostered players matching keywords like `injury`, `doubtful`, `suspended`, or `out`, outputting a dynamic health index (`HTRosterHealth`, `ATRosterHealth`, `RosterHealthDiff`).
+- **Robust Caching & Fallbacks**: Roster health scores are cached for 2 hours in SQLite. Roster strength indices default to safe historical averages if rosters are unavailable or scraping fails, with player-specific exception wrappers protecting the pipeline.
 
-### 4. Two-Stage Stacking Classifier Ensemble & Staking
+### 4. Two-Stage Stacking Classifier Ensemble, Staking & Progression
 - **Stage 1 Base Learners**: Combines predictions from an XGBoost classifier, a LightGBM classifier, and a Multi-Layer Perceptron (MLP) Neural Network.
 - **Stage 2 Meta-Learner**: Fits a Ridge Logistic Regression classifier using standard scaling on the concatenated out-of-fold predicted probabilities, preventing data leakage and stabilizing outputs.
 - **Fractional Kelly Sizing**: Integrates a Quarter-Kelly Criterion bankroll allocation for quant paper-bets (`SIGMABALLS`):
   $$f^* = 0.25 \times \frac{p \times b - (1 - p)}{b}$$
   where $b = \text{odds} - 1$ and $p = \text{probability}$. Capped at 15% maximum allocation to manage drawdown volatility.
+- **To-Qualify Progression Model**: Foretells advancement probabilities during the single-elimination knockout stages, estimating extra-time and shootout win chances based on team Elo differences and starting goalkeeper penalty-saving coefficients (e.g., Alisson: 33%, Suzuki: 25%).
 - **Enforced Real AI Debates**: Disables simulated fallbacks. The CLI exits with a clean alert if `GEMINI_API_KEY` is missing to ensure only live models drive bot decisions.
 
 ---
