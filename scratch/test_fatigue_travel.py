@@ -51,8 +51,8 @@ class TestFatigueTravel(unittest.TestCase):
         # Run features preprocessor
         features = get_match_features("portugal", "france")
         
-        # Verify length is 25 (17 base + 8 new)
-        self.assertEqual(len(features), 25)
+        # Verify length is 28 (17 base + 8 travel/fatigue + 3 roster strength)
+        self.assertEqual(len(features), 28)
         
         # Map feature values
         feat_dict = dict(zip(FEATURE_NAMES, features))

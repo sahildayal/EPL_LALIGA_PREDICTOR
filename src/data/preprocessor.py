@@ -16,7 +16,8 @@ FEATURE_NAMES = [
     "SentimentScore",
     "HTRestDays", "ATRestDays", "RestDisparity",
     "HTExtremeFatigue", "ATExtremeFatigue",
-    "HTTravel", "ATTravel", "TravelDisparity"
+    "HTTravel", "ATTravel", "TravelDisparity",
+    "HTRosterStrength", "ATRosterStrength", "RosterStrengthDiff"
 ]
 
 VENUE_COORDS = {
@@ -176,6 +177,27 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
     rest_disparity = ht_rest - at_rest
     travel_disparity = ht_travel - at_travel
 
+    h_avg = h_avg_g
+    a_avg = a_avg_g
+    try:
+        from src.data.scrapers.fixtures import get_match_lineups
+        from src.data.scrapers.player_stats import get_player_stats
+        lineups_res = get_match_lineups(home_team, away_team)
+        h_lineup = lineups_res.get("home_lineup", [])
+        a_lineup = lineups_res.get("away_lineup", [])
+        
+        h_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in h_lineup])
+        a_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in a_lineup])
+    except Exception:
+        h_roster_strength, a_roster_strength = 0.0, 0.0
+        
+    if h_roster_strength == 0.0:
+        h_roster_strength = h_avg * 1.5
+    if a_roster_strength == 0.0:
+        a_roster_strength = a_avg * 1.5
+        
+    roster_strength_diff = h_roster_strength - a_roster_strength
+
     # 6. Assemble the array
     features = np.array([
         b365h, b365d, b365a,
@@ -186,7 +208,8 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
         sentiment_diff,
         ht_rest, at_rest, rest_disparity,
         ht_fatigue, at_fatigue,
-        ht_travel, at_travel, travel_disparity
+        ht_travel, at_travel, travel_disparity,
+        h_roster_strength, a_roster_strength, roster_strength_diff
     ], dtype=np.float32)
 
     return features
@@ -216,6 +239,8 @@ def clean_and_load_dataset(raw_filepath: str) -> tuple:
                 df[col] = 7.0
             elif "Rest" in col or "Disparity" in col:
                 df[col] = 0.0
+            elif "RosterStrength" in col:
+                df[col] = 1.5 if "Diff" not in col else 0.0
             else:
                 df[col] = 0.0
 
