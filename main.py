@@ -99,6 +99,14 @@ def run_predict(query: str):
         table.add_row(label, f"{probs[outcome]*100:.2f}%", b_str)
         
     console.print(table)
+
+    # To-Qualify / Progression Forecast Matrix
+    prog_table = Table(title=f"{home.title()} vs {away.title()} To-Qualify (Progression) Forecast", box=box.SIMPLE)
+    prog_table.add_column("Team", style="cyan")
+    prog_table.add_column("Advance Probability", style="bold green")
+    prog_table.add_row(home.title(), f"{result.progression_probabilities['home_advances']*100:.2f}%")
+    prog_table.add_row(away.title(), f"{result.progression_probabilities['away_advances']*100:.2f}%")
+    console.print(prog_table)
     console.print(f"\n[bold white]News Sentiment Diff:[/bold white] {result.sentiment:+.2f}")
     console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts ({home.title()}: {ELO_PREDICTOR.get(home):.0f}, {away.title()}: {ELO_PREDICTOR.get(away):.0f})")
 
@@ -927,7 +935,8 @@ def run_ask(query: str, user_model: str):
             sentiment=result.sentiment,
             news_flags=news_flags,
             target_bets=target_bets,
-            user_model=user_model
+            user_model=user_model,
+            progression_probs=result.progression_probabilities
         )
     except Exception as e:
         console.print(f"\n[bold red]ERROR running debate: {e}[/bold red]\n")

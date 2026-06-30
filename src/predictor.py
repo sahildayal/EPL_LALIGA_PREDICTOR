@@ -111,13 +111,14 @@ def get_fitted_dixon_coles() -> DixonColesRegressor:
 
 
 class PredictionResult:
-    def __init__(self, home: str, away: str, probabilities: dict, model_breakdown: dict, sentiment: float, elo_diff: float):
+    def __init__(self, home: str, away: str, probabilities: dict, model_breakdown: dict, sentiment: float, elo_diff: float, progression_probabilities: dict = None):
         self.home = home
         self.away = away
         self.probabilities = probabilities  # {"home_win", "draw", "away_win"}
         self.model_breakdown = model_breakdown
         self.sentiment = sentiment
         self.elo_diff = elo_diff
+        self.progression_probabilities = progression_probabilities or {"home_advances": 0.50, "away_advances": 0.50}
 
 
 CONFEDERATION_BOOST = {
@@ -235,13 +236,37 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     a_news = news.get_sentiment(away_lower)
     sentiment_diff = h_news.get("score", 0.0) - a_news.get("score", 0.0)
     
+    # Goalkeeper penalty save rate logic
+    # Brazil GK (Alisson): 33%, Japan GK (Zion Suzuki): 25%
+    gk_rates = {
+        "brazil": 0.33,
+        "japan": 0.25
+    }
+    h_gk_rate = gk_rates.get(home_lower, 0.28)
+    a_gk_rate = gk_rates.get(away_lower, 0.28)
+    
+    # Probability of home team advancing if it goes to Extra Time/Penalties
+    # Adjusted by Elo diff and Goalkeeper penalty-saving rates
+    p_et_pens_home = 0.50 + 0.0008 * elo_diff + 0.10 * (h_gk_rate - a_gk_rate)
+    p_et_pens_home = max(0.30, min(0.70, p_et_pens_home))
+    
+    # Combined advances probability
+    p_home_advances = blended["home_win"] + blended["draw"] * p_et_pens_home
+    p_away_advances = 1.0 - p_home_advances
+    
+    prog_probs = {
+        "home_advances": round(p_home_advances, 4),
+        "away_advances": round(p_away_advances, 4)
+    }
+    
     return PredictionResult(
         home=home_team,
         away=away_team,
         probabilities=blended,
         model_breakdown=ml_breakdown,
         sentiment=sentiment_diff,
-        elo_diff=elo_diff
+        elo_diff=elo_diff,
+        progression_probabilities=prog_probs
     )
 
 
