@@ -100,15 +100,27 @@ def run_predict(query: str):
         
     console.print(table)
 
-    # To-Qualify / Progression Forecast Matrix
-    prog_table = Table(title=f"{home.title()} vs {away.title()} To-Qualify (Progression) Forecast", box=box.SIMPLE)
-    prog_table.add_column("Team", style="cyan")
-    prog_table.add_column("Advance Probability", style="bold green")
-    prog_table.add_row(home.title(), f"{result.progression_probabilities['home_advances']*100:.2f}%")
-    prog_table.add_row(away.title(), f"{result.progression_probabilities['away_advances']*100:.2f}%")
-    console.print(prog_table)
+    # To-Qualify / Progression Forecast Matrix (Only for Knockout Stage)
+    from src.market.llm import get_tournament_stage
+    stage_name = get_tournament_stage()
+    if "knockout" in stage_name.lower():
+        prog_table = Table(title=f"{home.title()} vs {away.title()} To-Qualify (Progression) Forecast", box=box.SIMPLE)
+        prog_table.add_column("Team", style="cyan")
+        prog_table.add_column("Advance Probability", style="bold green")
+        prog_table.add_row(home.title(), f"{result.progression_probabilities['home_advances']*100:.2f}%")
+        prog_table.add_row(away.title(), f"{result.progression_probabilities['away_advances']*100:.2f}%")
+        console.print(prog_table)
+
+    h_elo = ELO_PREDICTOR.get(home)
+    a_elo = ELO_PREDICTOR.get(away)
+    from src.predictor import TEAM_CONFEDERATION, CONFEDERATION_BOOST
+    h_conf = TEAM_CONFEDERATION.get(home, "neutral")
+    a_conf = TEAM_CONFEDERATION.get(away, "neutral")
+    h_boost = CONFEDERATION_BOOST.get(h_conf, 0.0)
+    a_boost = CONFEDERATION_BOOST.get(a_conf, 0.0)
+    
     console.print(f"\n[bold white]News Sentiment Diff:[/bold white] {result.sentiment:+.2f}")
-    console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts ({home.title()}: {ELO_PREDICTOR.get(home):.0f}, {away.title()}: {ELO_PREDICTOR.get(away):.0f})")
+    console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts (Calibrated ELO: {home.title()} {h_elo+h_boost:.0f} vs {away.title()} {a_elo+a_boost:.0f} | Raw: {h_elo:.0f} vs {a_elo:.0f})")
 
     # Set up Dixon-Coles for goal-based markets (Over/Under, BTTS, Player scorer)
     dc = statistical.DixonColesModel()

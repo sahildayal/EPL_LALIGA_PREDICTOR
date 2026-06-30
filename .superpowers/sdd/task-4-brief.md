@@ -1,51 +1,92 @@
-### Task 4: Rest Days, Fatigue Index, and Travel Distance Preprocessing
+### Task 4: Google News Roster Health / Injury RSS Parser
 
 **Files:**
+- Create: `src/data/scrapers/news.py` (Modify)
 - Modify: `src/data/preprocessor.py`
-- Test: `scratch/test_fatigue_travel.py`
-
-**Interfaces:**
-- Consumes: `save_team_travel` and `get_team_last_travel`
-- Produces: Travel distance calculation and fatigue rest disparity features added to feature matrix
+- Test: `scratch/test_roster_health.py`
 
 - [ ] **Step 1: Write the failing test**
-  Create `scratch/test_fatigue_travel.py` to verify preprocessor updates:
+  Create `scratch/test_roster_health.py`:
   ```python
   import unittest
   import sys
   from pathlib import Path
   sys.path.append(str(Path(__file__).resolve().parents[1]))
-  from src.data.preprocessor import calculate_distance_km
-
-  class TestFatigueTravel(unittest.TestCase):
-      def test_haversine_distance(self):
-          # Distance between London (51.5, -0.1) and Paris (48.8, 2.3)
-          dist = calculate_distance_km(51.5, -0.1, 48.8, 2.3)
-          self.assertTrue(300 < dist < 400)
+  
+  class TestRosterHealth(unittest.TestCase):
+      def test_injury_news_scoring(self):
+          from src.data.preprocessor import get_match_features
+          features = get_match_features("brazil", "japan")
+          # Roster health features appended: len is 31
+          self.assertEqual(len(features), 31)
+          self.assertTrue(features[28] <= 1.0) # HTRosterHealth
+          self.assertTrue(features[29] <= 1.0) # ATRosterHealth
+  
+  if __name__ == '__main__':
+      unittest.main()
   ```
+
 - [ ] **Step 2: Run test to verify it fails**
-  Run: `python scratch/test_fatigue_travel.py`
-  Expected: FAIL with `ImportError` or `AttributeError`
-- [ ] **Step 3: Write minimal implementation**
-  Edit `src/data/preprocessor.py` to add haversine distance helper and rest disparity metrics.
-  ```python
-  import math
+  Run: `python scratch/test_roster_health.py`
+  Expected: FAIL with `AssertionError: 28 != 31`
 
-  def calculate_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-      R = 6371.0  # Earth's radius in km
-      d_lat = math.radians(lat2 - lat1)
-      d_lon = math.radians(lon2 - lon1)
-      a = math.sin(d_lat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2)**2
-      c = 2 * math.asin(math.sqrt(a))
-      return R * c
+- [ ] **Step 3: Implement Roster Health and RSS keyword parser**
+  In `src/data/scrapers/news.py`:
+  ```python
+  def get_roster_health(team: str, roster: list) -> float:
+      """
+      Queries news headlines involving the team and parses for player injury keywords.
+      """
+      try:
+          import requests
+          from bs4 import BeautifulSoup
+          url = f"https://news.google.com/rss/search?q={team.replace(' ', '+')}+football+injury"
+          resp = requests.get(url, timeout=5)
+          if resp.status_code != 200:
+              return 1.0
+          soup = BeautifulSoup(resp.text, "xml")
+          titles = [item.title.text.lower() for item in soup.find_all("item")]
+      except Exception:
+          titles = []
+          
+      injury_words = ["injury", "injured", "out", "suspended", "doubtful", "miss", "absent", "hamstring", "knee"]
+      flagged = 0
+      for player in roster:
+          p_name = player.lower().strip()
+          for title in titles:
+              if p_name in title and any(w in title for w in injury_words):
+                  flagged += 1
+                  break
+                  
+      health = 1.0 - (flagged / 11)
+      return max(0.5, health)
   ```
+  In `src/data/preprocessor.py`:
+  Append `"HTRosterHealth"`, `"ATRosterHealth"`, `"RosterHealthDiff"` to `FEATURE_NAMES`.
+  Calculate team health scores inside `get_match_features`:
+  ```python
+      try:
+          from src.data.scrapers.news import get_roster_health
+          h_health = get_roster_health(home_team, h_lineup)
+          a_health = get_roster_health(away_team, a_lineup)
+      except Exception:
+          h_health, a_health = 1.0, 1.0
+          
+      health_diff = h_health - a_health
+  ```
+  Add `h_health`, `a_health`, and `health_diff` to the features array.
+  Update `clean_and_load_dataset` defaults:
+  ```python
+              elif "RosterHealth" in col:
+                  df[col] = 1.0 if "Diff" not in col else 0.0
+  ```
+
 - [ ] **Step 4: Run test to verify it passes**
-  Run: `python scratch/test_fatigue_travel.py`
+  Run: `python scratch/test_roster_health.py`
   Expected: PASS
+
 - [ ] **Step 5: Commit**
   ```bash
-  git add src/data/preprocessor.py scratch/test_fatigue_travel.py
-  git commit -m "feat: add travel distance math in preprocessor"
+  git add src/data/scrapers/news.py src/data/preprocessor.py scratch/test_roster_health.py
+  git commit -m "feat: implement Google News roster health parser"
   ```
-
----

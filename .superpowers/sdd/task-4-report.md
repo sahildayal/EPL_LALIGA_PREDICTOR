@@ -1,59 +1,55 @@
-# Task 4: Rest Days, Fatigue Index, and Travel Distance Preprocessing - Report
+# Task 4 Report: Google News Roster Health / Injury RSS Parser
 
-## 1. What was Implemented
-We implemented team rest days, fatigue indices, and cumulative travel distance calculations.
+## Implementation Details
+We implemented the Google News roster health / injury RSS parser that checks headlines for player names and injury keywords, and added these as features to the ML models.
 Specifically:
-- Created the haversine distance utility function `calculate_distance_km(lat1, lon1, lat2, lon2)` inside [preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py).
-- Implemented venue coordinate resolver `get_venue_coords(venue_name)` to convert city/stadium names (e.g. World Cup 2026 host cities) to lat/lon coordinates.
-- Implemented `calculate_team_fatigue_travel(team, current_date_str, current_coords)` to query SQLite travel cache, compute rest days (difference in days since last match), travel distance (km via Haversine), and flag extreme fatigue (rest days <= 3.0).
-- Extended `FEATURE_NAMES` with 8 new features (increasing feature dimensions from 17 to 25):
-  - `HTRestDays`, `ATRestDays`, `RestDisparity`
-  - `HTExtremeFatigue`, `ATExtremeFatigue`
-  - `HTTravel`, `ATTravel`, `TravelDisparity`
-- Integrated these features inside `get_match_features(home_team, away_team, kalshi_probs=None)` by mapping upcoming match dates and venues.
-- Updated `clean_and_load_dataset` to handle backward-compatibility with historical Premier League datasets (providing clean defaults like 7 rest days, 0 travel distance, and 0 fatigue if columns do not exist).
-- Retrained all 6 machine learning models on the master dataset using the updated 25 features to prevent shape mismatch errors.
+- Implemented `get_roster_health` in [src/data/scrapers/news.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/scrapers/news.py) to query the Google News RSS search endpoint for a team's injury news, extract the titles, and flag players in the team's roster that match injury keywords (e.g. `injury`, `injured`, `out`, `suspended`, `doubtful`, `miss`, `absent`, `hamstring`, `knee`). Roster health is computed as `1.0 - (flagged / 11)` capped at a minimum of `0.5`.
+- Updated `FEATURE_NAMES` in [src/data/preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py) to append `"HTRosterHealth"`, `"ATRosterHealth"`, `"RosterHealthDiff"`, bringing the total feature count to 31.
+- Updated `get_match_features` in [src/data/preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py) to calculate the home team and away team roster health values, calculate `health_diff = h_health - a_health`, and append these to the returned feature vector.
+- Updated `clean_and_load_dataset` in [src/data/preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py) to safely fill NAs with `1.0` for roster health features and `0.0` for the difference feature.
+- Adjusted existing tests in [scratch/test_roster_features.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_roster_features.py) and [scratch/test_fatigue_travel.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_fatigue_travel.py) to reflect the new feature vector length of 31 instead of 28.
 
-## 2. Verification and Test Results
-We created and ran the test suite:
-- Created test file [test_fatigue_travel.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_fatigue_travel.py) containing:
-  - `test_haversine_distance`: Verified the haversine calculation matches the distance between London and Paris (~344 km).
-  - `test_get_match_features_with_travel_cache`: Verified that setting up SQLite travel logs (e.g. Lisbon for Portugal, Paris for France) and calling `get_match_features` returns the correct 25 features, correctly calculating rest days (3 and 6), extreme fatigue flags, and travel distances to Munich.
+## Test Results
+We ran the unit and integration tests and they all passed successfully.
 
-All 43 tests pass successfully.
+### Test suite details in [scratch/test_roster_health.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_roster_health.py):
+- `test_injury_news_scoring`: Verifies that `get_match_features` returns a feature vector of length 31 and the health values are less than or equal to 1.0.
+- `test_get_roster_health_no_injuries`: Mock unit test verifying that if no injury headlines exist, the roster health score is correctly returned as `1.0`.
+- `test_get_roster_health_with_injuries`: Mock unit test verifying that when matching players are mentioned in injury headlines, the roster health score is properly penalized.
+- `test_get_roster_health_request_failure`: Mock unit test verifying that if the HTTP request fails, the parser gracefully returns `1.0` roster health.
 
-## 3. TDD Evidence
-### RED Stage
-- **Command:** `python scratch/test_fatigue_travel.py`
+## TDD Evidence
+### RED Phase
+- **Command Run:** `python scratch/test_roster_health.py`
 - **Output:**
-```
-Traceback (most recent call last):
-  File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_fatigue_travel.py", line 8, in <module>
-    from src.data.preprocessor import calculate_distance_km, get_match_features, FEATURE_NAMES
-ImportError: cannot import name 'calculate_distance_km' from 'src.data.preprocessor' (C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\src\data\preprocessor.py)
-```
-- **Why Failure Was Expected:** `calculate_distance_km` was not yet implemented or exported in `src/data/preprocessor.py`.
+  ```
+  FAIL: test_injury_news_scoring (__main__.TestRosterHealth.test_injury_news_scoring)
+  ----------------------------------------------------------------------
+  Traceback (most recent call last):
+    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_roster_health.py", line 11, in test_injury_news_scoring
+      self.assertEqual(len(features), 31)
+      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  AssertionError: 28 != 31
+  ```
+- **Why Failure Expected:** The roster health features had not yet been added to `FEATURE_NAMES` or calculated in `get_match_features` in `src/data/preprocessor.py`.
 
-### GREEN Stage
-- **Command:** `python scratch/test_fatigue_travel.py`
+### GREEN Phase
+- **Command Run:** `python scratch/test_roster_health.py`
 - **Output:**
-```
-..
-----------------------------------------------------------------------
-Ran 2 tests in 1.860s
+  ```
+  Ran 4 tests in 1.593s
 
-OK
-```
+  OK
+  ```
 
-## 4. Files Changed
-- [preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py) (Modified)
-- [test_fatigue_travel.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_fatigue_travel.py) (Created)
+## Files Changed
+- Modified: [src/data/scrapers/news.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/scrapers/news.py)
+- Modified: [src/data/preprocessor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/preprocessor.py)
+- Modified: [scratch/test_roster_features.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_roster_features.py)
+- Modified: [scratch/test_fatigue_travel.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_fatigue_travel.py)
+- Created: [scratch/test_roster_health.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_roster_health.py)
 
-## 5. Self-Review Findings
-- **Completeness:** Fully implemented all 8 fatigue/travel/rest features and verified they are correctly blended into the feature matrices.
-- **Quality:** Code contains clear comments and error handling for date parsing and coords lookup.
-- **Discipline:** Avoided any overbuilding or restructuring outside of the task scope. Added clean fallbacks to preserve backwards compatibility of existing ML training workflows.
-- **Testing:** Tests are robust and mocked external scrapers while executing real preprocessor/SQLite cache code.
-
-## 6. Issues or Concerns
-None.
+## Self-Review Findings
+- **Completeness:** The new RSS scraper correctly identifies player names and injury keywords, adding three robust features to the ML prediction pipeline.
+- **Quality:** Safe exception handling and network mocks are implemented to avoid brittle tests.
+- **Compatibility:** Feature defaults are configured, and prior test suites are updated to maintain total green test suite compatibility.

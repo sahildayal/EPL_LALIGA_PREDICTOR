@@ -188,8 +188,19 @@ def get_match_features(home_team: str, away_team: str, kalshi_probs: dict = None
         h_lineup = lineups_res.get("home_lineup", [])
         a_lineup = lineups_res.get("away_lineup", [])
         
-        h_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in h_lineup])
-        a_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in a_lineup])
+        h_roster_strength = 0.0
+        for p in h_lineup:
+            try:
+                h_roster_strength += get_player_stats(p).get("xg_per_90", 0.1)
+            except Exception:
+                h_roster_strength += 0.1
+                
+        a_roster_strength = 0.0
+        for p in a_lineup:
+            try:
+                a_roster_strength += get_player_stats(p).get("xg_per_90", 0.1)
+            except Exception:
+                a_roster_strength += 0.1
     except Exception:
         h_roster_strength, a_roster_strength = 0.0, 0.0
         

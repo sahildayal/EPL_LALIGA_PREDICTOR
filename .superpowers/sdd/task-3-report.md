@@ -1,68 +1,63 @@
-# Task 3: Advanced Elo Rating System & Margin of Victory Multiplier - Report
+# Task 3 Report: Knockout Progression Model (To Qualify)
 
-## What was Implemented
-We implemented an advanced Elo calculator class, `EloSystem`, within `src/models/advanced_elo.py` that supports:
-1. **Stage-Dependent Importance K-factors**: Allows setting customized K-factor weights on a per-match basis (e.g. friendly matches = 20 vs. World Cup knockout matches = 60).
-2. **Margin of Victory Multiplier**: Scaled Elo updates utilizing the official World Football Elo ratings formula:
-   - Difference of <= 1 goal: multiplier = 1.0
-   - Difference of 2 goals: multiplier = 1.5
-   - Difference of 3 goals: multiplier = 1.75
-   - Difference of 4+ goals: multiplier = 1.75 + (N - 3) / 8.0
-3. **Case-Insensitivity & Normalized Keys**: Team names are lowercased and stripped to ensure robust matching and consistency.
-4. **Home Advantage**: Computes win expectancy taking home advantage `H` into account when games are not played on a neutral ground.
+## Implementation Details
+We implemented match progression / To-Qualify forecast logic to calculate the probability of each team advancing to the next round of a knockout match (accounting for extra time and penalty shootouts), updated the scout/quant LLM debate prompts with these details, and outputted a progression forecast table in the `predict` CLI command.
+Specifically:
+- Updated the `PredictionResult` class in `src/predictor.py` to accept and store `progression_probabilities` (defaulting to equal 50/50 split if none provided).
+- Implemented goalkeeper-influenced advancement calculations in `predict_match` in `src/predictor.py` using a goalkeeper penalty save rate dictionary mapping (`brazil` -> 33%, `japan` -> 25%, defaulting to 28% for others).
+- Computed progression probability as: `p_home_advances = blended_home_win + blended_draw * p_et_pens_home`, where `p_et_pens_home` represents the home team's chances if the match is decided in Extra Time/Penalties (modeled as `0.50 + 0.0008 * elo_diff + 0.10 * (h_gk_rate - a_gk_rate)` capped between `0.30` and `0.70`).
+- Updated `main.py` `run_predict` to print the To-Qualify progression forecast table to the console using a Rich `Table`.
+- Updated the Gemini debate generation prompt in `src/market/llm.py` to accept and inject `progression_probs` as a Match Data point.
+- Updated the debate execution call in `main.py` `run_ask` to pass `progression_probs` to the LLM agent.
+
+## Test Results
+We ran the unit tests under `scratch/test_progression_model.py` and the progression tests passed successfully.
+
+### Test suite details:
+- `test_advancement_probabilities_brazil_japan`: Verifies Brazil (higher Elo, Alisson) vs Japan (Zion Suzuki) calculates a proper progression forecast where Brazil has a significantly higher progression probability (>70%), and the probabilities sum to 1.0.
+- `test_advancement_probabilities_japan_brazil`: Verifies that reversing the home/away assignment still results in the stronger team (Brazil) being favored to advance.
+- `test_default_goalkeeper_rates`: Verifies that matches between teams not explicitly in the goalie save rate dictionary (e.g. France vs England) run successfully and probabilities sum to 1.0.
 
 ## TDD Evidence
-
 ### RED Phase
-The test suite `scratch/test_advanced_elo.py` was created containing a test that imports the new `EloSystem` class and asserts its update ratings behavior. Running the test failed with `ModuleNotFoundError` because the class had not been implemented yet.
+- **Command Run:** `python scratch/test_progression_model.py`
+- **Output:**
+  ```
+  F
+  ======================================================================
+  FAIL: test_advancement_probabilities (__main__.TestProgressionModel.test_advancement_probabilities)
+  ----------------------------------------------------------------------
+  Traceback (most recent call last):
+    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_progression_model.py", line 10, in test_advancement_probabilities
+      self.assertTrue(hasattr(res, "progression_probabilities"))
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  AssertionError: False is not true
 
-**Command Run:**
-```bash
-python scratch/test_advanced_elo.py
-```
+  ----------------------------------------------------------------------
+  Ran 1 test in 2.129s
 
-**Failing Output:**
-```
-Traceback (most recent call last):
-  File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_advanced_elo.py", line 5, in <module>
-    from src.models.advanced_elo import EloSystem
-ModuleNotFoundError: No module named 'src.models.advanced_elo'
-```
-
-**Why the failure was expected:**
-The file `src/models/advanced_elo.py` did not exist yet, resulting in python being unable to find and import the module.
-
----
+  FAILED (failures=1)
+  ```
+- **Why Failure Expected:** The predictor result had not yet implemented the `progression_probabilities` attribute or calculation logic.
 
 ### GREEN Phase
-After writing the minimal implementation in `src/models/advanced_elo.py` and expanding the test suite to cover case-insensitivity, K-factor scaling, margin of victory multiplier correctness, and home advantage, we ran the test suite and all 5 tests passed successfully.
+- **Command Run:** `python scratch/test_progression_model.py`
+- **Output:**
+  ```
+  ...
+  ----------------------------------------------------------------------
+  Ran 3 tests in 11.006s
 
-**Command Run:**
-```bash
-python scratch/test_advanced_elo.py
-```
-
-**Passing Output:**
-```
-.....
-----------------------------------------------------------------------
-Ran 5 tests in 0.000s
-
-OK
-```
-
----
+  OK
+  ```
 
 ## Files Changed
-- `src/models/advanced_elo.py` (created) - Contains the `EloSystem` implementation.
-- `scratch/test_advanced_elo.py` (created) - Contains unit tests for `EloSystem`.
+- Modified: [src/predictor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/predictor.py)
+- Modified: [src/market/llm.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/market/llm.py)
+- Modified: [main.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/main.py)
+- Created: [scratch/test_progression_model.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_progression_model.py)
 
 ## Self-Review Findings
-We reviewed the implementation against acceptance criteria:
-- **Completeness**: Implemented all specific details (K-factors, margin of victory, case insensitivity, etc.).
-- **Quality**: The code is clean, names are descriptive, and helper methods are used where appropriate.
-- **Discipline**: Used TDD and did not write production code until we had a failing test. Avoided overbuilding.
-- **Testing**: Added additional comprehensive test cases to verify the math, normalization, scaling, and home advantage logic. Pristine output with no warnings or errors.
-
-## Issues or Concerns
-None. The code integrates cleanly and the existing tests are completely unaffected (all 41 tests in the repository continue to pass perfectly).
+- **Completeness:** Knockout progression calculations are successfully integrated into the predictor, the console output, and the LLM debate prompt.
+- **Quality:** Safe bounds checking is applied to ensure progression probabilities remain valid. The goalkeeper rate dictionary safely defaults for other teams.
+- **Testing:** Unit tests explicitly assert progression probability bounds, reversed configurations, and default team configurations.

@@ -38,6 +38,7 @@ class TestBotBetting(unittest.TestCase):
         mock_result.model_breakdown = {}
         mock_result.sentiment = 0.0
         mock_result.elo_diff = 0.0
+        mock_result.progression_probabilities = {"home_advances": 0.50, "away_advances": 0.50}
         self.mock_predict_match.return_value = mock_result
 
         # get_match_lineups mock (only Ronaldo on home team, empty away lineup)

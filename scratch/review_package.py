@@ -1,40 +1,53 @@
 import sys
 import subprocess
-from pathlib import Path
+import os
 
-def run_git(args):
-    res = subprocess.run(["git"] + args, capture_output=True, text=True, check=True)
-    return res.stdout
-
-def create_review_package(base, head, out_path=None):
-    base_short = run_git(["rev-parse", "--short", base]).strip()
-    head_short = run_git(["rev-parse", "--short", head]).strip()
-    
-    if not out_path:
-        out_path = Path(".superpowers/sdd") / f"review-{base_short}..{head_short}.diff"
-    else:
-        out_path = Path(out_path)
-        
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    commits_log = run_git(["log", "--oneline", f"{base}..{head}"])
-    diff_stat = run_git(["diff", "--stat", f"{base}..{head}"])
-    diff_content = run_git(["diff", "-U10", f"{base}..{head}"])
-    
-    content = []
-    content.append(f"# Review package: {base}..{head}\n")
-    content.append("## Commits\n")
-    content.append(commits_log + "\n")
-    content.append("## Files changed\n")
-    content.append(diff_stat + "\n")
-    content.append("## Diff\n")
-    content.append(diff_content + "\n")
-    
-    out_path.write_text("".join(content), encoding="utf-8")
-    print(f"Wrote review package to {out_path}")
-
-if __name__ == "__main__":
+def main():
+    if len(sys.argv) < 3:
+        print("Usage: python review_package.py BASE HEAD [OUTFILE]")
+        sys.exit(2)
     base = sys.argv[1]
     head = sys.argv[2]
-    out_path = sys.argv[3] if len(sys.argv) > 3 else None
-    create_review_package(base, head, out_path)
+    
+    # Verify refs
+    try:
+        subprocess.check_call(["git", "rev-parse", "--verify", "--quiet", base], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print(f"bad BASE: {base}")
+        sys.exit(2)
+        
+    try:
+        subprocess.check_call(["git", "rev-parse", "--verify", "--quiet", head], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print(f"bad HEAD: {head}")
+        sys.exit(2)
+        
+    if len(sys.argv) == 4:
+        outfile = sys.argv[3]
+    else:
+        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
+        sdd_dir = os.path.join(root, ".superpowers", "sdd")
+        os.makedirs(sdd_dir, exist_ok=True)
+        base_short = subprocess.check_output(["git", "rev-parse", "--short", base]).decode().strip()
+        head_short = subprocess.check_output(["git", "rev-parse", "--short", head]).decode().strip()
+        outfile = os.path.join(sdd_dir, f"review-{base_short}..{head_short}.diff")
+        
+    # Build content
+    with open(outfile, "w", encoding="utf-8") as f:
+        f.write(f"# Review package: {base}..{head}\n\n")
+        f.write("## Commits\n")
+        commits_log = subprocess.check_output(["git", "log", "--oneline", f"{base}..{head}"]).decode(errors="replace")
+        f.write(commits_log + "\n")
+        f.write("## Files changed\n")
+        diff_stat = subprocess.check_output(["git", "diff", "--stat", f"{base}..{head}"]).decode(errors="replace")
+        f.write(diff_stat + "\n")
+        f.write("## Diff\n")
+        diff_full = subprocess.check_output(["git", "diff", "-U10", f"{base}..{head}"]).decode(errors="replace")
+        f.write(diff_full + "\n")
+        
+    commits_count = subprocess.check_output(["git", "rev-list", "--count", f"{base}..{head}"]).decode().strip()
+    size_bytes = os.path.getsize(outfile)
+    print(f"wrote {outfile}: {commits_count} commit(s), {size_bytes} bytes")
+
+if __name__ == "__main__":
+    main()

@@ -1,81 +1,57 @@
-# Task 2 Report: Dixon-Coles Time Decay Model & Parameter Estimator
+# Task 2 Report: Confederation ELO Calibration
 
 ## Implementation Details
-We implemented the Dixon-Coles goal expectation regressor model with dynamic parameter estimation and exponential time-decay weighting.
-Specifically, the class `DixonColesRegressor` in `src/models/dixon_coles_decay.py` includes:
-- Attacking parameters (`alpha`), defensive parameters (`beta`), home advantage (`gamma`), and correlation adjustment (`rho`).
-- Exponential time weighting of log-likelihood using parameters `xi` and match age `days_ago`.
-- Numerical stability improvements using `np.clip` on the exponent terms to prevent potential overflow/underflow during parameter optimization under SciPy `minimize`.
-- A fallback system in the event optimization doesn't converge or encounters issues, defaulting to safe parameter estimates.
+We implemented ELO ratings differential boosting based on team confederations (UEFA, CONMEBOL, AFC, CAF, CONCACAF, OFC) to calibrate match prediction models.
+Specifically:
+- Defined the confederation mappings `TEAM_CONFEDERATION` and their corresponding ELO boosts/penalties `CONFEDERATION_BOOST` in `src/predictor.py`.
+- Updated `predict_match` to retrieve each team's confederation (defaulting to `"uefa"` if unknown) and calculate their boosts.
+- Modified the rating difference calculation to apply these boosts, i.e., `elo_diff = (h_elo + h_boost) - (a_elo + a_boost)`, rounded to 1 decimal place.
+- Ensured the adjusted ELO ratings are correctly fed into the ELO probability prediction inside `predict_match` by constructing a localized `EloModel` instance to run `.predict()`.
 
 ## Test Results
-We ran the unit tests locally under `scratch/test_dixon_coles_decay.py` and all tests passed successfully.
+We ran the unit tests under `scratch/test_confederation_calibration.py` and the calibration test passed successfully.
 
 ### Test suite details:
-- `test_regressor_fit`: Verifies parameter estimation converges and produces valid probabilities within the `[0, 1]` range.
-- `test_unknown_teams`: Verifies that predicting matches containing teams not present in the training set falls back to the default probability split `(0.33, 0.33, 0.34)`.
-- `test_fallback_fit_failure`: Verifies that minimal input datasets still fit without error, and output probabilities continue to sum to 1.0.
+- `test_confederation_boosting`: Sets explicit baseline Elo ratings for Brazil (CONMEBOL, +50 boost) and Japan (AFC, -20 penalty) so that the initial difference is exactly `162.1`, then verifies that after applying calibration, the reported ELO ratings difference is exactly `232.1` (a `+70` rating points shift).
 
 ## TDD Evidence
 ### RED Phase
-- **Command Run:** `python scratch/test_dixon_coles_decay.py`
+- **Command Run:** `python scratch/test_confederation_calibration.py`
 - **Output:**
   ```
+  F
+  ======================================================================
+  FAIL: test_confederation_boosting (__main__.TestConfedCalibration.test_confederation_boosting)
+  ----------------------------------------------------------------------
   Traceback (most recent call last):
-    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_dixon_coles_decay.py", line 6, in <module>
-      from src.models.dixon_coles_decay import DixonColesRegressor
-  ModuleNotFoundError: No module named 'src.models.dixon_coles_decay'
+    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_confederation_calibration.py", line 16, in test_confederation_boosting
+      self.assertEqual(res.elo_diff, 232.1) # rating diff (162.1) + confed diff (70.0)
+      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  AssertionError: 162.0999999999999 != 232.1
+
+  ----------------------------------------------------------------------
+  Ran 1 test in 2.082s
+
+  FAILED (failures=1)
   ```
-- **Why Failure Expected:** The target module `src.models.dixon_coles_decay` did not exist yet, causing the initial import to fail.
+- **Why Failure Expected:** The predictor had not yet implemented confederation boosts, so `elo_diff` was the uncalibrated raw difference `162.1`.
 
 ### GREEN Phase
-- **Command Run:** `python scratch/test_dixon_coles_decay.py`
+- **Command Run:** `python scratch/test_confederation_calibration.py`
 - **Output:**
   ```
-  ...
+  .
   ----------------------------------------------------------------------
-  Ran 3 tests in 0.065s
+  Ran 1 test in 2.093s
 
   OK
   ```
 
 ## Files Changed
-- Created: [src/models/dixon_coles_decay.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/models/dixon_coles_decay.py)
-- Created: [scratch/test_dixon_coles_decay.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_dixon_coles_decay.py)
+- Modified: [src/predictor.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/predictor.py)
+- Created: [scratch/test_confederation_calibration.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_confederation_calibration.py)
 
 ## Self-Review Findings
-- **Completeness:** Implemented all required interfaces (`DixonColesRegressor(xi=0.0019)`, `DixonColesRegressor.fit(df)`, `DixonColesRegressor.predict_match_probs(home, away)`).
-- **Quality:** Capped exponent terms using `np.clip` to prevent potential numeric overflow warnings during scipy optimization.
-- **Testing:** The tests cover typical success paths, unknown team fallback paths, minimal datasets, and verify that the output probabilities are properly normalized and sum to 1.0.
-
-## Fixes Applied
-
-1. **ValueError on Empty Fitting**:
-   - Added checks in `fit()` in `src/models/dixon_coles_decay.py` to check if `df` is empty, or lacks `home_team`/`away_team` columns, or if `n_teams <= 1`.
-   - If any of these are true, immediately populates fallback parameters and returns early without causing a `ValueError` in SciPy parameter initialization.
-
-2. **Negative Probability Protection in Prediction**:
-   - In `predict_match_probs()`, added protection checking `tau_val <= 0` and setting it to `1e-10` to avoid potential non-positive/negative probabilities during calculation.
-
-3. **Method Signature Rename**:
-   - Renamed parameter names from `home_team` and `away_team` to `home` and `away` inside `predict_match_probs()` to match the expected signature in the task brief.
-
-4. **Test Exception Swallowing Removal & Empty Fit Assertion**:
-   - Updated `scratch/test_dixon_coles_decay.py` to remove the `try/except` block swallowing exceptions during empty fit checks.
-   - Added assertions verifying that fitting empty data runs without raising exceptions and correctly populates the fallback params.
-
-5. **Case Insensitivity Support**:
-   - Handled case-insensitive input by lowercasing and stripping team names in both `fit()` and `predict_match_probs()`.
-   - Added a new unit test `test_case_insensitivity_and_whitespace` to verify correct behavior.
-
-## Updated Test Results
-- **Command Run:** `python scratch/test_dixon_coles_decay.py`
-- **Output:**
-  ```
-  ....
-  ----------------------------------------------------------------------
-  Ran 4 tests in 0.106s
-
-  OK
-  ```
-
+- **Completeness:** The implementation covers both `elo_diff` rating difference adjustment and ELO probability prediction adjustment inside `predict_match`.
+- **Quality:** Safe dictionaries and fallback defaults ensure unknown national teams default to UEFA parameters with 0.0 boost adjustment without crashing.
+- **Testing:** The test explicitly controls team ELOs to verify mathematical correctness of the confederation delta (+70 points shift) precisely.

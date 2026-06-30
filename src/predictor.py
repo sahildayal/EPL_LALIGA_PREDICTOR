@@ -127,7 +127,8 @@ CONFEDERATION_BOOST = {
     "caf": 0.0,
     "afc": -20.0,
     "concacaf": -30.0,
-    "ofc": -80.0
+    "ofc": -80.0,
+    "neutral": 0.0
 }
 
 TEAM_CONFEDERATION = {
@@ -148,8 +149,8 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     home_lower = normalize_team_name(home_team)
     away_lower = normalize_team_name(away_team)
     
-    h_conf = TEAM_CONFEDERATION.get(home_lower, "uefa")
-    a_conf = TEAM_CONFEDERATION.get(away_lower, "uefa")
+    h_conf = TEAM_CONFEDERATION.get(home_lower, "neutral")
+    a_conf = TEAM_CONFEDERATION.get(away_lower, "neutral")
     
     h_boost = CONFEDERATION_BOOST.get(h_conf, 0.0)
     a_boost = CONFEDERATION_BOOST.get(a_conf, 0.0)

@@ -75,6 +75,11 @@ def get_roster_health(team: str, roster: list) -> float:
     """
     Queries news headlines involving the team and parses for player injury keywords.
     """
+    key = f"{team.lower().strip()}_{'_'.join(sorted([p.lower().strip() for p in roster]))}"
+    cached = cache.get("roster_health", {"key": key})
+    if cached is not None:
+        return cached
+
     try:
         import requests
         from bs4 import BeautifulSoup
@@ -97,5 +102,7 @@ def get_roster_health(team: str, roster: list) -> float:
                 break
                 
     health = 1.0 - (flagged / 11)
-    return max(0.5, health)
+    health = max(0.5, health)
+    cache.set("roster_health", {"key": key}, health, ttl_seconds=3600 * 2)  # cache 2 hours
+    return health
 

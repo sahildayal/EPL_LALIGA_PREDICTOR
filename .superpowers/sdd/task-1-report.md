@@ -1,54 +1,23 @@
-# Task 1 Completion Report: SQLite Storage Scaffolding & Travel Logs Cache
+# Task 1 Report: Starting XI Quality Index Feature Engineering
 
-## Actions Completed
-1. Modified [cache.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/cache.py) to:
-   - Create the `team_travel` table inside `_conn()` if it doesn't already exist.
-   - Implement `save_team_travel(team: str, city: str, date: str, lat: float, lon: float)` to normalize inputs (lowercase and strip whitespace) and store them in the `team_travel` table.
-   - Implement `get_team_last_travel(team: str) -> dict` to retrieve the latest travel log (city, date, lat, lon) for a team.
-2. Created a test file [test_db_scaffolding.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_db_scaffolding.py) to verify travel cache storing and fetching functionality.
-3. Verified the TDD cycle:
-   - RED: Verified test fails with `ImportError: cannot import name 'save_team_travel'` before implementation.
-   - GREEN: Verified test passes after implementation.
-4. Ran the full test suite to ensure zero regressions across the codebase.
+## Status
+**DONE**
 
-## TDD Evidence
+## Changes Made
+- Modified `src/data/preprocessor.py` to:
+  - Append `"HTRosterStrength"`, `"ATRosterStrength"`, and `"RosterStrengthDiff"` to `FEATURE_NAMES`.
+  - Fetch match lineups dynamically using `get_match_lineups(home_team, away_team)` and look up starting players' composite statistics via `get_player_stats(player)`.
+  - Sum the `xg_per_90` statistics of the players in each lineup to compute roster strength.
+  - Apply fallback calculations (`h_avg * 1.5` / `a_avg * 1.5`) when roster strength is 0.0 or scraping/lineup lookup fails.
+  - Append the computed home roster strength, away roster strength, and roster strength difference to the `features` numpy array.
+  - Set default value mappings for the new columns in `clean_and_load_dataset` (setting roster strength to 1.5 and difference to 0.0 if not present).
+- Created a new test suite file `scratch/test_roster_features.py` to verify the calculated roster strength features and array size extensions.
+- Updated `scratch/test_fatigue_travel.py` to expect 28 features instead of the old 25.
 
-### RED (Failing Test Output before Implementation)
-- **Command:** `python scratch/test_db_scaffolding.py`
-- **Output:**
-  ```
-  Traceback (most recent call last):
-    File "C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\scratch\test_db_scaffolding.py", line 5, in <module>
-      from src.data.cache import save_team_travel, get_team_last_travel, _conn
-  ImportError: cannot import name 'save_team_travel' from 'src.data.cache' (C:\Users\Bikash\Desktop\CODEBASE\WorldCupPredictor\src\data\cache.py)
-  ```
-- **Explanation:** The failure was expected because `save_team_travel` and `get_team_last_travel` were not yet defined in `src/data/cache.py`.
+## Commits
+- `9272f18` feat: add Starting XI roster strength features
 
-### GREEN (Passing Test Output after Implementation)
-- **Command:** `python scratch/test_db_scaffolding.py`
-- **Output:**
-  ```
-  .
-  ----------------------------------------------------------------------
-  Ran 1 test in 0.024s
-
-  OK
-  ```
-
-## Integration & Full Test Suite Verification
-- **Command:** `python -m unittest discover -s scratch -p "test_*.py"`
-- **Output:**
-  ```
-  Ran 32 tests in 1.532s
-
-  OK
-  ```
-
-## Files Changed
-- [cache.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/data/cache.py) - Added `team_travel` table schema and caching helper methods.
-- [test_db_scaffolding.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/scratch/test_db_scaffolding.py) - Created to test travel caching.
-
-## Self-Review Findings
-- The implementation strictly adheres to the brief.
-- Inputs are properly normalized (lowercased and stripped).
-- All 32 tests pass successfully with pristine output.
+## Verification & Testing
+- Ran TDD test suite `scratch/test_roster_features.py` which failed initially (25 != 28) and passed (OK) after preprocessor implementation.
+- Ran the full scratch test suite (`python -m unittest discover -s scratch -p "test_*.py"`):
+  - 48 tests passed successfully, verifying correctness of features, travel/fatigue integration, Dixon-Coles model optimization, ELO scoring, and paper trading portfolio bot betting flow.
