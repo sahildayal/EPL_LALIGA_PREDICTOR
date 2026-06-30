@@ -120,6 +120,25 @@ class PredictionResult:
         self.elo_diff = elo_diff
 
 
+CONFEDERATION_BOOST = {
+    "conmebol": 50.0,
+    "uefa": 40.0,
+    "caf": 0.0,
+    "afc": -20.0,
+    "concacaf": -30.0,
+    "ofc": -80.0
+}
+
+TEAM_CONFEDERATION = {
+    "brazil": "conmebol", "argentina": "conmebol", "uruguay": "conmebol", "colombia": "conmebol", "ecuador": "conmebol", "chile": "conmebol", "paraguay": "conmebol",
+    "france": "uefa", "england": "uefa", "spain": "uefa", "portugal": "uefa", "netherlands": "uefa", "germany": "uefa", "italy": "uefa", "croatia": "uefa", "belgium": "uefa", "denmark": "uefa", "switzerland": "uefa", "sweden": "uefa", "norway": "uefa",
+    "morocco": "caf", "senegal": "caf", "egypt": "caf", "tunisia": "caf",
+    "japan": "afc", "south korea": "afc", "australia": "afc", "saudi arabia": "afc", "iran": "afc", "jordan": "afc",
+    "mexico": "concacaf", "usa": "concacaf", "canada": "concacaf", "haiti": "concacaf",
+    "new zealand": "ofc"
+}
+
+
 def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neutral: bool = True) -> PredictionResult:
     """
     Orchestrates the 8 models to predict a single match.
@@ -128,10 +147,18 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
     home_lower = normalize_team_name(home_team)
     away_lower = normalize_team_name(away_team)
     
+    h_conf = TEAM_CONFEDERATION.get(home_lower, "uefa")
+    a_conf = TEAM_CONFEDERATION.get(away_lower, "uefa")
+    
+    h_boost = CONFEDERATION_BOOST.get(h_conf, 0.0)
+    a_boost = CONFEDERATION_BOOST.get(a_conf, 0.0)
+    
     # 1. Fetch team ELOs and averages
     h_elo = ELO_PREDICTOR.get(home_lower)
     a_elo = ELO_PREDICTOR.get(away_lower)
-    elo_diff = h_elo - a_elo
+    
+    # Apply boost and round to 1 decimal place
+    elo_diff = round((h_elo + h_boost) - (a_elo + a_boost), 1)
     
     # 2. Dixon-Coles statistical prediction
     dc_reg = get_fitted_dixon_coles()
@@ -141,7 +168,12 @@ def predict_match(home_team: str, away_team: str, kalshi_probs: dict = None, neu
         "draw": round(p_d, 4),
         "away_win": round(p_a, 4)
     }
-    elo_prob = ELO_PREDICTOR.predict(home_lower, away_lower, home_advantage=(0 if neutral else 65))
+    
+    # Calibrated ELO rating fed into ELO probability prediction
+    temp_elo_predictor = EloModel()
+    temp_elo_predictor.set(home_lower, h_elo + h_boost)
+    temp_elo_predictor.set(away_lower, a_elo + a_boost)
+    elo_prob = temp_elo_predictor.predict(home_lower, away_lower, home_advantage=(0 if neutral else 65))
     
     # 3. Load & Run the 6 ML models
     ml_probs = []
