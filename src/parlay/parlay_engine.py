@@ -25,6 +25,9 @@ class ParlayEngine:
         Outcomes can be: 'home_win', 'draw', 'away_win', 'over_1.5', 'over_2.5', 'btts', 'under_2.5', corners, progression
         player_props: list of tuples (player_name, is_home_player)
         """
+        if "to_qualify_home" in outcomes and "to_qualify_away" in outcomes:
+            return 0.0
+
         # Extract corner outcomes and progression outcomes
         corner_outcomes = [o for o in outcomes if "corners_over_" in o]
         progression_outcomes = [o for o in outcomes if "to_qualify_" in o]
@@ -54,6 +57,7 @@ class ParlayEngine:
                 p_stats = self.memo_player_stats[p_key]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
                 share = p_g90 / max(h_avg, 0.01) if is_home else p_g90 / max(a_avg, 0.01)
+                share = min(1.0, max(0.0, share))
                 player_shares.append((share, is_home))
 
         # Fetch Knockout progression model probabilities to compute correlated advances
@@ -209,6 +213,7 @@ class ParlayEngine:
                 p_stats = self.memo_player_stats[p_key]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
                 share = p_g90 / max(h_avg if is_home else a_avg, 0.01)
+                share = min(1.0, max(0.0, share))
                 
                 # P(Player scores) = sum_h,a matrix[h,a] * (1 - (1-share)^team_goals)
                 p_prob = 0.0
@@ -292,8 +297,20 @@ class ParlayEngine:
                 # Enforce sports betting mutual exclusions:
                 # - Max 1 Moneyline outcome (home_win, away_win, draw) per match
                 # - Max 1 Totals/Spread outcome (over_1.5, over_2.5, under_2.5) per match
+                # - Contradictory options (e.g. to_qualify_home and to_qualify_away, or home_win and to_qualify_away, etc.)
                 invalid_combo = False
                 for match_key, legs in match_legs.items():
+                    outcomes = [leg.get("outcome") for leg in legs if leg.get("outcome") is not None]
+                    if "to_qualify_home" in outcomes and "to_qualify_away" in outcomes:
+                        invalid_combo = True
+                        break
+                    if "home_win" in outcomes and "to_qualify_away" in outcomes:
+                        invalid_combo = True
+                        break
+                    if "away_win" in outcomes and "to_qualify_home" in outcomes:
+                        invalid_combo = True
+                        break
+
                     ml_count = sum(1 for leg in legs if leg.get("outcome") in ["home_win", "away_win", "draw"])
                     totals_count = sum(1 for leg in legs if leg.get("outcome") in ["over_1.5", "over_2.5", "under_2.5"])
                     if ml_count > 1 or totals_count > 1:

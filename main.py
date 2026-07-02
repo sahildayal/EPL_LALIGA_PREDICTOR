@@ -124,21 +124,24 @@ def run_predict(query: str):
     console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts (Calibrated ELO: {home.title()} {h_elo+h_boost:.0f} vs {away.title()} {a_elo+a_boost:.0f} | Raw: {h_elo:.0f} vs {a_elo:.0f})")
 
     # Under ELO ratings print in main.py:
-    from src.data.scrapers.corners import get_team_recent_corners
-    h_crn = get_team_recent_corners(home)
-    a_crn = get_team_recent_corners(away)
-    
-    lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
-    lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
-    
-    crn_table = Table(title=f"{home.title()} vs {away.title()} Corner Kicks Expectation", box=box.SIMPLE)
-    crn_table.add_column("Team", style="cyan")
-    crn_table.add_column("Avg Corners Won", style="green")
-    crn_table.add_column("Expected Corners (Match)", style="bold green")
-    crn_table.add_row(home.title(), f"{h_crn['won']:.1f}", f"{lambda_h:.1f}")
-    crn_table.add_row(away.title(), f"{a_crn['won']:.1f}", f"{lambda_a:.1f}")
-    crn_table.add_row("Total Expected", "-", f"{lambda_h + lambda_a:.1f}")
-    console.print(crn_table)
+    try:
+        from src.data.scrapers.corners import get_team_recent_corners
+        h_crn = get_team_recent_corners(home)
+        a_crn = get_team_recent_corners(away)
+        
+        lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
+        lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
+        
+        crn_table = Table(title=f"{home.title()} vs {away.title()} Corner Kicks Expectation", box=box.SIMPLE)
+        crn_table.add_column("Team", style="cyan")
+        crn_table.add_column("Avg Corners Won", style="green")
+        crn_table.add_column("Expected Corners (Match)", style="bold green")
+        crn_table.add_row(home.title(), f"{h_crn['won']:.1f}", f"{lambda_h:.1f}")
+        crn_table.add_row(away.title(), f"{a_crn['won']:.1f}", f"{lambda_a:.1f}")
+        crn_table.add_row("Total Expected", "-", f"{lambda_h + lambda_a:.1f}")
+        console.print(crn_table)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not load corner kick expectations: {e}[/yellow]")
 
     # Set up Dixon-Coles for goal-based markets (Over/Under, BTTS, Player scorer)
     dc = statistical.DixonColesModel()
@@ -947,15 +950,23 @@ def run_ask(query: str, user_model: str):
     news_flags = h_news.get("flags", []) + a_news.get("flags", [])
     
     # Corners expectation
-    h_crn = get_team_recent_corners(home)
-    a_crn = get_team_recent_corners(away)
-    lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
-    lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
-    corners_expectation = {
-        home.title(): f"{lambda_h:.1f}",
-        away.title(): f"{lambda_a:.1f}",
-        "Total Expected": f"{lambda_h + lambda_a:.1f}"
-    }
+    try:
+        h_crn = get_team_recent_corners(home)
+        a_crn = get_team_recent_corners(away)
+        lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
+        lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
+        corners_expectation = {
+            home.title(): f"{lambda_h:.1f}",
+            away.title(): f"{lambda_a:.1f}",
+            "Total Expected": f"{lambda_h + lambda_a:.1f}"
+        }
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not load corner kick expectations: {e}[/yellow]")
+        corners_expectation = {
+            home.title(): "N/A",
+            away.title(): "N/A",
+            "Total Expected": "N/A"
+        }
     
     # Generate debate
     if not GEMINI_AVAILABLE:

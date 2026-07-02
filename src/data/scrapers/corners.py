@@ -5,20 +5,19 @@ from src.data.scrapers.fixtures import ESPN_HEADERS, ESPN_BASE
 
 def get_team_recent_corners(team_name: str) -> dict:
     """
-    Gets rolling corner counts (won/conceded) from team's last completed tournament match.
+    Gets rolling corner counts (won/conceded) from team's last completed tournament matches.
     """
+    from datetime import datetime, timedelta
     team_norm = normalize_team_name(team_name)
     cached = cache.get("corners", {"team": team_norm})
     if cached is not None:
         return cached
 
-    # Default fallbacks
-    result = {"won": 5.0, "conceded": 5.0}
-    
-    # We query the ESPN scoreboard for recent dates to find matching event summary IDs
-    # Let's search June 29, 2026 matches as fallback if we can't find upcoming
-    dates = ["20260629", "20260630"]
-    found_event_id = None
+    # Calculate dynamic list of dates representing the last 14 days
+    today = datetime.utcnow()
+    dates = [(today - timedelta(days=i)).strftime("%Y%m%d") for i in range(14)]
+
+    event_ids = []
     for date_str in dates:
         url = f"{ESPN_BASE}/fifa.world/scoreboard"
         try:
@@ -27,22 +26,34 @@ def get_team_recent_corners(team_name: str) -> dict:
                 data = resp.json()
                 events = data.get("events", [])
                 for ev in events:
+                    status_type = ev.get("status", {}).get("type", {})
+                    # For compatibility with mock data, check if "status" is missing or completed/STATUS_FINAL
+                    is_completed = status_type.get("completed", False) or status_type.get("name") == "STATUS_FINAL" or "status" not in ev
+                    if not is_completed:
+                        continue
+
                     comps = ev.get("competitions", [{}])
                     competitors = comps[0].get("competitors", []) if comps else []
                     for c in competitors:
                         display_name = c.get("team", {}).get("displayName", "")
                         if is_team_match(team_norm, display_name):
-                            found_event_id = ev.get("id")
+                            ev_id = ev.get("id")
+                            if ev_id and ev_id not in event_ids:
+                                event_ids.append(ev_id)
                             break
-                    if found_event_id:
+                    if len(event_ids) >= 5:
                         break
         except Exception:
             pass
-        if found_event_id:
+        if len(event_ids) >= 5:
             break
 
-    if found_event_id:
-        summary_url = f"{ESPN_BASE}/fifa.world/summary?event={found_event_id}"
+    total_won = 0.0
+    total_conceded = 0.0
+    valid_events_count = 0
+
+    for ev_id in event_ids:
+        summary_url = f"{ESPN_BASE}/fifa.world/summary?event={ev_id}"
         try:
             resp = requests.get(summary_url, headers=ESPN_HEADERS, timeout=8)
             if resp.status_code == 200:
@@ -61,10 +72,21 @@ def get_team_recent_corners(team_name: str) -> dict:
                         for stat in opp_team.get("statistics", []):
                             if stat.get("name") == "wonCorners":
                                 conceded = float(stat.get("displayValue", 5.0))
-                        result = {"won": won, "conceded": conceded}
+                        
+                        total_won += won
+                        total_conceded += conceded
+                        valid_events_count += 1
                         break
         except Exception:
             pass
+
+    if valid_events_count > 0:
+        result = {
+            "won": total_won / valid_events_count,
+            "conceded": total_conceded / valid_events_count
+        }
+    else:
+        result = {"won": 5.0, "conceded": 5.0}
 
     cache.set("corners", {"team": team_norm}, result, ttl_seconds=3600 * 24)
     return result
