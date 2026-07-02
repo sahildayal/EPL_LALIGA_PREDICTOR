@@ -25,10 +25,6 @@ def get_team_recent_corners(team_name: str) -> dict:
             resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=8)
             if resp.status_code == 200:
                 data = resp.json()
-                if "boxscore" in data:
-                    # In testing environment, requests.get might be mocked to return the boxscore JSON directly
-                    found_event_id = "mocked_from_test"
-                    break
                 events = data.get("events", [])
                 for ev in events:
                     comps = ev.get("competitions", [{}])
@@ -61,7 +57,7 @@ def get_team_recent_corners(team_name: str) -> dict:
                         for stat in t.get("statistics", []):
                             if stat.get("name") == "wonCorners":
                                 won = float(stat.get("displayValue", 5.0))
-                        opp_team = teams[opp_idx] if len(teams) > opp_idx else {}
+                        opp_team = teams[opp_idx] if (opp_idx >= 0 and len(teams) > opp_idx) else {}
                         for stat in opp_team.get("statistics", []):
                             if stat.get("name") == "wonCorners":
                                 conceded = float(stat.get("displayValue", 5.0))

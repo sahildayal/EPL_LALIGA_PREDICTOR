@@ -1,91 +1,157 @@
-### Task 1: Starting XI Quality Index Feature Engineering
+### Task 1: Corner Kick Scraper & Caching Layer
 
 **Files:**
-- Modify: `src/data/preprocessor.py`
-- Test: `scratch/test_roster_features.py`
+- Create: `src/data/scrapers/corners.py`
+- Test: `scratch/test_corners.py`
 
 **Interfaces:**
-- Consumes: Lineup rosters from `src/data/scrapers/fixtures.py` and player stats from `src/data/scrapers/player_stats.py`
-- Produces: Features array extended by three columns (`HTRosterStrength`, `ATRosterStrength`, `RosterStrengthDiff`)
+- Consumes: `src.data.cache` and standard `requests`
+- Produces: `get_team_recent_corners(team_name: str) -> dict` returning `{"won": float, "conceded": float}`
 
 - [ ] **Step 1: Write the failing test**
-  Create `scratch/test_roster_features.py`:
+  Create `scratch/test_corners.py` with mock responses:
   ```python
   import unittest
+  from unittest.mock import patch, MagicMock
   import sys
   from pathlib import Path
   sys.path.append(str(Path(__file__).resolve().parents[1]))
-  
-  class TestRosterFeatures(unittest.TestCase):
-      def test_roster_strength_calculations(self):
-          from src.data.preprocessor import get_match_features
-          features = get_match_features("brazil", "japan")
-          # Verify extended feature length is 28 (original 25 + 3 new features)
-          self.assertEqual(len(features), 28)
-          self.assertTrue(features[25] > 0.0) # HTRosterStrength
-          self.assertTrue(features[26] > 0.0) # ATRosterStrength
-  
+
+  class TestCornersScraper(unittest.TestCase):
+      def setUp(self):
+          self.cache_get_patcher = patch("src.data.cache.get", return_value=None)
+          self.cache_set_patcher = patch("src.data.cache.set")
+          self.mock_cache_get = self.cache_get_patcher.start()
+          self.mock_cache_set = self.cache_set_patcher.start()
+
+      def tearDown(self):
+          self.cache_get_patcher.stop()
+          self.cache_set_patcher.stop()
+
+      @patch("requests.get")
+      @patch("src.data.scrapers.fixtures._find_espn_event_id")
+      def test_scrape_team_corners(self, mock_find, mock_get):
+          # Mock recent completed event IDs (events in the past)
+          mock_find.return_value = ("760487", "fifa.world")
+          
+          # Mock ESPN summary JSON with wonCorners statistic
+          mock_resp = MagicMock()
+          mock_resp.status_code = 200
+          mock_resp.json.return_value = {
+              "boxscore": {
+                  "teams": [
+                      {
+                          "team": {"displayName": "Brazil"},
+                          "statistics": [
+                              {"name": "wonCorners", "displayValue": "6", "label": "Corner Kicks"}
+                          ]
+                      },
+                      {
+                          "team": {"displayName": "Japan"},
+                          "statistics": [
+                              {"name": "wonCorners", "displayValue": "4", "label": "Corner Kicks"}
+                          ]
+                      }
+                  ]
+              }
+          }
+          mock_get.return_value = mock_resp
+
+          from src.data.scrapers.corners import get_team_recent_corners
+          res = get_team_recent_corners("brazil")
+          self.assertEqual(res["won"], 6.0)
+          self.assertEqual(res["conceded"], 4.0)
+
   if __name__ == '__main__':
       unittest.main()
   ```
 
 - [ ] **Step 2: Run test to verify it fails**
-  Run: `python scratch/test_roster_features.py`
-  Expected: FAIL with `AssertionError: 25 != 28`
+  Run: `python scratch/test_corners.py`
+  Expected: FAIL with `ModuleNotFoundError` on `src.data.scrapers.corners`
 
-- [ ] **Step 3: Modify preprocessor code**
-  Update `FEATURE_NAMES` and `get_match_features` in `src/data/preprocessor.py` to append the new roster columns:
+- [ ] **Step 3: Implement Corner Scraper and Caching**
+  Create `src/data/scrapers/corners.py`:
   ```python
-  # In src/data/preprocessor.py lines 10-20:
-  FEATURE_NAMES = [
-      "B365H", "B365D", "B365A",
-      "HTGS", "HTGC", "HTP", "HTGD",
-      "ATGS", "ATGC", "ATP", "ATGD",
-      "HTFormPts", "ATFormPts",
-      "DiffFormPts", "DiffPts", "DiffGD",
-      "SentimentScore",
-      "HTRestDays", "ATRestDays", "RestDisparity",
-      "HTExtremeFatigue", "ATExtremeFatigue",
-      "HTTravel", "ATTravel", "TravelDisparity",
-      "HTRosterStrength", "ATRosterStrength", "RosterStrengthDiff"
-  ]
-  ```
-  In `get_match_features` (around line 178):
-  ```python
-      try:
-          from src.data.scrapers.fixtures import get_match_lineups
-          from src.data.scrapers.player_stats import get_player_stats
-          lineups_res = get_match_lineups(home_team, away_team)
-          h_lineup = lineups_res.get("home_lineup", [])
-          a_lineup = lineups_res.get("away_lineup", [])
-          
-          h_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in h_lineup])
-          a_roster_strength = sum([get_player_stats(p).get("xg_per_90", 0.1) for p in a_lineup])
-      except Exception:
-          h_roster_strength, a_roster_strength = 0.0, 0.0
-          
-      if h_roster_strength == 0.0:
-          h_roster_strength = h_avg * 1.5
-      if a_roster_strength == 0.0:
-          a_roster_strength = a_avg * 1.5
-          
-      roster_strength_diff = h_roster_strength - a_roster_strength
-  ```
-  Add these parameters to the returned `features` array.
-  Update `clean_and_load_dataset` default mappings:
-  ```python
-              elif "RosterStrength" in col:
-                  df[col] = 1.5 if "Diff" not in col else 0.0
+  import requests
+  from src.data import cache
+  from src.data.team_mapping import normalize_team_name, is_team_match
+  from src.data.scrapers.fixtures import ESPN_HEADERS, ESPN_BASE
+
+  def get_team_recent_corners(team_name: str) -> dict:
+      """
+      Gets rolling corner counts (won/conceded) from team's last completed tournament match.
+      """
+      team_norm = normalize_team_name(team_name)
+      cached = cache.get("corners", {"team": team_norm})
+      if cached is not None:
+          return cached
+
+      # Default fallbacks
+      result = {"won": 5.0, "conceded": 5.0}
+      
+      # We query the ESPN scoreboard for recent dates to find matching event summary IDs
+      # Let's search June 29, 2026 matches as fallback if we can't find upcoming
+      dates = ["20260629", "20260630"]
+      found_event_id = None
+      for date_str in dates:
+          url = f"{ESPN_BASE}/fifa.world/scoreboard"
+          try:
+              resp = requests.get(url, params={"dates": date_str}, headers=ESPN_HEADERS, timeout=8)
+              if resp.status_code == 200:
+                  events = resp.json().get("events", [])
+                  for ev in events:
+                      comps = ev.get("competitions", [{}])
+                      competitors = comps[0].get("competitors", []) if comps else []
+                      for c in competitors:
+                          display_name = c.get("team", {}).get("displayName", "")
+                          if is_team_match(team_norm, display_name):
+                              found_event_id = ev.get("id")
+                              break
+                      if found_event_id:
+                          break
+          except Exception:
+              pass
+          if found_event_id:
+              break
+
+      if found_event_id:
+          summary_url = f"{ESPN_BASE}/fifa.world/summary?event={found_event_id}"
+          try:
+              resp = requests.get(summary_url, headers=ESPN_HEADERS, timeout=8)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  teams = data.get("boxscore", {}).get("teams", [])
+                  for idx, t in enumerate(teams):
+                      disp = t.get("team", {}).get("displayName", "")
+                      opp_idx = 1 - idx
+                      if is_team_match(team_norm, disp):
+                          won = 5.0
+                          conceded = 5.0
+                          for stat in t.get("statistics", []):
+                              if stat.get("name") == "wonCorners":
+                                  won = float(stat.get("displayValue", 5.0))
+                          opp_team = teams[opp_idx] if len(teams) > opp_idx else {}
+                          for stat in opp_team.get("statistics", []):
+                              if stat.get("name") == "wonCorners":
+                                  conceded = float(stat.get("displayValue", 5.0))
+                          result = {"won": won, "conceded": conceded}
+                          break
+          except Exception:
+              pass
+
+      cache.set("corners", {"team": team_norm}, result, ttl_seconds=3600 * 24)
+      return result
   ```
 
 - [ ] **Step 4: Run test to verify it passes**
-  Run: `python scratch/test_roster_features.py`
+  Run: `python scratch/test_corners.py`
   Expected: PASS
 
 - [ ] **Step 5: Commit**
   ```bash
-  git add src/data/preprocessor.py scratch/test_roster_features.py
-  git commit -m "feat: add Starting XI roster strength features"
+  git add src/data/scrapers/corners.py scratch/test_corners.py
+  git commit -m "feat: implement ESPN completed corners scraper and 24h caching"
   ```
 
 ---

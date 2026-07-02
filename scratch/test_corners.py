@@ -16,33 +16,50 @@ class TestCornersScraper(unittest.TestCase):
         self.cache_set_patcher.stop()
 
     @patch("requests.get")
-    @patch("src.data.scrapers.fixtures._find_espn_event_id")
-    def test_scrape_team_corners(self, mock_find, mock_get):
-        # Mock recent completed event IDs (events in the past)
-        mock_find.return_value = ("760487", "fifa.world")
-        
-        # Mock ESPN summary JSON with wonCorners statistic
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.json.return_value = {
-            "boxscore": {
-                "teams": [
-                    {
-                        "team": {"displayName": "Brazil"},
-                        "statistics": [
-                            {"name": "wonCorners", "displayValue": "6", "label": "Corner Kicks"}
-                        ]
-                    },
-                    {
-                        "team": {"displayName": "Japan"},
-                        "statistics": [
-                            {"name": "wonCorners", "displayValue": "4", "label": "Corner Kicks"}
+    def test_scrape_team_corners(self, mock_get):
+        def dynamic_get(url, *args, **kwargs):
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            if "scoreboard" in url:
+                mock_resp.json.return_value = {
+                    "events": [
+                        {
+                            "id": "760487",
+                            "competitions": [
+                                {
+                                    "competitors": [
+                                        {"team": {"displayName": "Brazil"}, "homeAway": "home"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            elif "summary" in url:
+                mock_resp.json.return_value = {
+                    "boxscore": {
+                        "teams": [
+                            {
+                                "team": {"displayName": "Brazil"},
+                                "statistics": [
+                                    {"name": "wonCorners", "displayValue": "6", "label": "Corner Kicks"}
+                                ]
+                            },
+                            {
+                                "team": {"displayName": "Japan"},
+                                "statistics": [
+                                    {"name": "wonCorners", "displayValue": "4", "label": "Corner Kicks"}
+                                ]
+                            }
                         ]
                     }
-                ]
-            }
-        }
-        mock_get.return_value = mock_resp
+                }
+            else:
+                mock_resp.status_code = 404
+                mock_resp.json.return_value = {}
+            return mock_resp
+
+        mock_get.side_effect = dynamic_get
 
         from src.data.scrapers.corners import get_team_recent_corners
         res = get_team_recent_corners("brazil")
