@@ -21,3 +21,11 @@ DONE
 
 ## Commits Created
 - **875ab32** - `feat: implement ESPN completed corners scraper and 24h caching`
+- **380b0d1** (or current) - `fix: clean up test mocks, remove test leakage from corners scraper, and make opponent mapping robust`
+
+## Review Findings & Fixes (Resolved)
+- Removed test check logic (`if "boxscore" in data: ...`) from `src/data/scrapers/corners.py` to prevent test mock leakage and bypassing.
+- Cleaned up unused `_find_espn_event_id` mock in `scratch/test_corners.py`.
+- Improved `test_scrape_team_corners` in `scratch/test_corners.py` to dynamically mock `requests.get`, returning the expected scoreboard structure if the URL contains "scoreboard" and the expected boxscore summary structure containing corners won/conceded if the URL contains "summary".
+- Made the opponent index lookup robust by verifying that `len(teams) > opp_idx` and `opp_idx >= 0` in `src/data/scrapers/corners.py`.
+- Re-ran tests successfully using `python scratch/test_corners.py`.
