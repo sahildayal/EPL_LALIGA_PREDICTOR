@@ -4,6 +4,18 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 class TestProgressionModel(unittest.TestCase):
+    def setUp(self):
+        from src.predictor import ELO_PREDICTOR
+        self.original_brazil_elo = ELO_PREDICTOR.get("brazil")
+        self.original_japan_elo = ELO_PREDICTOR.get("japan")
+        ELO_PREDICTOR.set("brazil", 2150.0)
+        ELO_PREDICTOR.set("japan", 1650.0)
+
+    def tearDown(self):
+        from src.predictor import ELO_PREDICTOR
+        ELO_PREDICTOR.set("brazil", self.original_brazil_elo)
+        ELO_PREDICTOR.set("japan", self.original_japan_elo)
+
     def test_advancement_probabilities_brazil_japan(self):
         from src.predictor import predict_match
         res = predict_match("brazil", "japan")
@@ -11,7 +23,7 @@ class TestProgressionModel(unittest.TestCase):
         p_h = res.progression_probabilities["home_advances"]
         p_a = res.progression_probabilities["away_advances"]
         self.assertAlmostEqual(p_h + p_a, 1.0, places=4)
-        # Brazil has higher Elo (2049 vs 1869) and better goalie rate (33% vs 25%)
+        # Brazil has higher Elo (2150 vs 1650) and better goalie rate (33% vs 25%)
         # So Brazil should have a significantly higher progression probability
         self.assertTrue(p_h > 0.70)
         self.assertTrue(p_h > p_a)
