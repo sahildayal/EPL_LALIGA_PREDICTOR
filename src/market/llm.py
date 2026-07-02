@@ -49,7 +49,7 @@ def get_tournament_stage() -> str:
     return "Group Stage (Round Robin - Matches can end in a Draw/Tie after 90 mins + injury time)."
 
 
-def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None) -> dict:
+def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None) -> dict:
     """
     Calls Gemini API to generate a debate between Big D and SIGMABALLS.
     Injects their bankroll stats and performance history, and parses their chosen personal bets.
@@ -116,6 +116,7 @@ Match Data:
 - Blended Probabilities: {probs}
 - Progression/To-Qualify Probabilities: {progression_probs}
 - ELO Difference: {elo_diff:+.1f} pts
+- Expected Corner Kicks: {corners_expectation}
 - News Sentiment: {sentiment:+.2f}
 - Key News Flags: {news_flags}
 - Live/Target Bets Options (Odds/Margins): {target_bets}

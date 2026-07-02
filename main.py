@@ -6,6 +6,7 @@ from src.predictor import predict_match, ELO_PREDICTOR, math_log, save_elo
 from src.market.kalshi_client import KalshiClient
 from src.parlay.parlay_engine import ParlayEngine
 from src.data.scrapers import fbref, player_stats, news, fixtures
+from src.data.scrapers.corners import get_team_recent_corners
 from src.market.llm import generate_debate, GEMINI_AVAILABLE
 from src.data.team_mapping import normalize_team_name, is_team_match
 from src.data.scrapers.fixtures import get_match_lineups
@@ -121,6 +122,23 @@ def run_predict(query: str):
     
     console.print(f"\n[bold white]News Sentiment Diff:[/bold white] {result.sentiment:+.2f}")
     console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts (Calibrated ELO: {home.title()} {h_elo+h_boost:.0f} vs {away.title()} {a_elo+a_boost:.0f} | Raw: {h_elo:.0f} vs {a_elo:.0f})")
+
+    # Under ELO ratings print in main.py:
+    from src.data.scrapers.corners import get_team_recent_corners
+    h_crn = get_team_recent_corners(home)
+    a_crn = get_team_recent_corners(away)
+    
+    lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
+    lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
+    
+    crn_table = Table(title=f"{home.title()} vs {away.title()} Corner Kicks Expectation", box=box.SIMPLE)
+    crn_table.add_column("Team", style="cyan")
+    crn_table.add_column("Avg Corners Won", style="green")
+    crn_table.add_column("Expected Corners (Match)", style="bold green")
+    crn_table.add_row(home.title(), f"{h_crn['won']:.1f}", f"{lambda_h:.1f}")
+    crn_table.add_row(away.title(), f"{a_crn['won']:.1f}", f"{lambda_a:.1f}")
+    crn_table.add_row("Total Expected", "-", f"{lambda_h + lambda_a:.1f}")
+    console.print(crn_table)
 
     # Set up Dixon-Coles for goal-based markets (Over/Under, BTTS, Player scorer)
     dc = statistical.DixonColesModel()
@@ -928,6 +946,17 @@ def run_ask(query: str, user_model: str):
     a_news = news.get_sentiment(away)
     news_flags = h_news.get("flags", []) + a_news.get("flags", [])
     
+    # Corners expectation
+    h_crn = get_team_recent_corners(home)
+    a_crn = get_team_recent_corners(away)
+    lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
+    lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
+    corners_expectation = {
+        home.title(): f"{lambda_h:.1f}",
+        away.title(): f"{lambda_a:.1f}",
+        "Total Expected": f"{lambda_h + lambda_a:.1f}"
+    }
+    
     # Generate debate
     if not GEMINI_AVAILABLE:
         console.print("\n[bold red]ERROR: GEMINI_API_KEY is not configured or google-generativeai package is missing.[/bold red]")
@@ -948,7 +977,8 @@ def run_ask(query: str, user_model: str):
             news_flags=news_flags,
             target_bets=target_bets,
             user_model=user_model,
-            progression_probs=result.progression_probabilities
+            progression_probs=result.progression_probabilities,
+            corners_expectation=corners_expectation
         )
     except Exception as e:
         console.print(f"\n[bold red]ERROR running debate: {e}[/bold red]\n")

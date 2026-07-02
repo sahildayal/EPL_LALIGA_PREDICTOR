@@ -31,7 +31,7 @@ class ParlayEngine:
         regulation_outcomes = [o for o in outcomes if o not in corner_outcomes and o not in progression_outcomes]
 
         # Generate scoreline probability matrix
-        matrix_key = (home_team, away_team)
+        matrix_key = (home_team.lower(), away_team.lower())
         if matrix_key not in self.memo_score_matrices:
             self.memo_score_matrices[matrix_key] = self.dc_model.predict_score_matrix(home_team, away_team, max_goals=6)
         matrix = self.memo_score_matrices[matrix_key]
@@ -39,16 +39,19 @@ class ParlayEngine:
         # Calculate player goal share coefficients
         player_shares = []
         if player_props:
-            if home_team not in self.memo_avg_goals:
-                self.memo_avg_goals[home_team] = float(fbref_avg_goals(home_team))
-            if away_team not in self.memo_avg_goals:
-                self.memo_avg_goals[away_team] = float(fbref_avg_goals(away_team))
-            h_avg = self.memo_avg_goals[home_team]
-            a_avg = self.memo_avg_goals[away_team]
+            h_key = home_team.lower()
+            a_key = away_team.lower()
+            if h_key not in self.memo_avg_goals:
+                self.memo_avg_goals[h_key] = float(fbref_avg_goals(home_team))
+            if a_key not in self.memo_avg_goals:
+                self.memo_avg_goals[a_key] = float(fbref_avg_goals(away_team))
+            h_avg = self.memo_avg_goals[h_key]
+            a_avg = self.memo_avg_goals[a_key]
             for name, is_home in player_props:
-                if name not in self.memo_player_stats:
-                    self.memo_player_stats[name] = player_stats.get_player_stats(name)
-                p_stats = self.memo_player_stats[name]
+                p_key = name.lower()
+                if p_key not in self.memo_player_stats:
+                    self.memo_player_stats[p_key] = player_stats.get_player_stats(name)
+                p_stats = self.memo_player_stats[p_key]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
                 share = p_g90 / max(h_avg, 0.01) if is_home else p_g90 / max(a_avg, 0.01)
                 player_shares.append((share, is_home))
@@ -68,6 +71,11 @@ class ParlayEngine:
                 p_adv_away = res.progression_probabilities["away_advances"]
             except Exception:
                 pass
+
+        # Redundant double-sum optimization: compute the three matrix sum expressions once outside the nested loops
+        sum_home_win = float(sum(matrix[i, j] for i in range(matrix.shape[0]) for j in range(matrix.shape[1]) if i > j))
+        sum_draw = max(1e-4, float(sum(matrix[i, j] for i in range(matrix.shape[0]) for j in range(matrix.shape[1]) if i == j)))
+        sum_away_win = float(sum(matrix[i, j] for i in range(matrix.shape[0]) for j in range(matrix.shape[1]) if j > i))
 
         joint_prob = 0.0
         for h in range(matrix.shape[0]):
@@ -101,6 +109,7 @@ class ParlayEngine:
                 # Handle progression joint probabilities
                 p_cell_progression = 1.0
                 for prog in progression_outcomes:
+                    p_cell_prog = 1.0  # Safety boundaries: Initialize to prevent potential UnboundLocalError
                     if prog == "to_qualify_home":
                         # If home team wins regulation, they qualify (prob = 1.0)
                         if h > a:
@@ -109,7 +118,7 @@ class ParlayEngine:
                             p_cell_prog = 0.0
                         else:
                             # If draw, probability home team advances in ET/shootout
-                            p_cell_prog = (p_adv_home - float(sum(matrix[i, j] for i in range(7) for j in range(7) if i > j))) / max(1e-4, float(sum(matrix[i, j] for i in range(7) for j in range(7) if i == j)))
+                            p_cell_prog = (p_adv_home - sum_home_win) / sum_draw
                             p_cell_prog = max(0.0, min(1.0, p_cell_prog))
                     elif prog == "to_qualify_away":
                         if a > h:
@@ -117,7 +126,7 @@ class ParlayEngine:
                         elif a < h:
                             p_cell_prog = 0.0
                         else:
-                            p_cell_prog = (p_adv_away - float(sum(matrix[i, j] for i in range(7) for j in range(7) if j > i))) / max(1e-4, float(sum(matrix[i, j] for i in range(7) for j in range(7) if i == j)))
+                            p_cell_prog = (p_adv_away - sum_away_win) / sum_draw
                             p_cell_prog = max(0.0, min(1.0, p_cell_prog))
                     p_cell_progression *= p_cell_prog
                     
@@ -184,17 +193,20 @@ class ParlayEngine:
                     })
                     
             # Player props candidates
-            if home not in self.memo_avg_goals:
-                self.memo_avg_goals[home] = float(fbref_avg_goals(home))
-            if away not in self.memo_avg_goals:
-                self.memo_avg_goals[away] = float(fbref_avg_goals(away))
-            h_avg = self.memo_avg_goals[home]
-            a_avg = self.memo_avg_goals[away]
+            h_key = home.lower()
+            a_key = away.lower()
+            if h_key not in self.memo_avg_goals:
+                self.memo_avg_goals[h_key] = float(fbref_avg_goals(home))
+            if a_key not in self.memo_avg_goals:
+                self.memo_avg_goals[a_key] = float(fbref_avg_goals(away))
+            h_avg = self.memo_avg_goals[h_key]
+            a_avg = self.memo_avg_goals[a_key]
 
             for name, is_home in m.get("players", []):
-                if name not in self.memo_player_stats:
-                    self.memo_player_stats[name] = player_stats.get_player_stats(name)
-                p_stats = self.memo_player_stats[name]
+                p_key = name.lower()
+                if p_key not in self.memo_player_stats:
+                    self.memo_player_stats[p_key] = player_stats.get_player_stats(name)
+                p_stats = self.memo_player_stats[p_key]
                 p_g90 = p_stats.get("goals_per_90", 0.25)
                 share = p_g90 / max(h_avg if is_home else a_avg, 0.01)
                 
