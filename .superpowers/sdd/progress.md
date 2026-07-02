@@ -6,8 +6,8 @@
 - Task 4: Google News Roster Health / Injury RSS Parser [COMPLETE] (commits 862fdc6..1edd749, review clean)
 
 ## Phase 2: Corners & Knockout Progression Parlays
-- Task 5: Corner Kick Scraper & Caching Layer [PENDING]
-- Task 6: Probability Modeling & Poisson CDF [PENDING]
+- Task 5: Corner Kick Scraper & Caching Layer [COMPLETE] (commits f060d09..3c6735a, review clean)
+- Task 6: Probability Modeling & Poisson CDF [COMPLETE] (commit c46c581)
 - Task 7: Same-Game Parlay (SGP) Integration & Correlation [PENDING]
 - Task 8: CLI output formatting and Ask prompt update [PENDING]
 
