@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 from src.models.statistical import DixonColesModel
 from src.data.scrapers import player_stats
+from src.data.scrapers.corners import get_team_recent_corners
 
 
 class ParlayEngine:
@@ -245,6 +246,31 @@ class ParlayEngine:
         # Sort by edge descending
         parlays.sort(key=lambda x: x["edge"], reverse=True)
         return parlays
+
+    def get_corners_probability(self, home: str, away: str, line: float) -> float:
+        """
+        Calculates probability of total corners exceeding 'line' using Poisson CDF.
+        """
+        h_stats = get_team_recent_corners(home)
+        a_stats = get_team_recent_corners(away)
+        
+        # Calculate expected lambda for both sides
+        # Baseline tournament corners conceded is 4.8
+        lambda_h = h_stats["won"] * (a_stats["conceded"] / 4.8)
+        lambda_a = a_stats["won"] * (h_stats["conceded"] / 4.8)
+        
+        lambda_total = lambda_h + lambda_a
+        if lambda_total <= 0:
+            lambda_total = 9.6 # fallback default
+
+        # Poisson CDF: P(X <= k) = sum_{i=0}^k e^{-lambda} * lambda^i / i!
+        k = int(line)
+        cdf = 0.0
+        for i in range(k + 1):
+            cdf += math.exp(-lambda_total) * (lambda_total ** i) / math.factorial(i)
+            
+        p_over = 1.0 - cdf
+        return round(max(0.0, min(1.0, p_over)), 4)
 
 
 def fbref_avg_goals(team: str) -> float:
