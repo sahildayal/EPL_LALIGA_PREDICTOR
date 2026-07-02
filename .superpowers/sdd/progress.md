@@ -7,7 +7,6 @@
 
 ## Phase 2: Corners & Knockout Progression Parlays
 - Task 5: Corner Kick Scraper & Caching Layer [COMPLETE] (commits f060d09..3c6735a, review clean)
-- Task 6: Probability Modeling & Poisson CDF [COMPLETE] (commit c46c581)
-- Task 7: Same-Game Parlay (SGP) Integration & Correlation [PENDING]
+- Task 6: Probability Modeling & Poisson CDF [COMPLETE] (commits 3c6735a..a7c7910, review clean)
+- Task 7: Same-Game Parlay (SGP) Integration & Correlation [COMPLETE] (commits a7c7910..70353f4, review clean)
 - Task 8: CLI output formatting and Ask prompt update [PENDING]
-
