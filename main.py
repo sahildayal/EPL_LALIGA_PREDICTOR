@@ -468,9 +468,9 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
                 })
 
     if today_only:
-        from datetime import datetime, timedelta
-        today_local = datetime.now().date()
-        today_str = today_local.strftime("%Y-%m-%d")
+        from datetime import datetime, timedelta, timezone
+        today_utc = datetime.now(timezone.utc).date()
+        today_str = today_utc.strftime("%Y-%m-%d")
         filtered_matches = []
         for m in matches:
             occ = m.get("occurrence_time")
@@ -478,10 +478,9 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
                 continue
             try:
                 # Handle ISO datetime parsing with timezone conversion
-                dt_utc = datetime.fromisoformat(occ.replace("Z", "+00:00"))
-                dt_local = dt_utc.astimezone()
-                is_today = (dt_local.date() == today_local)
-                is_early_tomorrow = (dt_local.date() == today_local + timedelta(days=1) and dt_local.hour < 6)
+                dt_utc = datetime.fromisoformat(occ.replace("Z", "+00:00")).astimezone(timezone.utc)
+                is_today = (dt_utc.date() == today_utc)
+                is_early_tomorrow = (dt_utc.date() == today_utc + timedelta(days=1) and dt_utc.hour < 6)
                 if is_today or is_early_tomorrow:
                     filtered_matches.append(m)
             except Exception:
@@ -533,8 +532,8 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
     engine = ParlayEngine(dc)
     
     if longshot:
-        # Long-shot targeting 10x to 150x payouts
-        parlays = engine.generate_combos(matches, min_odds=10.0, max_odds=150.0)
+        # Long-shot targeting 50x to 400x payouts
+        parlays = engine.generate_combos(matches, min_odds=50.0, max_odds=400.0)
         if today_only:
             parlays.sort(key=lambda x: x["joint_probability"], reverse=True)
         else:
@@ -553,9 +552,9 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
         
     if longshot:
         console.print(f"\n[bold yellow]Long-Shot Round Robin Portfolio Generated ({len(parlays)} Combos)[/bold yellow]")
-        console.print("[dim]Targeting high-multiplier cards (10x - 150x payout) with positive EV edge.[/dim]\n")
+        console.print("[dim]Targeting high-multiplier cards (50x - 400x payout) with positive EV edge.[/dim]\n")
         
-        selected_parlays = parlays[:5]
+        selected_parlays = parlays[:10]
         total_stake = len(selected_parlays) * 2.0  # $2 stake per card
         console.print(f"[bold white]Portfolio Allocation Suggestion:[/bold white]")
         console.print(f"  - Total Portfolio Stake: [bold yellow]${total_stake:.2f}[/bold yellow] ($2.00 flat stake on each of the {len(selected_parlays)} cards)\n")
@@ -597,7 +596,7 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
             p_desc = f"Longshot Card #{idx+1} ({p['legs_count']} legs)"
             payout = p["payout_multiplier"]
             
-            stake_d = round(d_sum["bankroll"] * 0.02, 2)
+            stake_d = 2.0
             res_d = paper_trading.update_bet(
                 "parlay_longshot", "magnus", "parlay", f"longshot_{idx+1}",
                 p_desc, stake_d, payout, is_parlay=True, legs=bet_legs
@@ -613,7 +612,7 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
                 bet = res_d["bet"]
                 bot_alerts.append(f"[dim][=] Magnus kept existing Card #{idx+1}:[/dim] {bet['odds']:.2f}x (${bet['stake']:.2f})")
                 
-            stake_s = round(s_sum["bankroll"] * 0.01, 2)
+            stake_s = 2.0
             res_s = paper_trading.update_bet(
                 "parlay_longshot", "athena", "parlay", f"longshot_{idx+1}",
                 p_desc, stake_s, payout, is_parlay=True, legs=bet_legs

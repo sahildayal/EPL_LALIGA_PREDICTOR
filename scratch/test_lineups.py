@@ -296,7 +296,7 @@ class TestLineups(unittest.TestCase):
 
     def test_find_espn_event_id_extended_lookahead(self):
         from src.data.scrapers.fixtures import _find_espn_event_id
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         
         requested_dates = []
         def mock_get_side_effect(url, params=None, *args, **kwargs):
@@ -307,7 +307,7 @@ class TestLineups(unittest.TestCase):
             if date_str:
                 requested_dates.append(date_str)
                 
-            target_date = (datetime.utcnow() + timedelta(days=6)).strftime("%Y%m%d")
+            target_date = (datetime.now(timezone.utc) + timedelta(days=6)).strftime("%Y%m%d")
             if date_str == target_date:
                 mock_resp.json.return_value = {
                     "events": [
@@ -339,7 +339,7 @@ class TestLineups(unittest.TestCase):
 
     def test_fetch_team_recent_lineup_extended_lookback(self):
         from src.data.scrapers.fixtures import _fetch_team_recent_lineup
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         
         requested_dates = []
         def mock_get_side_effect(url, params=None, *args, **kwargs):
@@ -349,7 +349,7 @@ class TestLineups(unittest.TestCase):
                 date_str = params.get("dates") if params else None
                 if date_str:
                     requested_dates.append(date_str)
-                target_date = (datetime.utcnow() - timedelta(days=7)).strftime("%Y%m%d")
+                target_date = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y%m%d")
                 if date_str == target_date:
                     mock_resp.json.return_value = {
                         "events": [

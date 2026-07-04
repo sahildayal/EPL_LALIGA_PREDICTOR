@@ -211,12 +211,12 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
         return {"action": "placed", "new": new_bet}
 
 def _find_completed_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     from src.data.team_mapping import is_team_match
     from src.data import cache
     import requests
     
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     # Search scoreboard from 3 days ago to today
     for offset in range(-3, 1):
         date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")

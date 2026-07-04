@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.data import cache
 
 ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer"
@@ -21,7 +21,7 @@ def get_world_cup_fixtures(days_ahead: int = 3) -> list:
     if cached:
         return cached
 
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     events = []
     
     # Check "fifa.world" (World Cup) and "uefa.nations" as fallback
@@ -152,7 +152,7 @@ def get_match_lineups(home_team: str, away_team: str, event_id: str = None, leag
 
 def _find_espn_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
     from src.data.team_mapping import is_team_match
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     for offset in range(7):
         date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
         for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
@@ -277,7 +277,7 @@ def _fetch_team_recent_lineup(team_norm: str) -> list:
     if cached:
         return cached
 
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     # Query team schedule to find recent completed matches
     for offset in range(8):
         date_str = (today - timedelta(days=offset)).strftime("%Y%m%d")

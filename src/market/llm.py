@@ -41,9 +41,9 @@ def map_model_name(friendly_name: str) -> str:
 
 
 def get_tournament_stage() -> str:
-    from datetime import datetime
+    from datetime import datetime, timezone
     # World Cup 2026 Group Stage: June 11 to June 27. Knockout Stage: June 28 to July 19.
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     if today.year > 2026 or (today.year == 2026 and (today.month > 6 or (today.month == 6 and today.day >= 28))):
         return "Knockout Stage (Single Elimination - Extra Time & Penalties apply if tied at 120 mins. Note: Kalshi Moneyline markets still resolve based on regulation 90 mins + injury time scoreline)."
     return "Group Stage (Round Robin - Matches can end in a Draw/Tie after 90 mins + injury time)."

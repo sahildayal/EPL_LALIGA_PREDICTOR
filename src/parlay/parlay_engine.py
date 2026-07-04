@@ -182,9 +182,9 @@ class ParlayEngine:
             btts = float(sum(matrix[h, a] for h in range(7) for a in range(7) if h >= 1 and a >= 1))
             
             lines = {
-                "home_win": (dc_probs["home_win"], "Moneyline: " + home.title()),
-                "away_win": (dc_probs["away_win"], "Moneyline: " + away.title()),
-                "draw": (dc_probs["draw"], "Moneyline: Draw"),
+                "home_win": (dc_probs["home_win"], f"Moneyline: {home.title()} ({home.title()} vs {away.title()})"),
+                "away_win": (dc_probs["away_win"], f"Moneyline: {away.title()} ({home.title()} vs {away.title()})"),
+                "draw": (dc_probs["draw"], f"Moneyline: Draw ({home.title()} vs {away.title()})"),
                 "over_1.5": (over_15, f"{home.title()} vs {away.title()} Over 1.5 Goals"),
                 "over_2.5": (over_25, f"{home.title()} vs {away.title()} Over 2.5 Goals"),
                 "btts": (btts, f"{home.title()} vs {away.title()} Both Teams to Score")
@@ -240,7 +240,7 @@ class ParlayEngine:
                         "match": (home, away),
                         "player": name,
                         "is_home": is_home,
-                        "description": f"{name.title()} to Score (Anytime)",
+                        "description": f"{name.title()} to Score (Anytime) in {home.title()} vs {away.title()}",
                         "model_prob": p_prob,
                         "market_prob": p_mkt_prob,
                         "odds": 1.0 / p_mkt_prob
@@ -382,7 +382,7 @@ class ParlayEngine:
                 # Verify this parlay does not share more than 2 legs with any already-selected parlay
                 is_diverse = True
                 for sel in diverse_portfolio:
-                    shared = sum(1 for leg in p["legs"] for s_leg in sel["legs"] if leg["description"] == s_leg["description"])
+                    shared = sum(1 for leg in p["legs"] for s_leg in sel["legs"] if leg["match"] == s_leg["match"] and leg["description"] == s_leg["description"])
                     if shared >= 3:
                         is_diverse = False
                         break

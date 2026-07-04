@@ -7,14 +7,14 @@ def get_team_recent_corners(team_name: str) -> dict:
     """
     Gets rolling corner counts (won/conceded) from team's last completed tournament matches.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     team_norm = normalize_team_name(team_name)
     cached = cache.get("corners", {"team": team_norm})
     if cached is not None:
         return cached
 
     # Calculate dynamic list of dates representing the last 14 days
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
     dates = [(today - timedelta(days=i)).strftime("%Y%m%d") for i in range(14)]
 
     event_ids = []
