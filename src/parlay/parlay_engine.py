@@ -6,6 +6,7 @@ import numpy as np
 from src.models.statistical import DixonColesModel
 from src.data.scrapers import player_stats
 from src.data.scrapers.corners import get_team_recent_corners
+from src.parlay.sgp_validator import SgpSandboxValidator
 
 STATS_PATH = os.path.join("data", "processed", "tournament_player_stats.json")
 MASTER_PATH = os.path.join("data", "processed", "master_dataset.csv")
@@ -309,29 +310,8 @@ class ParlayEngine:
                 for leg in combo:
                     match_legs.setdefault(leg["match"], []).append(leg)
                 
-                # Enforce sports betting mutual exclusions:
-                # - Max 1 Moneyline outcome (home_win, away_win, draw) per match
-                # - Max 1 Totals/Spread outcome (over_1.5, over_2.5, under_2.5) per match
-                # - Contradictory options (e.g. to_qualify_home and to_qualify_away, or home_win and to_qualify_away, etc.)
-                invalid_combo = False
-                for match_key, legs in match_legs.items():
-                    outcomes = [leg.get("outcome") for leg in legs if leg.get("outcome") is not None]
-                    if "to_qualify_home" in outcomes and "to_qualify_away" in outcomes:
-                        invalid_combo = True
-                        break
-                    if "home_win" in outcomes and "to_qualify_away" in outcomes:
-                        invalid_combo = True
-                        break
-                    if "away_win" in outcomes and "to_qualify_home" in outcomes:
-                        invalid_combo = True
-                        break
-
-                    ml_count = sum(1 for leg in legs if leg.get("outcome") in ["home_win", "away_win", "draw"])
-                    totals_count = sum(1 for leg in legs if leg.get("outcome") in ["over_1.5", "over_2.5", "under_2.5"])
-                    if ml_count > 1 or totals_count > 1:
-                        invalid_combo = True
-                        break
-                if invalid_combo:
+                # Enforce sports betting mutual exclusions using SgpSandboxValidator
+                if not SgpSandboxValidator.validate_combo(combo):
                     continue
 
                 # Ensure we don't have conflicting outcomes in the same match
