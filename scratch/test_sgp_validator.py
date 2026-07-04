@@ -50,5 +50,23 @@ class TestSgpValidator(unittest.TestCase):
         ]
         self.assertFalse(SgpSandboxValidator.validate_combo(player_over_05))
 
+    def test_case_insensitive_and_swapped_order_grouping(self):
+        from src.parlay.sgp_validator import SgpSandboxValidator
+        
+        # Test case: Same-game legs with mixed casing and swapped team order should be grouped and validated correctly.
+        # BTTS and Over 1.5 is a blocked SGP combo.
+        mixed_btts_over_15 = [
+            {"match": ("France", "Sweden"), "outcome": "btts", "type": "game_line"},
+            {"match": ("sweden", "france"), "outcome": "over_1.5", "type": "game_line"}
+        ]
+        self.assertFalse(SgpSandboxValidator.validate_combo(mixed_btts_over_15))
+        
+        # Test case: BTTS and Over 2.5 is an allowed SGP combo.
+        mixed_btts_over_25 = [
+            {"match": ("France", "Sweden"), "outcome": "btts", "type": "game_line"},
+            {"match": ("sweden", "france"), "outcome": "over_2.5", "type": "game_line"}
+        ]
+        self.assertTrue(SgpSandboxValidator.validate_combo(mixed_btts_over_25))
+
 if __name__ == '__main__':
     unittest.main()

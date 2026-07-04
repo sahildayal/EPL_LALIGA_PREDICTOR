@@ -310,12 +310,13 @@ class ParlayEngine:
                     continue
 
                 # Ensure we don't have conflicting outcomes in the same match
-                matches_in_combo = [leg["match"] for leg in combo]
+                matches_in_combo = [tuple(sorted(t.lower() for t in leg["match"])) for leg in combo]
                 if len(matches_in_combo) != len(set(matches_in_combo)):
                     # Contains same-game legs, need to group and calculate joint same-game prob
                     grouped = {}
                     for leg in combo:
-                        grouped.setdefault(leg["match"], []).append(leg)
+                        match_key = tuple(sorted(t.lower() for t in leg["match"]))
+                        grouped.setdefault(match_key, []).append(leg)
                     
                     joint_prob = 1.0
                     total_odds = 1.0
@@ -328,7 +329,8 @@ class ParlayEngine:
                             outcomes = [l["outcome"] for l in legs if l["type"] == "game_line"]
                             p_props = [(l["player"], l["is_home"]) for l in legs if l["type"] == "player_prop"]
                             
-                            sg_prob = self.get_same_game_joint_prob(match[0], match[1], outcomes, p_props)
+                            orig_match = legs[0]["match"]
+                            sg_prob = self.get_same_game_joint_prob(orig_match[0], orig_match[1], outcomes, p_props)
                             joint_prob *= sg_prob
                             # Parlay odds for same game (implied Kalshi odds product)
                             total_odds *= np.prod([l["odds"] for l in legs])
