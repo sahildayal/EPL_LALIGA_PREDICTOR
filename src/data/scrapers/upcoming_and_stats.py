@@ -1,9 +1,12 @@
 import requests
 import json
 import os
+import logging
 from datetime import datetime, timedelta, timezone
 from src.data.scrapers.fixtures import ESPN_HEADERS, ESPN_BASE
 from src.data.team_mapping import normalize_team_name
+
+logger = logging.getLogger(__name__)
 
 SCHEDULE_PATH = os.path.join("data", "processed", "daily_schedule.json")
 PLAYER_STATS_PATH = os.path.join("data", "processed", "tournament_player_stats.json")
@@ -39,8 +42,8 @@ def scrape_upcoming_fixtures() -> list:
                         "away": normalize_team_name(away.get("team", {}).get("displayName", "")),
                         "date": ev.get("date", "")
                     })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Error scraping upcoming fixtures: %s", e)
             
     os.makedirs(os.path.dirname(SCHEDULE_PATH), exist_ok=True)
     with open(SCHEDULE_PATH, "w") as f:
@@ -71,8 +74,8 @@ def scrape_tournament_stats() -> dict:
                         val = float(l.get("value", 0.0))
                         if name:
                             result["assists"][name] = val
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Error scraping tournament stats: %s", e)
         
     os.makedirs(os.path.dirname(PLAYER_STATS_PATH), exist_ok=True)
     with open(PLAYER_STATS_PATH, "w") as f:

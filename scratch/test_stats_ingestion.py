@@ -2,10 +2,31 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import os
+import tempfile
+import shutil
+import logging
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 class TestStatsIngestion(unittest.TestCase):
+    def setUp(self):
+        # Isolate paths using a temporary directory
+        self.test_dir = tempfile.mkdtemp()
+        self.test_schedule_path = os.path.join(self.test_dir, "daily_schedule.json")
+        self.test_player_stats_path = os.path.join(self.test_dir, "tournament_player_stats.json")
+        
+        self.patch_schedule = patch("src.data.scrapers.upcoming_and_stats.SCHEDULE_PATH", self.test_schedule_path)
+        self.patch_player_stats = patch("src.data.scrapers.upcoming_and_stats.PLAYER_STATS_PATH", self.test_player_stats_path)
+        
+        self.patch_schedule.start()
+        self.patch_player_stats.start()
+
+    def tearDown(self):
+        self.patch_schedule.stop()
+        self.patch_player_stats.stop()
+        shutil.rmtree(self.test_dir)
+
     @patch("requests.get")
     def test_scrape_tournament_stats(self, mock_get):
         mock_resp = MagicMock()
@@ -32,6 +53,9 @@ class TestStatsIngestion(unittest.TestCase):
         res = scrape_tournament_stats()
         self.assertEqual(res["goals"]["kylian mbappe"], 6.0)
         self.assertEqual(res["assists"]["lionel messi"], 3.0)
+        
+        # Verify it wrote to the isolated test path
+        self.assertTrue(os.path.exists(self.test_player_stats_path))
 
     @patch("requests.get")
     def test_scrape_upcoming_fixtures(self, mock_get):
@@ -73,6 +97,27 @@ class TestStatsIngestion(unittest.TestCase):
         self.assertEqual(res[0]["home"], "argentina")
         self.assertEqual(res[0]["away"], "brazil")
         self.assertEqual(res[0]["date"], "2026-07-04T18:00Z")
+        
+        # Verify it wrote to the isolated test path
+        self.assertTrue(os.path.exists(self.test_schedule_path))
+
+    @patch("requests.get", side_effect=Exception("Network error"))
+    def test_scrape_upcoming_fixtures_exception_logging(self, mock_get):
+        from src.data.scrapers.upcoming_and_stats import scrape_upcoming_fixtures
+        # We assert that a warning is logged when requests fails
+        with self.assertLogs("src.data.scrapers.upcoming_and_stats", level="WARNING") as log:
+            res = scrape_upcoming_fixtures()
+            self.assertEqual(res, [])
+            self.assertTrue(any("Network error" in message for message in log.output))
+
+    @patch("requests.get", side_effect=Exception("Database error"))
+    def test_scrape_tournament_stats_exception_logging(self, mock_get):
+        from src.data.scrapers.upcoming_and_stats import scrape_tournament_stats
+        # We assert that a warning is logged when requests fails
+        with self.assertLogs("src.data.scrapers.upcoming_and_stats", level="WARNING") as log:
+            res = scrape_tournament_stats()
+            self.assertEqual(res, {"goals": {}, "assists": {}})
+            self.assertTrue(any("Database error" in message for message in log.output))
 
 if __name__ == '__main__':
     unittest.main()

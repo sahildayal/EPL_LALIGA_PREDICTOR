@@ -1,9 +1,14 @@
+import os
+import json
 import math
 import itertools
 import numpy as np
 from src.models.statistical import DixonColesModel
 from src.data.scrapers import player_stats
 from src.data.scrapers.corners import get_team_recent_corners
+
+STATS_PATH = os.path.join("data", "processed", "tournament_player_stats.json")
+MASTER_PATH = os.path.join("data", "processed", "master_dataset.csv")
 
 
 class ParlayEngine:
@@ -17,6 +22,8 @@ class ParlayEngine:
         self.memo_avg_goals = {}
         self.memo_player_stats = {}
         self.memo_score_matrices = {}
+        self.tourney_stats = None
+        self.team_matches = {}
 
     def get_same_game_joint_prob(self, home_team: str, away_team: str, outcomes: list, player_props: list = None) -> float:
         """
@@ -55,8 +62,9 @@ class ParlayEngine:
                 if p_key not in self.memo_player_stats:
                     self.memo_player_stats[p_key] = player_stats.get_player_stats(name)
                 p_stats = self.memo_player_stats[p_key]
-                p_g90 = p_stats.get("goals_per_90", 0.25)
-                share = p_g90 / max(h_avg, 0.01) if is_home else p_g90 / max(a_avg, 0.01)
+                team_name = home_team if is_home else away_team
+                p_g90_blended = self.get_blended_player_g90(name, team_name, p_stats)
+                share = p_g90_blended / max(h_avg if is_home else a_avg, 0.01)
                 share = min(1.0, max(0.0, share))
                 player_shares.append((share, is_home))
 
@@ -211,8 +219,9 @@ class ParlayEngine:
                 if p_key not in self.memo_player_stats:
                     self.memo_player_stats[p_key] = player_stats.get_player_stats(name)
                 p_stats = self.memo_player_stats[p_key]
-                p_g90 = p_stats.get("goals_per_90", 0.25)
-                share = p_g90 / max(h_avg if is_home else a_avg, 0.01)
+                team_name = home if is_home else away
+                p_g90_blended = self.get_blended_player_g90(name, team_name, p_stats)
+                share = p_g90_blended / max(h_avg if is_home else a_avg, 0.01)
                 share = min(1.0, max(0.0, share))
                 
                 # P(Player scores) = sum_h,a matrix[h,a] * (1 - (1-share)^team_goals)
@@ -364,7 +373,56 @@ class ParlayEngine:
                         
         # Sort by edge descending
         parlays.sort(key=lambda x: x["edge"], reverse=True)
+        if min_odds >= 10.0:
+            diverse_portfolio = []
+            for p in parlays:
+                if len(diverse_portfolio) >= 10:
+                    break
+                # Verify this parlay does not share more than 2 legs with any already-selected parlay
+                is_diverse = True
+                for sel in diverse_portfolio:
+                    shared = sum(1 for leg in p["legs"] for s_leg in sel["legs"] if leg["description"] == s_leg["description"])
+                    if shared >= 3:
+                        is_diverse = False
+                        break
+                if is_diverse:
+                    diverse_portfolio.append(p)
+            return diverse_portfolio
         return parlays
+
+    def _load_tourney_stats(self):
+        if self.tourney_stats is None:
+            self.tourney_stats = {"goals": {}, "assists": {}}
+            if os.path.exists(STATS_PATH):
+                try:
+                    with open(STATS_PATH, "r") as f:
+                        self.tourney_stats = json.load(f)
+                except Exception as e:
+                    import logging
+                    logging.warning("Error loading tournament stats: %s", e)
+
+    def _get_team_wc_matches(self, team: str) -> float:
+        team_key = team.lower()
+        if team_key not in self.team_matches:
+            m_wc = 3.0 # default baseline matches
+            if os.path.exists(MASTER_PATH):
+                try:
+                    import pandas as pd
+                    df = pd.read_csv(MASTER_PATH)
+                    m_wc = max(1.0, float(((df["HomeTeam"].str.lower() == team_key) | (df["AwayTeam"].str.lower() == team_key)).sum()))
+                except Exception as e:
+                    import logging
+                    logging.warning("Error reading master dataset to count matches: %s", e)
+            self.team_matches[team_key] = m_wc
+        return self.team_matches[team_key]
+
+    def get_blended_player_g90(self, name: str, team: str, p_stats: dict) -> float:
+        self._load_tourney_stats()
+        p_g_wc = self.tourney_stats.get("goals", {}).get(name.lower(), 0.0)
+        m_wc = self._get_team_wc_matches(team)
+        g90_wc = p_g_wc / m_wc
+        p_g90 = p_stats.get("goals_per_90", 0.25)
+        return 0.5 * p_g90 + 0.5 * g90_wc
 
     def get_corners_probability(self, home: str, away: str, line: float) -> float:
         """
