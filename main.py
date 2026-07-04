@@ -1235,12 +1235,59 @@ def run_update():
     console.print("[bold green]Success! Schedule and tournament stats prepared.[/bold green]")
 
 
+def run_daily():
+    import json
+    from datetime import datetime
+    
+    schedule_path = os.path.join("data", "processed", "daily_schedule.json")
+    if not os.path.exists(schedule_path):
+        console.print("[red]Error: daily_schedule.json not found. Run 'update' command first.[/red]")
+        return
+    try:
+        with open(schedule_path, "r") as f:
+            schedule = json.load(f)
+    except Exception as e:
+        console.print(f"[red]Failed to read schedule: {e}[/red]")
+        return
+
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    todays_matches = []
+    for m in schedule:
+        if m.get("date", "").startswith(today_str):
+            todays_matches.append(m)
+            
+    if not todays_matches:
+        console.print(f"[yellow]No matches scheduled for today ({today_str}).[/yellow]")
+    else:
+        console.print(Panel(
+            f"[bold green]Executing Daily Betting Pipeline for {today_str}[/bold green]\n"
+            f"Matches found: {len(todays_matches)}",
+            border_style="green"
+        ))
+        
+        for idx, m in enumerate(todays_matches):
+            h = m["home"]
+            a = m["away"]
+            query = f"{h} vs {a}"
+            
+            console.print(f"\n[bold cyan]=== [Match #{idx+1}] {query.upper()} ===[/bold cyan]\n")
+            run_predict(query)
+            run_ask(query, "Gemini 2.5 Flash")
+            
+    console.print("\n[yellow]Running Parlay Engine for today's matches...[/yellow]")
+    run_parlay(longshot=False, today_only=True)
+    run_parlay(longshot=True, today_only=True)
+    
+    console.print("\n[bold green]=== Daily Pipeline Execution Completed ===[/bold green]")
+
+
 def main():
     parser = argparse.ArgumentParser(description="World Cup Predictor & Parlay Engine CLI")
     subparsers = parser.add_subparsers(dest="command")
     
     subparsers.add_parser("init", help="Run initial model training on history")
     subparsers.add_parser("update", help="Automatically sync completed tournament match results & retrain")
+    subparsers.add_parser("run-daily", help="Runs predictions & debates for all of today's matches")
     
     pred_parser = subparsers.add_parser("predict", help="Predict match outcome")
     pred_parser.add_argument("query", help="Match query, e.g. 'Argentina vs France'")
@@ -1267,6 +1314,8 @@ def main():
         run_init()
     elif args.command == "update":
         run_update()
+    elif args.command == "run-daily":
+        run_daily()
     elif args.command == "predict":
         run_predict(args.query)
     elif args.command == "ask":
