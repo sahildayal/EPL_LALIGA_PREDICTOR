@@ -51,7 +51,7 @@ class TestTemporalWeighting(unittest.TestCase):
         
         # Create a simple mock dataset (31 features to match FEATURE_NAMES length)
         X = np.random.randn(10, 31)
-        y_res = np.random.choice([0, 1, 2], size=10)
+        y_res = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])  # Deterministic contiguous classes
         y_goals = np.random.randint(0, 5, size=(10, 2))
         sample_weight = np.random.uniform(0.05, 1.0, size=10)
         
