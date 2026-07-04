@@ -17,4 +17,6 @@
 - Task 11: Dynamic Scorer Blending & 50x-400x Diverse Parlay Portfolio Engine [COMPLETE] (commits 17b2537..4c59359, review clean)
 - Task 12: Daily Execution CLI Command (`run-daily`) [COMPLETE] (commits 4c59359..0a798ff, review clean)
 - Task 13: Temporal Sample Weighting for ML Models [COMPLETE] (commits eb4d244..d15a9f7, review clean)
+- Task 14: High-Leg Parlay Generation & Candidate Capping [PENDING]
+
 
