@@ -159,7 +159,28 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
 
     if active_idx != -1:
         old_bet = p_data["active_bets"][active_idx]
+        
+        is_identical = False
         if clean_btype(old_bet["bet_type"]) == clean_btype(new_bet_type):
+            # Compare stakes
+            if abs(old_bet.get("stake", 0.0) - new_stake) < 0.01:
+                if is_parlay:
+                    old_legs = old_bet.get("legs", [])
+                    new_legs = legs or []
+                    if len(old_legs) == len(new_legs):
+                        legs_match = True
+                        for l1, l2 in zip(old_legs, new_legs):
+                            if (normalize_team_name(l1.get("home")) != normalize_team_name(l2.get("home")) or 
+                                normalize_team_name(l1.get("away")) != normalize_team_name(l2.get("away")) or 
+                                clean_btype(l1.get("bet_type")) != clean_btype(l2.get("bet_type"))):
+                                legs_match = False
+                                break
+                        if legs_match:
+                            is_identical = True
+                else:
+                    is_identical = True
+                    
+        if is_identical:
             # Same bet, do nothing
             return {"action": "none", "bet": old_bet}
         else:
