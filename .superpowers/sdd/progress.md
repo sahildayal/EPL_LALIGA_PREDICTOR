@@ -15,4 +15,4 @@
 - Task 9: Bot Renaming & Database State Migration [COMPLETE] (commits 94c20ff..72c29e0, review clean)
 - Task 10: ESPN Upcoming Fixtures & World Cup Statistics Scraper [COMPLETE] (commits 72c29e0..17b2537, review clean)
 - Task 11: Dynamic Scorer Blending & 50x-400x Diverse Parlay Portfolio Engine [COMPLETE] (commits 17b2537..4c59359, review clean)
-- Task 12: Daily Execution CLI Command (`run-daily`) [PENDING]
+- Task 12: Daily Execution CLI Command (`run-daily`) [COMPLETE] (commits 4c59359..0a798ff, review clean)
