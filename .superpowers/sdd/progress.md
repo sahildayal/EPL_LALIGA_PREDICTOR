@@ -10,3 +10,10 @@
 - Task 6: Probability Modeling & Poisson CDF [COMPLETE] (commits 3c6735a..a7c7910, review clean)
 - Task 7: Same-Game Parlay (SGP) Integration & Correlation [COMPLETE] (commits a7c7910..70353f4, review clean)
 - Task 8: CLI output formatting and Ask prompt update [COMPLETE] (commits afe89ec..9439eb0, review clean)
+
+## Phase 3: Daily Ingestion, Execution Pipeline & 50x-400x Parlay Portfolios
+- Task 9: Bot Renaming & Database State Migration [PENDING]
+- Task 10: ESPN Upcoming Fixtures & World Cup Statistics Scraper [PENDING]
+- Task 11: Dynamic Scorer Blending & 50x-400x Diverse Parlay Portfolio Engine [PENDING]
+- Task 12: Daily Execution CLI Command (`run-daily`) [PENDING]
+
