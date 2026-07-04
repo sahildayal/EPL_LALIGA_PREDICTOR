@@ -533,14 +533,14 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
     
     if longshot:
         # Long-shot targeting 50x to 400x payouts
-        parlays = engine.generate_combos(matches, min_odds=50.0, max_odds=400.0)
+        parlays = engine.generate_combos(matches, max_legs=12, min_odds=50.0, max_odds=400.0)
         if today_only:
             parlays.sort(key=lambda x: x["joint_probability"], reverse=True)
         else:
             parlays.sort(key=lambda x: x["edge"], reverse=True)
     else:
         # Standard targeting 5x to 150x payouts
-        parlays = engine.generate_combos(matches, min_odds=5.0, max_odds=150.0)
+        parlays = engine.generate_combos(matches, max_legs=6, min_odds=5.0, max_odds=150.0)
         parlays.sort(key=lambda x: x["joint_probability"], reverse=True)
     
     if not parlays:

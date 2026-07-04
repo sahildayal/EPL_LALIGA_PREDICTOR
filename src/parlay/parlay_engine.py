@@ -292,8 +292,13 @@ class ParlayEngine:
                     })
 
         # Sort and limit candidates to prevent combinatorial explosion, focusing on highest edge
-        candidates.sort(key=lambda x: x["model_prob"] - x["market_prob"], reverse=True)
-        candidates = candidates[:25]
+        if max_legs > 5:
+            candidates.sort(key=lambda x: x["model_prob"] * (x["model_prob"] - x["market_prob"]), reverse=True)
+        else:
+            candidates.sort(key=lambda x: x["model_prob"] - x["market_prob"], reverse=True)
+        
+        max_cand = 15 if max_legs > 5 else 25
+        candidates = candidates[:max_cand]
 
         # 2. Generate combinations of 3 to 5 legs
         parlays = []
