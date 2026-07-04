@@ -14,6 +14,32 @@ from src.models.base import BaseModel
 MODELS_DIR = Path(__file__).parent.parent.parent / "data" / "models"
 
 
+def _fit_with_sample_weight(estimator, X, y, sample_weight=None):
+    """Fits an estimator, passing sample_weight only if it is supported and provided."""
+    import inspect
+    if sample_weight is None:
+        estimator.fit(X, y)
+        return
+    try:
+        sig = inspect.signature(estimator.fit)
+        if 'sample_weight' in sig.parameters:
+            estimator.fit(X, y, sample_weight=sample_weight)
+        else:
+            # Check if it takes **kwargs
+            has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+            if has_kwargs:
+                try:
+                    estimator.fit(X, y, sample_weight=sample_weight)
+                except TypeError:
+                    estimator.fit(X, y)
+            else:
+                estimator.fit(X, y)
+    except Exception:
+        # Fallback to standard fit if signature inspection fails
+        estimator.fit(X, y)
+
+
+
 class LogisticRegressionModel(BaseModel):
     def __init__(self):
         super().__init__("LogisticRegression")
@@ -22,12 +48,12 @@ class LogisticRegressionModel(BaseModel):
         self.reg_a = LinearRegression()
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         if y_goals is not None:
-            self.reg_h.fit(X_scaled, y_goals[:, 0])
-            self.reg_a.fit(X_scaled, y_goals[:, 1])
+            _fit_with_sample_weight(self.reg_h, X_scaled, y_goals[:, 0], sample_weight)
+            _fit_with_sample_weight(self.reg_a, X_scaled, y_goals[:, 1], sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -71,12 +97,12 @@ class SVMModel(BaseModel):
         self.reg_a = SVR(kernel="rbf", C=1.0, gamma="scale")
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         if y_goals is not None:
-            self.reg_h.fit(X_scaled, y_goals[:, 0])
-            self.reg_a.fit(X_scaled, y_goals[:, 1])
+            _fit_with_sample_weight(self.reg_h, X_scaled, y_goals[:, 0], sample_weight)
+            _fit_with_sample_weight(self.reg_a, X_scaled, y_goals[:, 1], sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -118,9 +144,9 @@ class GDAModel(BaseModel):
         self.clf = LinearDiscriminantAnalysis()
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -156,9 +182,9 @@ class RandomForestModel(BaseModel):
         )
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -218,11 +244,11 @@ class XGBoostModel(BaseModel):
         )
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         if y_goals is not None:
-            self.reg.fit(X_scaled, y_goals)
+            _fit_with_sample_weight(self.reg, X_scaled, y_goals, sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -270,9 +296,9 @@ class NeuralNetworkModel(BaseModel):
         )
         self.scaler = StandardScaler()
 
-    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None):
+    def train(self, X: np.ndarray, y_res: np.ndarray, y_goals: np.ndarray = None, sample_weight: np.ndarray = None):
         X_scaled = self.scaler.fit_transform(X)
-        self.clf.fit(X_scaled, y_res)
+        _fit_with_sample_weight(self.clf, X_scaled, y_res, sample_weight)
         self.is_fitted = True
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
