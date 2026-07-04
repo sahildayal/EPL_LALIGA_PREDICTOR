@@ -1237,7 +1237,7 @@ def run_update():
 
 def run_daily():
     import json
-    from datetime import datetime
+    from datetime import datetime, timezone
     
     schedule_path = os.path.join("data", "processed", "daily_schedule.json")
     if not os.path.exists(schedule_path):
@@ -1250,7 +1250,7 @@ def run_daily():
         console.print(f"[red]Failed to read schedule: {e}[/red]")
         return
 
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     todays_matches = []
     for m in schedule:
         if m.get("date", "").startswith(today_str):
@@ -1258,21 +1258,22 @@ def run_daily():
             
     if not todays_matches:
         console.print(f"[yellow]No matches scheduled for today ({today_str}).[/yellow]")
-    else:
-        console.print(Panel(
-            f"[bold green]Executing Daily Betting Pipeline for {today_str}[/bold green]\n"
-            f"Matches found: {len(todays_matches)}",
-            border_style="green"
-        ))
+        return
+
+    console.print(Panel(
+        f"[bold green]Executing Daily Betting Pipeline for {today_str}[/bold green]\n"
+        f"Matches found: {len(todays_matches)}",
+        border_style="green"
+    ))
+    
+    for idx, m in enumerate(todays_matches):
+        h = m["home"]
+        a = m["away"]
+        query = f"{h} vs {a}"
         
-        for idx, m in enumerate(todays_matches):
-            h = m["home"]
-            a = m["away"]
-            query = f"{h} vs {a}"
-            
-            console.print(f"\n[bold cyan]=== [Match #{idx+1}] {query.upper()} ===[/bold cyan]\n")
-            run_predict(query)
-            run_ask(query, "Gemini 2.5 Flash")
+        console.print(f"\n[bold cyan]=== [Match #{idx+1}] {query.upper()} ===[/bold cyan]\n")
+        run_predict(query)
+        run_ask(query, "Gemini 2.5 Flash")
             
     console.print("\n[yellow]Running Parlay Engine for today's matches...[/yellow]")
     run_parlay(longshot=False, today_only=True)

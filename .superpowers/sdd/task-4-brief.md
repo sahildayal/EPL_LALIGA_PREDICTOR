@@ -1,11 +1,15 @@
-### Task 4: CLI output formatting and Ask prompt update
+### Task 4: Daily Execution CLI Command (`run-daily`)
 
 **Files:**
 - Modify: `main.py`
-- Test: `scratch/test_cli_integration.py`
+- Test: `scratch/test_run_daily.py`
+
+**Interfaces:**
+- Consumes: `python main.py run-daily` command
+- Produces: Console run banner and runs predicts, debates, and parlay cards for today's matches.
 
 - [ ] **Step 1: Write the failing test**
-  Create `scratch/test_cli_integration.py`:
+  Create `scratch/test_run_daily.py`:
   ```python
   import unittest
   from unittest.mock import patch, MagicMock
@@ -13,70 +17,89 @@
   from pathlib import Path
   sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-  class TestCliIntegration(unittest.TestCase):
-      @patch("main.predict_match")
-      @patch("main.get_team_recent_corners")
-      def test_cli_forecast_outputs(self, mock_corners, mock_predict):
-          mock_corners.return_value = {"won": 6.0, "conceded": 4.0}
+  class TestRunDaily(unittest.TestCase):
+      @patch("main.run_predict")
+      @patch("main.run_ask")
+      @patch("main.run_parlay")
+      @patch("json.load")
+      @patch("os.path.exists", return_value=True)
+      def test_run_daily_matches(self, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
+          # Mock schedule JSON
+          mock_json.return_value = [
+              {"home": "france", "away": "sweden", "date": "2026-07-04T18:00:00Z"}
+          ]
           
-          mock_res = MagicMock()
-          mock_res.probabilities = {"home_win": 0.50, "draw": 0.20, "away_win": 0.30}
-          mock_res.sentiment = 0.0
-          mock_res.elo_diff = 0.0
-          mock_res.progression_probabilities = {"home_advances": 0.60, "away_advances": 0.40}
-          mock_predict.return_value = mock_res
+          from main import run_daily
+          run_daily()
           
-          from main import run_predict
-          # Verifies executing main prediction runs successfully without syntax exceptions
-          try:
-              run_predict("brazil vs japan")
-              passed = True
-          except Exception:
-              passed = False
-          self.assertTrue(passed)
+          mock_predict.assert_called_once_with("france vs sweden")
+          mock_ask.assert_called_once_with("france vs sweden", "Gemini 2.5 Flash")
 
   if __name__ == '__main__':
       unittest.main()
   ```
 
 - [ ] **Step 2: Run test to verify it fails**
-  Run: `python scratch/test_cli_integration.py`
-  Expected: FAIL (expected corners table formatting not yet printed or missing imports)
+  Run: `python scratch/test_run_daily.py`
+  Expected: FAIL with `AttributeError` on `run_daily`
 
-- [ ] **Step 3: Modify main.py display outputs**
-  In `main.py` inside `run_predict`:
-  Calculate expected corners won, conceded, and total. Print expected corners matrix to console:
-  ```python
-      # Under ELO ratings print in main.py:
-      from src.data.scrapers.corners import get_team_recent_corners
-      h_crn = get_team_recent_corners(home)
-      a_crn = get_team_recent_corners(away)
-      
-      lambda_h = h_crn["won"] * (a_crn["conceded"] / 4.8)
-      lambda_a = a_crn["won"] * (h_crn["conceded"] / 4.8)
-      
-      crn_table = Table(title=f"{home.title()} vs {away.title()} Corner Kicks Expectation", box=box.SIMPLE)
-      crn_table.add_column("Team", style="cyan")
-      crn_table.add_column("Avg Corners Won", style="green")
-      crn_table.add_column("Expected Corners (Match)", style="bold green")
-      crn_table.add_row(home.title(), f"{h_crn['won']:.1f}", f"{lambda_h:.1f}")
-      crn_table.add_row(away.title(), f"{a_crn['won']:.1f}", f"{lambda_a:.1f}")
-      crn_table.add_row("Total Expected", "-", f"{lambda_h + lambda_a:.1f}")
-      console.print(crn_table)
-  ```
-  Update the debate prompt in `src/market/llm.py` to accept and inject corners expectations.
-  Update `generate_debate` in `src/market/llm.py` to interpolate corners data:
-  ```python
-  # Under Match Data inside generate_debate:
-  - Expected Corner Kicks: {corners_expectation}
-  ```
+- [ ] **Step 3: Implement CLI parser and run-daily loop**
+  In `main.py`:
+  1. Add `run_daily` definition:
+     ```python
+     def run_daily():
+         schedule_path = os.path.join("data", "processed", "daily_schedule.json")
+         if not os.path.exists(schedule_path):
+             console.print("[red]Error: daily_schedule.json not found. Run 'update' command first.[/red]")
+             return
+         try:
+             with open(schedule_path, "r") as f:
+                 schedule = json.load(f)
+         except Exception as e:
+             console.print(f"[red]Failed to read schedule: {e}[/red]")
+             return
+
+         today_str = datetime.utcnow().strftime("%Y-%m-%d")
+         todays_matches = []
+         for m in schedule:
+             if m.get("date", "").startswith(today_str):
+                 todays_matches.append(m)
+                 
+         if not todays_matches:
+             console.print(f"[yellow]No matches scheduled for today ({today_str}).[/yellow]")
+             return
+             
+         console.print(Panel(
+             f"[bold green]Executing Daily Betting Pipeline for {today_str}[/bold green]\n"
+             f"Matches found: {len(todays_matches)}",
+             border_style="green"
+         ))
+         
+         for idx, m in enumerate(todays_matches):
+             h = m["home"]
+             a = m["away"]
+             query = f"{h} vs {a}"
+             
+             console.print(f"\n[bold cyan]=== [Match #{idx+1}] {query.upper()} ===[/bold cyan]\n")
+             run_predict(query)
+             run_ask(query, "Gemini 2.5 Flash")
+             
+         console.print("\n[bold green]=== Daily Pipeline Execution Completed ===[/bold green]")
+     ```
+  2. Register CLI argument inside `main()`:
+     ```python
+     subparsers.add_parser("run-daily", help="Runs predictions & debates for all of today's matches")
+     # In arguments routing:
+     elif args.command == "run-daily":
+         run_daily()
+     ```
 
 - [ ] **Step 4: Run test to verify it passes**
-  Run: `python scratch/test_cli_integration.py`
+  Run: `python scratch/test_run_daily.py`
   Expected: PASS
 
 - [ ] **Step 5: Commit**
   ```bash
-  git add main.py src/market/llm.py scratch/test_cli_integration.py
-  git commit -m "feat: integrate corner expectations display in predict and LLM debate prompts"
+  git add main.py scratch/test_run_daily.py
+  git commit -m "feat: implement run-daily CLI runner to execute daily match schedules automatically"
   ```

@@ -1,8 +1,11 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, mock_open
 import sys
+import os
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from main import run_daily
 
 class TestRunDaily(unittest.TestCase):
     @patch("main.run_predict")
@@ -10,16 +13,17 @@ class TestRunDaily(unittest.TestCase):
     @patch("main.run_parlay")
     @patch("json.load")
     @patch("os.path.exists", return_value=True)
-    def test_run_daily_matches(self, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
-        from datetime import datetime
-        today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_run_daily_matches(self, mock_file, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
+        from datetime import datetime, timezone
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         mock_json.return_value = [
             {"home": "france", "away": "sweden", "date": f"{today_str}T18:00:00Z"}
         ]
         
-        from main import run_daily
         run_daily()
         
+        mock_file.assert_called_once_with(os.path.join("data", "processed", "daily_schedule.json"), "r")
         mock_predict.assert_called_once_with("france vs sweden")
         mock_ask.assert_called_once_with("france vs sweden", "Gemini 2.5 Flash")
         
@@ -27,6 +31,24 @@ class TestRunDaily(unittest.TestCase):
         self.assertEqual(mock_parlay.call_count, 2)
         mock_parlay.assert_any_call(longshot=False, today_only=True)
         mock_parlay.assert_any_call(longshot=True, today_only=True)
+
+    @patch("main.run_predict")
+    @patch("main.run_ask")
+    @patch("main.run_parlay")
+    @patch("json.load")
+    @patch("os.path.exists", return_value=True)
+    @patch("builtins.open", new_callable=mock_open)
+    def test_run_daily_no_matches(self, mock_file, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
+        from datetime import datetime, timezone
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        mock_json.return_value = []
+        
+        run_daily()
+        
+        mock_file.assert_called_once_with(os.path.join("data", "processed", "daily_schedule.json"), "r")
+        mock_predict.assert_not_called()
+        mock_ask.assert_not_called()
+        mock_parlay.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main()
