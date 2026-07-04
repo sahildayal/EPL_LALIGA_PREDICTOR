@@ -70,15 +70,27 @@ class TestLongshotPortfolio(unittest.TestCase):
             {
                 "home": "France", "away": "Brazil",
                 "market_odds": {
-                    "home_win": 0.5,
-                    "draw": 0.3,
-                    "away_win": 0.2,
-                    "over_1.5": 0.7,
-                    "over_2.5": 0.5,
-                    "btts": 0.5,
-                    "scorer_mbappe": 0.4
+                    "home_win": 0.01,
+                    "draw": 0.01,
+                    "away_win": 0.01,
+                    "over_1.5": 0.01,
+                    "over_2.5": 0.01,
+                    "btts": 0.01,
+                    "scorer_mbappe": 0.01
                 },
                 "players": [("mbappe", True)]
+            },
+            {
+                "home": "Argentina", "away": "England",
+                "market_odds": {
+                    "home_win": 0.02,
+                    "draw": 0.02,
+                    "away_win": 0.02,
+                    "over_1.5": 0.02,
+                    "over_2.5": 0.02,
+                    "btts": 0.02
+                },
+                "players": []
             }
         ]
 
@@ -90,11 +102,19 @@ class TestLongshotPortfolio(unittest.TestCase):
         # verifies the player stats blending.
 
         # Let's mock player_stats.get_player_stats to return a known value.
-        with patch("src.data.scrapers.player_stats.get_player_stats") as mock_get_stats:
+        with patch("src.data.scrapers.player_stats.get_player_stats") as mock_get_stats, \
+             patch("src.parlay.parlay_engine.fbref_avg_goals") as mock_fbref_avg, \
+             patch("src.parlay.parlay_engine.get_team_recent_corners") as mock_corners:
             mock_get_stats.return_value = {"goals_per_90": 0.8}
+            mock_fbref_avg.return_value = 1.5
+            mock_corners.return_value = {"won": 5.0, "conceded": 5.0}
             
             # Run generate_combos with min_odds=10.0
-            combos = engine.generate_combos(match_data, max_legs=4, min_odds=10.0, max_odds=400.0)
+            combos = engine.generate_combos(match_data, max_legs=4, min_odds=10.0, max_odds=1000000.0)
+            print(f"\n[DEBUG] len(combos) = {len(combos)}")
+            
+            # Assert that len(combos) > 0 to verify selection is executing.
+            self.assertGreater(len(combos), 0, "generate_combos returned an empty portfolio!")
             
             # Assert all returned combos do not share more than 2 legs
             for i, p1 in enumerate(combos):

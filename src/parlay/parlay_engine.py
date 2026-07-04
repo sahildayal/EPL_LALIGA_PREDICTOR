@@ -24,6 +24,7 @@ class ParlayEngine:
         self.memo_score_matrices = {}
         self.tourney_stats = None
         self.team_matches = {}
+        self._master_df = None
 
     def get_same_game_joint_prob(self, home_team: str, away_team: str, outcomes: list, player_props: list = None) -> float:
         """
@@ -405,14 +406,21 @@ class ParlayEngine:
         team_key = team.lower()
         if team_key not in self.team_matches:
             m_wc = 3.0 # default baseline matches
-            if os.path.exists(MASTER_PATH):
+            if self._master_df is None and os.path.exists(MASTER_PATH):
                 try:
                     import pandas as pd
-                    df = pd.read_csv(MASTER_PATH)
+                    self._master_df = pd.read_csv(MASTER_PATH)
+                except Exception as e:
+                    import logging
+                    logging.warning("Error reading master dataset: %s", e)
+            
+            if self._master_df is not None:
+                try:
+                    df = self._master_df
                     m_wc = max(1.0, float(((df["HomeTeam"].str.lower() == team_key) | (df["AwayTeam"].str.lower() == team_key)).sum()))
                 except Exception as e:
                     import logging
-                    logging.warning("Error reading master dataset to count matches: %s", e)
+                    logging.warning("Error counting matches from master dataset: %s", e)
             self.team_matches[team_key] = m_wc
         return self.team_matches[team_key]
 
