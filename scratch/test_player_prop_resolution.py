@@ -53,7 +53,7 @@ class TestPlayerPropResolution(unittest.TestCase):
         # Mock active bets state
         mock_state = {
             "predict": {
-                "big_d": {
+                "magnus": {
                     "bankroll": 1000.0,
                     "active_bets": [
                         {
@@ -73,7 +73,7 @@ class TestPlayerPropResolution(unittest.TestCase):
                     ],
                     "history": []
                 },
-                "sigmaballs": {
+                "athena": {
                     "bankroll": 1000.0,
                     "active_bets": [],
                     "history": []

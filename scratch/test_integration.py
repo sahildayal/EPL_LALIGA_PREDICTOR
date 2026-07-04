@@ -66,11 +66,11 @@ def test_paper_trading_normalization():
         # 1. Place a bet for South Africa vs South Korea
         # Moneyline - South Korea Win
         # Stake: $50, Odds: 2.0
-        res1 = update_bet("predict", "big_d", "South Africa", "South Korea", "Moneyline - South Korea Win", 50.0, 2.0)
+        res1 = update_bet("predict", "magnus", "South Africa", "South Korea", "Moneyline - South Korea Win", 50.0, 2.0)
         assert res1["action"] == "placed", f"Expected 'placed', got {res1.get('action')}"
         
         # Verify it exists in active bets
-        summary = get_personality_summary("predict", "big_d")
+        summary = get_personality_summary("predict", "magnus")
         assert len(summary["active_bets"]) == 1, "Expected 1 active bet"
         active_bet = summary["active_bets"][0]
         assert active_bet["home"] == "south africa"
@@ -81,7 +81,7 @@ def test_paper_trading_normalization():
         
         # 2. Try placing the SAME bet but with swapped team order (SK vs SA)
         # It should recognize the existing position and return action "none"
-        res2 = update_bet("predict", "big_d", "South Korea", "South Africa", "Moneyline - South Korea Win", 50.0, 2.0)
+        res2 = update_bet("predict", "magnus", "South Korea", "South Africa", "Moneyline - South Korea Win", 50.0, 2.0)
         assert res2["action"] == "none", f"Expected 'none', got {res2.get('action')}"
         
         # 3. Resolve the bet with a completed match result:
@@ -92,12 +92,12 @@ def test_paper_trading_normalization():
         assert len(resolved) == 1, f"Expected 1 resolved bet, got {len(resolved)}"
         portfolio, personality, bet_res = resolved[0]
         assert portfolio == "predict"
-        assert personality == "big_d"
+        assert personality == "magnus"
         assert bet_res["result"] == "WIN"
         assert bet_res["pnl"] == 50.0
         
         # Bankroll should be updated: 1000 - 50 (placed) + 100 (won payout) = 1050
-        summary_after = get_personality_summary("predict", "big_d")
+        summary_after = get_personality_summary("predict", "magnus")
         assert summary_after["bankroll"] == 1050.0, f"Expected bankroll 1050.0, got {summary_after['bankroll']}"
         assert len(summary_after["active_bets"]) == 0, "Expected 0 active bets after resolution"
         assert len(summary_after["recent_bets"]) == 1, "Expected 1 resolved bet in history"

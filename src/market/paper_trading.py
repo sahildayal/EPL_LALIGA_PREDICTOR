@@ -11,20 +11,20 @@ def load_state() -> dict:
         
     initial_state = {
         "predict": {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         },
         "ask": {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         },
         "parlay_standard": {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         },
         "parlay_longshot": {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         }
     }
 
@@ -41,21 +41,32 @@ def load_state() -> dict:
             # Migrate the old single-portfolio format to the 'ask' category
             migrated_state = {
                 "predict": {
-                    "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-                    "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+                    "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+                    "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
                 },
                 "ask": state,
                 "parlay_standard": {
-                    "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-                    "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+                    "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+                    "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
                 },
                 "parlay_longshot": {
-                    "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-                    "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+                    "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+                    "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
                 }
             }
             save_state(migrated_state)
-            return migrated_state
+            state = migrated_state
+            
+        # Detect old format keys:
+        if any("big_d" in state[p] or "sigmaballs" in state[p] for p in state if isinstance(state[p], dict)):
+            migrated = {}
+            for port, port_data in state.items():
+                migrated[port] = {}
+                for k, v in port_data.items():
+                    new_k = "magnus" if k == "big_d" else "athena" if k == "sigmaballs" else k
+                    migrated[port][new_k] = v
+            save_state(migrated)
+            state = migrated
             
         return state
     except Exception:
@@ -75,8 +86,8 @@ def place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: 
     state = load_state()
     if portfolio not in state:
         state[portfolio] = {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         }
     p_data = state[portfolio].get(personality)
     if not p_data:
@@ -113,8 +124,8 @@ def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_t
     state = load_state()
     if portfolio not in state:
         state[portfolio] = {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         }
     p_data = state[portfolio].get(personality)
     if not p_data:
@@ -437,7 +448,7 @@ def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int)
         if portfolio not in state:
             continue
             
-        for personality in ["big_d", "sigmaballs"]:
+        for personality in ["magnus", "athena"]:
             p_data = state[portfolio][personality]
             still_active = []
             
@@ -543,8 +554,8 @@ def get_personality_summary(portfolio: str, personality: str) -> dict:
     state = load_state()
     if portfolio not in state:
         state[portfolio] = {
-            "big_d": {"bankroll": 1000.0, "active_bets": [], "history": []},
-            "sigmaballs": {"bankroll": 1000.0, "active_bets": [], "history": []}
+            "magnus": {"bankroll": 1000.0, "active_bets": [], "history": []},
+            "athena": {"bankroll": 1000.0, "active_bets": [], "history": []}
         }
     p_data = state[portfolio].get(personality, {})
     

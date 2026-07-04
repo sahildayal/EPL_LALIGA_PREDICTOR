@@ -51,15 +51,15 @@ def get_tournament_stage() -> str:
 
 def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None) -> dict:
     """
-    Calls Gemini API to generate a debate between Big D and SIGMABALLS.
+    Calls Gemini API to generate a debate between Magnus and Athena.
     Injects their bankroll stats and performance history, and parses their chosen personal bets.
     Falls back to a simulated script if API is unavailable.
     """
     from src.market import paper_trading
     
     # 1. Fetch current bankrolls and record history for prompt injection
-    d_sum = paper_trading.get_personality_summary("ask", "big_d")
-    s_sum = paper_trading.get_personality_summary("ask", "sigmaballs")
+    d_sum = paper_trading.get_personality_summary("ask", "magnus")
+    s_sum = paper_trading.get_personality_summary("ask", "athena")
     
     d_str = f"Bankroll: ${d_sum['bankroll']:.2f}, P&L: ${d_sum['total_pnl']:+.2f}, Win Rate: {d_sum['win_rate']}% ({d_sum['total_bets']} bets)"
     s_str = f"Bankroll: ${s_sum['bankroll']:.2f}, P&L: ${s_sum['total_pnl']:+.2f}, Win Rate: {s_sum['win_rate']}% ({s_sum['total_bets']} bets)"
@@ -72,9 +72,9 @@ def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentimen
     if d_active or s_active:
         prev_bet_prompt = "\nActive/Previous bets already placed on this match:\n"
         if d_active:
-            prev_bet_prompt += f"- Big D's current active bet: {d_active['bet_type']} | Stake: ${d_active['stake']:.2f} | Odds: {d_active['odds']:.2f}x\n"
+            prev_bet_prompt += f"- Magnus's current active bet: {d_active['bet_type']} | Stake: ${d_active['stake']:.2f} | Odds: {d_active['odds']:.2f}x\n"
         if s_active:
-            prev_bet_prompt += f"- SIGMABALLS's current active bet: {s_active['bet_type']} | Stake: ${s_active['stake']:.2f} | Odds: {s_active['odds']:.2f}x\n"
+            prev_bet_prompt += f"- Athena's current active bet: {s_active['bet_type']} | Stake: ${s_active['stake']:.2f} | Odds: {s_active['odds']:.2f}x\n"
         prev_bet_prompt += (
             "IMPORTANT: The bots already have the above bets placed on this match. "
             "If the live odds or news sentiment have changed, they can choose to either:\n"
@@ -99,17 +99,17 @@ def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentimen
 You are staging a debate between two sports sports betting personalities analyzing the upcoming match: {home.title()} vs {away.title()}.
  
 Personalities:
-1. **Big D (The Eye-Test Scout)**:
+1. **Magnus (The Eye-Test Scout)**:
    - Personality: A grizzled, old-school veteran football scout. Doesn't know what a CSV file is and doesn't want to. He has watched 10,000 matches.
    - Current Bankroll & Performance: {d_str}
    - Analysis: He only cares about four things: ranking, form, who they played, and who's healthy. He asks: "Is the better team actually showing up today?" 
    - Style: Direct, opinionated, speaks in scout jargon, quotes historical matches he's seen. He never talks about "expected value" or "vig." He just tells you who is going to win and if they are going to play lazy.
    
-2. **SIGMABALLS (The Quant)**:
-   - Personality: A brilliant, cold-blooded machine learning engineer. His favorite player is Pascal Gross. Never impressed by a 35-yard screamer.
+2. **Athena (The Quant)**:
+   - Personality: A brilliant, cold-blooded machine learning engineer. Her favorite player is Pascal Gross. Never impressed by a 35-yard screamer.
    - Current Bankroll & Performance: {s_str}
-   - Analysis: He only trusts data: ELO ratings, Dixon-Coles Poisson goals, and the machine learning model ensemble. 
-   - Style: Highly logical, quotes percentages and edges. He only bets when the model shows a positive edge against Kalshi market odds.
+   - Analysis: She only trusts data: ELO ratings, Dixon-Coles Poisson goals, and the machine learning model ensemble. 
+   - Style: Highly logical, quotes percentages and edges. She only bets when the model shows a positive edge against Kalshi market odds.
  
 Match Data:
 - Current Tournament Stage: {stage}
@@ -125,11 +125,11 @@ Match Data:
 Generate a short, punchy, realistic dialogue debate where they analyze the game and try to align on a consensus recommendation. Refer to their current bankroll status or recent bet performance if relevant (e.g. if they are on a winning/losing streak).
  
 Format your output exactly with these headers:
-[Big D's Take]
+[Magnus's Take]
 <his paragraphs>
  
-[SIGMABALLS' Take]
-<his paragraphs>
+[Athena's Take]
+<her paragraphs>
  
 [Consensus Bet]
 <what bet they recommend placing (from the target list) and how they size it>
@@ -139,12 +139,12 @@ Additionally, on its own lines at the very end of your response, output a struct
 Example format:
 [Personal Bets JSON]
 {{
-  "big_d": {{
+  "magnus": {{
     "bet_type": "Moneyline - England Win",
     "stake": 50.0,
     "odds": 1.38
   }},
-  "sigmaballs": {{
+  "athena": {{
     "bet_type": "Game Lines - Over 2.5 Goals",
     "stake": 30.0,
     "odds": 1.74
@@ -158,11 +158,11 @@ Example format:
         text = response.text
         
         # Parse output
-        parts = {"big_d": "", "sigmaballs": "", "consensus": "", "personal_bets": None}
+        parts = {"magnus": "", "athena": "", "consensus": "", "personal_bets": None}
         
-        if "[Big D's Take]" in text and "[SIGMABALLS' Take]" in text and "[Consensus Bet]" in text:
-            big_d_part = text.split("[Big D's Take]")[1].split("[SIGMABALLS' Take]")[0].strip()
-            sigma_part = text.split("[SIGMABALLS' Take]")[1].split("[Consensus Bet]")[0].strip()
+        if "[Magnus's Take]" in text and "[Athena's Take]" in text and "[Consensus Bet]" in text:
+            magnus_part = text.split("[Magnus's Take]")[1].split("[Athena's Take]")[0].strip()
+            athena_part = text.split("[Athena's Take]")[1].split("[Consensus Bet]")[0].strip()
             
             # Check if JSON is also at the end
             if "[Personal Bets JSON]" in text:
@@ -183,15 +183,15 @@ Example format:
             else:
                 consensus_part = text.split("[Consensus Bet]")[1].strip()
                 
-            parts["big_d"] = big_d_part
-            parts["sigmaballs"] = sigma_part
+            parts["magnus"] = magnus_part
+            parts["athena"] = athena_part
             parts["consensus"] = consensus_part
             return parts
         else:
             # Simple splitter fallback
             return {
-                "big_d": text[:len(text)//3],
-                "sigmaballs": text[len(text)//3: 2*len(text)//3],
+                "magnus": text[:len(text)//3],
+                "athena": text[len(text)//3: 2*len(text)//3],
                 "consensus": text[2*len(text)//3:],
                 "personal_bets": None
             }
@@ -210,14 +210,14 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
     
     # Simple logic-based mock debate
     if elo_diff > 100:
-        big_d = (
+        magnus = (
             f"Look, I've watched {h_title} play a thousand times. They've got the historical pedigree and "
             f"they are clearly the better squad here. ELO difference is {elo_diff:.0f} points? I don't need your ELO. "
             f"My eyes tell me they are going to control the tempo from the whistle. {a_title} doesn't have the size "
             f"to deal with them. Hammer {h_title} win. Don't overcomplicate it. My bankroll is at ${d_summary['bankroll']:.2f} "
             f"and I'm ready to size this up!"
         )
-        sigma = (
+        athena = (
             f"Statistically, {h_title} is favored at {probs.get('home_win', 0.5)*100:.1f}%. However, the market "
             f"has already priced this in. Our Dixon-Coles goal expectation shows {a_title} +1.5 has an implied probability "
             f"that is undervalued. I trust the mathematics. With my bankroll at ${s_summary['bankroll']:.2f}, "
@@ -225,12 +225,12 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
         )
         consensus = f"Buy YES on {h_title} Over 1.5 Goals or {h_title} Win if the contract is under ${probs.get('home_win', 0.5):.2f}."
         personal_bets = {
-            "big_d": {
+            "magnus": {
                 "bet_type": f"Moneyline - {h_title} Win",
                 "stake": round(d_summary["bankroll"] * 0.1, 2),
                 "odds": 1.45
             },
-            "sigmaballs": {
+            "athena": {
                 "bet_type": "Game Lines - Over 1.5 Goals",
                 "stake": round(s_summary["bankroll"] * 0.05, 2),
                 "odds": 1.55
@@ -238,24 +238,24 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
         }
     else:
         stage_desc = "Nobody wants to risk elimination in the knockouts." if is_knockout else "Nobody wants to lose the group stages."
-        big_d = (
+        magnus = (
             f"This is a classic trap match. {h_title} and {a_title} are too close in form. "
             f"I see both teams playing safe, keeping it compact in the first half. It's going to be a slugfest. "
             f"I smell a Draw all over this. {stage_desc} Let's place a gut bet on the Draw!"
         )
-        sigma = (
+        athena = (
             f"The model agrees the Draw probability is elevated at {probs.get('draw', 0.3)*100:.1f}%. "
             f"Dixon-Coles score expectations point to a high frequency of 1-1. The math matches your intuition "
-            f"for once, D. The edge on the Draw Yes contract is positive. I will allocate capital accordingly."
+            f"for once, Magnus. The edge on the Draw Yes contract is positive. I will allocate capital accordingly."
         )
         consensus = f"Buy YES on the Draw contract or BTTS (Both Teams to Score)."
         personal_bets = {
-            "big_d": {
+            "magnus": {
                 "bet_type": "Moneyline - Draw",
                 "stake": round(d_summary["bankroll"] * 0.08, 2),
                 "odds": 3.10
             },
-            "sigmaballs": {
+            "athena": {
                 "bet_type": "Game Lines - Both Teams to Score",
                 "stake": round(s_summary["bankroll"] * 0.04, 2),
                 "odds": 1.85
@@ -263,8 +263,9 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
         }
  
     return {
-        "big_d": big_d,
-        "sigmaballs": sigma,
+        "magnus": magnus,
+        "athena": athena,
         "consensus": consensus,
         "personal_bets": personal_bets
     }
+

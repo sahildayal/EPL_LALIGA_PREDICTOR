@@ -300,26 +300,26 @@ def run_predict(query: str):
 
     # Automated Bot Betting for 'predict' portfolio
     from src.market import paper_trading
-    d_sum = paper_trading.get_personality_summary("predict", "big_d")
-    s_sum = paper_trading.get_personality_summary("predict", "sigmaballs")
+    d_sum = paper_trading.get_personality_summary("predict", "magnus")
+    s_sum = paper_trading.get_personality_summary("predict", "athena")
     
-    big_d_bet_type = None
-    big_d_odds = None
+    magnus_bet_type = None
+    magnus_odds = None
     if probs["home_win"] >= probs["away_win"] and probs["home_win"] >= probs["draw"]:
         live_price = mkt_odds.get("home_win")
         if live_price:
-            big_d_bet_type = f"Moneyline - {home.title()} Win"
-            big_d_odds = 1.0 / live_price
+            magnus_bet_type = f"Moneyline - {home.title()} Win"
+            magnus_odds = 1.0 / live_price
     elif probs["away_win"] >= probs["home_win"] and probs["away_win"] >= probs["draw"]:
         live_price = mkt_odds.get("away_win")
         if live_price:
-            big_d_bet_type = f"Moneyline - {away.title()} Win"
-            big_d_odds = 1.0 / live_price
+            magnus_bet_type = f"Moneyline - {away.title()} Win"
+            magnus_odds = 1.0 / live_price
     else:
         live_price = mkt_odds.get("draw")
         if live_price:
-            big_d_bet_type = "Moneyline - Draw"
-            big_d_odds = 1.0 / live_price
+            magnus_bet_type = "Moneyline - Draw"
+            magnus_odds = 1.0 / live_price
             
     for outcome, label in [("home_win", f"Moneyline - {home.title()} Win"),
                            ("draw", "Moneyline - Draw"),
@@ -339,32 +339,32 @@ def run_predict(query: str):
             if edge > 0:
                 candidates.append((edge, label, live_price))
                 
-    sigmaballs_bet_type = None
-    sigmaballs_odds = None
+    athena_bet_type = None
+    athena_odds = None
     if candidates:
         candidates.sort(key=lambda x: x[0], reverse=True)
-        best_edge, sigmaballs_bet_type, live_price = candidates[0]
-        sigmaballs_odds = 1.0 / live_price
+        best_edge, athena_bet_type, live_price = candidates[0]
+        athena_odds = 1.0 / live_price
         
     bot_alerts = []
-    if big_d_bet_type and big_d_odds:
+    if magnus_bet_type and magnus_odds:
         stake = round(d_sum["bankroll"] * 0.1, 2)
-        res = paper_trading.update_bet("predict", "big_d", home, away, big_d_bet_type, stake, big_d_odds)
+        res = paper_trading.update_bet("predict", "magnus", home, away, magnus_bet_type, stake, magnus_odds)
         action = res.get("action")
         if action == "placed":
             new = res["new"]
-            bot_alerts.append(f"[green][+] Big D placed new position:[/green] {new['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
+            bot_alerts.append(f"[green][+] Magnus placed new position:[/green] {new['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
         elif action == "updated":
             old, new = res["old"], res["new"]
-            bot_alerts.append(f"[bold yellow][!] Big D changed recommendation:[/bold yellow] {new['bet_type']} replacing {old['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
+            bot_alerts.append(f"[bold yellow][!] Magnus changed recommendation:[/bold yellow] {new['bet_type']} replacing {old['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
         elif action == "none":
             bet = res["bet"]
-            bot_alerts.append(f"[dim][=] Big D kept existing position:[/dim] {bet['bet_type']} (${bet['stake']:.2f} at {bet['odds']:.2f}x)")
+            bot_alerts.append(f"[dim][=] Magnus kept existing position:[/dim] {bet['bet_type']} (${bet['stake']:.2f} at {bet['odds']:.2f}x)")
             
-    if sigmaballs_bet_type and sigmaballs_odds:
+    if athena_bet_type and athena_odds:
         # Fractional Kelly sizing: f_star = (p * b - (1 - p)) / b
         p_val = live_price + best_edge
-        b_val = sigmaballs_odds - 1.0
+        b_val = athena_odds - 1.0
         if b_val > 0:
             f_star = (p_val * b_val - (1.0 - p_val)) / b_val
             # Quarter-Kelly (0.25) capped at 15% (0.15) of bankroll, minimum 2% (0.02)
@@ -373,17 +373,17 @@ def run_predict(query: str):
             kelly_fraction = 0.05
         
         stake = round(s_sum["bankroll"] * kelly_fraction, 2)
-        res = paper_trading.update_bet("predict", "sigmaballs", home, away, sigmaballs_bet_type, stake, sigmaballs_odds)
+        res = paper_trading.update_bet("predict", "athena", home, away, athena_bet_type, stake, athena_odds)
         action = res.get("action")
         if action == "placed":
             new = res["new"]
-            bot_alerts.append(f"[green][+] SIGMABALLS placed new position:[/green] {new['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
+            bot_alerts.append(f"[green][+] Athena placed new position:[/green] {new['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
         elif action == "updated":
             old, new = res["old"], res["new"]
-            bot_alerts.append(f"[bold yellow][!] SIGMABALLS changed recommendation:[/bold yellow] {new['bet_type']} replacing {old['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
+            bot_alerts.append(f"[bold yellow][!] Athena changed recommendation:[/bold yellow] {new['bet_type']} replacing {old['bet_type']} (${new['stake']:.2f} at {new['odds']:.2f}x)")
         elif action == "none":
             bet = res["bet"]
-            bot_alerts.append(f"[dim][=] SIGMABALLS kept existing position:[/dim] {bet['bet_type']} (${bet['stake']:.2f} at {bet['odds']:.2f}x)")
+            bot_alerts.append(f"[dim][=] Athena kept existing position:[/dim] {bet['bet_type']} (${bet['stake']:.2f} at {bet['odds']:.2f}x)")
             
     if bot_alerts:
         console.print()
@@ -582,8 +582,8 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
         from src.market import paper_trading
         bot_alerts = []
         for idx, p in enumerate(selected_parlays):
-            d_sum = paper_trading.get_personality_summary("parlay_longshot", "big_d")
-            s_sum = paper_trading.get_personality_summary("parlay_longshot", "sigmaballs")
+            d_sum = paper_trading.get_personality_summary("parlay_longshot", "magnus")
+            s_sum = paper_trading.get_personality_summary("parlay_longshot", "athena")
             
             bet_legs = []
             for leg in p["legs"]:
@@ -599,35 +599,35 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
             
             stake_d = round(d_sum["bankroll"] * 0.02, 2)
             res_d = paper_trading.update_bet(
-                "parlay_longshot", "big_d", "parlay", f"longshot_{idx+1}",
+                "parlay_longshot", "magnus", "parlay", f"longshot_{idx+1}",
                 p_desc, stake_d, payout, is_parlay=True, legs=bet_legs
             )
             action_d = res_d.get("action")
             if action_d == "placed":
                 new = res_d["new"]
-                bot_alerts.append(f"[green][+] Big D placed Card #{idx+1}:[/green] {new['odds']:.2f}x (${new['stake']:.2f})")
+                bot_alerts.append(f"[green][+] Magnus placed Card #{idx+1}:[/green] {new['odds']:.2f}x (${new['stake']:.2f})")
             elif action_d == "updated":
                 new = res_d["new"]
-                bot_alerts.append(f"[bold yellow][!] Big D updated Card #{idx+1}:[/bold yellow] {new['odds']:.2f}x (${new['stake']:.2f})")
+                bot_alerts.append(f"[bold yellow][!] Magnus updated Card #{idx+1}:[/bold yellow] {new['odds']:.2f}x (${new['stake']:.2f})")
             elif action_d == "none":
                 bet = res_d["bet"]
-                bot_alerts.append(f"[dim][=] Big D kept existing Card #{idx+1}:[/dim] {bet['odds']:.2f}x (${bet['stake']:.2f})")
+                bot_alerts.append(f"[dim][=] Magnus kept existing Card #{idx+1}:[/dim] {bet['odds']:.2f}x (${bet['stake']:.2f})")
                 
             stake_s = round(s_sum["bankroll"] * 0.01, 2)
             res_s = paper_trading.update_bet(
-                "parlay_longshot", "sigmaballs", "parlay", f"longshot_{idx+1}",
+                "parlay_longshot", "athena", "parlay", f"longshot_{idx+1}",
                 p_desc, stake_s, payout, is_parlay=True, legs=bet_legs
             )
             action_s = res_s.get("action")
             if action_s == "placed":
                 new = res_s["new"]
-                bot_alerts.append(f"[green][+] SIGMABALLS placed Card #{idx+1}:[/green] {new['odds']:.2f}x (${new['stake']:.2f})")
+                bot_alerts.append(f"[green][+] Athena placed Card #{idx+1}:[/green] {new['odds']:.2f}x (${new['stake']:.2f})")
             elif action_s == "updated":
                 new = res_s["new"]
-                bot_alerts.append(f"[bold yellow][!] SIGMABALLS updated Card #{idx+1}:[/bold yellow] {new['odds']:.2f}x (${new['stake']:.2f})")
+                bot_alerts.append(f"[bold yellow][!] Athena updated Card #{idx+1}:[/bold yellow] {new['odds']:.2f}x (${new['stake']:.2f})")
             elif action_s == "none":
                 bet = res_s["bet"]
-                bot_alerts.append(f"[dim][=] SIGMABALLS kept existing Card #{idx+1}:[/dim] {bet['odds']:.2f}x (${bet['stake']:.2f})")
+                bot_alerts.append(f"[dim][=] Athena kept existing Card #{idx+1}:[/dim] {bet['odds']:.2f}x (${bet['stake']:.2f})")
 
         if bot_alerts:
             console.print()
@@ -651,8 +651,8 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
 
         # Place standard parlay bet
         from src.market import paper_trading
-        d_sum = paper_trading.get_personality_summary("parlay_standard", "big_d")
-        s_sum = paper_trading.get_personality_summary("parlay_standard", "sigmaballs")
+        d_sum = paper_trading.get_personality_summary("parlay_standard", "magnus")
+        s_sum = paper_trading.get_personality_summary("parlay_standard", "athena")
         
         best_parlay = parlays[0]
         bet_legs = []
@@ -670,35 +670,35 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
         bot_alerts = []
         stake_d = round(d_sum["bankroll"] * 0.1, 2)
         res_d = paper_trading.update_bet(
-            "parlay_standard", "big_d", "parlay", "standard",
+            "parlay_standard", "magnus", "parlay", "standard",
             p_desc, stake_d, payout, is_parlay=True, legs=bet_legs
         )
         action_d = res_d.get("action")
         if action_d == "placed":
             new = res_d["new"]
-            bot_alerts.append(f"[green][+] Big D placed Standard Parlay:[/green] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
+            bot_alerts.append(f"[green][+] Magnus placed Standard Parlay:[/green] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
         elif action_d == "updated":
             new = res_d["new"]
-            bot_alerts.append(f"[bold yellow][!] Big D updated Standard Parlay:[/bold yellow] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
+            bot_alerts.append(f"[bold yellow][!] Magnus updated Standard Parlay:[/bold yellow] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
         elif action_d == "none":
             bet = res_d["bet"]
-            bot_alerts.append(f"[dim][=] Big D kept existing Standard Parlay:[/dim] Payout {bet['odds']:.2f}x (${bet['stake']:.2f})")
+            bot_alerts.append(f"[dim][=] Magnus kept existing Standard Parlay:[/dim] Payout {bet['odds']:.2f}x (${bet['stake']:.2f})")
 
         stake_s = round(s_sum["bankroll"] * 0.05, 2)
         res_s = paper_trading.update_bet(
-            "parlay_standard", "sigmaballs", "parlay", "standard",
+            "parlay_standard", "athena", "parlay", "standard",
             p_desc, stake_s, payout, is_parlay=True, legs=bet_legs
         )
         action_s = res_s.get("action")
         if action_s == "placed":
             new = res_s["new"]
-            bot_alerts.append(f"[green][+] SIGMABALLS placed Standard Parlay:[/green] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
+            bot_alerts.append(f"[green][+] Athena placed Standard Parlay:[/green] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
         elif action_s == "updated":
             new = res_s["new"]
-            bot_alerts.append(f"[bold yellow][!] SIGMABALLS updated Standard Parlay:[/bold yellow] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
+            bot_alerts.append(f"[bold yellow][!] Athena updated Standard Parlay:[/bold yellow] Payout {new['odds']:.2f}x (${new['stake']:.2f})")
         elif action_s == "none":
             bet = res_s["bet"]
-            bot_alerts.append(f"[dim][=] SIGMABALLS kept existing Standard Parlay:[/dim] Payout {bet['odds']:.2f}x (${bet['stake']:.2f})")
+            bot_alerts.append(f"[dim][=] Athena kept existing Standard Parlay:[/dim] Payout {bet['odds']:.2f}x (${bet['stake']:.2f})")
 
         if bot_alerts:
             console.print()
@@ -738,7 +738,7 @@ def run_complete(home: str, away: str, home_goals: int, away_goals: int):
     if results:
         console.print("\n[bold cyan]Resolved Personality Paper Bets:[/bold cyan]")
         for portfolio, personality, bet in results:
-            p_name = "Big D" if personality == "big_d" else "SIGMABALLS"
+            p_name = "Magnus" if personality == "magnus" else "Athena"
             color = "green" if bet["result"] == "WIN" else "red"
             sign = "+" if bet["pnl"] >= 0 else ""
             console.print(f"  - [{portfolio.upper()}] {p_name}: {bet['bet_type']} for ${bet['stake']:.2f} at {bet['odds']:.2f}x -> [{color}]{bet['result']} ({sign}${bet['pnl']:.2f} P&L)[/{color}]")
@@ -746,9 +746,9 @@ def run_complete(home: str, away: str, home_goals: int, away_goals: int):
         # Print updated bankrolls
         console.print(f"  [bold white]Updated Bankrolls:[/bold white]")
         for port in ["predict", "ask", "parlay_standard", "parlay_longshot"]:
-            d_sum = paper_trading.get_personality_summary(port, "big_d")
-            s_sum = paper_trading.get_personality_summary(port, "sigmaballs")
-            console.print(f"    * {port.title()}: Big D: ${d_sum['bankroll']:.2f} | SIGMABALLS: ${s_sum['bankroll']:.2f}")
+            d_sum = paper_trading.get_personality_summary(port, "magnus")
+            s_sum = paper_trading.get_personality_summary(port, "athena")
+            console.print(f"    * {port.title()}: Magnus: ${d_sum['bankroll']:.2f} | Athena: ${s_sum['bankroll']:.2f}")
         console.print()
 
 
@@ -1000,7 +1000,7 @@ def run_ask(query: str, user_model: str):
     pb = debate.get("personal_bets")
     changes = {}
     if pb:
-        for personality in ["big_d", "sigmaballs"]:
+        for personality in ["magnus", "athena"]:
             bet = pb.get(personality)
             if bet and isinstance(bet, dict):
                 b_type = bet.get("bet_type")
@@ -1010,13 +1010,13 @@ def run_ask(query: str, user_model: str):
                     res = paper_trading.update_bet("ask", personality, home, away, b_type, stake, odds)
                     changes[personality] = res
                     
-    d_sum = paper_trading.get_personality_summary("ask", "big_d")
-    s_sum = paper_trading.get_personality_summary("ask", "sigmaballs")
+    d_sum = paper_trading.get_personality_summary("ask", "magnus")
+    s_sum = paper_trading.get_personality_summary("ask", "athena")
     
     # Display comparison alerts if there are any position changes or status updates
     update_alerts = []
     for personality, res in changes.items():
-        name = "Big D" if personality == "big_d" else "SIGMABALLS"
+        name = "Magnus" if personality == "magnus" else "Athena"
         action = res.get("action")
         if action == "updated":
             old = res["old"]
@@ -1066,15 +1066,15 @@ def run_ask(query: str, user_model: str):
     
     console.print()
     console.print(Panel(
-        f"{debate['big_d']}\n\n[bold white]Bankroll:[/bold white] ${d_sum['bankroll']:.2f} (P&L: {d_sum['total_pnl']:+.2f}) | [bold white]Active Bet:[/bold white] {d_bet_str}",
-        title="[bold red]Big D's Scout Eye-Test[/bold red]",
+        f"{debate['magnus']}\n\n[bold white]Bankroll:[/bold white] ${d_sum['bankroll']:.2f} (P&L: {d_sum['total_pnl']:+.2f}) | [bold white]Active Bet:[/bold white] {d_bet_str}",
+        title="[bold red]Magnus's Scout Eye-Test[/bold red]",
         border_style="red",
         padding=(1, 2)
     ))
     console.print()
     console.print(Panel(
-        f"{debate['sigmaballs']}\n\n[bold white]Bankroll:[/bold white] ${s_sum['bankroll']:.2f} (P&L: {s_sum['total_pnl']:+.2f}) | [bold white]Active Bet:[/bold white] {s_bet_str}",
-        title="[bold blue]SIGMABALLS' Quant Analysis[/bold blue]",
+        f"{debate['athena']}\n\n[bold white]Bankroll:[/bold white] ${s_sum['bankroll']:.2f} (P&L: {s_sum['total_pnl']:+.2f}) | [bold white]Active Bet:[/bold white] {s_bet_str}",
+        title="[bold blue]Athena's Quant Analysis[/bold blue]",
         border_style="blue",
         padding=(1, 2)
     ))
@@ -1212,7 +1212,7 @@ def run_update():
         if resolved_bets_total:
             console.print("\n[bold cyan]Resolved Personality Paper Bets during sync:[/bold cyan]")
             for portfolio, personality, bet in resolved_bets_total:
-                p_name = "Big D" if personality == "big_d" else "SIGMABALLS"
+                p_name = "Magnus" if personality == "magnus" else "Athena"
                 color = "green" if bet["result"] == "WIN" else "red"
                 sign = "+" if bet["pnl"] >= 0 else ""
                 console.print(f"  - [{portfolio.upper()}] {p_name}: {bet['bet_type']} for ${bet['stake']:.2f} at {bet['odds']:.2f}x -> [{color}]{bet['result']} ({sign}${bet['pnl']:.2f} P&L)[/{color}]")
@@ -1220,9 +1220,9 @@ def run_update():
             # Print updated bankrolls
             console.print(f"  [bold white]Updated Bankrolls:[/bold white]")
             for port in ["predict", "ask", "parlay_standard", "parlay_longshot"]:
-                d_sum = paper_trading.get_personality_summary(port, "big_d")
-                s_sum = paper_trading.get_personality_summary(port, "sigmaballs")
-                console.print(f"    * {port.title()}: Big D: ${d_sum['bankroll']:.2f} | SIGMABALLS: ${s_sum['bankroll']:.2f}")
+                d_sum = paper_trading.get_personality_summary(port, "magnus")
+                s_sum = paper_trading.get_personality_summary(port, "athena")
+                console.print(f"    * {port.title()}: Magnus: ${d_sum['bankroll']:.2f} | Athena: ${s_sum['bankroll']:.2f}")
             console.print()
     else:
         console.print("[green]Everything is already up-to-date! No new completed matches found.[/green]\n")
@@ -1238,7 +1238,7 @@ def main():
     pred_parser = subparsers.add_parser("predict", help="Predict match outcome")
     pred_parser.add_argument("query", help="Match query, e.g. 'Argentina vs France'")
     
-    ask_parser = subparsers.add_parser("ask", help="Stages a Big D & SIGMABALLS debate on a match")
+    ask_parser = subparsers.add_parser("ask", help="Stages a Magnus & Athena debate on a match")
     ask_parser.add_argument("query", help="Match query, e.g. 'Argentina vs France'")
     ask_parser.add_argument("--model", "-m", default="Gemini 3.5 Flash (Medium)", help="Model to use for prediction/debate")
     

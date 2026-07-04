@@ -16,14 +16,14 @@ def print_section(title):
     print("=" * 70)
 
 def print_portfolio_standings(port_id, port_name):
-    big_d = paper_trading.get_personality_summary(port_id, "big_d")
-    sigmaballs = paper_trading.get_personality_summary(port_id, "sigmaballs")
+    magnus = paper_trading.get_personality_summary(port_id, "magnus")
+    athena = paper_trading.get_personality_summary(port_id, "athena")
     
     print(f"\n  >> {port_name} Portfolio <<")
-    print("    Big D (Scout):")
-    print(f"      Bankroll : ${big_d['bankroll']:.2f} | P&L: {big_d['total_pnl']:+.2f} | Win Rate: {big_d['win_rate']}% ({big_d['total_bets']} bets) | Active: {len(big_d['active_bets'])}")
-    print("    SIGMABALLS (Quant):")
-    print(f"      Bankroll : ${sigmaballs['bankroll']:.2f} | P&L: {sigmaballs['total_pnl']:+.2f} | Win Rate: {sigmaballs['win_rate']}% ({sigmaballs['total_bets']} bets) | Active: {len(sigmaballs['active_bets'])}")
+    print("    Magnus (Scout):")
+    print(f"      Bankroll : ${magnus['bankroll']:.2f} | P&L: {magnus['total_pnl']:+.2f} | Win Rate: {magnus['win_rate']}% ({magnus['total_bets']} bets) | Active: {len(magnus['active_bets'])}")
+    print("    Athena (Quant):")
+    print(f"      Bankroll : ${athena['bankroll']:.2f} | P&L: {athena['total_pnl']:+.2f} | Win Rate: {athena['win_rate']}% ({athena['total_bets']} bets) | Active: {len(athena['active_bets'])}")
 
 def main():
     print("+" + "-" * 68 + "+")

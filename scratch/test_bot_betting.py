@@ -110,13 +110,13 @@ class TestBotBetting(unittest.TestCase):
         for call in self.mock_update_bet.call_args_list:
             print("  ", call)
 
-        # Verify that sigmaballs placed a bet on the expected player prop market
+        # Verify that athena placed a bet on the expected player prop market
         matched_call = False
         for call in self.mock_update_bet.call_args_list:
             args = call[0]
             if len(args) >= 7:
                 port, name, home, away, bet_type, stake, odds = args[:7]
-                if port == "predict" and name == "sigmaballs" and bet_type == expected_bet_type:
+                if port == "predict" and name == "athena" and bet_type == expected_bet_type:
                     self.assertEqual(home, "portugal")
                     self.assertEqual(away, "france")
                     # Calculate expected Kelly stake
