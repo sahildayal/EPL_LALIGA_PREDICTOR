@@ -4,7 +4,8 @@ class SgpSandboxValidator:
         # Group legs by match
         match_legs = {}
         for leg in combo:
-            match_legs.setdefault(leg["match"], []).append(leg)
+            match_key = tuple(sorted(t.lower() for t in leg["match"]))
+            match_legs.setdefault(match_key, []).append(leg)
             
         for match_key, legs in match_legs.items():
             outcomes = [leg.get("outcome") for leg in legs if leg.get("outcome") is not None]

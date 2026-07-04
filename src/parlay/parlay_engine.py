@@ -305,11 +305,6 @@ class ParlayEngine:
         parlays = []
         for r in range(3, min(max_legs, len(candidates)) + 1):
             for combo in itertools.combinations(candidates, r):
-                # Group legs by match to check mutual exclusions
-                match_legs = {}
-                for leg in combo:
-                    match_legs.setdefault(leg["match"], []).append(leg)
-                
                 # Enforce sports betting mutual exclusions using SgpSandboxValidator
                 if not SgpSandboxValidator.validate_combo(combo):
                     continue
