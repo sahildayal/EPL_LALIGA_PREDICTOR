@@ -18,7 +18,9 @@
 - Task 12: Daily Execution CLI Command (`run-daily`) [COMPLETE] (commits 4c59359..0a798ff, review clean)
 - Task 13: Temporal Sample Weighting for ML Models [COMPLETE] (commits eb4d244..d15a9f7, review clean)
 - Task 14: High-Leg Parlay Generation & Candidate Capping [COMPLETE] (commits 5eca163..bd5f9e4, review clean)
-- Task 15: Parlay Bet Identity Checking Refinement [PENDING]
+- Task 15: Parlay Bet Identity Checking Refinement [COMPLETE] (commits deb99ed..73bc0b0, review clean)
+- Task 16: SGP Sandbox Validator Class & Engine Integration [PENDING]
+
 
 
 
