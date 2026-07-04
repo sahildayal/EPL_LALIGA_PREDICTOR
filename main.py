@@ -1227,6 +1227,13 @@ def run_update():
     else:
         console.print("[green]Everything is already up-to-date! No new completed matches found.[/green]\n")
 
+    # Sync upcoming fixtures & stats
+    from src.data.scrapers.upcoming_and_stats import scrape_upcoming_fixtures, scrape_tournament_stats
+    console.print("\n[yellow]Syncing upcoming fixtures and live tournament player statistics...[/yellow]")
+    scrape_upcoming_fixtures()
+    scrape_tournament_stats()
+    console.print("[bold green]Success! Schedule and tournament stats prepared.[/bold green]")
+
 
 def main():
     parser = argparse.ArgumentParser(description="World Cup Predictor & Parlay Engine CLI")
