@@ -43,12 +43,16 @@ def calculate_sample_weights(dates: pd.Series) -> np.ndarray:
     current_time = pd.Timestamp.now()
     # Convert to pd.Series to ensure the .dt accessor is available
     dates_series = pd.Series(dates)
+    # Convert dates_series to datetime and strip timezone info
+    dates_dt = pd.to_datetime(dates_series, errors='coerce').dt.tz_localize(None)
     # Compute years ago
-    years_ago = (current_time - pd.to_datetime(dates_series)).dt.days / 365.25
+    years_ago = (current_time - dates_dt).dt.days / 365.25
     # Half life decay lambda = ln(2)/4 = 0.173286
     weights = np.exp(-0.173286 * years_ago)
+    # Replace any resulting NaN weights in weights with default minimum weight 0.05
+    weights = np.nan_to_num(weights, nan=0.05)
     # Clamp at 0.05
-    return np.maximum(0.05, weights.values)
+    return np.maximum(0.05, weights)
 
 
 

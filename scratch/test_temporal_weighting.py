@@ -26,6 +26,23 @@ class TestTemporalWeighting(unittest.TestCase):
         # Clamped at 0.05
         self.assertAlmostEqual(weights[3], 0.05, places=2)
 
+    def test_timezone_and_nan_safety(self):
+        from src.models.trainer import calculate_sample_weights
+        
+        # Test timezone-aware datetime and NaT/invalid dates
+        dates = pd.Series([
+            pd.Timestamp.now(tz="UTC"),
+            pd.NaT,
+            "invalid-date-string"
+        ])
+        
+        weights = calculate_sample_weights(dates)
+        self.assertEqual(len(weights), 3)
+        # Timezone-aware should succeed and be close to 1.0; NaT/invalid should default to 0.05
+        self.assertAlmostEqual(weights[0], 1.0, places=2)
+        self.assertAlmostEqual(weights[1], 0.05, places=2)
+        self.assertAlmostEqual(weights[2], 0.05, places=2)
+
     def test_model_training_with_weights(self):
         from src.models.machine_learning import (
             LogisticRegressionModel, SVMModel, GDAModel,
