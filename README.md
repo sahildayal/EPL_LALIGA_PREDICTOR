@@ -1,8 +1,8 @@
 # 🏆 2026 FIFA World Cup Predictor & Parlay Engine ⚽
 
-A unified machine learning and statistical forecasting suite designed specifically for the ongoing **2026 FIFA World Cup**. It combines 8 prediction models (Dixon-Coles score expectations, ELO ratings, and 6 ML classification/regression algorithms) with live news sentiment, Google News RSS, and Kalshi V2 exchange data to identify high-edge betting value and parlay combinations.
+A unified machine learning and statistical forecasting suite designed specifically for the ongoing **2026 FIFA World Cup**. It combines 8 prediction models (Dixon-Coles score expectations, ELO ratings, and 6 ML classification/regression algorithms) with live news sentiment, Google News RSS, ESPN corner statistics, and Kalshi V2 exchange data to identify high-edge betting value and parlay combinations.
 
-It also features a persistent **Multi-Portfolio Paper Trading System** where two rival AI personalities (**Big D**, the old-school qualitative scout, and **SIGMABALLS**, the cold-blooded quant) debate predictions, allocate stakes, and manage their own simulated bankrolls across four separate prediction categories to track which methodology yields the highest return.
+It also features a persistent **Multi-Portfolio Paper Trading System** where two rival AI personalities (**Magnus**, the old-school qualitative scout, and **Athena**, the cold-blooded quant) debate predictions, allocate stakes, and manage their own simulated bankrolls across four separate prediction categories to track which methodology yields the highest return.
 
 ---
 
@@ -16,7 +16,7 @@ WorldCupPredictor/
 │   └── models/                # Saved weights/pickles for the 6 ML models
 ├── src/
 │   ├── data/
-│   │   ├── scrapers/          # Scrapers (FBRef stats, Google News, ESPN rosters, player_stats)
+│   │   ├── scrapers/          # Scrapers (FBRef stats, ESPN rosters, corners, upcoming_and_stats)
 │   │   └── preprocessor.py    # Feature engineering (17 team/sentiment variables)
 │   ├── models/
 │   │   ├── base.py            # Unified ML model wrapper interface
@@ -34,11 +34,11 @@ WorldCupPredictor/
 ├── show_project_summary.py    # Interactive dashboard printing project stats
 ├── requirements.txt           # Required Python packages
 ├── scratch/
-│   ├── test_bot_betting.py    # Bot betting candidates unit tests
-│   ├── test_player_scraping.py# Scraper mock testing
-│   ├── test_prop_math.py      # Player prop binomial prediction tests
-│   ├── test_player_prop_resolution.py # Completed match prop resolver tests
-│   └── test_player_props_integration.py # E2E CLI pipeline integration tests
+│   ├── test_corners.py        # ESPN corners scraper tests
+│   ├── test_stats_ingestion.py# Upcoming fixtures and tournament stats scraper tests
+│   ├── test_longshot_portfolio.py # Diverse parlay portfolio math tests
+│   ├── test_run_daily.py      # Daily execution pipeline runner tests
+│   └── test_integration.py    # E2E CLI pipeline integration tests
 └── .env                       # Environment credentials and configurations
 ```
 
@@ -49,8 +49,8 @@ WorldCupPredictor/
 ### 1. Forecasting & Capital Allocation Flow
 ```mermaid
 graph TD
-    A["Input Match Query (e.g., England vs Ghana)"] --> B["Data Scrapers & Sentiment Analysis"]
-    B --> C["17 Engineered Features (Pre-Match)"]
+    A["Input Match Query (e.g., England vs Senegal)"] --> B["Data Scrapers, Sentiment & Corners"]
+    B --> C["17 Engineered Features + Corners Stats"]
     C --> D["8-Model Ensemble Orchestrator"]
     D --> D1["Dixon-Coles Model"]
     D --> D2["Elo Rating Predictor"]
@@ -58,9 +58,9 @@ graph TD
     D1 & D2 & D3 --> E["Forecast Probabilities & Value Edge Calculations"]
     E --> F["Automated Paper Trading Portfolio Allocation"]
     F --> F1["predict: Edge-Based Single Bets"]
-    F --> F2["ask: LLM Debated Bets"]
+    F --> F2["ask: LLM Debated Bets (Magnus vs Athena)"]
     F --> F3["parlay_standard: Top Combined Bets (5x-150x)"]
-    F --> F4["parlay_longshot: Round Robin Cards (10x-150x)"]
+    F --> F4["parlay_longshot: Diverse portfolios (50x-400x)"]
 ```
 
 ### 2. Parlay Leg Resolution Pipeline
@@ -81,14 +81,14 @@ graph TD
 ---
 
 ## 💼 Paper Trading Portfolios
-To evaluate which method performs best, the AI personalities (**Big D** and **SIGMABALLS**) maintain isolated bankrolls of **$1,000.00** each across four distinct portfolios:
+To evaluate which method performs best, the AI personalities (**Magnus** and **Athena**) maintain isolated bankrolls of **$1,000.00** each across four distinct portfolios:
 
 1. **`predict` (Match Forecasts):** Automated bets placed when you query a match. 
-   - **Big D** places a gut bet (10% of bankroll) on the moneyline of the team with the highest model probability.
-   - **SIGMABALLS** scans all moneyline and game line edges and places a calculated bet (5% of bankroll) on the option with the highest positive edge.
+   - **Magnus** places a gut bet (10% of bankroll) on the moneyline of the team with the highest model probability.
+   - **Athena** scans all moneyline and game line edges and places a calculated bet (5% of bankroll) on the option with the highest positive edge.
 2. **`ask` (Debates & LLM Plays):** Capital allocated dynamically during the scout-quant LLM debates. If live odds change, the bots can choose to stick with or hedge/update their positions, triggering automatic stake refunds.
-3. **`parlay_standard` (Standard Parlays):** Both bots place bets on the top recommended standard or today-only parlay. (Big D: 10% stake, SIGMABALLS: 5% stake).
-4. **`parlay_longshot` (Longshot Round Robins):** The bots split their capital across all 5 generated round-robin cards. (Big D: 2% per card, SIGMABALLS: 1% per card).
+3. **`parlay_standard` (Standard Parlays):** Both bots place bets on the top recommended standard or today-only parlay. (Magnus: 10% stake, Athena: 5% stake).
+4. **`parlay_longshot` (Longshot portfolios):** The bots allocate a flat **$2.00** stake per card across all 10 generated round-robin cards (Magnus: $2.00 flat, Athena: $2.00 flat).
 
 ---
 
@@ -118,47 +118,42 @@ Trains the 6 machine learning models on the master historical match records data
 python main.py init
 ```
 
-### 2. `update` - Scoreboard Auto-Sync & Retraining
-Fetches completed World Cup matches from ESPN. It updates ELOs, resolves active paper trades across all portfolios, appends new rows to the training set, and retrains all models.
+### 2. `update` - Scoreboard Auto-Sync & Ingestion
+Fetches completed tournament match results from ESPN scoreboard, updates ELOs, resolves active paper trades, and retrains all models. It also parses:
+- Upcoming fixtures scheduled for today and the next 2 days $\rightarrow$ writes to `data/processed/daily_schedule.json`.
+- Live tournament statistics (top goals and assists leaders) $\rightarrow$ writes to `data/processed/tournament_player_stats.json`.
 ```bash
 python main.py update
 ```
 
-### 3. `predict` - Match Forecast & Betting Edge
-Blends ELO ratings, news sentiment, and all 8 models to output the forecast probabilities for Home Win, Draw, and Away Win. It also automatically places paper bets in the `predict` portfolio and outputs value edges against live Kalshi prices.
+### 3. `run-daily` - Daily Betting Pipeline Runner
+Reads the prepared `daily_schedule.json`, filters for games scheduled for the current UTC date, and sequentially executes the forecasting pipeline (`predict` + `ask` debate + standard/longshot parlay portfolios placement) automatically.
 ```bash
-python main.py predict "England vs Ghana"
+python main.py run-daily
 ```
 
-### 4. `ask` - Personality Debates & Paper Bets
-Stages an LLM debate between **Big D** and **SIGMABALLS** analyzing the game. They place their paper bets in the `ask` portfolio. The command checks for odds changes, displays position comparison alerts, and manages stake refunds.
+### 4. `predict` - Match Forecast & Corner Expectations
+Blends ELO ratings, news sentiment, and all 8 models to output the forecast probabilities for Home Win, Draw, and Away Win, prints expected corners won/conceded, and places paper bets in the `predict` portfolio.
 ```bash
-# Uses the default model specified in .env
-python main.py ask "England vs Ghana"
+python main.py predict "England vs Senegal"
 ```
 
-### 5. `parlay` - Correlated Kalshi Combo Builder
-Searches live Kalshi markets to construct 3-to-5-leg parlay/combo recommendations with a combined payout $\ge 5x$.
-- `-t`, `--today`: Generate parlays/combos playing today only, sorted by **highest joint probability (success ratio)**. It converts UTC to local timezone and handles late-night slate rollovers.
-- `-l`, `--longshot`: Generate a portfolio of high-payout long-shot parlays (10x to 150x payout) sorted by expected edge.
+### 5. `ask` - Personality Debates & Paper Bets
+Stages an LLM debate between **Magnus** and **Athena** analyzing the game, including corners and knockout qualification, placing paper bets in the `ask` portfolio.
 ```bash
-# Standard parlays (Automatically bets in parlay_standard portfolio)
+python main.py ask "England vs Senegal"
+```
+
+### 6. `parlay` - Correlated Kalshi Combo Builder
+Searches live Kalshi markets to construct parlay/combo recommendations.
+- `-t`, `--today`: Generate parlays/combos playing today only, sorted by highest joint probability.
+- `-l`, `--longshot`: Generate a hedged portfolio of **10 distinct cards** targeting **50x to 400x** payout longshots, keeping overlap under 3 legs.
+```bash
+# Standard parlays
 python main.py parlay -t
 
-# Risky but high-value long-shot Round Robin portfolio (Automatically bets in parlay_longshot portfolio)
+# Long-shot portfolios (flat $2.00 stakes per card)
 python main.py parlay -l
-```
-
-### 6. `complete` - Manual Match Resolution
-Manually ingests a completed game score. It updates team ELOs, resolves active paper bets across all portfolios, and triggers model retraining.
-```bash
-python main.py complete england ghana 2 1
-```
-
-### 7. `portfolio` - Kalshi Account Summary
-Connects to the live Kalshi elections endpoint (`https://api.elections.kalshi.com`) to print your live cash balance and closed trades history.
-```bash
-python main.py portfolio
 ```
 
 ---
@@ -167,97 +162,28 @@ python main.py portfolio
 
 The predictor features a complete pipeline for scraping starting lineups, blending player statistics, calculating anytime goals/assists binomial distributions, matching props to live Kalshi contracts, and resolving them automatically.
 
-### 1. Dynamic Starting Lineups Scraper
-- **ESPN Lineups Feed**: Automatically parses the starting lineups for the match.
-- **Recent Completed Game Fallback**: If the official starting lineups are not yet published for an upcoming match (e.g. earlier than 30 minutes before kickoff), the scraper automatically looks back through each country's previous completed matches (up to 8 days prior) to extract their most recent starting 11 roster.
-- **Default Squads Backup**: If no recent completed matches are found on ESPN, the system falls back to a curated roster seed containing each country's primary tournament squad.
-
-### 2. Tiered SQLite Caching & Storage
-To optimize performance and comply with API rate limits:
-- **General cache table**: Stores raw ESPN scoreboard JSON (6h TTL) and parsed event lineups (24h TTL).
-- **`player_statistics` table**: Persists scraped player stats from FBRef (Goals, Assists, Minutes played, Expected Goals xG, Position) with a 7-day TTL cache.
-- **Overhead Optimization**: Checks database initialization status locally on connection to avoid executing duplicate DDL (`CREATE TABLE IF NOT EXISTS`) statements on every query.
-
-### 3. Binomial Goal & Assist Prediction Math
-For every player in the starting lineups:
-- **Prior Blending**: Blends the player's club/country statistics (60% country stats weight, 40% club stats weight) or uses position-specific default profiles (e.g., forwards: 0.25 G/90, midfielders: 0.15 A/90) if no club data is scraped.
+### 1. Tournament Statistics Blending
+- **Prior Blending**: Blends the player's club/country statistics (60% country stats weight, 40% club stats weight) or uses position-specific default profiles.
+- **World Cup Form Boost**: Blends the player's historical stats 50/50 with their current World Cup performance (World Cup goals divided by their team's completed tournament match count).
 - **Binomial Matrix Integration**: Conditional binomial probability distribution calculates the odds of the player scoring or assisting given the Dixon-Coles match-level scoreline expectation joint matrix:
   $$P(\text{at least } k \text{ events}) = \sum_{g=k}^{6} P(\text{Team Goals} = g) \times \sum_{j=k}^{g} \binom{g}{j} s^j (1 - s)^{g - j}$$
   where $s$ is the player's share of team goalscoring/assisting per 90.
-- **Categories Predicted**:
-  - **Player Goals**: `1+ Goals`, `2+ Goals`
-  - **Player Assists**: `1+ Assists`, `2+ Assists`
-  - **Player G/A**: `Score or Assist` (any goal or assist contribution)
-
-### 4. Word-Boundary Regex Market Matching
-- Matches predicted player prop statistics against live Kalshi contracts using case-insensitive pre-compiled regex matching with clear word boundaries:
-  `r'(?<!\w)' + re.escape(player_name) + r'(?!\w)'`
-- This ensures full-word matching and completely avoids substring collision bugs (such as matching "Ed" inside "Edward").
-
-### 5. Automated Completed Match Props Settlement
-- **Match Ingestion**: During `complete` or `update` commands, the resolver queries the completed match summary page on ESPN.
-- **Boxscore Rosters**: Extracts the actual goals and assists stats for each player in that specific match to settle player prop bets (WIN/LOSS) and update bot bankrolls accordingly.
 
 ---
 
 ## 🧠 Advanced Model & Algorithm Refinements
 
-To maximize forecasting accuracy, the orchestrator incorporates advanced statistical and machine learning modeling techniques:
+### 1. ESPN Corners & Poisson CDF modeling
+- **Rolling Scraper**: Scrapes up to 5 of the team's most recent completed World Cup matches to calculate rolling corners won and conceded averages.
+- **Corners Expectation**: Evaluates corner kick scoring intensities $\lambda_{\text{Home}}$ and $\lambda_{\text{Away}}$ based on rolling averages and a tournament baseline factor.
+- **Poisson Probabilities**: Models total corners using a Poisson distribution and calculates precise probabilities for over/under lines (e.g. Over 7.5, 8.5, and 9.5 corners) using the Poisson CDF.
 
-### 1. Time-Decayed Dixon-Coles Regressor
-- **Dynamic Weighting**: Incorporates an exponential time-decay parameter ($\xi = 0.0019$, equivalent to a half-life of ~365 days) that discounts older matches relative to the match forecast date:
-  $$\phi(t) = \exp(-\xi t)$$
-- **NumPy Vectorized Likelihood Optimization**: Runs purely in vectorized arrays to bypass slow loop iteration. This reduces SciPy L-BFGS-B parameter fitting time on 10,000+ matches from ~42 minutes to **under 3.5 seconds**, utilizing cached results in SQLite.
-- **Numerical Stability**: Re-formulates maximum likelihood estimation directly in log-probability space, utilizing `np.clip` on scoring intensities to completely prevent numeric overflow or underflow under SciPy optimization.
-- **Robust Fallbacks**: Automatically falls back to safe prior parameters if a team has insufficient history or if the optimizer fails to converge.
+### 2. Knockout Progression (To Qualify)
+- **Advancement Forecasts**: Estimates advancement probabilities during single-elimination knockout matches, incorporating goalie shootout saving rates (e.g., Alisson: 33%, Pickford: 28%).
+- **Same-Game Parlay Correlation**: Implements SGP joint probability math. If a team wins in regulation, their advancement probability is $1.0$. If a team draws, the conditional probability of qualifying is:
+  $$P(\text{Qualify} \mid \text{Draw}) = \frac{P(\text{Qualify}) - P(\text{Regulation Win})}{P(\text{Draw})}$$
 
-### 2. Advanced Elo Rating System & Confederation Calibration
-- **Stage-Dependent K-factors**: Scales match importance based on the official FIFA/eloratings.net weights (e.g., friendly matches = 20 weight, World Cup qualifiers = 40 weight, World Cup knockout matches = 60 weight).
-- **Margin of Victory Multiplier**: Updates ratings using a goal-difference scaling factor:
-  $$R_{\text{new}} = R_{\text{old}} + K \times M(N) \times (W - W_e)$$
-  where $M(N) = 1.75 + \frac{N-3}{8}$ for absolute goal differences $N \ge 4$.
-- **Confederation Boosts**: Dynamically applies region-dependent adjustments to Elo differences before probability calculation (e.g., CONMEBOL: +50 ELO, UEFA: +40 ELO, AFC: -20 ELO, CONCACAF: -30 ELO, OFC: -80 ELO, defaulting to 0 for unknown teams), correcting cross-confederation rating gaps.
-- **Regional Home Advantage**: Dynamically applies a +100 ELO home advantage boost for non-neutral fixtures, defaulting to 0 for neutral tournament grounds.
-
-### 3. Starting XI Quality Index & Roster Health Preprocessing
-- **Starting XI Strength**: Parses active match rosters and aggregates player-specific performance stats (club/country goals and xG per 90) to generate a dynamic team roster strength index (`HTRosterStrength`, `ATRosterStrength`, and `RosterStrengthDiff`), adjusting predictions if starting lineups are rotated or resting key players.
-- **Google News Injury RSS Parser**: Continuously scans live RSS search endpoints for team injury news and flags rostered players matching keywords like `injury`, `doubtful`, `suspended`, or `out`, outputting a dynamic health index (`HTRosterHealth`, `ATRosterHealth`, `RosterHealthDiff`).
-- **Robust Caching & Fallbacks**: Roster health scores are cached for 2 hours in SQLite. Roster strength indices default to safe historical averages if rosters are unavailable or scraping fails, with player-specific exception wrappers protecting the pipeline.
-
-### 4. Two-Stage Stacking Classifier Ensemble, Staking & Progression
-- **Stage 1 Base Learners**: Combines predictions from an XGBoost classifier, a LightGBM classifier, and a Multi-Layer Perceptron (MLP) Neural Network.
-- **Stage 2 Meta-Learner**: Fits a Ridge Logistic Regression classifier using standard scaling on the concatenated out-of-fold predicted probabilities, preventing data leakage and stabilizing outputs.
-- **Fractional Kelly Sizing**: Integrates a Quarter-Kelly Criterion bankroll allocation for quant paper-bets (`SIGMABALLS`):
-  $$f^* = 0.25 \times \frac{p \times b - (1 - p)}{b}$$
-  where $b = \text{odds} - 1$ and $p = \text{probability}$. Capped at 15% maximum allocation to manage drawdown volatility.
-- **To-Qualify Progression Model**: Foretells advancement probabilities during the single-elimination knockout stages, estimating extra-time and shootout win chances based on team Elo differences and starting goalkeeper penalty-saving coefficients (e.g., Alisson: 33%, Suzuki: 25%).
-- **Enforced Real AI Debates**: Disables simulated fallbacks. The CLI exits with a clean alert if `GEMINI_API_KEY` is missing to ensure only live models drive bot decisions.
-
----
-
-## 📈 Real-Time Tournament Self-Learning
-
-The system dynamically adapts to the progression of the tournament and continuously updates its parameters as games are played.
-
-### 1. Dynamic Tournament Stage Detection
-- **Date-Based Progression**: The engine automatically detects the tournament phase. Starting June 28, 2026, the stage changes to **Knockout Stage (Single Elimination)**.
-- **Debate Prompt Context**: Informs the scout and quant AI personalities (**Big D** and **SIGMABALLS**) during LLM debates that matches are in single elimination, but explicitly highlights that Kalshi moneyline markets still resolve based on the scoreline at the end of regulation (90 mins + injury time).
-
-### 2. Rolling Team Averages from Completed Matches
-- **Decoupled from Static Priors**: Rather than relying on pre-tournament static team stats, the Dixon-Coles goal expectation parameters (`avg_goals`, `avg_conceded`) and form indexes are computed dynamically from `master_dataset.csv`.
-- **Tournament Form**: The scraper uses the last 10 games involving the team to update their offensive and defensive baselines, ensuring the model ensemble adapts to their current tournament form.
-
-### 3. Decaying/Boosting Player Form Updates
-- **Feedback Loop**: When a completed match is resolved (`complete` or `update`), the starting players' statistics are updated in the SQLite `player_statistics` table.
-- **Rolling Math**: Adjusts player expectations (Goals, Assists, xG) using a rolling average formula:
-  $$\text{New Stat} = \frac{\text{Old Stat} \times 10 + \text{Match Performance}}{11}$$
-  - **Boost**: Players who score or assist receive an expectation boost.
-  - **Decay**: Players who do not score or assist have their expectations decay naturally.
-
----
-
-## 📊 Summary Dashboard
-Run [show_project_summary.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/show_project_summary.py) at any time to print a clean console view of dataset sizes, top ELO ratings, and bankroll standings across all four portfolios:
-```bash
-python show_project_summary.py
-```
+### 3. Diverse Parlay portfolios (Round Robin Hedging)
+- **Shared Leg Filtering**: Sorts candidates by edge descending, and greedily compiles a 10-card portfolio.
+- **Diversity Rules**: To prevent combinatorial overlap, a parlay is only added if it shares **at most 2 legs** with any already-selected parlay in the portfolio.
+- **Description Collisions**: Avoids key collisions by appending match titles to generic outcome descriptions (e.g., `"Moneyline: Draw (France vs Sweden)"`).
