@@ -20,6 +20,8 @@
 - Task 14: High-Leg Parlay Generation & Candidate Capping [COMPLETE] (commits 5eca163..bd5f9e4, review clean)
 - Task 15: Parlay Bet Identity Checking Refinement [COMPLETE] (commits deb99ed..73bc0b0, review clean)
 - Task 16: SGP Sandbox Validator Class & Engine Integration [COMPLETE] (commits 1d51fec..595e428, review clean)
+- Task 17: SGP Leg Expansion (Corners & To Advance) [PENDING]
+
 
 
 
