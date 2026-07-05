@@ -13,17 +13,20 @@ class TestRunDaily(unittest.TestCase):
     @patch("main.run_parlay")
     @patch("json.load")
     @patch("os.path.exists", return_value=True)
+    @patch("src.models.simulation.run_tournament_simulation")
     @patch("builtins.open", new_callable=mock_open)
-    def test_run_daily_matches(self, mock_file, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
+    def test_run_daily_matches(self, mock_file, mock_sim, mock_exists, mock_json, mock_parlay, mock_ask, mock_predict):
         from datetime import datetime, timezone
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         mock_json.return_value = [
             {"home": "france", "away": "sweden", "date": f"{today_str}T18:00:00Z"}
         ]
+        mock_sim.return_value = {"probabilities": []}
         
         run_daily()
         
-        mock_file.assert_called_once_with(os.path.join("data", "processed", "daily_schedule.json"), "r")
+        mock_file.assert_any_call(os.path.join("data", "processed", "daily_schedule.json"), "r")
+        mock_file.assert_any_call(os.path.join("data", "processed", "simulation_results.json"), "w")
         mock_predict.assert_called_once_with("france vs sweden")
         mock_ask.assert_called_once_with("france vs sweden", "Gemini 2.5 Flash")
         

@@ -1245,6 +1245,16 @@ def run_update():
     scrape_upcoming_fixtures()
     scrape_tournament_stats()
     console.print("[bold green]Success! Schedule and tournament stats prepared.[/bold green]")
+    
+    console.print("\n[yellow]Running tournament simulations (10,000 runs)...[/yellow]")
+    import json
+    from src.models.simulation import run_tournament_simulation
+    sim_results = run_tournament_simulation(num_runs=10000)
+    sim_results_path = os.path.join("data", "processed", "simulation_results.json")
+    os.makedirs(os.path.dirname(sim_results_path), exist_ok=True)
+    with open(sim_results_path, "w") as f:
+        json.dump(sim_results, f, indent=2)
+    console.print("[bold green]Success! Saved tournament simulations to data/processed/simulation_results.json[/bold green]")
 
 
 def run_daily():
@@ -1290,6 +1300,15 @@ def run_daily():
     console.print("\n[yellow]Running Parlay Engine for today's matches...[/yellow]")
     run_parlay(longshot=False, today_only=True)
     run_parlay(longshot=True, today_only=True)
+    
+    console.print("\n[yellow]Running tournament simulations (10,000 runs)...[/yellow]")
+    from src.models.simulation import run_tournament_simulation
+    sim_results = run_tournament_simulation(num_runs=10000)
+    sim_results_path = os.path.join("data", "processed", "simulation_results.json")
+    os.makedirs(os.path.dirname(sim_results_path), exist_ok=True)
+    with open(sim_results_path, "w") as f:
+        json.dump(sim_results, f, indent=2)
+    console.print("[bold green]Success! Saved tournament simulations to data/processed/simulation_results.json[/bold green]")
     
     console.print("\n[bold green]=== Daily Pipeline Execution Completed ===[/bold green]")
 
