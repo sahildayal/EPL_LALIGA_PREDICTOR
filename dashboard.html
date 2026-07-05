@@ -943,14 +943,38 @@
         selectMatch('qf1');
       } catch (error) {
         console.error("Failed to load simulation results:", error);
+        
+        const isLocalFile = window.location.protocol === 'file:';
+        let errorMessage = "⚠️ Error loading simulation results. Verify 'data/processed/simulation_results.json' exists and matches schema.";
+        if (isLocalFile) {
+          errorMessage = `
+            <div style="max-width: 600px; margin: 0 auto; text-align: left; background: rgba(255, 117, 143, 0.1); border: 1px solid var(--accent-pink); padding: 1.5rem; border-radius: 8px;">
+              <h4 style="color: var(--accent-pink); margin-top: 0; font-family: var(--font-title);">🔒 Browser CORS Security Active</h4>
+              <p style="font-size: 0.9rem; line-height: 1.4; color: var(--color-text-light);">
+                Modern browsers block JavaScript AJAX <code>fetch()</code> requests when files are opened directly via the <code>file:///</code> protocol.
+              </p>
+              <p style="font-size: 0.9rem; line-height: 1.4; color: var(--color-text-light); margin-top: 0.5rem;">
+                <strong>Solution:</strong> Please start the local web server from your project root:
+              </p>
+              <code style="display: block; background: #1a1b26; padding: 0.75rem; border-radius: 4px; font-size: 0.8rem; margin: 0.5rem 0; border: 1px solid var(--border-color); color: var(--accent-cyan);">
+                powershell -ExecutionPolicy Bypass -File .\\start-dashboard.ps1
+              </code>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.5rem;">
+                This script automatically starts a local python HTTP server and launches <a href="http://localhost:8080/dashboard.html" style="color: var(--accent-cyan); text-decoration: underline;">http://localhost:8080/dashboard.html</a>.
+              </p>
+            </div>
+          `;
+        }
+        
         document.getElementById('table-body').innerHTML = `
           <tr>
-            <td colspan="6" style="text-align: center; color: var(--accent-pink); padding: 2rem;">
-              ⚠️ Error loading simulation results. Verify 'data/processed/simulation_results.json' exists.
+            <td colspan="6" style="padding: 2rem; text-align: center;">
+              ${errorMessage}
             </td>
           </tr>
         `;
       }
+
     }
 
     // Populate the rankings table
