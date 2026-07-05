@@ -247,50 +247,58 @@ class ParlayEngine:
                         "odds": 1.0 / p_mkt_prob
                     })
 
-            # Add corners and qualification lines to candidates check
-            from src.market.llm import get_tournament_stage
+            # To Advance
             from src.predictor import predict_match
-            is_knockout = "knockout" in get_tournament_stage().lower()
-            
-            if is_knockout:
-                try:
-                    res_prog = predict_match(home, away)
-                    p_home_q = res_prog.progression_probabilities["home_advances"]
-                    p_away_q = res_prog.progression_probabilities["away_advances"]
-                    
-                    q_lines = {
-                        "to_qualify_home": (p_home_q, f"{home.title()} to Qualify"),
-                        "to_qualify_away": (p_away_q, f"{away.title()} to Qualify")
-                    }
-                    for outcome, (prob, desc) in q_lines.items():
-                        mkt_prob = mkt.get(outcome)
-                        if mkt_prob and prob > mkt_prob:
-                            candidates.append({
-                                "type": "game_line",
-                                "match": (home, away),
-                                "outcome": outcome,
-                                "description": desc,
-                                "model_prob": prob,
-                                "market_prob": mkt_prob,
-                                "odds": 1.0 / mkt_prob
-                            })
-                except Exception:
-                    pass
-                    
-            for line_val in [7.5, 8.5, 9.5]:
-                p_crn = self.get_corners_probability(home, away, line_val)
-                outcome = f"corners_over_{line_val}"
-                mkt_prob = mkt.get(outcome)
-                if mkt_prob and p_crn > mkt_prob:
+            try:
+                res = predict_match(home, away)
+                p_adv_home = res.progression_probabilities["home_advances"]
+                p_adv_away = res.progression_probabilities["away_advances"]
+            except Exception:
+                p_adv_home = 0.50
+                p_adv_away = 0.50
+                
+            if "to_qualify_home" in m["market_odds"]:
+                prob = p_adv_home
+                mkt_p = m["market_odds"]["to_qualify_home"]
+                if prob > mkt_p:
                     candidates.append({
                         "type": "game_line",
                         "match": (home, away),
-                        "outcome": outcome,
-                        "description": f"{home.title()} vs {away.title()} Over {line_val} Corners",
-                        "model_prob": p_crn,
-                        "market_prob": mkt_prob,
-                        "odds": 1.0 / mkt_prob
+                        "outcome": "to_qualify_home",
+                        "description": f"{home.title()} to Advance ({home.title()} vs {away.title()})",
+                        "model_prob": prob,
+                        "market_prob": mkt_p,
+                        "odds": 1.0 / mkt_p
                     })
+            if "to_qualify_away" in m["market_odds"]:
+                prob = p_adv_away
+                mkt_p = m["market_odds"]["to_qualify_away"]
+                if prob > mkt_p:
+                    candidates.append({
+                        "type": "game_line",
+                        "match": (home, away),
+                        "outcome": "to_qualify_away",
+                        "description": f"{away.title()} to Advance ({home.title()} vs {away.title()})",
+                        "model_prob": prob,
+                        "market_prob": mkt_p,
+                        "odds": 1.0 / mkt_p
+                    })
+
+            # Corners
+            for key, mkt_p in m["market_odds"].items():
+                if key.startswith("corners_over_"):
+                    line_val = float(key.split("_")[-1])
+                    prob = self.get_corners_probability(home, away, line_val)
+                    if prob > mkt_p:
+                        candidates.append({
+                            "type": "game_line",
+                            "match": (home, away),
+                            "outcome": key,
+                            "description": f"{home.title()} vs {away.title()} Over {line_val} Corners",
+                            "model_prob": prob,
+                            "market_prob": mkt_p,
+                            "odds": 1.0 / mkt_p
+                        })
 
         # Sort and limit candidates to prevent combinatorial explosion, focusing on highest edge
         if max_legs > 5:

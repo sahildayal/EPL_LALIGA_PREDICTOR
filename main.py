@@ -425,6 +425,19 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
                         odds["over_2.5"] = m["yes_price"]
                     elif "both teams" in t or "btts" in t:
                         odds["btts"] = m["yes_price"]
+                    elif "KXWCTCORNERS" in ticker or "corner" in t:
+                        match = re.search(r'(\d+\.?\d*)', t)
+                        if match:
+                            line_val = float(match.group(1))
+                            if "+" in t:
+                                line_val = line_val - 0.5
+                            key = f"corners_over_{line_val}"
+                            odds[key] = m["yes_price"]
+                    elif "KXWCQUAL" in ticker:
+                        if is_team_match(h, t):
+                            odds["to_qualify_home"] = m["yes_price"]
+                        elif is_team_match(a, t):
+                            odds["to_qualify_away"] = m["yes_price"]
                 
                 # Scorer props
                 KEY_PLAYERS_FLAT = ["harry kane", "jude bellingham", "bukayo saka", "kylian mbappe", "antoine griezmann", "lionel messi", "lautaro martinez", "vinicius jr", "cristiano ronaldo", "robert lewandowski", "jamal musiala", "florian wirtz", "alvaro morata", "antoine semenyo", "mohammed kudus"]

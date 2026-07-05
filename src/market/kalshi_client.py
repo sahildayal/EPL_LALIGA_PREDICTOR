@@ -225,7 +225,7 @@ class KalshiClient:
                 }
             ]
 
-        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL", "KXWCAST", "KXWCSOA"]
+        series_tickers = ["KXWCGAME", "KXWCBTTS", "KXWCTOTAL", "KXWCGOAL", "KXWCAST", "KXWCSOA", "KXWCQUAL", "KXWCTCORNERS"]
         raw_markets = []
         for ticker in series_tickers:
             url = f"{KALSHI_BASE_URL}/trade-api/v2/markets"
