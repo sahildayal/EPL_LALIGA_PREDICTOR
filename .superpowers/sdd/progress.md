@@ -22,6 +22,13 @@
 - Task 16: SGP Sandbox Validator Class & Engine Integration [COMPLETE] (commits 1d51fec..595e428, review clean)
 - Task 17: SGP Leg Expansion (Corners & To Advance) [COMPLETE] (commits 04a746d..2aa9d75, review clean)
 
+## Phase 4: Active News Debates & Monte Carlo Simulation Dashboard
+- Task 18: Active News Debating Agents [PENDING]
+- Task 19: Monte Carlo Simulation Engine [PENDING]
+- Task 20: Trigger Integration & JSON Caching [PENDING]
+- Task 21: Interactive Web Dashboard [PENDING]
+
+
 
 
 
