@@ -920,6 +920,12 @@
     let currentSortAscending = false;
     let selectedMatchupId = null;
 
+    // Normalize team names consistently for flags, matching, etc.
+    function cleanTeamName(team) {
+      if (!team) return "";
+      return team.toLowerCase().trim().replace(/[\s_]+/g, ' ');
+    }
+
     // Load simulation results
     async function loadSimulationData() {
       try {
@@ -933,7 +939,7 @@
         buildTable();
         buildBracket();
         
-        // Auto-select the first bracket match with a generated debate
+        // Auto-select the first bracket match
         selectMatch('qf1');
       } catch (error) {
         console.error("Failed to load simulation results:", error);
@@ -960,7 +966,7 @@
         if (currentSortColumn === 'team') {
           valA = a.team;
           valB = b.team;
-          return currentSortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          return currentSortAscending ? cleanTeamName(valA).localeCompare(cleanTeamName(valB)) : cleanTeamName(valB).localeCompare(cleanTeamName(valA));
         } else if (currentSortColumn === 'qf') {
           valA = a.quarterfinals; valB = b.quarterfinals;
         } else if (currentSortColumn === 'sf') {
@@ -975,7 +981,7 @@
 
       tbody.innerHTML = '';
       teams.forEach((t, index) => {
-        const flag = FLAGS[t.team] || "🏳️";
+        const flag = FLAGS[cleanTeamName(t.team)] || "🏳️";
         const rank = currentSortAscending ? teams.length - index : index + 1;
         
         const row = document.createElement('tr');
@@ -1020,9 +1026,6 @@
     function buildBracket() {
       if (!simulationData || !simulationData.probabilities) return;
       
-      // We read the 8 teams in order from probabilities
-      // Since ELO loader returns top 8 sorted:
-      // Index 0 vs 1 (QF1), 2 vs 3 (QF2), 4 vs 5 (QF3), 6 vs 7 (QF4)
       const probs = simulationData.probabilities;
       
       const qf1_1 = probs[0]; const qf1_2 = probs[1];
@@ -1043,7 +1046,7 @@
       setupTeamNode('qf4-team1', qf4_1.team, qf4_1.quarterfinals);
       setupTeamNode('qf4-team2', qf4_2.team, qf4_2.quarterfinals);
 
-      // Determine Semifinalists (the team in each matchup with higher SF probability)
+      // Determine Semifinalists
       const sf1_1 = (qf1_1.semifinals >= qf1_2.semifinals) ? qf1_1 : qf1_2;
       const sf1_2 = (qf2_1.semifinals >= qf2_2.semifinals) ? qf2_1 : qf2_2;
       const sf2_1 = (qf3_1.semifinals >= qf3_2.semifinals) ? qf3_1 : qf3_2;
@@ -1076,25 +1079,24 @@
 
       // Champion display card
       const champCard = document.getElementById('champion-card');
-      document.getElementById('champ-flag').textContent = FLAGS[champ.team] || "🏆";
+      document.getElementById('champ-flag').textContent = FLAGS[cleanTeamName(champ.team)] || "🏆";
       document.getElementById('champ-name').textContent = champ.team;
       document.getElementById('champ-prob').textContent = `${(champ.champion * 100).toFixed(1)}% Win Prob`;
-      champCard.setAttribute('data-team', champ.team);
+      champCard.setAttribute('data-team', cleanTeamName(champ.team));
     }
 
     function setupTeamNode(elementId, team, probability) {
       const node = document.getElementById(elementId);
-      node.setAttribute('data-team', team);
+      node.setAttribute('data-team', cleanTeamName(team));
       
       const flagEl = node.querySelector('.team-flag');
       const nameEl = node.querySelector('.team-name');
       const probEl = node.querySelector('.team-prob');
       
-      flagEl.textContent = FLAGS[team] || "🏳️";
+      flagEl.textContent = FLAGS[cleanTeamName(team)] || "🏳️";
       nameEl.textContent = team;
       probEl.textContent = `${(probability * 100).toFixed(0)}%`;
       
-      // Remove class names
       node.classList.remove('winner', 'highlighted');
     }
 
@@ -1102,23 +1104,28 @@
       const el1 = document.getElementById(id1);
       const el2 = document.getElementById(id2);
       
-      if (el1.getAttribute('data-team') === winnerTeam) {
+      const t1 = cleanTeamName(el1.getAttribute('data-team'));
+      const t2 = cleanTeamName(el2.getAttribute('data-team'));
+      const win = cleanTeamName(winnerTeam);
+      
+      if (t1 === win) {
         el1.classList.add('winner');
-      } else if (el2.getAttribute('data-team') === winnerTeam) {
+      } else if (t2 === win) {
         el2.classList.add('winner');
       }
     }
 
     // Highlight a team's path through the tournament bracket on click
     function highlightTeamPath(team) {
-      // Clear previous highlights
       document.querySelectorAll('.bracket-team').forEach(el => el.classList.remove('highlighted'));
       
       if (!team) return;
 
-      // Select all nodes matching the clicked team name and highlight them
-      document.querySelectorAll(`.bracket-team[data-team="${team}"]`).forEach(el => {
-        el.classList.add('highlighted');
+      const target = cleanTeamName(team);
+      document.querySelectorAll('.bracket-team').forEach(el => {
+        if (cleanTeamName(el.getAttribute('data-team')) === target) {
+          el.classList.add('highlighted');
+        }
       });
     }
 
@@ -1131,54 +1138,51 @@
       const matchNode = document.getElementById(`match-${matchId}`);
       if (matchNode) matchNode.classList.add('selected');
 
-      const team1 = document.getElementById(`${matchId}-team1`).getAttribute('data-team');
-      const team2 = document.getElementById(`${matchId}-team2`).getAttribute('data-team');
+      const team1 = cleanTeamName(document.getElementById(`${matchId}-team1`).getAttribute('data-team'));
+      const team2 = cleanTeamName(document.getElementById(`${matchId}-team2`).getAttribute('data-team'));
 
-      document.getElementById('debate-match-title').textContent = `${FLAGS[team1] || ''} ${team1.toUpperCase()} vs ${FLAGS[team2] || ''} ${team2.toUpperCase()}`;
+      document.getElementById('debate-match-title').textContent = `${FLAGS[cleanTeamName(team1)] || ''} ${team1.toUpperCase()} vs ${FLAGS[cleanTeamName(team2)] || ''} ${team2.toUpperCase()}`;
 
       const contentArea = document.getElementById('debate-content-area');
       contentArea.innerHTML = `<div class="spinner"></div>`;
 
-      // Try loading debate from file. File syntax is YYYY-MM-DD-home-vs-away.json
-      // Let's compute date keys: today and the mock file dates
-      const today = new Date().toISOString().slice(0, 10);
-      const datesToTry = [today, '2026-07-05'];
-      
       let loadedData = null;
-      let triedPaths = [];
+      let debateFile = null;
+      
+      if (simulationData && simulationData.active_debates) {
+        debateFile = simulationData.active_debates.find(d => {
+          const dHome = cleanTeamName(d.home);
+          const dAway = cleanTeamName(d.away);
+          return (dHome === team1 && dAway === team2) || (dHome === team2 && dAway === team1);
+        });
+      }
 
-      for (let date of datesToTry) {
-        const fileKey1 = `data/processed/debates/${date}-${team1}-vs-${team2}.json`;
-        const fileKey2 = `data/processed/debates/${date}-${team2}-vs-${team1}.json`; // inverse home/away
-
-        for (let path of [fileKey1, fileKey2]) {
-          triedPaths.push(path);
-          try {
-            const resp = await fetch(path);
-            if (resp.ok) {
-              loadedData = await resp.json();
-              break;
-            }
-          } catch (e) {
-            // ignore and try next
+      if (debateFile) {
+        const path = `data/processed/debates/${debateFile.filename}`;
+        try {
+          const resp = await fetch(path);
+          if (resp.ok) {
+            loadedData = await resp.json();
           }
+        } catch (e) {
+          console.error("Error fetching debate file:", path, e);
         }
-        if (loadedData) break;
       }
 
       if (loadedData) {
         renderDebate(loadedData);
       } else {
+        const triedPath = debateFile ? `data/processed/debates/${debateFile.filename}` : `No matching debate found in active_debates metadata`;
         contentArea.innerHTML = `
           <div class="debate-empty-state">
             <div class="debate-empty-icon">⚠️</div>
             <p>No debate log JSON found for this matchup.</p>
             <p style="font-size: 0.8rem; color: var(--color-text-dark); margin-top: 0.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-              We checked the following locations: <br>
-              <code style="font-size: 0.75rem; color: var(--accent-pink); word-break: break-all;">${triedPaths.join('<br>')}</code>
+              We checked: <br>
+              <code style="font-size: 0.75rem; color: var(--accent-pink); word-break: break-all;">${triedPath}</code>
             </p>
             <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--color-text-muted);">
-              Run `python main.py ask "${team1} vs ${team2}"` to generate a live Gemini debate transcript.
+              Run \`python main.py ask "${team1} vs ${team2}"\` to generate a live Gemini debate transcript.
             </p>
           </div>
         `;
@@ -1220,71 +1224,75 @@
           </div>
         </div>
 
-        <!-- Dialogue Layout -->
-        <div class="debate-layout">
-          <!-- Magnus Scout Card -->
-          <div class="speaker-card magnus">
-            <div class="speaker-header">
-              <span class="speaker-avatar">👴</span>
-              <div class="speaker-meta">
-                <h3>Magnus</h3>
-                <span>The Eye-Test Scout</span>
-              </div>
-            </div>
-            <p class="speaker-quote">"${data.debate.magnus}"</p>
-            <div class="speaker-bet-box">
-              <span class="bet-label">Personal Bet:</span>
-              <div class="bet-value">
-                <span class="bet-stake">$${(magnusBet.stake || 0).toFixed(0)}</span>
-                <span>${magnusBet.bet_type || 'N/A'} @ ${magnusBet.odds || 1.0}x</span>
-              </div>
-            </div>
+        <!-- Accordion for qualitative discussions & team news -->
+        <div class="news-accordion" style="margin-top: 1rem;">
+          <div class="accordion-header" id="accordion-trigger">
+            <span>💬 View Magnus vs Athena Qualitative Discussions & Team News</span>
+            <span id="accordion-icon">▼</span>
           </div>
+          <div class="accordion-content" id="accordion-content">
+            <!-- Dialogue Layout inside accordion -->
+            <div class="debate-layout" style="margin-top: 0;">
+              <!-- Magnus Scout Card -->
+              <div class="speaker-card magnus">
+                <div class="speaker-header">
+                  <span class="speaker-avatar">👴</span>
+                  <div class="speaker-meta">
+                    <h3>Magnus</h3>
+                    <span>The Eye-Test Scout</span>
+                  </div>
+                </div>
+                <p class="speaker-quote">"${data.debate.magnus}"</p>
+                <div class="speaker-bet-box">
+                  <span class="bet-label">Personal Bet:</span>
+                  <div class="bet-value">
+                    <span class="bet-stake">$${(magnusBet.stake || 0).toFixed(0)}</span>
+                    <span>${magnusBet.bet_type || 'N/A'} @ ${magnusBet.odds || 1.0}x</span>
+                  </div>
+                </div>
+              </div>
 
-          <!-- Athena Quant Card -->
-          <div class="speaker-card athena">
-            <div class="speaker-header">
-              <span class="speaker-avatar">🤖</span>
-              <div class="speaker-meta">
-                <h3>Athena</h3>
-                <span>The Quant Model</span>
+              <!-- Athena Quant Card -->
+              <div class="speaker-card athena">
+                <div class="speaker-header">
+                  <span class="speaker-avatar">🤖</span>
+                  <div class="speaker-meta">
+                    <h3>Athena</h3>
+                    <span>The Quant Model</span>
+                  </div>
+                </div>
+                <p class="speaker-quote">"${data.debate.athena}"</p>
+                <div class="speaker-bet-box">
+                  <span class="bet-label">Personal Bet:</span>
+                  <div class="bet-value">
+                    <span class="bet-stake">$${(athenaBet.stake || 0).toFixed(0)}</span>
+                    <span>${athenaBet.bet_type || 'N/A'} @ ${athenaBet.odds || 1.0}x</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Consensus Panel -->
+              <div class="consensus-panel">
+                <span class="consensus-icon">🤝</span>
+                <div class="consensus-content">
+                  <h4>Consensus Recommendation</h4>
+                  <div class="consensus-text">${data.debate.consensus}</div>
+                </div>
               </div>
             </div>
-            <p class="speaker-quote">"${data.debate.athena}"</p>
-            <div class="speaker-bet-box">
-              <span class="bet-label">Personal Bet:</span>
-              <div class="bet-value">
-                <span class="bet-stake">$${(athenaBet.stake || 0).toFixed(0)}</span>
-                <span>${athenaBet.bet_type || 'N/A'} @ ${athenaBet.odds || 1.0}x</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Consensus Panel -->
-          <div class="consensus-panel">
-            <span class="consensus-icon">🤝</span>
-            <div class="consensus-content">
-              <h4>Consensus Recommendation</h4>
-              <div class="consensus-text">${data.debate.consensus}</div>
-            </div>
-          </div>
-          
-          <!-- Accordion for news bullets -->
-          <div class="news-accordion">
-            <div class="accordion-header" id="accordion-trigger">
-              <span>📰 View Match Team News Bullets & Injuries</span>
-              <span id="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content" id="accordion-content">
+
+            <!-- Team News Columns inside accordion -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+              <h5 style="font-family: var(--font-title); font-size: 0.9rem; color: var(--accent-cyan); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">📰 Team News & Injury Reports</h5>
               <div class="news-columns">
                 <div class="news-column">
-                  <h5>${FLAGS[data.home] || ''} ${data.home}</h5>
+                  <h5>${FLAGS[cleanTeamName(data.home)] || ''} ${data.home}</h5>
                   <ul>
                     ${(data.home_news_bullets || 'No recent updates.').split('\n').filter(l => l.trim()).map(line => `<li>${line.replace(/^-\s*/, '')}</li>`).join('')}
                   </ul>
                 </div>
                 <div class="news-column">
-                  <h5>${FLAGS[data.away] || ''} ${data.away}</h5>
+                  <h5>${FLAGS[cleanTeamName(data.away)] || ''} ${data.away}</h5>
                   <ul>
                     ${(data.away_news_bullets || 'No recent updates.').split('\n').filter(l => l.trim()).map(line => `<li>${line.replace(/^-\s*/, '')}</li>`).join('')}
                   </ul>
@@ -1350,7 +1358,6 @@
       // Bracket matches selection event listeners
       document.querySelectorAll('.bracket-match').forEach(match => {
         match.addEventListener('click', (e) => {
-          // Avoid clicking inner team nodes causing double trigger if we want path highlight
           const matchId = match.getAttribute('data-match-id');
           selectMatch(matchId);
         });

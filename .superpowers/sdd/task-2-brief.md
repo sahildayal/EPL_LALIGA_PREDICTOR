@@ -1,86 +1,53 @@
-### Task 2: Probability Modeling & Poisson CDF
+### Task 2: Monte Carlo Simulation Engine
 
 **Files:**
-- Modify: `src/parlay/parlay_engine.py`
-- Test: `scratch/test_parlay_engine_corners.py`
+- Create: `src/models/simulation.py` (Monte Carlo simulation math)
+- Create: `scratch/test_monte_carlo.py` (TDD tests)
 
 **Interfaces:**
-- Consumes: `src.data.scrapers.corners.get_team_recent_corners`
-- Produces: `get_corners_probability(home: str, away: str, line: float) -> float`
+- Consumes: ELO ratings from `data/processed/elo_ratings.json` and Dixon-Coles parameters.
+- Produces: `run_tournament_simulation(num_runs: int = 10000) -> dict` returning aggregated stage progression probabilities for each team.
 
 - [ ] **Step 1: Write the failing test**
-  Create `scratch/test_parlay_engine_corners.py`:
+  Create `scratch/test_monte_carlo.py`:
   ```python
   import unittest
-  from unittest.mock import patch
-  import sys
-  from pathlib import Path
-  sys.path.append(str(Path(__file__).resolve().parents[1]))
+  import os
+  from src.models.simulation import run_tournament_simulation
 
-  class TestParlayEngineCorners(unittest.TestCase):
-      @patch("src.parlay.parlay_engine.get_team_recent_corners")
-      def test_corner_probabilities(self, mock_corners):
-          # Mock home team (6 won, 4 conceded) and away team (5 won, 5 conceded)
-          mock_corners.side_effect = lambda t: {"won": 6.0, "conceded": 4.0} if t == "brazil" else {"won": 5.0, "conceded": 5.0}
-          
-          from src.models.statistical import DixonColesModel
-          from src.parlay.parlay_engine import ParlayEngine
-          
-          dc = DixonColesModel()
-          engine = ParlayEngine(dc)
-          
-          # Expected total corners won = 6 + 5 = 11
-          # Check probability over 8.5 corners
-          p_over = engine.get_corners_probability("brazil", "japan", 8.5)
-          self.assertTrue(0.0 <= p_over <= 1.0)
-          self.assertTrue(p_over > 0.5)
-
-  if __name__ == '__main__':
-      unittest.main()
+  class TestMonteCarlo(unittest.TestCase):
+      def test_simulation_probabilities_sum_to_one(self):
+          results = run_tournament_simulation(num_runs=100)
+          self.assertIn("probabilities", results)
+          # Assert that sum of champion probabilities is approx 1.0 (100%)
+          total_champ = sum(t["champion"] for t in results["probabilities"])
+          self.assertAlmostEqual(total_champ, 1.0, places=2)
   ```
 
 - [ ] **Step 2: Run test to verify it fails**
-  Run: `python scratch/test_parlay_engine_corners.py`
-  Expected: FAIL with `AttributeError` on `get_corners_probability`
+  Run: `python -m unittest scratch/test_monte_carlo.py`
+  Expected: FAIL with module not found or import error.
 
-- [ ] **Step 3: Implement Poisson expectation and probability**
-  Add the method to `ParlayEngine` in `src/parlay/parlay_engine.py`:
-  ```python
-      def get_corners_probability(self, home: str, away: str, line: float) -> float:
-          """
-          Calculates probability of total corners exceeding 'line' using Poisson CDF.
-          """
-          from src.data.scrapers.corners import get_team_recent_corners
-          h_stats = get_team_recent_corners(home)
-          a_stats = get_team_recent_corners(away)
-          
-          # Calculate expected lambda for both sides
-          # Baseline tournament corners conceded is 4.8
-          lambda_h = h_stats["won"] * (a_stats["conceded"] / 4.8)
-          lambda_a = a_stats["won"] * (h_stats["conceded"] / 4.8)
-          
-          lambda_total = lambda_h + lambda_a
-          if lambda_total <= 0:
-              lambda_total = 9.6 # fallback default
-
-          # Poisson CDF: P(X <= k) = sum_{i=0}^k e^{-lambda} * lambda^i / i!
-          k = int(line)
-          cdf = 0.0
-          for i in range(k + 1):
-              cdf += math.exp(-lambda_total) * (lambda_total ** i) / math.factorial(i)
-              
-          p_over = 1.0 - cdf
-          return round(max(0.0, min(1.0, p_over)), 4)
-  ```
+- [ ] **Step 3: Write minimal implementation**
+  Create `src/models/simulation.py`:
+  - Load ELO and Dixon-Coles models.
+  - Define bracket stages: Quarterfinals (4 matches), Semifinals (2 matches), Finals (1 match).
+  - Simulate each match:
+    - 90m match using Dixon-Coles score expectations.
+    - If draw, extra time using 30m scaled Dixon-Coles.
+    - If still draw, penalties using Goalie Save Rates:
+      `home_win_shootout = home_goalie_rate / (home_goalie_rate + away_goalie_rate)`
+  - Compile the probabilities per stage and return the results as a dictionary matching the schema.
 
 - [ ] **Step 4: Run test to verify it passes**
-  Run: `python scratch/test_parlay_engine_corners.py`
+  Run: `python -m unittest scratch/test_monte_carlo.py`
   Expected: PASS
 
 - [ ] **Step 5: Commit**
   ```bash
-  git add src/parlay/parlay_engine.py scratch/test_parlay_engine_corners.py
-  git commit -m "feat: implement corner expectation Poisson modeling and get_corners_probability"
+  git add src/models/simulation.py scratch/test_monte_carlo.py
+  git commit -m "feat: implement 10,000x tournament Monte Carlo simulation engine"
   ```
 
 ---
+

@@ -4,48 +4,51 @@ import os
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python task_brief.py PLAN_FILE TASK_NUMBER [OUTFILE]")
+        print("usage: task_brief.py PLAN_FILE TASK_NUMBER [OUTFILE]")
         sys.exit(2)
+        
     plan_file = sys.argv[1]
     task_num = sys.argv[2]
     
-    if not os.path.exists(plan_file):
-        print(f"no such plan file: {plan_file}")
-        sys.exit(2)
-        
     if len(sys.argv) == 4:
         outfile = sys.argv[3]
     else:
-        # Resolve using git
-        import subprocess
-        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
-        sdd_dir = os.path.join(root, ".superpowers", "sdd")
-        os.makedirs(sdd_dir, exist_ok=True)
-        with open(os.path.join(sdd_dir, ".gitignore"), "w") as f:
-            f.write("*\n")
-        outfile = os.path.join(sdd_dir, f"task-{task_num}-brief.md")
+        outfile = f"C:\\Users\\Bikash\\Desktop\\CODEBASE\\WorldCupPredictor\\.superpowers\\sdd\\task-{task_num}-brief.md"
         
-    # Read plan
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+    
     with open(plan_file, "r", encoding="utf-8") as f:
-        content = f.read()
+        lines = f.readlines()
         
-    # Find heading matching "### Task N:" or similar
-    pattern = rf"(^### Task {task_num}\b.*?)(?=^### Task \d+\b|\Z)"
-    match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
-    if not match:
-        # Fall back to standard headers
-        pattern = rf"(^#+\s+Task\s+{task_num}\b.*?)(?=^#+\s+Task\s+\d+\b|\Z)"
-        match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
-    if not match:
+    in_fence = False
+    in_task = False
+    task_lines = []
+    
+    # Match headings like "### Task N: ..." or "## Task N:"
+    pattern = re.compile(rf"^#+\s+Task\s+{task_num}(\b|$)")
+    next_task_pattern = re.compile(r"^#+\s+Task\s+(\d+)(\b|$)")
+    
+    for line in lines:
+        if line.startswith("```"):
+            in_fence = not in_fence
+            
+        if not in_fence:
+            if pattern.search(line):
+                in_task = True
+            elif in_task and next_task_pattern.search(line):
+                break
+                
+        if in_task:
+            task_lines.append(line)
+            
+    if not task_lines:
         print(f"task {task_num} not found in {plan_file}")
         sys.exit(3)
         
-    task_text = match.group(1).strip()
-    
     with open(outfile, "w", encoding="utf-8") as f:
-        f.write(task_text + "\n")
+        f.writelines(task_lines)
         
-    print(f"wrote {outfile}: {len(task_text.splitlines())} lines")
+    print(f"wrote {outfile}: {len(task_lines)} lines")
 
 if __name__ == "__main__":
     main()

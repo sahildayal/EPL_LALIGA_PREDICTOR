@@ -56,7 +56,7 @@ class TestTriggerSimulation(unittest.TestCase):
         write_calls = write_handle.write.call_args_list
         written_content = "".join(call[0][0] for call in write_calls)
         written_json = json.loads(written_content)
-        self.assertEqual(written_json, {"probabilities": [{"team": "france", "champion": 0.5}]})
+        self.assertEqual(written_json.get("probabilities"), [{"team": "france", "champion": 0.5}])
 
     @patch("requests.get")
     @patch("src.models.trainer.initialize_master_dataset")
@@ -119,7 +119,7 @@ class TestTriggerSimulation(unittest.TestCase):
         write_calls = write_handle.write.call_args_list
         written_content = "".join(call[0][0] for call in write_calls)
         written_json = json.loads(written_content)
-        self.assertEqual(written_json, {"probabilities": [{"team": "argentina", "champion": 0.6}]})
+        self.assertEqual(written_json.get("probabilities"), [{"team": "argentina", "champion": 0.6}])
 
 if __name__ == "__main__":
     unittest.main()

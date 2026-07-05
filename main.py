@@ -1252,6 +1252,27 @@ def run_update():
     sim_results = run_tournament_simulation(num_runs=10000)
     sim_results_path = os.path.join("data", "processed", "simulation_results.json")
     os.makedirs(os.path.dirname(sim_results_path), exist_ok=True)
+    
+    debates_dir = os.path.join("data", "processed", "debates")
+    active_debates = []
+    if os.path.exists(debates_dir):
+        for f in os.listdir(debates_dir):
+            if f.endswith(".json"):
+                parts = f[:-5].split("-")
+                if len(parts) >= 4:
+                    date_str = "-".join(parts[:3])
+                    if "vs" in parts:
+                        vs_idx = parts.index("vs")
+                        home_clean = "_".join(parts[3:vs_idx]).replace("_", " ")
+                        away_clean = "_".join(parts[vs_idx+1:]).replace("_", " ")
+                        active_debates.append({
+                            "filename": f,
+                            "date": date_str,
+                            "home": home_clean,
+                            "away": away_clean
+                        })
+    sim_results["active_debates"] = active_debates
+
     with open(sim_results_path, "w") as f:
         json.dump(sim_results, f, indent=2)
     console.print("[bold green]Success! Saved tournament simulations to data/processed/simulation_results.json[/bold green]")
@@ -1306,6 +1327,27 @@ def run_daily():
     sim_results = run_tournament_simulation(num_runs=10000)
     sim_results_path = os.path.join("data", "processed", "simulation_results.json")
     os.makedirs(os.path.dirname(sim_results_path), exist_ok=True)
+    
+    debates_dir = os.path.join("data", "processed", "debates")
+    active_debates = []
+    if os.path.exists(debates_dir):
+        for f in os.listdir(debates_dir):
+            if f.endswith(".json"):
+                parts = f[:-5].split("-")
+                if len(parts) >= 4:
+                    date_str = "-".join(parts[:3])
+                    if "vs" in parts:
+                        vs_idx = parts.index("vs")
+                        home_clean = "_".join(parts[3:vs_idx]).replace("_", " ")
+                        away_clean = "_".join(parts[vs_idx+1:]).replace("_", " ")
+                        active_debates.append({
+                            "filename": f,
+                            "date": date_str,
+                            "home": home_clean,
+                            "away": away_clean
+                        })
+    sim_results["active_debates"] = active_debates
+
     with open(sim_results_path, "w") as f:
         json.dump(sim_results, f, indent=2)
     console.print("[bold green]Success! Saved tournament simulations to data/processed/simulation_results.json[/bold green]")
