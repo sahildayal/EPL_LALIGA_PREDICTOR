@@ -7,7 +7,7 @@ from src.market.kalshi_client import KalshiClient
 from src.parlay.parlay_engine import ParlayEngine
 from src.data.scrapers import fbref, player_stats, news, fixtures
 from src.data.scrapers.corners import get_team_recent_corners
-from src.market.llm import generate_debate, GEMINI_AVAILABLE
+from src.market.llm import generate_debate, run_news_debate, GEMINI_AVAILABLE
 from src.data.team_mapping import normalize_team_name, is_team_match
 from src.data.scrapers.fixtures import get_match_lineups
 from src.models.player_props import calculate_player_prop_probs
@@ -991,7 +991,7 @@ def run_ask(query: str, user_model: str):
     console.print(f"[green]Calling Gemini API ({mapped_model}) to generate live scout-quant debate...[/green]")
         
     try:
-        debate = generate_debate(
+        debate = run_news_debate(
             home=home,
             away=away,
             probs=result.probabilities,

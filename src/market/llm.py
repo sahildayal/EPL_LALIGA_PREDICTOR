@@ -49,7 +49,7 @@ def get_tournament_stage() -> str:
     return "Group Stage (Round Robin - Matches can end in a Draw/Tie after 90 mins + injury time)."
 
 
-def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None) -> dict:
+def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None, home_bullets: str = "", away_bullets: str = "") -> dict:
     """
     Calls Gemini API to generate a debate between Magnus and Athena.
     Injects their bankroll stats and performance history, and parses their chosen personal bets.
@@ -119,6 +119,10 @@ Match Data:
 - Expected Corner Kicks: {corners_expectation}
 - News Sentiment: {sentiment:+.2f}
 - Key News Flags: {news_flags}
+- {home.title()} Recent News Updates:
+{home_bullets or "No recent news updates."}
+- {away.title()} Recent News Updates:
+{away_bullets or "No recent news updates."}
 - Live/Target Bets Options (Odds/Margins): {target_bets}
 {prev_bet_prompt}
  
@@ -268,4 +272,115 @@ def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sen
         "consensus": consensus,
         "personal_bets": personal_bets
     }
+
+
+def search_web(query: str) -> dict:
+    """
+    Search the web for news updates. Queries Google News RSS as a robust source.
+    """
+    try:
+        import requests
+        import xml.etree.ElementTree as ET
+        query_encoded = query.replace(" ", "+")
+        url = f"https://news.google.com/rss/search?q={query_encoded}&hl=en-US&gl=US&ceid=US:en"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        resp = requests.get(url, headers=headers, timeout=8)
+        if resp.status_code != 200:
+            return {"summary": "", "citations": []}
+        
+        root = ET.fromstring(resp.content)
+        titles = []
+        links = []
+        for item in root.iter("item"):
+            title_el = item.find("title")
+            link_el = item.find("link")
+            title = title_el.text if title_el is not None else ""
+            link = link_el.text if link_el is not None else ""
+            if title:
+                # Strip source/publication name often present at the end, e.g. "- ESPN"
+                if " - " in title:
+                    title = title.rsplit(" - ", 1)[0]
+                titles.append(title)
+            if link:
+                links.append(link)
+            if len(titles) >= 5:
+                break
+        
+        summary = "\n".join([f"- {t}" for t in titles])
+        return {"summary": summary, "citations": links[:5]}
+    except Exception:
+        return {"summary": "", "citations": []}
+
+
+def fetch_team_news_bullets(team_name: str) -> str:
+    """
+    Fetches news bullets for a team query using search_web wrapper.
+    """
+    try:
+        res = search_web(query=f"{team_name} national football team roster injuries 2026")
+        summary = res.get("summary", "")
+        if not summary:
+            return f"No recent updates found for {team_name}."
+        return summary
+    except Exception:
+        return f"Unable to fetch news for {team_name}."
+
+
+def run_news_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None) -> dict:
+    """
+    Runs a news-enhanced debate: fetches news bullets for both teams,
+    injects them into generate_debate, and caches the debate result to JSON.
+    """
+    home_bullets = fetch_team_news_bullets(home)
+    away_bullets = fetch_team_news_bullets(away)
+    
+    debate = generate_debate(
+        home=home,
+        away=away,
+        probs=probs,
+        elo_diff=elo_diff,
+        sentiment=sentiment,
+        news_flags=news_flags,
+        target_bets=target_bets,
+        user_model=user_model,
+        progression_probs=progression_probs,
+        corners_expectation=corners_expectation,
+        home_bullets=home_bullets,
+        away_bullets=away_bullets
+    )
+    
+    # Save the debate to data/processed/debates/YYYY-MM-DD-<home>-vs-<away>.json
+    from datetime import datetime, timezone
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Ensure directory exists
+    os.makedirs(os.path.join("data", "processed", "debates"), exist_ok=True)
+    
+    # Clean filenames
+    home_clean = home.lower().strip().replace(" ", "_")
+    away_clean = away.lower().strip().replace(" ", "_")
+    filename = f"{date_str}-{home_clean}-vs-{away_clean}.json"
+    filepath = os.path.join("data", "processed", "debates", filename)
+    
+    save_data = {
+        "home": home,
+        "away": away,
+        "date": date_str,
+        "probabilities": probs,
+        "elo_diff": elo_diff,
+        "sentiment": sentiment,
+        "news_flags": news_flags,
+        "home_news_bullets": home_bullets,
+        "away_news_bullets": away_bullets,
+        "debate": debate
+    }
+    
+    try:
+        with open(filepath, "w") as f:
+            json.dump(save_data, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to save debate JSON to {filepath}: {e}")
+        
+    return debate
+
 
