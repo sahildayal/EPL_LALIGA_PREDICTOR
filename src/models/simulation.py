@@ -239,4 +239,28 @@ def run_tournament_simulation(num_runs: int = 10000, teams: list = None) -> dict
         }
         probabilities.append(team_probs)
         
-    return {"probabilities": probabilities}
+    # Gather ELO ratings and goalkeeper save rates for all teams
+    from src.predictor import ELO_PREDICTOR
+    all_teams = list(ELO_PREDICTOR.ratings.keys()) if ELO_PREDICTOR.ratings else normalized_teams
+    elo_ratings = {t: float(ELO_PREDICTOR.ratings.get(t, 1500)) for t in all_teams}
+    goalie_rates = {t: float(get_goalie_rate(t)) for t in all_teams}
+    
+    alphas_list = [float(a) for a in alphas]
+    betas_list = [float(b) for b in betas]
+        
+    return {
+        "probabilities": probabilities,
+        "dixon_coles": {
+            "alphas": alphas_list,
+            "betas": betas_list,
+            "team_indices": dc_model.team_indices,
+            "gamma": float(gamma),
+            "rho": float(rho),
+            "mean_alpha": float(mean_alpha),
+            "mean_beta": float(mean_beta)
+        },
+        "elo_ratings": elo_ratings,
+        "goalie_rates": goalie_rates,
+        "starting_teams": normalized_teams
+    }
+

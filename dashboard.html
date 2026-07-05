@@ -716,18 +716,169 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* What-If Customizer Styles */
+    .customizer-panel {
+      background: rgba(30, 32, 48, 0.4);
+      border: 1px dashed var(--accent-cyan);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .customizer-panel h3 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      color: var(--accent-cyan);
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .customizer-panel p {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+    }
+    .customizer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .match-select-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem;
+    }
+    .match-select-box h4 {
+      font-family: var(--font-title);
+      font-size: 0.8rem;
+      color: var(--accent-purple);
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .select-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--color-text-dark);
+    }
+    .select-row select {
+      flex: 1;
+      background: #1a1b26;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: #fff;
+      padding: 0.35rem;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .customizer-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    .btn {
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #1a1b26;
+    }
+    .btn-primary:hover {
+      background: #73daca;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .customizer-toggle-btn {
+      font-family: var(--font-title);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      background: rgba(122, 162, 247, 0.1);
+      border: 1px solid var(--accent-cyan);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .customizer-toggle-btn:hover {
+      background: rgba(122, 162, 247, 0.2);
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Header -->
     <header>
-      <h1>🏆 2026 World Cup Monte Carlo Dashboard</h1>
-      <div class="subtitle">Phase 4 Unified Simulation & Expert Debate Ledger</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 1rem;">
+        <div>
+          <h1>🏆 2026 World Cup Monte Carlo Dashboard</h1>
+          <div class="subtitle">Phase 4 Unified Simulation & Expert Debate Ledger</div>
+        </div>
+        <button class="customizer-toggle-btn" id="btn-toggle-customizer">🎛️ Customizer & What-If</button>
+      </div>
     </header>
+
+    <!-- Customizer Panel -->
+    <div class="customizer-panel" id="customizer-panel">
+      <h3>🎛️ World Cup Bracket Customizer & What-If Simulator</h3>
+      <p>Modify the starting 8 teams to run custom 10,000x Monte Carlo bracket simulations right in your browser using our ELO and Dixon-Coles parameters.</p>
+      <div class="customizer-grid">
+        <div class="match-select-box">
+          <h4>QF Match #1</h4>
+          <div class="select-row">
+            <select id="select-qf1-t1"></select> vs <select id="select-qf1-t2"></select>
+          </div>
+        </div>
+        <div class="match-select-box">
+          <h4>QF Match #2</h4>
+          <div class="select-row">
+            <select id="select-qf2-t1"></select> vs <select id="select-qf2-t2"></select>
+          </div>
+        </div>
+        <div class="match-select-box">
+          <h4>QF Match #3</h4>
+          <div class="select-row">
+            <select id="select-qf3-t1"></select> vs <select id="select-qf3-t2"></select>
+          </div>
+        </div>
+        <div class="match-select-box">
+          <h4>QF Match #4</h4>
+          <div class="select-row">
+            <select id="select-qf4-t1"></select> vs <select id="select-qf4-t2"></select>
+          </div>
+        </div>
+      </div>
+      <div class="customizer-actions">
+        <button class="btn btn-primary" id="btn-run-custom-sim">⚡ Run 10k Simulation</button>
+        <button class="btn btn-secondary" id="btn-reset-sim">Reset to Standings</button>
+      </div>
+    </div>
 
     <!-- Main Content Grid -->
     <main class="dashboard-grid">
+
       
       <!-- Left Pane: Tournament Bracket -->
       <section class="panel" aria-label="Tournament Bracket">
@@ -916,6 +1067,7 @@
     };
 
     let simulationData = null;
+    let originalSimulationData = null;
     let currentSortColumn = 'champ';
     let currentSortAscending = false;
     let selectedMatchupId = null;
@@ -926,6 +1078,221 @@
       return team.toLowerCase().trim().replace(/[\s_]+/g, ' ');
     }
 
+    // Poisson simulation helpers
+    const FACTORIALS = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800];
+    function factorial(n) {
+      if (n < 0) return 1;
+      if (n <= 10) return FACTORIALS[n];
+      let res = 1;
+      for (let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    function poissonPMF(k, lambda) {
+      return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+    }
+
+    function tauAdjustment(x, y, lambda, mu, rho) {
+      if (x === 0 && y === 0) return 1 - lambda * mu * rho;
+      if (x === 1 && y === 0) return 1 + mu * rho;
+      if (x === 0 && y === 1) return 1 + lambda * rho;
+      if (x === 1 && y === 1) return 1 - rho;
+      return 1;
+    }
+
+    // Client-side Monte Carlo Simulation Engine (10,000x runs)
+    function runClientSimulation(teams) {
+      if (!simulationData || !simulationData.dixon_coles) return null;
+      const dc = simulationData.dixon_coles;
+      const elo = simulationData.elo_ratings;
+      const goalie = simulationData.goalie_rates;
+      
+      const alphas = dc.alphas;
+      const betas = dc.betas;
+      const teamIndices = dc.team_indices;
+      const gamma = dc.gamma;
+      const rho = dc.rho;
+      const meanAlpha = dc.mean_alpha;
+      const meanBeta = dc.mean_beta;
+      
+      const numRuns = 10000;
+      const normTeams = teams.map(cleanTeamName);
+      
+      const matchCache = {};
+      
+      function getMatchSimData(home, away) {
+        const key = `${home}_vs_${away}`;
+        if (matchCache[key]) return matchCache[key];
+        
+        const hIdx = teamIndices[home];
+        const aIdx = teamIndices[away];
+        
+        const alphaH = (hIdx !== undefined && hIdx < alphas.length) ? alphas[hIdx] : meanAlpha;
+        const betaH = (hIdx !== undefined && hIdx < betas.length) ? betas[hIdx] : meanBeta;
+        const alphaA = (aIdx !== undefined && aIdx < alphas.length) ? alphas[aIdx] : meanAlpha;
+        const betaA = (aIdx !== undefined && aIdx < betas.length) ? betas[aIdx] : meanBeta;
+        
+        const etaH = Math.min(10, Math.max(-10, alphaH + betaA + gamma));
+        const etaA = Math.min(10, Math.max(-10, alphaA + betaH));
+        const lam = Math.exp(etaH);
+        const mu = Math.exp(etaA);
+        
+        // 90m probability matrix
+        const maxGoals = 10;
+        const flatProbs = [];
+        let totalSum = 0;
+        for (let x = 0; x <= maxGoals; x++) {
+          for (let y = 0; y <= maxGoals; y++) {
+            const poissonH = poissonPMF(x, lam);
+            const poissonA = poissonPMF(y, mu);
+            let tauVal = tauAdjustment(x, y, lam, mu, rho);
+            if (tauVal <= 0) tauVal = 1e-10;
+            const pVal = tauVal * poissonH * poissonA;
+            flatProbs.push({ x, y, p: pVal });
+            totalSum += pVal;
+          }
+        }
+        flatProbs.forEach(item => item.p /= totalSum);
+        
+        // Extra Time (30m) scaled by 1/3
+        const lamEt = lam / 3.0;
+        const muEt = mu / 3.0;
+        const maxGoalsEt = 4;
+        const flatProbsEt = [];
+        let totalSumEt = 0;
+        for (let x = 0; x <= maxGoalsEt; x++) {
+          for (let y = 0; y <= maxGoalsEt; y++) {
+            const poissonHEt = poissonPMF(x, lamEt);
+            const poissonAEt = poissonPMF(y, muEt);
+            let tauValEt = tauAdjustment(x, y, lamEt, muEt, rho);
+            if (tauValEt <= 0) tauValEt = 1e-10;
+            const pVal = tauValEt * poissonHEt * poissonAEt;
+            flatProbsEt.push({ x, y, p: pVal });
+            totalSumEt += pVal;
+          }
+        }
+        flatProbsEt.forEach(item => item.p /= totalSumEt);
+        
+        // Shootout win probability
+        const hGk = goalie[home] !== undefined ? goalie[home] : 0.25;
+        const aGk = goalie[away] !== undefined ? goalie[away] : 0.25;
+        const pShootoutHome = (hGk + aGk) > 0 ? hGk / (hGk + aGk) : 0.5;
+        
+        const simData = { flatProbs, flatProbsEt, pShootoutHome };
+        matchCache[key] = simData;
+        return simData;
+      }
+      
+      function sampleIndex(flatProbs) {
+        const r = Math.random();
+        let cumulative = 0;
+        for (let i = 0; i < flatProbs.length; i++) {
+          cumulative += flatProbs[i].p;
+          if (r <= cumulative) return flatProbs[i];
+        }
+        return flatProbs[flatProbs.length - 1];
+      }
+      
+      function simulateMatch(home, away) {
+        const simData = getMatchSimData(home, away);
+        
+        // Regulation
+        const reg = sampleIndex(simData.flatProbs);
+        if (reg.x > reg.y) return home;
+        if (reg.y > reg.x) return away;
+        
+        // Extra Time
+        const et = sampleIndex(simData.flatProbsEt);
+        const hTot = reg.x + et.x;
+        const aTot = reg.y + et.y;
+        if (hTot > aTot) return home;
+        if (aTot > hTot) return away;
+        
+        // Shootout
+        return (Math.random() < simData.pShootoutHome) ? home : away;
+      }
+      
+      const progressionCounts = {};
+      normTeams.forEach(t => {
+        progressionCounts[t] = { quarterfinals: 0, semifinals: 0, finals: 0, champion: 0 };
+      });
+      
+      for (let run = 0; run < numRuns; run++) {
+        // Quarterfinals
+        const qfWinners = [];
+        for (let i = 0; i < 4; i++) {
+          const tHome = normTeams[2 * i];
+          const tAway = normTeams[2 * i + 1];
+          progressionCounts[tHome].quarterfinals++;
+          progressionCounts[tAway].quarterfinals++;
+          
+          const winner = simulateMatch(tHome, tAway);
+          qfWinners.push(winner);
+        }
+        // Semifinals
+        const sfWinners = [];
+        for (let i = 0; i < 2; i++) {
+          const tHome = qfWinners[2 * i];
+          const tAway = qfWinners[2 * i + 1];
+          progressionCounts[tHome].semifinals++;
+          progressionCounts[tAway].semifinals++;
+          
+          const winner = simulateMatch(tHome, tAway);
+          sfWinners.push(winner);
+        }
+        // Finals
+        const tHome = sfWinners[0];
+        const tAway = sfWinners[1];
+        progressionCounts[tHome].finals++;
+        progressionCounts[tAway].finals++;
+        
+        const champion = simulateMatch(tHome, tAway);
+        progressionCounts[champion].champion++;
+      }
+      
+      const probabilities = normTeams.map(team => ({
+        team: team,
+        quarterfinals: progressionCounts[team].quarterfinals / numRuns,
+        semifinals: progressionCounts[team].semifinals / numRuns,
+        finals: progressionCounts[team].finals / numRuns,
+        champion: progressionCounts[team].champion / numRuns
+      }));
+      
+      return probabilities;
+    }
+
+    // Populate customizer team options
+    function setupCustomizer() {
+      if (!simulationData || !simulationData.elo_ratings) return;
+      const elo = simulationData.elo_ratings;
+      const allTeams = Object.keys(elo).sort();
+      const starting = simulationData.starting_teams || [];
+      
+      const selectIds = [
+        "select-qf1-t1", "select-qf1-t2",
+        "select-qf2-t1", "select-qf2-t2",
+        "select-qf3-t1", "select-qf3-t2",
+        "select-qf4-t1", "select-qf4-t2"
+      ];
+      
+      selectIds.forEach((id, idx) => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.innerHTML = '';
+        allTeams.forEach(team => {
+          const opt = document.createElement('option');
+          opt.value = team;
+          opt.textContent = `${FLAGS[team] || '🏳️'} ${team.toUpperCase()}`;
+          select.appendChild(opt);
+        });
+        
+        // Set default value
+        if (starting[idx]) {
+          select.value = cleanTeamName(starting[idx]);
+        }
+      });
+    }
+
     // Load simulation results
     async function loadSimulationData() {
       try {
@@ -934,6 +1301,10 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         simulationData = await response.json();
+        originalSimulationData = JSON.parse(JSON.stringify(simulationData));
+        
+        // Setup customizer dropdown elements
+        setupCustomizer();
         
         // Populate bracket and table
         buildTable();
@@ -941,6 +1312,7 @@
         
         // Auto-select the first bracket match
         selectMatch('qf1');
+
       } catch (error) {
         console.error("Failed to load simulation results:", error);
         
@@ -1342,6 +1714,61 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadSimulationData();
 
+      // Customizer UI Toggles & Actions
+      const customizerPanel = document.getElementById('customizer-panel');
+      const toggleBtn = document.getElementById('btn-toggle-customizer');
+      if (toggleBtn && customizerPanel) {
+        toggleBtn.addEventListener('click', () => {
+          const isVisible = window.getComputedStyle(customizerPanel).display !== 'none';
+          customizerPanel.style.display = isVisible ? 'none' : 'block';
+        });
+      }
+
+      const runSimBtn = document.getElementById('btn-run-custom-sim');
+      if (runSimBtn) {
+        runSimBtn.addEventListener('click', () => {
+          const teams = [
+            document.getElementById("select-qf1-t1").value,
+            document.getElementById("select-qf1-t2").value,
+            document.getElementById("select-qf2-t1").value,
+            document.getElementById("select-qf2-t2").value,
+            document.getElementById("select-qf3-t1").value,
+            document.getElementById("select-qf3-t2").value,
+            document.getElementById("select-qf4-t1").value,
+            document.getElementById("select-qf4-t2").value
+          ];
+          
+          runSimBtn.textContent = "⚙️ Simulating...";
+          runSimBtn.disabled = true;
+          
+          setTimeout(() => {
+            const newProbs = runClientSimulation(teams);
+            if (newProbs) {
+              simulationData.probabilities = newProbs;
+              simulationData.starting_teams = teams;
+              buildTable();
+              buildBracket();
+              selectMatch('qf1');
+            }
+            runSimBtn.textContent = "⚡ Run 10k Simulation";
+            runSimBtn.disabled = false;
+          }, 50);
+        });
+      }
+
+      const resetSimBtn = document.getElementById('btn-reset-sim');
+      if (resetSimBtn) {
+        resetSimBtn.addEventListener('click', () => {
+          if (originalSimulationData) {
+            simulationData = JSON.parse(JSON.stringify(originalSimulationData));
+            setupCustomizer();
+            buildTable();
+            buildBracket();
+            selectMatch('qf1');
+          }
+        });
+      }
+
       // Table Sorting logic
       const sortHeaders = [
         { id: 'th-team', col: 'team' },
@@ -1403,6 +1830,7 @@
         highlightTeamPath(team);
       });
     });
+
   </script>
 </body>
 </html>
