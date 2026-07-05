@@ -187,3 +187,23 @@ The predictor features a complete pipeline for scraping starting lineups, blendi
 - **Shared Leg Filtering**: Sorts candidates by edge descending, and greedily compiles a 10-card portfolio.
 - **Diversity Rules**: To prevent combinatorial overlap, a parlay is only added if it shares **at most 2 legs** with any already-selected parlay in the portfolio.
 - **Description Collisions**: Avoids key collisions by appending match titles to generic outcome descriptions (e.g., `"Moneyline: Draw (France vs Sweden)"`).
+
+### 4. Same-Game Parlay (SGP) Sandbox Validator
+- **Programmatic SGP Rules**: Enforces Kalshi SGP rules programmatically via `SgpSandboxValidator` in [sgp_validator.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/parlay/sgp_validator.py) before recommending or placing combos.
+- **Mutually Exclusive/Redundant Discards**:
+  - **BTTS & Over 1.5 Goals**: Blocked (BTTS YES guarantees 2+ goals, making Over 1.5 redundant).
+  - **Moneyline & To Advance**: Blocked (regulation win implies qualifying).
+  - **Spread & Moneyline**: Blocked (beating spread implies winning).
+  - **Player Goal & Team Goals (Over 0.5)**: Blocked (player scoring implies team scores 1+ goals).
+  - **Multi-Selection Caps**: Disallows more than 1 Moneyline leg, 1 Spread leg, or 1 Totals leg per match.
+
+### 5. Knockout SGP Leg Expansion
+- **Corners & To Advance Integration**: Automatically queries and parses `KXWCQUAL` (To Advance) and `KXWCTCORNERS` (Total Corners) tickers from Kalshi, enabling rich 5-leg to 8-leg parlays per match even when the daily slate has only 1 or 2 games.
+
+---
+
+## 🚀 Future Roadmap (Phase 4)
+Based on comparative research of sports analytics and prediction agents (such as `Hicruben` and `AhmedHazem02`), the following features are actively under development:
+1. **Active News Debating Agents**: Equipping Magnus and Athena with active web-search agents to debate real-time squad roster changes, squad injuries, and news before trades.
+2. **Tournament Monte Carlo Simulation Dashboard**: A visual dashboard running 10,000 Monte Carlo runs of the remaining knockout bracket to plot visual progression trees and path-dependent team probabilities.
+
