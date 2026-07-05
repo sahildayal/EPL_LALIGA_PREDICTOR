@@ -257,9 +257,9 @@ class ParlayEngine:
                 p_adv_home = 0.50
                 p_adv_away = 0.50
                 
-            if "to_qualify_home" in m["market_odds"]:
+            if "to_qualify_home" in mkt:
                 prob = p_adv_home
-                mkt_p = m["market_odds"]["to_qualify_home"]
+                mkt_p = mkt["to_qualify_home"]
                 if prob > mkt_p:
                     candidates.append({
                         "type": "game_line",
@@ -270,9 +270,9 @@ class ParlayEngine:
                         "market_prob": mkt_p,
                         "odds": 1.0 / mkt_p
                     })
-            if "to_qualify_away" in m["market_odds"]:
+            if "to_qualify_away" in mkt:
                 prob = p_adv_away
-                mkt_p = m["market_odds"]["to_qualify_away"]
+                mkt_p = mkt["to_qualify_away"]
                 if prob > mkt_p:
                     candidates.append({
                         "type": "game_line",
@@ -285,7 +285,7 @@ class ParlayEngine:
                     })
 
             # Corners
-            for key, mkt_p in m["market_odds"].items():
+            for key, mkt_p in mkt.items():
                 if key.startswith("corners_over_"):
                     line_val = float(key.split("_")[-1])
                     prob = self.get_corners_probability(home, away, line_val)
