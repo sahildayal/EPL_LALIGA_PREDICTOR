@@ -68,5 +68,23 @@ class TestSgpValidator(unittest.TestCase):
         ]
         self.assertTrue(SgpSandboxValidator.validate_combo(mixed_btts_over_25))
 
+    def test_multiple_corners_blocked(self):
+        from src.parlay.sgp_validator import SgpSandboxValidator
+        
+        # Multiple corners on the same match should be blocked
+        multiple_corners = [
+            {"match": ("france", "sweden"), "outcome": "corners_over_7.5", "type": "game_line"},
+            {"match": ("france", "sweden"), "outcome": "corners_over_8.5", "type": "game_line"}
+        ]
+        self.assertFalse(SgpSandboxValidator.validate_combo(multiple_corners))
+        
+        # Corners on different matches should be allowed
+        corners_diff_matches = [
+            {"match": ("france", "sweden"), "outcome": "corners_over_7.5", "type": "game_line"},
+            {"match": ("brazil", "japan"), "outcome": "corners_over_8.5", "type": "game_line"}
+        ]
+        self.assertTrue(SgpSandboxValidator.validate_combo(corners_diff_matches))
+
 if __name__ == '__main__':
     unittest.main()
+

@@ -37,10 +37,28 @@ class TestSgpExpansion(unittest.TestCase):
                     "scorer_antoine_griezmann": 0.15
                 },
                 "players": [("kylian mbappe", True), ("antoine griezmann", True)]
+            },
+            {
+                "home": "brazil",
+                "away": "japan",
+                "market_odds": {
+                    "home_win": 0.40,
+                    "draw": 0.15,
+                    "away_win": 0.15,
+                    "over_1.5": 0.70,
+                    "btts": 0.50,
+                    "to_qualify_home": 0.40,
+                    "to_qualify_away": 0.30,
+                    "corners_over_7.5": 0.60,
+                    "corners_over_8.5": 0.40,
+                    "scorer_vinicius_jr": 0.20
+                },
+                "players": [("vinicius jr", True)]
             }
         ]
         
         combos = engine.generate_combos(match_data, max_legs=8, min_odds=2.0, max_odds=200.0)
+
         
         # Verify that candidates were generated for To Advance and Corners
         # and that some combos contain more than 4 legs

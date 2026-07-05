@@ -1293,11 +1293,23 @@ def run_daily():
         console.print(f"[red]Failed to read schedule: {e}[/red]")
         return
 
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    from datetime import datetime, timedelta, timezone
+    today_utc = datetime.now(timezone.utc).date()
+    today_str = today_utc.strftime("%Y-%m-%d")
     todays_matches = []
     for m in schedule:
-        if m.get("date", "").startswith(today_str):
-            todays_matches.append(m)
+        date_val = m.get("date")
+        if not date_val:
+            continue
+        try:
+            dt_utc = datetime.fromisoformat(date_val.replace("Z", "+00:00")).astimezone(timezone.utc)
+            is_today = (dt_utc.date() == today_utc)
+            is_early_tomorrow = (dt_utc.date() == today_utc + timedelta(days=1) and dt_utc.hour < 6)
+            if is_today or is_early_tomorrow:
+                todays_matches.append(m)
+        except Exception:
+            if date_val.startswith(today_str):
+                todays_matches.append(m)
             
     if not todays_matches:
         console.print(f"[yellow]No matches scheduled for today ({today_str}).[/yellow]")

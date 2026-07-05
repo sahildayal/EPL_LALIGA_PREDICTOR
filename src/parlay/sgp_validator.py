@@ -34,7 +34,9 @@ class SgpSandboxValidator:
             ml_count = sum(1 for leg in legs if leg.get("outcome") in ml_outcomes)
             totals_count = sum(1 for leg in legs if leg.get("outcome") in {"over_0.5", "over_1.5", "over_2.5", "under_2.5"})
             spread_count = len(spread_outcomes)
-            if ml_count > 1 or totals_count > 1 or spread_count > 1:
+            corners_count = sum(1 for leg in legs if str(leg.get("outcome", "")).startswith("corners_over_"))
+            if ml_count > 1 or totals_count > 1 or spread_count > 1 or corners_count > 1:
                 return False
                 
         return True
+
