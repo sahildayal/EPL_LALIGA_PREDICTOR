@@ -23,7 +23,7 @@
 - Task 17: SGP Leg Expansion (Corners & To Advance) [COMPLETE] (commits 04a746d..2aa9d75, review clean)
 
 ## Phase 4: Active News Debates & Monte Carlo Simulation Dashboard
-- Task 18: Active News Debating Agents [PENDING]
+- Task 18: Active News Debating Agents [COMPLETE] (commits 1279805..90ef992, review clean)
 - Task 19: Monte Carlo Simulation Engine [PENDING]
 - Task 20: Trigger Integration & JSON Caching [PENDING]
 - Task 21: Interactive Web Dashboard [PENDING]
