@@ -10,7 +10,8 @@ from src.models.simulation import run_tournament_simulation, get_goalie_rate
 
 class TestMonteCarlo(unittest.TestCase):
     def test_simulation_probabilities_sum_to_one(self):
-        results = run_tournament_simulation(num_runs=100)
+        custom_teams = ["Argentina", "France", "Brazil", "England", "Spain", "Portugal", "Netherlands", "Norway"]
+        results = run_tournament_simulation(num_runs=100, teams=custom_teams)
         self.assertIn("probabilities", results)
         
         # Assert that sum of champion probabilities is approx 1.0 (100%)

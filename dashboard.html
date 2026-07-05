@@ -147,14 +147,20 @@
     }
     
     /* Left Pane - Bracket Tree Styling */
+    .panel-bracket-wrap {
+      overflow-x: auto;
+      width: 100%;
+    }
+    
     .bracket-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
-      min-height: 450px;
+      gap: 1.25rem;
+      min-height: 580px;
       position: relative;
       padding: 1rem 0;
+      min-width: 1100px;
     }
     
     .bracket-column {
@@ -163,7 +169,7 @@
       justify-content: space-around;
       height: 100%;
       flex: 1;
-      gap: 2rem;
+      gap: 1rem;
     }
     
     /* Bracket Match Node */
@@ -887,11 +893,111 @@
           <div style="font-size: 0.75rem; color: var(--color-text-dark); font-weight: 600;">CLICK MATCH TO LOAD DEBATE</div>
         </div>
         
-        <div id="bracket-tree" class="bracket-container">
-          <!-- Column 1: Quarterfinals -->
-          <div class="bracket-column" id="qf-column">
-            <!-- QF 1 -->
-            <div class="bracket-match" id="match-qf1" data-match-id="qf1">
+        <div class="panel-bracket-wrap">
+          <div id="bracket-tree" class="bracket-container">
+            <!-- Column 0: Round of 16 -->
+            <div class="bracket-column" id="ro16-column" style="display: none;">
+              <!-- RO16 1 -->
+              <div class="bracket-match" id="match-ro16-1" data-match-id="ro16-1">
+                <div class="bracket-team" id="ro16-1-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-1-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 2 -->
+              <div class="bracket-match" id="match-ro16-2" data-match-id="ro16-2">
+                <div class="bracket-team" id="ro16-2-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-2-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 3 -->
+              <div class="bracket-match" id="match-ro16-3" data-match-id="ro16-3">
+                <div class="bracket-team" id="ro16-3-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-3-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 4 -->
+              <div class="bracket-match" id="match-ro16-4" data-match-id="ro16-4">
+                <div class="bracket-team" id="ro16-4-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-4-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 5 -->
+              <div class="bracket-match" id="match-ro16-5" data-match-id="ro16-5">
+                <div class="bracket-team" id="ro16-5-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-5-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 6 -->
+              <div class="bracket-match" id="match-ro16-6" data-match-id="ro16-6">
+                <div class="bracket-team" id="ro16-6-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-6-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 7 -->
+              <div class="bracket-match" id="match-ro16-7" data-match-id="ro16-7">
+                <div class="bracket-team" id="ro16-7-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-7-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+              
+              <!-- RO16 8 -->
+              <div class="bracket-match" id="match-ro16-8" data-match-id="ro16-8">
+                <div class="bracket-team" id="ro16-8-team1" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+                <div class="bracket-team" id="ro16-8-team2" data-team="">
+                  <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                  <span class="team-prob">...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 1: Quarterfinals -->
+            <div class="bracket-column" id="qf-column">
+              <!-- QF 1 -->
+              <div class="bracket-match" id="match-qf1" data-match-id="qf1">
               <div class="bracket-team" id="qf1-team1" data-team="">
                 <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
                 <span class="team-prob">...</span>
@@ -990,6 +1096,7 @@
               <div class="champion-prob" id="champ-prob">...</div>
             </div>
           </div>
+        </div>
         </div>
         
         <div class="bracket-hint">
@@ -1214,35 +1321,60 @@
       
       const progressionCounts = {};
       normTeams.forEach(t => {
-        progressionCounts[t] = { quarterfinals: 0, semifinals: 0, finals: 0, champion: 0 };
+        progressionCounts[t] = { round_of_16: 0, quarterfinals: 0, semifinals: 0, finals: 0, champion: 0 };
       });
       
+      const isRo16 = normTeams.length === 16;
+      const completedWinners = simulationData.completed_winners || {};
+      
       for (let run = 0; run < numRuns; run++) {
+        let qfTeams = [];
+        if (isRo16) {
+          // Simulate/Load Round of 16
+          for (let i = 0; i < 8; i++) {
+            const tHome = normTeams[2 * i];
+            const tAway = normTeams[2 * i + 1];
+            progressionCounts[tHome].round_of_16++;
+            progressionCounts[tAway].round_of_16++;
+            
+            // Check completed winners
+            let winner = completedWinners[`${tHome}_vs_${tAway}`] || completedWinners[`${tAway}_vs_${tHome}`];
+            if (!winner) {
+              winner = simulateMatch(tHome, tAway);
+            }
+            qfTeams.push(winner);
+          }
+        } else {
+          qfTeams = normTeams;
+        }
+
         // Quarterfinals
-        const qfWinners = [];
+        const sfWinners = [];
         for (let i = 0; i < 4; i++) {
-          const tHome = normTeams[2 * i];
-          const tAway = normTeams[2 * i + 1];
+          const tHome = qfTeams[2 * i];
+          const tAway = qfTeams[2 * i + 1];
           progressionCounts[tHome].quarterfinals++;
           progressionCounts[tAway].quarterfinals++;
           
           const winner = simulateMatch(tHome, tAway);
-          qfWinners.push(winner);
+          sfWinners.push(winner);
         }
+        
         // Semifinals
-        const sfWinners = [];
+        const finalWinners = [];
         for (let i = 0; i < 2; i++) {
-          const tHome = qfWinners[2 * i];
-          const tAway = qfWinners[2 * i + 1];
+          const tHome = sfWinners[2 * i];
+          const tAway = sfWinners[2 * i + 1];
           progressionCounts[tHome].semifinals++;
           progressionCounts[tAway].semifinals++;
           
           const winner = simulateMatch(tHome, tAway);
-          sfWinners.push(winner);
+          finalWinners.push(winner);
         }
+        
         // Finals
-        const tHome = sfWinners[0];
-        const tAway = sfWinners[1];
+        const tHome = finalWinners[0];
+        const tAway = finalWinners[1];
         progressionCounts[tHome].finals++;
         progressionCounts[tAway].finals++;
         
@@ -1252,6 +1384,7 @@
       
       const probabilities = normTeams.map(team => ({
         team: team,
+        round_of_16: isRo16 ? progressionCounts[team].round_of_16 / numRuns : 1.0,
         quarterfinals: progressionCounts[team].quarterfinals / numRuns,
         semifinals: progressionCounts[team].semifinals / numRuns,
         finals: progressionCounts[team].finals / numRuns,
@@ -1268,29 +1401,43 @@
       const allTeams = Object.keys(elo).sort();
       const starting = simulationData.starting_teams || [];
       
-      const selectIds = [
-        "select-qf1-t1", "select-qf1-t2",
-        "select-qf2-t1", "select-qf2-t2",
-        "select-qf3-t1", "select-qf3-t2",
-        "select-qf4-t1", "select-qf4-t2"
-      ];
+      const grid = document.getElementById("customizer-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
       
-      selectIds.forEach((id, idx) => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        select.innerHTML = '';
+      const numMatches = starting.length / 2;
+      for (let i = 0; i < numMatches; i++) {
+        const t1Default = starting[2 * i] || "";
+        const t2Default = starting[2 * i + 1] || "";
+        
+        const box = document.createElement("div");
+        box.className = "match-select-box";
+        box.innerHTML = `
+          <h4>Match #${i + 1}</h4>
+          <div class="select-row">
+            <select id="select-m${i}-t1"></select> vs <select id="select-m${i}-t2"></select>
+          </div>
+        `;
+        grid.appendChild(box);
+        
+        const s1 = box.querySelector(`#select-m${i}-t1`);
+        const s2 = box.querySelector(`#select-m${i}-t2`);
+        
         allTeams.forEach(team => {
-          const opt = document.createElement('option');
-          opt.value = team;
-          opt.textContent = `${FLAGS[team] || '🏳️'} ${team.toUpperCase()}`;
-          select.appendChild(opt);
+          const opt1 = document.createElement("option");
+          opt1.value = team;
+          opt1.textContent = `${FLAGS[team] || '🏳️'} ${team.toUpperCase()}`;
+          s1.appendChild(opt1);
+          
+          const opt2 = document.createElement("option");
+          opt2.value = team;
+          opt2.textContent = `${FLAGS[team] || '🏳️'} ${team.toUpperCase()}`;
+          s2.appendChild(opt2);
         });
         
-        // Set default value
-        if (starting[idx]) {
-          select.value = cleanTeamName(starting[idx]);
-        }
-      });
+        s1.value = cleanTeamName(t1Default);
+        s2.value = cleanTeamName(t2Default);
+      }
     }
 
     // Load simulation results
@@ -1311,7 +1458,11 @@
         buildBracket();
         
         // Auto-select the first bracket match
-        selectMatch('qf1');
+        if (simulationData.probabilities && simulationData.probabilities.length === 16) {
+          selectMatch('ro16-1');
+        } else {
+          selectMatch('qf1');
+        }
 
       } catch (error) {
         console.error("Failed to load simulation results:", error);
@@ -1423,56 +1574,98 @@
       if (!simulationData || !simulationData.probabilities) return;
       
       const probs = simulationData.probabilities;
+      const ro16Col = document.getElementById('ro16-column');
       
-      const qf1_1 = probs[0]; const qf1_2 = probs[1];
-      const qf2_1 = probs[2]; const qf2_2 = probs[3];
-      const qf3_1 = probs[4]; const qf3_2 = probs[5];
-      const qf4_1 = probs[6]; const qf4_2 = probs[7];
-
-      // Populate Quarterfinals UI
-      setupTeamNode('qf1-team1', qf1_1.team, qf1_1.quarterfinals);
-      setupTeamNode('qf1-team2', qf1_2.team, qf1_2.quarterfinals);
+      let qf1_1, qf1_2, qf2_1, qf2_2, qf3_1, qf3_2, qf4_1, qf4_2;
       
-      setupTeamNode('qf2-team1', qf2_1.team, qf2_1.quarterfinals);
-      setupTeamNode('qf2-team2', qf2_2.team, qf2_2.quarterfinals);
+      if (probs.length === 16) {
+        if (ro16Col) ro16Col.style.display = 'flex';
+        
+        // Populate RO16 matches
+        for (let i = 0; i < 8; i++) {
+          setupTeamNode(`ro16-${i+1}-team1`, probs[2*i].team, probs[2*i].round_of_16 || 1.0);
+          setupTeamNode(`ro16-${i+1}-team2`, probs[2*i+1].team, probs[2*i+1].round_of_16 || 1.0);
+        }
+        
+        // Determine QF teams by who advanced/advances in the simulation
+        qf1_1 = (probs[0].quarterfinals >= probs[1].quarterfinals) ? probs[0] : probs[1];
+        qf1_2 = (probs[2].quarterfinals >= probs[3].quarterfinals) ? probs[2] : probs[3];
+        qf2_1 = (probs[4].quarterfinals >= probs[5].quarterfinals) ? probs[4] : probs[5];
+        qf2_2 = (probs[6].quarterfinals >= probs[7].quarterfinals) ? probs[6] : probs[7];
+        qf3_1 = (probs[8].quarterfinals >= probs[9].quarterfinals) ? probs[8] : probs[9];
+        qf3_2 = (probs[10].quarterfinals >= probs[11].quarterfinals) ? probs[10] : probs[11];
+        qf4_1 = (probs[12].quarterfinals >= probs[13].quarterfinals) ? probs[12] : probs[13];
+        qf4_2 = (probs[14].quarterfinals >= probs[15].quarterfinals) ? probs[14] : probs[15];
+        
+        // Populate QF UI
+        setupTeamNode('qf1-team1', qf1_1.team, qf1_1.quarterfinals);
+        setupTeamNode('qf1-team2', qf1_2.team, qf1_2.quarterfinals);
+        setupTeamNode('qf2-team1', qf2_1.team, qf2_1.quarterfinals);
+        setupTeamNode('qf2-team2', qf2_2.team, qf2_2.quarterfinals);
+        setupTeamNode('qf3-team1', qf3_1.team, qf3_1.quarterfinals);
+        setupTeamNode('qf3-team2', qf3_2.team, qf3_2.quarterfinals);
+        setupTeamNode('qf4-team1', qf4_1.team, qf4_1.quarterfinals);
+        setupTeamNode('qf4-team2', qf4_2.team, qf4_2.quarterfinals);
+        
+        // Highlight RO16 winners
+        markWinner('ro16-1-team1', 'ro16-1-team2', qf1_1.team);
+        markWinner('ro16-2-team1', 'ro16-2-team2', qf1_2.team);
+        markWinner('ro16-3-team1', 'ro16-3-team2', qf2_1.team);
+        markWinner('ro16-4-team1', 'ro16-4-team2', qf2_2.team);
+        markWinner('ro16-5-team1', 'ro16-5-team2', qf3_1.team);
+        markWinner('ro16-6-team1', 'ro16-6-team2', qf3_2.team);
+        markWinner('ro16-7-team1', 'ro16-7-team2', qf4_1.team);
+        markWinner('ro16-8-team1', 'ro16-8-team2', qf4_2.team);
+      } else {
+        if (ro16Col) ro16Col.style.display = 'none';
+        
+        qf1_1 = probs[0]; qf1_2 = probs[1];
+        qf2_1 = probs[2]; qf2_2 = probs[3];
+        qf3_1 = probs[4]; qf3_2 = probs[5];
+        qf4_1 = probs[6]; qf4_2 = probs[7];
+        
+        // Populate Quarterfinals UI
+        setupTeamNode('qf1-team1', qf1_1.team, qf1_1.quarterfinals);
+        setupTeamNode('qf1-team2', qf1_2.team, qf1_2.quarterfinals);
+        setupTeamNode('qf2-team1', qf2_1.team, qf2_1.quarterfinals);
+        setupTeamNode('qf2-team2', qf2_2.team, qf2_2.quarterfinals);
+        setupTeamNode('qf3-team1', qf3_1.team, qf3_1.quarterfinals);
+        setupTeamNode('qf3-team2', qf3_2.team, qf3_2.quarterfinals);
+        setupTeamNode('qf4-team1', qf4_1.team, qf4_1.quarterfinals);
+        setupTeamNode('qf4-team2', qf4_2.team, qf4_2.quarterfinals);
+      }
       
-      setupTeamNode('qf3-team1', qf3_1.team, qf3_1.quarterfinals);
-      setupTeamNode('qf3-team2', qf3_2.team, qf3_2.quarterfinals);
-      
-      setupTeamNode('qf4-team1', qf4_1.team, qf4_1.quarterfinals);
-      setupTeamNode('qf4-team2', qf4_2.team, qf4_2.quarterfinals);
-
       // Determine Semifinalists
       const sf1_1 = (qf1_1.semifinals >= qf1_2.semifinals) ? qf1_1 : qf1_2;
       const sf1_2 = (qf2_1.semifinals >= qf2_2.semifinals) ? qf2_1 : qf2_2;
       const sf2_1 = (qf3_1.semifinals >= qf3_2.semifinals) ? qf3_1 : qf3_2;
       const sf2_2 = (qf4_1.semifinals >= qf4_2.semifinals) ? qf4_1 : qf4_2;
-
+      
       setupTeamNode('sf1-team1', sf1_1.team, sf1_1.semifinals);
       setupTeamNode('sf1-team2', sf1_2.team, sf1_2.semifinals);
       setupTeamNode('sf2-team1', sf2_1.team, sf2_1.semifinals);
       setupTeamNode('sf2-team2', sf2_2.team, sf2_2.semifinals);
-
+      
       // Highlight QF winners
       markWinner('qf1-team1', 'qf1-team2', sf1_1.team);
       markWinner('qf2-team1', 'qf2-team2', sf1_2.team);
       markWinner('qf3-team1', 'qf3-team2', sf2_1.team);
       markWinner('qf4-team1', 'qf4-team2', sf2_2.team);
-
+      
       // Determine Finalists
       const f_1 = (sf1_1.finals >= sf1_2.finals) ? sf1_1 : sf1_2;
       const f_2 = (sf2_1.finals >= sf2_2.finals) ? sf2_1 : sf2_2;
-
+      
       setupTeamNode('final-team1', f_1.team, f_1.finals);
       setupTeamNode('final-team2', f_2.team, f_2.finals);
-
+      
       markWinner('sf1-team1', 'sf1-team2', f_1.team);
       markWinner('sf2-team1', 'sf2-team2', f_2.team);
-
+      
       // Determine Champion
       const champ = (f_1.champion >= f_2.champion) ? f_1 : f_2;
       markWinner('final-team1', 'final-team2', champ.team);
-
+      
       // Champion display card
       const champCard = document.getElementById('champion-card');
       document.getElementById('champ-flag').textContent = FLAGS[cleanTeamName(champ.team)] || "🏆";
@@ -1727,16 +1920,17 @@
       const runSimBtn = document.getElementById('btn-run-custom-sim');
       if (runSimBtn) {
         runSimBtn.addEventListener('click', () => {
-          const teams = [
-            document.getElementById("select-qf1-t1").value,
-            document.getElementById("select-qf1-t2").value,
-            document.getElementById("select-qf2-t1").value,
-            document.getElementById("select-qf2-t2").value,
-            document.getElementById("select-qf3-t1").value,
-            document.getElementById("select-qf3-t2").value,
-            document.getElementById("select-qf4-t1").value,
-            document.getElementById("select-qf4-t2").value
-          ];
+          const starting = simulationData.starting_teams || [];
+          const numMatches = starting.length / 2;
+          const teams = [];
+          for (let i = 0; i < numMatches; i++) {
+            const select1 = document.getElementById(`select-m${i}-t1`);
+            const select2 = document.getElementById(`select-m${i}-t2`);
+            if (select1 && select2) {
+              teams.push(select1.value);
+              teams.push(select2.value);
+            }
+          }
           
           runSimBtn.textContent = "⚙️ Simulating...";
           runSimBtn.disabled = true;
@@ -1748,7 +1942,11 @@
               simulationData.starting_teams = teams;
               buildTable();
               buildBracket();
-              selectMatch('qf1');
+              if (teams.length === 16) {
+                selectMatch('ro16-1');
+              } else {
+                selectMatch('qf1');
+              }
             }
             runSimBtn.textContent = "⚡ Run 10k Simulation";
             runSimBtn.disabled = false;
@@ -1764,7 +1962,11 @@
             setupCustomizer();
             buildTable();
             buildBracket();
-            selectMatch('qf1');
+            if (simulationData.probabilities && simulationData.probabilities.length === 16) {
+              selectMatch('ro16-1');
+            } else {
+              selectMatch('qf1');
+            }
           }
         });
       }
