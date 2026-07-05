@@ -200,10 +200,22 @@ The predictor features a complete pipeline for scraping starting lineups, blendi
 ### 5. Knockout SGP Leg Expansion
 - **Corners & To Advance Integration**: Automatically queries and parses `KXWCQUAL` (To Advance) and `KXWCTCORNERS` (Total Corners) tickers from Kalshi, enabling rich 5-leg to 8-leg parlays per match even when the daily slate has only 1 or 2 games.
 
+### 6. Active News Debating Agents
+- **Dynamic News Retrieval**: Before starting debates, retrieves recent team injuries and roster changes from the Google News RSS feed.
+- **Context Injection**: Bullet summaries are injected directly into the Magnus vs Athena prompt templates.
+- **Debate Caching**: Debate logs are serialized and saved to `data/processed/debates/` with full probability and sentiment metadata.
+
+### 7. Tournament Monte Carlo Simulation Engine
+- **10,000x Bracket Simulation**: Simulates the remaining single-elimination tournament bracket from Quarterfinals to the Final.
+- **Match Resolutions**: Simulates 90m (Dixon-Coles score expectations), 30m Extra Time (scaled expected goal rates), and penalty shootouts (goalkeeper save rate ratios: Brazil/Alisson 33%, England/Pickford 28%, default 25%).
+- **Cached Results**: Outputs are saved to `data/processed/simulation_results.json` during data update commands.
+
 ---
 
-## 🚀 Future Roadmap (Phase 4)
-Based on comparative research of sports analytics and prediction agents (such as `Hicruben` and `AhmedHazem02`), the following features are actively under development:
-1. **Active News Debating Agents**: Equipping Magnus and Athena with active web-search agents to debate real-time squad roster changes, squad injuries, and news before trades.
-2. **Tournament Monte Carlo Simulation Dashboard**: A visual dashboard running 10,000 Monte Carlo runs of the remaining knockout bracket to plot visual progression trees and path-dependent team probabilities.
+## 🖥️ Interactive Web Dashboard
+An interactive dashboard [dashboard.html](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/dashboard.html) provides a premium dark-mode (Tokyo Night Theme) user interface:
+- **Left Pane (Knockout Bracket)**: A responsive tournament bracket displaying the progression of teams. Clicking a matchup highlights stage progression paths.
+- **Right Pane (Simulation Table)**: A sortable table ranking teams based on their simulation probabilities (QF, SF, Final, Champion) using clean accent progress bars.
+- **Bottom Pane (Qualitative Accordion)**: Renders live Magnus vs Athena debates and recent team injury/news bullet points dynamically using AJAX fetch.
+
 
