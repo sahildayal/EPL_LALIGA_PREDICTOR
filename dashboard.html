@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 2026 World Cup Monte Carlo Dashboard</title>
+  <meta name="description" content="Interactive Monte Carlo simulation results and qualitative expert debate logs for the 2026 World Cup knockout stage.">
+  
+  <!-- Import Outfit and Inter Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Tokyo Night Palette Design System */
+    :root {
+      --bg-main: hsl(230, 20%, 8%);
+      --bg-card: rgba(26, 27, 38, 0.75);
+      --bg-card-hover: rgba(36, 38, 56, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.18);
+      
+      --color-text-primary: #c0caf5;
+      --color-text-muted: #a9b1d6;
+      --color-text-dark: #565f89;
+      
+      --accent-cyan: #0db9d7;
+      --accent-cyan-glow: rgba(13, 185, 215, 0.2);
+      --accent-purple: #bb9af3;
+      --accent-purple-glow: rgba(187, 154, 243, 0.25);
+      --accent-green: #9ece6a;
+      --accent-green-glow: rgba(158, 206, 106, 0.2);
+      --accent-pink: #f7768e;
+      --accent-pink-glow: rgba(247, 118, 142, 0.2);
+      --accent-blue: #7aa2f7;
+      
+      --font-title: 'Outfit', 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--bg-main);
+      color: var(--color-text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(187, 154, 243, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(13, 185, 215, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    
+    /* Header Styles */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+    
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff 20%, var(--accent-cyan) 60%, var(--accent-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 8px rgba(13, 185, 215, 0.15));
+      display: inline-block;
+    }
+    
+    .subtitle {
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+    
+    /* Main Dashboard Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Glassmorphic Panel/Card Base */
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .panel:hover {
+      border-color: var(--border-hover);
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+    
+    .panel-title {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Left Pane - Bracket Tree Styling */
+    .bracket-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      min-height: 450px;
+      position: relative;
+      padding: 1rem 0;
+    }
+    
+    .bracket-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: 100%;
+      flex: 1;
+      gap: 2rem;
+    }
+    
+    /* Bracket Match Node */
+    .bracket-match {
+      display: flex;
+      flex-direction: column;
+      background: rgba(30, 32, 48, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 220px;
+      margin: 0 auto;
+      transition: all var(--transition-normal);
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .bracket-match:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px var(--accent-cyan-glow);
+    }
+    
+    .bracket-match.selected {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 20px var(--accent-purple-glow);
+      background: rgba(40, 42, 66, 0.6);
+    }
+    
+    .bracket-team {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    
+    .bracket-team:last-child {
+      border-bottom: none;
+    }
+    
+    .bracket-team.winner {
+      color: #fff;
+      font-weight: 600;
+    }
+    
+    .bracket-team.highlighted {
+      background: rgba(187, 154, 243, 0.15);
+      color: #fff;
+    }
+    
+    .team-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .team-flag {
+      font-size: 1.1rem;
+    }
+    
+    .team-name {
+      text-transform: capitalize;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 110px;
+    }
+    
+    .team-prob {
+      font-family: var(--font-title);
+      font-size: 0.75rem;
+      color: var(--color-text-dark);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+    }
+    
+    .bracket-team.winner .team-prob {
+      color: var(--accent-green);
+      background: var(--accent-green-glow);
+    }
+    
+    /* Champion Node Special Styling */
+    .champion-column {
+      flex: 0.8;
+      max-width: 180px;
+    }
+    
+    .champion-card {
+      background: linear-gradient(135deg, rgba(26, 27, 38, 0.9) 0%, rgba(187, 154, 243, 0.1) 100%);
+      border: 2px solid var(--accent-purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(187, 154, 243, 0.15);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+    
+    .champion-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(187, 154, 243, 0.3);
+    }
+    
+    .champion-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .champion-flag {
+      font-size: 3rem;
+      margin-bottom: 0.25rem;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+    
+    .champion-name {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: capitalize;
+      margin-bottom: 0.25rem;
+    }
+    
+    .champion-prob {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      color: var(--accent-green);
+      background: var(--accent-green-glow);
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    
+    /* Interactive instructions */
+    .bracket-hint {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--color-text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: none;
+    }
+    
+    /* Right Pane - Probability Table Styling */
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    
+    th {
+      font-family: var(--font-title);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      transition: color var(--transition-fast);
+    }
+    
+    th:hover {
+      color: #fff;
+    }
+    
+    th.sort-active {
+      color: var(--accent-cyan);
+    }
+    
+    th.sort-active::after {
+      content: ' ▾';
+      font-size: 0.7rem;
+    }
+    
+    th.sort-asc::after {
+      content: ' ▴';
+      font-size: 0.7rem;
+    }
+    
+    td {
+      padding: 0.85rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+    
+    tr {
+      transition: background var(--transition-fast);
+    }
+    
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: #fff;
+    }
+    
+    .table-team {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #fff;
+      text-transform: capitalize;
+    }
+    
+    /* Progress bars inside table */
+    .progress-cell {
+      min-width: 80px;
+    }
+    
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .progress-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.1, 0.8, 0.25, 1);
+    }
+    
+    .qf-bar { background: var(--accent-blue); }
+    .sf-bar { background: var(--accent-purple); }
+    .final-bar { background: var(--accent-pink); }
+    .champ-bar { background: linear-gradient(90deg, var(--accent-cyan) 0%, var(--accent-green) 100%); }
+    
+    .progress-val {
+      font-family: var(--font-title);
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 32px;
+      text-align: right;
+    }
+    
+    /* Bottom Section - Debate Logs Styling */
+    .debate-section {
+      margin-top: 1rem;
+    }
+    
+    .debate-empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--color-text-dark);
+    }
+    
+    .debate-empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .debate-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .debate-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Speaker Cards */
+    .speaker-card {
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      background: rgba(30, 32, 48, 0.3);
+      border: 1px solid var(--border-color);
+      transition: transform var(--transition-normal);
+    }
+    
+    .speaker-card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .speaker-card.magnus {
+      border-left: 4px solid var(--accent-pink);
+    }
+    
+    .speaker-card.athena {
+      border-left: 4px solid var(--accent-blue);
+    }
+    
+    .speaker-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .speaker-avatar {
+      font-size: 2.2rem;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    }
+    
+    .speaker-meta h3 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .speaker-meta span {
+      font-size: 0.75rem;
+      color: var(--color-text-dark);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .speaker-quote {
+      font-size: 0.9rem;
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      font-style: italic;
+    }
+    
+    .speaker-bet-box {
+      margin-top: 1.25rem;
+      padding: 0.85rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    
+    .bet-label {
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    
+    .bet-value {
+      font-family: var(--font-title);
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .bet-stake {
+      color: var(--accent-green);
+      font-weight: 600;
+      background: var(--accent-green-glow);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
+    
+    /* Central Consensus & Metadata panels */
+    .consensus-panel {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(158, 206, 106, 0.05) 0%, rgba(30, 32, 48, 0.4) 100%);
+      border: 1px solid rgba(158, 206, 106, 0.2);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .consensus-icon {
+      font-size: 1.8rem;
+    }
+    
+    .consensus-content h4 {
+      font-family: var(--font-title);
+      font-size: 0.9rem;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    
+    .consensus-text {
+      font-size: 0.9rem;
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    /* Match Parameter Stats */
+    .match-meta-grid {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .meta-stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem;
+      text-align: center;
+    }
+    
+    .meta-stat-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    
+    .meta-stat-val {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .meta-stat-val.positive { color: var(--accent-green); }
+    .meta-stat-val.negative { color: var(--accent-pink); }
+    
+    /* Accordion for news bullets */
+    .news-accordion {
+      grid-column: 1 / -1;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    
+    .accordion-header {
+      background: rgba(30, 32, 48, 0.5);
+      padding: 0.85rem 1.25rem;
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    
+    .accordion-header:hover {
+      background: rgba(30, 32, 48, 0.8);
+      color: #fff;
+    }
+    
+    .accordion-content {
+      display: none;
+      padding: 1.25rem;
+      background: rgba(20, 21, 33, 0.3);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .accordion-content.open {
+      display: block;
+    }
+    
+    .news-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 600px) {
+      .news-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .news-column h5 {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-transform: capitalize;
+      color: #fff;
+    }
+    
+    .news-column ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    .news-column li {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+      padding-left: 0.75rem;
+      position: relative;
+    }
+    
+    .news-column li::before {
+      content: '•';
+      color: var(--accent-cyan);
+      position: absolute;
+      left: 0;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.05);
+      border-top: 4px solid var(--accent-cyan);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 2rem auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🏆 2026 World Cup Monte Carlo Dashboard</h1>
+      <div class="subtitle">Phase 4 Unified Simulation & Expert Debate Ledger</div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Left Pane: Tournament Bracket -->
+      <section class="panel" aria-label="Tournament Bracket">
+        <div class="panel-header">
+          <h2 class="panel-title">⚽ Knockout Bracket</h2>
+          <div style="font-size: 0.75rem; color: var(--color-text-dark); font-weight: 600;">CLICK MATCH TO LOAD DEBATE</div>
+        </div>
+        
+        <div id="bracket-tree" class="bracket-container">
+          <!-- Column 1: Quarterfinals -->
+          <div class="bracket-column" id="qf-column">
+            <!-- QF 1 -->
+            <div class="bracket-match" id="match-qf1" data-match-id="qf1">
+              <div class="bracket-team" id="qf1-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="qf1-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+            
+            <!-- QF 2 -->
+            <div class="bracket-match" id="match-qf2" data-match-id="qf2">
+              <div class="bracket-team" id="qf2-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="qf2-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+            
+            <!-- QF 3 -->
+            <div class="bracket-match" id="match-qf3" data-match-id="qf3">
+              <div class="bracket-team" id="qf3-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="qf3-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+            
+            <!-- QF 4 -->
+            <div class="bracket-match" id="match-qf4" data-match-id="qf4">
+              <div class="bracket-team" id="qf4-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="qf4-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Column 2: Semifinals -->
+          <div class="bracket-column" id="sf-column">
+            <!-- SF 1 -->
+            <div class="bracket-match" id="match-sf1" data-match-id="sf1">
+              <div class="bracket-team" id="sf1-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="sf1-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+            
+            <!-- SF 2 -->
+            <div class="bracket-match" id="match-sf2" data-match-id="sf2">
+              <div class="bracket-team" id="sf2-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="sf2-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Column 3: Final -->
+          <div class="bracket-column" id="final-column">
+            <!-- Final Match -->
+            <div class="bracket-match" id="match-final" data-match-id="final">
+              <div class="bracket-team" id="final-team1" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+              <div class="bracket-team" id="final-team2" data-team="">
+                <span class="team-info"><span class="team-flag"></span><span class="team-name">...</span></span>
+                <span class="team-prob">...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Column 4: Champion Display -->
+          <div class="bracket-column champion-column">
+            <div class="champion-card" id="champion-card">
+              <div class="champion-title">CHAMPION</div>
+              <span class="champion-flag" id="champ-flag">🏆</span>
+              <div class="champion-name" id="champ-name">...</div>
+              <div class="champion-prob" id="champ-prob">...</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bracket-hint">
+          <span>💡 Click a team in the bracket to highlight their tournament path!</span>
+        </div>
+      </section>
+
+      <!-- Right Pane: Sortable Simulation Rankings Table -->
+      <section class="panel" aria-label="Simulation Rankings Table">
+        <div class="panel-header">
+          <h2 class="panel-title">📊 Simulation Rankings</h2>
+        </div>
+        <div class="table-container">
+          <table id="prob-table">
+            <thead>
+              <tr>
+                <th id="th-rank">Rank</th>
+                <th id="th-team">Team</th>
+                <th id="th-qf">QF %</th>
+                <th id="th-sf">SF %</th>
+                <th id="th-final">Final %</th>
+                <th id="th-champ">Champ %</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Bottom Details Section: Debate Logs -->
+      <section class="panel debate-section" id="debate-panel" aria-label="Qualitative Debate Logs">
+        <div class="panel-header">
+          <h2 class="panel-title">💬 Qualitative Debate Logs</h2>
+          <div id="debate-match-title" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-purple);">
+            Select a match in the bracket to view Magnus vs Athena debate
+          </div>
+        </div>
+        
+        <div id="debate-content-area">
+          <div class="debate-empty-state">
+            <div class="debate-empty-icon">💬</div>
+            <p>No debate log currently loaded.</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-dark);">
+              Click on one of the active bracket matchups (like Argentina vs France or Brazil vs Spain) to load the qualitative expert discussion and personal betting positions.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <script>
+    // Flag dictionary for visual elegance
+    const FLAGS = {
+      "argentina": "🇦🇷",
+      "france": "🇫🇷",
+      "brazil": "🇧🇷",
+      "spain": "🇪🇸",
+      "portugal": "🇵🇹",
+      "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "netherlands": "🇳🇱",
+      "croatia": "🇭🇷",
+      "germany": "🇩🇪",
+      "belgium": "🇧🇪",
+      "mexico": "🇲🇽",
+      "egypt": "🇪🇬",
+      "switzerland": "🇨🇭",
+      "colombia": "🇨🇴",
+      "norway": "🇳🇴",
+      "usa": "🇺🇸",
+      "united states": "🇺🇸"
+    };
+
+    let simulationData = null;
+    let currentSortColumn = 'champ';
+    let currentSortAscending = false;
+    let selectedMatchupId = null;
+
+    // Load simulation results
+    async function loadSimulationData() {
+      try {
+        const response = await fetch('data/processed/simulation_results.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        simulationData = await response.json();
+        
+        // Populate bracket and table
+        buildTable();
+        buildBracket();
+        
+        // Auto-select the first bracket match with a generated debate
+        selectMatch('qf1');
+      } catch (error) {
+        console.error("Failed to load simulation results:", error);
+        document.getElementById('table-body').innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--accent-pink); padding: 2rem;">
+              ⚠️ Error loading simulation results. Verify 'data/processed/simulation_results.json' exists.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Populate the rankings table
+    function buildTable() {
+      const tbody = document.getElementById('table-body');
+      if (!simulationData || !simulationData.probabilities) return;
+
+      let teams = [...simulationData.probabilities];
+
+      // Sort teams
+      teams.sort((a, b) => {
+        let valA, valB;
+        if (currentSortColumn === 'team') {
+          valA = a.team;
+          valB = b.team;
+          return currentSortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (currentSortColumn === 'qf') {
+          valA = a.quarterfinals; valB = b.quarterfinals;
+        } else if (currentSortColumn === 'sf') {
+          valA = a.semifinals; valB = b.semifinals;
+        } else if (currentSortColumn === 'final') {
+          valA = a.finals; valB = b.finals;
+        } else {
+          valA = a.champion; valB = b.champion;
+        }
+        return currentSortAscending ? valA - valB : valB - valA;
+      });
+
+      tbody.innerHTML = '';
+      teams.forEach((t, index) => {
+        const flag = FLAGS[t.team] || "🏳️";
+        const rank = currentSortAscending ? teams.length - index : index + 1;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="color: var(--color-text-dark); font-weight: bold;">#${rank}</td>
+          <td>
+            <div class="table-team">
+              <span class="team-flag">${flag}</span>
+              <span class="team-name">${t.team}</span>
+            </div>
+          </td>
+          <td class="progress-cell">
+            <div class="progress-container">
+              <div class="progress-bar-bg"><div class="progress-bar-fill qf-bar" style="width: ${t.quarterfinals * 100}%"></div></div>
+              <span class="progress-val">${(t.quarterfinals * 100).toFixed(0)}%</span>
+            </div>
+          </td>
+          <td class="progress-cell">
+            <div class="progress-container">
+              <div class="progress-bar-bg"><div class="progress-bar-fill sf-bar" style="width: ${t.semifinals * 100}%"></div></div>
+              <span class="progress-val">${(t.semifinals * 100).toFixed(0)}%</span>
+            </div>
+          </td>
+          <td class="progress-cell">
+            <div class="progress-container">
+              <div class="progress-bar-bg"><div class="progress-bar-fill final-bar" style="width: ${t.finals * 100}%"></div></div>
+              <span class="progress-val">${(t.finals * 100).toFixed(0)}%</span>
+            </div>
+          </td>
+          <td class="progress-cell">
+            <div class="progress-container">
+              <div class="progress-bar-bg"><div class="progress-bar-fill champ-bar" style="width: ${t.champion * 100}%"></div></div>
+              <span class="progress-val">${(t.champion * 100).toFixed(1)}%</span>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Build the responsive knockout bracket tree
+    function buildBracket() {
+      if (!simulationData || !simulationData.probabilities) return;
+      
+      // We read the 8 teams in order from probabilities
+      // Since ELO loader returns top 8 sorted:
+      // Index 0 vs 1 (QF1), 2 vs 3 (QF2), 4 vs 5 (QF3), 6 vs 7 (QF4)
+      const probs = simulationData.probabilities;
+      
+      const qf1_1 = probs[0]; const qf1_2 = probs[1];
+      const qf2_1 = probs[2]; const qf2_2 = probs[3];
+      const qf3_1 = probs[4]; const qf3_2 = probs[5];
+      const qf4_1 = probs[6]; const qf4_2 = probs[7];
+
+      // Populate Quarterfinals UI
+      setupTeamNode('qf1-team1', qf1_1.team, qf1_1.quarterfinals);
+      setupTeamNode('qf1-team2', qf1_2.team, qf1_2.quarterfinals);
+      
+      setupTeamNode('qf2-team1', qf2_1.team, qf2_1.quarterfinals);
+      setupTeamNode('qf2-team2', qf2_2.team, qf2_2.quarterfinals);
+      
+      setupTeamNode('qf3-team1', qf3_1.team, qf3_1.quarterfinals);
+      setupTeamNode('qf3-team2', qf3_2.team, qf3_2.quarterfinals);
+      
+      setupTeamNode('qf4-team1', qf4_1.team, qf4_1.quarterfinals);
+      setupTeamNode('qf4-team2', qf4_2.team, qf4_2.quarterfinals);
+
+      // Determine Semifinalists (the team in each matchup with higher SF probability)
+      const sf1_1 = (qf1_1.semifinals >= qf1_2.semifinals) ? qf1_1 : qf1_2;
+      const sf1_2 = (qf2_1.semifinals >= qf2_2.semifinals) ? qf2_1 : qf2_2;
+      const sf2_1 = (qf3_1.semifinals >= qf3_2.semifinals) ? qf3_1 : qf3_2;
+      const sf2_2 = (qf4_1.semifinals >= qf4_2.semifinals) ? qf4_1 : qf4_2;
+
+      setupTeamNode('sf1-team1', sf1_1.team, sf1_1.semifinals);
+      setupTeamNode('sf1-team2', sf1_2.team, sf1_2.semifinals);
+      setupTeamNode('sf2-team1', sf2_1.team, sf2_1.semifinals);
+      setupTeamNode('sf2-team2', sf2_2.team, sf2_2.semifinals);
+
+      // Highlight QF winners
+      markWinner('qf1-team1', 'qf1-team2', sf1_1.team);
+      markWinner('qf2-team1', 'qf2-team2', sf1_2.team);
+      markWinner('qf3-team1', 'qf3-team2', sf2_1.team);
+      markWinner('qf4-team1', 'qf4-team2', sf2_2.team);
+
+      // Determine Finalists
+      const f_1 = (sf1_1.finals >= sf1_2.finals) ? sf1_1 : sf1_2;
+      const f_2 = (sf2_1.finals >= sf2_2.finals) ? sf2_1 : sf2_2;
+
+      setupTeamNode('final-team1', f_1.team, f_1.finals);
+      setupTeamNode('final-team2', f_2.team, f_2.finals);
+
+      markWinner('sf1-team1', 'sf1-team2', f_1.team);
+      markWinner('sf2-team1', 'sf2-team2', f_2.team);
+
+      // Determine Champion
+      const champ = (f_1.champion >= f_2.champion) ? f_1 : f_2;
+      markWinner('final-team1', 'final-team2', champ.team);
+
+      // Champion display card
+      const champCard = document.getElementById('champion-card');
+      document.getElementById('champ-flag').textContent = FLAGS[champ.team] || "🏆";
+      document.getElementById('champ-name').textContent = champ.team;
+      document.getElementById('champ-prob').textContent = `${(champ.champion * 100).toFixed(1)}% Win Prob`;
+      champCard.setAttribute('data-team', champ.team);
+    }
+
+    function setupTeamNode(elementId, team, probability) {
+      const node = document.getElementById(elementId);
+      node.setAttribute('data-team', team);
+      
+      const flagEl = node.querySelector('.team-flag');
+      const nameEl = node.querySelector('.team-name');
+      const probEl = node.querySelector('.team-prob');
+      
+      flagEl.textContent = FLAGS[team] || "🏳️";
+      nameEl.textContent = team;
+      probEl.textContent = `${(probability * 100).toFixed(0)}%`;
+      
+      // Remove class names
+      node.classList.remove('winner', 'highlighted');
+    }
+
+    function markWinner(id1, id2, winnerTeam) {
+      const el1 = document.getElementById(id1);
+      const el2 = document.getElementById(id2);
+      
+      if (el1.getAttribute('data-team') === winnerTeam) {
+        el1.classList.add('winner');
+      } else if (el2.getAttribute('data-team') === winnerTeam) {
+        el2.classList.add('winner');
+      }
+    }
+
+    // Highlight a team's path through the tournament bracket on click
+    function highlightTeamPath(team) {
+      // Clear previous highlights
+      document.querySelectorAll('.bracket-team').forEach(el => el.classList.remove('highlighted'));
+      
+      if (!team) return;
+
+      // Select all nodes matching the clicked team name and highlight them
+      document.querySelectorAll(`.bracket-team[data-team="${team}"]`).forEach(el => {
+        el.classList.add('highlighted');
+      });
+    }
+
+    // Load debate log file dynamically
+    async function selectMatch(matchId) {
+      selectedMatchupId = matchId;
+      
+      // Update UI classes for bracket selection
+      document.querySelectorAll('.bracket-match').forEach(el => el.classList.remove('selected'));
+      const matchNode = document.getElementById(`match-${matchId}`);
+      if (matchNode) matchNode.classList.add('selected');
+
+      const team1 = document.getElementById(`${matchId}-team1`).getAttribute('data-team');
+      const team2 = document.getElementById(`${matchId}-team2`).getAttribute('data-team');
+
+      document.getElementById('debate-match-title').textContent = `${FLAGS[team1] || ''} ${team1.toUpperCase()} vs ${FLAGS[team2] || ''} ${team2.toUpperCase()}`;
+
+      const contentArea = document.getElementById('debate-content-area');
+      contentArea.innerHTML = `<div class="spinner"></div>`;
+
+      // Try loading debate from file. File syntax is YYYY-MM-DD-home-vs-away.json
+      // Let's compute date keys: today and the mock file dates
+      const today = new Date().toISOString().slice(0, 10);
+      const datesToTry = [today, '2026-07-05'];
+      
+      let loadedData = null;
+      let triedPaths = [];
+
+      for (let date of datesToTry) {
+        const fileKey1 = `data/processed/debates/${date}-${team1}-vs-${team2}.json`;
+        const fileKey2 = `data/processed/debates/${date}-${team2}-vs-${team1}.json`; // inverse home/away
+
+        for (let path of [fileKey1, fileKey2]) {
+          triedPaths.push(path);
+          try {
+            const resp = await fetch(path);
+            if (resp.ok) {
+              loadedData = await resp.json();
+              break;
+            }
+          } catch (e) {
+            // ignore and try next
+          }
+        }
+        if (loadedData) break;
+      }
+
+      if (loadedData) {
+        renderDebate(loadedData);
+      } else {
+        contentArea.innerHTML = `
+          <div class="debate-empty-state">
+            <div class="debate-empty-icon">⚠️</div>
+            <p>No debate log JSON found for this matchup.</p>
+            <p style="font-size: 0.8rem; color: var(--color-text-dark); margin-top: 0.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+              We checked the following locations: <br>
+              <code style="font-size: 0.75rem; color: var(--accent-pink); word-break: break-all;">${triedPaths.join('<br>')}</code>
+            </p>
+            <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--color-text-muted);">
+              Run `python main.py ask "${team1} vs ${team2}"` to generate a live Gemini debate transcript.
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    // Render debate log JSON to html
+    function renderDebate(data) {
+      const contentArea = document.getElementById('debate-content-area');
+      
+      const magnusBet = data.debate.personal_bets?.magnus || {};
+      const athenaBet = data.debate.personal_bets?.athena || {};
+      
+      const sentimentVal = data.sentiment !== undefined ? data.sentiment : 0.0;
+      const sentimentClass = sentimentVal > 0 ? 'positive' : (sentimentVal < 0 ? 'negative' : '');
+      const eloDiffVal = data.elo_diff !== undefined ? data.elo_diff : 0;
+      const eloDiffClass = eloDiffVal > 0 ? 'positive' : (eloDiffVal < 0 ? 'negative' : '');
+
+      contentArea.innerHTML = `
+        <!-- Metadata cards -->
+        <div class="match-meta-grid">
+          <div class="meta-stat-card">
+            <div class="meta-stat-label">ELO Difference</div>
+            <div class="meta-stat-val ${eloDiffClass}">${eloDiffVal > 0 ? '+' : ''}${eloDiffVal.toFixed(1)}</div>
+          </div>
+          <div class="meta-stat-card">
+            <div class="meta-stat-label">News Sentiment</div>
+            <div class="meta-stat-val ${sentimentClass}">${sentimentVal > 0 ? '+' : ''}${sentimentVal.toFixed(2)}</div>
+          </div>
+          <div class="meta-stat-card">
+            <div class="meta-stat-label">Key News Flags</div>
+            <div class="meta-stat-val" style="font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(data.news_flags || []).join(', ') || 'None'}">
+              ${(data.news_flags || []).join(', ') || 'None'}
+            </div>
+          </div>
+          <div class="meta-stat-card">
+            <div class="meta-stat-label">Forecasting Model</div>
+            <div class="meta-stat-val" style="font-size: 0.85rem; color: var(--accent-purple);">Dixon-Coles + ML</div>
+          </div>
+        </div>
+
+        <!-- Dialogue Layout -->
+        <div class="debate-layout">
+          <!-- Magnus Scout Card -->
+          <div class="speaker-card magnus">
+            <div class="speaker-header">
+              <span class="speaker-avatar">👴</span>
+              <div class="speaker-meta">
+                <h3>Magnus</h3>
+                <span>The Eye-Test Scout</span>
+              </div>
+            </div>
+            <p class="speaker-quote">"${data.debate.magnus}"</p>
+            <div class="speaker-bet-box">
+              <span class="bet-label">Personal Bet:</span>
+              <div class="bet-value">
+                <span class="bet-stake">$${(magnusBet.stake || 0).toFixed(0)}</span>
+                <span>${magnusBet.bet_type || 'N/A'} @ ${magnusBet.odds || 1.0}x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Athena Quant Card -->
+          <div class="speaker-card athena">
+            <div class="speaker-header">
+              <span class="speaker-avatar">🤖</span>
+              <div class="speaker-meta">
+                <h3>Athena</h3>
+                <span>The Quant Model</span>
+              </div>
+            </div>
+            <p class="speaker-quote">"${data.debate.athena}"</p>
+            <div class="speaker-bet-box">
+              <span class="bet-label">Personal Bet:</span>
+              <div class="bet-value">
+                <span class="bet-stake">$${(athenaBet.stake || 0).toFixed(0)}</span>
+                <span>${athenaBet.bet_type || 'N/A'} @ ${athenaBet.odds || 1.0}x</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Consensus Panel -->
+          <div class="consensus-panel">
+            <span class="consensus-icon">🤝</span>
+            <div class="consensus-content">
+              <h4>Consensus Recommendation</h4>
+              <div class="consensus-text">${data.debate.consensus}</div>
+            </div>
+          </div>
+          
+          <!-- Accordion for news bullets -->
+          <div class="news-accordion">
+            <div class="accordion-header" id="accordion-trigger">
+              <span>📰 View Match Team News Bullets & Injuries</span>
+              <span id="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content" id="accordion-content">
+              <div class="news-columns">
+                <div class="news-column">
+                  <h5>${FLAGS[data.home] || ''} ${data.home}</h5>
+                  <ul>
+                    ${(data.home_news_bullets || 'No recent updates.').split('\n').filter(l => l.trim()).map(line => `<li>${line.replace(/^-\s*/, '')}</li>`).join('')}
+                  </ul>
+                </div>
+                <div class="news-column">
+                  <h5>${FLAGS[data.away] || ''} ${data.away}</h5>
+                  <ul>
+                    ${(data.away_news_bullets || 'No recent updates.').split('\n').filter(l => l.trim()).map(line => `<li>${line.replace(/^-\s*/, '')}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Setup accordion event listener
+      const trigger = document.getElementById('accordion-trigger');
+      const content = document.getElementById('accordion-content');
+      const icon = document.getElementById('accordion-icon');
+      
+      trigger.addEventListener('click', () => {
+        content.classList.toggle('open');
+        icon.textContent = content.classList.contains('open') ? '▲' : '▼';
+      });
+    }
+
+    // Setup interactive events
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSimulationData();
+
+      // Table Sorting logic
+      const sortHeaders = [
+        { id: 'th-team', col: 'team' },
+        { id: 'th-qf', col: 'qf' },
+        { id: 'th-sf', col: 'sf' },
+        { id: 'th-final', col: 'final' },
+        { id: 'th-champ', col: 'champ' }
+      ];
+
+      sortHeaders.forEach(h => {
+        const el = document.getElementById(h.id);
+        el.addEventListener('click', () => {
+          if (currentSortColumn === h.col) {
+            currentSortAscending = !currentSortAscending;
+          } else {
+            currentSortColumn = h.col;
+            currentSortAscending = false;
+          }
+          
+          // Clear active sort styling
+          sortHeaders.forEach(x => {
+            const elHeader = document.getElementById(x.id);
+            elHeader.classList.remove('sort-active', 'sort-asc');
+          });
+          
+          el.classList.add('sort-active');
+          if (currentSortAscending) {
+            el.classList.add('sort-asc');
+          }
+          
+          buildTable();
+        });
+      });
+      
+      // Default table header styling
+      document.getElementById('th-champ').classList.add('sort-active');
+
+      // Bracket matches selection event listeners
+      document.querySelectorAll('.bracket-match').forEach(match => {
+        match.addEventListener('click', (e) => {
+          // Avoid clicking inner team nodes causing double trigger if we want path highlight
+          const matchId = match.getAttribute('data-match-id');
+          selectMatch(matchId);
+        });
+      });
+
+      // Bracket team path highlighting on clicking individual team row inside match cards
+      document.querySelectorAll('.bracket-team').forEach(teamNode => {
+        teamNode.addEventListener('click', (e) => {
+          e.stopPropagation(); // prevent parent match click trigger
+          
+          const team = teamNode.getAttribute('data-team');
+          highlightTeamPath(team);
+        });
+      });
+
+      // Champion display card path highlight click trigger
+      document.getElementById('champion-card').addEventListener('click', (e) => {
+        const team = document.getElementById('champion-card').getAttribute('data-team');
+        highlightTeamPath(team);
+      });
+    });
+  </script>
+</body>
+</html>
