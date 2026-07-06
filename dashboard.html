@@ -1210,6 +1210,18 @@
         </section>
         
       </div>
+
+      <!-- Bot Portfolios Ledger Section -->
+      <section class="panel" id="portfolio-panel" aria-label="Bot Portfolios Ledger" style="width: 100%; margin-top: 2rem; margin-bottom: 2rem;">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+          <h2 class="panel-title">💼 Bot Portfolio Accounts Ledger</h2>
+          <button class="btn btn-secondary" id="btn-refresh-portfolio" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; cursor: pointer;">🔄 Refresh Ledgers</button>
+        </div>
+        
+        <div id="portfolio-grid-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; width: 100%;">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
       
     </main>
   </div>
@@ -2082,6 +2094,7 @@
           
           await loadSimulationData(false);
           await selectMatch(selectedMatchupId);
+          await loadPortfolioData();
         } else {
           termContent.textContent += `\n[SYSTEM] Command failed with error:\n\n${errorMsg || resultText}`;
         }
@@ -2208,6 +2221,7 @@
           if (selectedMatchupId) {
             await selectMatch(selectedMatchupId); // Refresh currently selected match view!
           }
+          await loadPortfolioData();
         } else {
           termContent.textContent += `\n[SYSTEM] Global command failed with error:\n\n${errorMsg || resultText}`;
         }
@@ -2233,6 +2247,102 @@
         statusBadge.style.color = resultSuccess ? "var(--accent-green)" : "var(--accent-pink)";
         statusBadge.style.background = resultSuccess ? "rgba(4, 215, 172, 0.15)" : "rgba(255, 122, 142, 0.15)";
         statusBadge.style.border = resultSuccess ? "1px solid rgba(4, 215, 172, 0.3)" : "1px solid rgba(255, 122, 142, 0.3)";
+      }
+    }
+
+    // Fetch and render paper portfolios for all categories and bots
+    async function loadPortfolioData() {
+      const container = document.getElementById('portfolio-grid-content');
+      if (!container) return;
+      
+      container.innerHTML = `<div class="spinner" style="grid-column: 1/-1; margin: 2rem auto;"></div>`;
+      
+      const portNames = {
+        "predict": { name: "🔮 ML Predict Moneylines", color: "var(--accent-cyan)" },
+        "ask": { name: "💬 LLM Expert Debate Lines", color: "var(--accent-purple)" },
+        "parlay_standard": { name: "💵 Standard Parlay Tickets", color: "var(--accent-green)" },
+        "parlay_longshot": { name: "📅 Longshot Round-Robin Tickets", color: "var(--accent-pink)" }
+      };
+      
+      try {
+        const response = await fetch('/api/portfolio');
+        if (!response.ok) throw new Error("Failed to fetch portfolio data");
+        
+        const data = await response.json();
+        let html = "";
+        
+        for (const [key, meta] of Object.entries(portNames)) {
+          const portData = data[key] || {};
+          const magnus = portData.magnus || { bankroll: 1000.0, total_pnl: 0.0, win_rate: 0.0, total_bets: 0, active_bets: [] };
+          const athena = portData.athena || { bankroll: 1000.0, total_pnl: 0.0, win_rate: 0.0, total_bets: 0, active_bets: [] };
+          
+          const magPnlClass = magnus.total_pnl >= 0 ? 'positive' : 'negative';
+          const athPnlClass = athena.total_pnl >= 0 ? 'positive' : 'negative';
+          
+          html += `
+            <div style="background: rgba(30, 32, 48, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: space-between; border-top: 3px solid ${meta.color};">
+              <div>
+                <h3 style="color: ${meta.color}; font-size: 0.95rem; font-family: var(--font-title); margin: 0 0 1rem 0; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; text-align: left;">${meta.name}</h3>
+                
+                <!-- Bots side-by-side stats -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                  
+                  <!-- Magnus -->
+                  <div style="background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); text-align: left;">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-pink); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.25rem;">
+                      <span>👴</span> Magnus
+                    </div>
+                    <div style="font-size: 0.75rem; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">Bank:</span>
+                      <strong>$${magnus.bankroll.toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 0.75rem; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">P&L:</span>
+                      <strong class="${magPnlClass}">${magnus.total_pnl >= 0 ? '+' : ''}$${magnus.total_pnl.toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">Win%:</span>
+                      <strong style="color: #fff;">${magnus.win_rate.toFixed(1)}%</strong>
+                    </div>
+                  </div>
+
+                  <!-- Athena -->
+                  <div style="background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); text-align: left;">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-purple); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.25rem;">
+                      <span>🤖</span> Athena
+                    </div>
+                    <div style="font-size: 0.75rem; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">Bank:</span>
+                      <strong>$${athena.bankroll.toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 0.75rem; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">P&L:</span>
+                      <strong class="${athPnlClass}">${athena.total_pnl >= 0 ? '+' : ''}$${athena.total_pnl.toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                      <span style="color: var(--color-text-dark);">Win%:</span>
+                      <strong style="color: #fff;">${athena.win_rate.toFixed(1)}%</strong>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+              
+              <!-- Pending Bets indicator -->
+              <div style="font-size: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; color: var(--color-text-dark);">
+                <span>Active pending bets:</span>
+                <span style="font-weight: bold; color: ${meta.color};">
+                  Magnus: ${magnus.active_bets ? magnus.active_bets.length : 0} | Athena: ${athena.active_bets ? athena.active_bets.length : 0}
+                </span>
+              </div>
+            </div>
+          `;
+        }
+        
+        container.innerHTML = html;
+      } catch (err) {
+        console.error("Failed loading portfolio data:", err);
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--accent-pink); padding: 1.5rem; font-size: 0.85rem;">⚠️ Failed loading bot portfolio accounts. Make sure background server is online.</div>`;
       }
     }
 
@@ -2363,140 +2473,118 @@
 
     // Render predict subprocess output beautifully to UI
     function renderPredictOutput(stdout) {
-      const contentArea = document.getElementById('debate-content-area');
-      const lines = stdout.split('\n');
+      const contentArea = document.getElementById('quant-content-area');
       
-      let matchTitle = "Match Prediction";
-      let outcomes = [];
-      let toQualify = [];
-      let eloDiff = "";
-      let corners = [];
-      let valueBets = [];
-      let magnusBet = null;
-      let athenaBet = null;
-      let sentimentDiff = "";
-      
-      const titleMatch = stdout.match(/Predicting match:\s*([^\.]+)/i);
-      if (titleMatch) matchTitle = titleMatch[1].trim();
+      try {
+        const lines = stdout.split('\n');
+        
+        let matchTitle = "Match Prediction";
+        let outcomes = [];
+        let toQualify = [];
+        let eloDiff = "";
+        let corners = [];
+        let valueBets = [];
+        let magnusBet = null;
+        let athenaBet = null;
+        let sentimentDiff = "";
+        
+        const titleMatch = stdout.match(/Predicting match:\s*([^\.]+)/i);
+        if (titleMatch) matchTitle = titleMatch[1].trim();
 
-      let currentSection = "";
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
+        let currentSection = "";
         
-        if (line.includes("Forecast Matrix")) {
-          currentSection = "matrix";
-          continue;
-        }
-        if (line.includes("To-Qualify") && line.includes("Forecast")) {
-          currentSection = "qualify";
-          continue;
-        }
-        if (line.includes("Corner Kicks Expectation")) {
-          currentSection = "corners";
-          continue;
-        }
-        if (line.includes("Value Bets & Target Prices")) {
-          currentSection = "valuebets";
-          continue;
-        }
-        if (line.includes("Predict Portfolio Bot Paper Bets")) {
-          currentSection = "botbets";
-          continue;
-        }
-        
-        if (line.startsWith("ELO ratings diff:")) {
-          eloDiff = line;
-          continue;
-        }
-        if (line.startsWith("News Sentiment Diff:")) {
-          sentimentDiff = line;
-          continue;
-        }
-        
-        if (currentSection === "matrix" && line.startsWith("|") && !line.includes("Outcome") && !line.includes("----")) {
-          const parts = line.split("|").map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 2) {
-            if (parts[0] && (parts[1].endsWith("%") || parts[1].includes("."))) {
-              outcomes.push({ outcome: parts[0], prob: parts[1], details: parts[2] || "" });
-            } else if (outcomes.length > 0 && !parts[0] && !parts[1]) {
-              outcomes[outcomes.length - 1].details += " " + parts[2];
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          if (line.includes("Forecast Matrix")) {
+            currentSection = "matrix";
+            continue;
+          }
+          if (line.includes("To-Qualify") && line.includes("Forecast")) {
+            currentSection = "qualify";
+            continue;
+          }
+          if (line.includes("Corner Kicks Expectation")) {
+            currentSection = "corners";
+            continue;
+          }
+          if (line.includes("Value Bets & Target Prices")) {
+            currentSection = "valuebets";
+            continue;
+          }
+          if (line.includes("Paper Portfolio Betting Orders") || line.includes("Magnus placed new position:") || line.includes("Athena placed new position:") || line.includes("Magnus kept existing position:") || line.includes("Athena kept existing position:")) {
+            currentSection = "botbets";
+          }
+          if (line.includes("News Sentiment Diff:") || line.includes("Sentiment Diff:")) {
+            sentimentDiff = line;
+          }
+          
+          if (currentSection === "matrix" && line.startsWith("|") && !line.includes("Outcome") && !line.includes("----")) {
+            const parts = line.split("|").map(p => p.trim()).filter(Boolean);
+            if (parts.length >= 2) {
+              outcomes.push({ name: parts[0], prob: parts[1] });
             }
           }
-        }
-        
-        if (currentSection === "qualify" && line.startsWith("|") && !line.includes("Team") && !line.includes("----")) {
-          const parts = line.split("|").map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 2) {
-            toQualify.push({ team: parts[0], prob: parts[1] });
+          
+          if (currentSection === "qualify" && line.startsWith("|") && !line.includes("Team") && !line.includes("----")) {
+            const parts = line.split("|").map(p => p.trim()).filter(Boolean);
+            if (parts.length >= 2) {
+              toQualify.push({ team: parts[0], prob: parts[1] });
+            }
           }
-        }
-        
-        if (currentSection === "corners" && line.startsWith("|") && !line.includes("Team") && !line.includes("----")) {
-          const parts = line.split("|").map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 3) {
-            corners.push({ team: parts[0], avg: parts[1], expected: parts[2] });
+          
+          if (currentSection === "corners" && line.startsWith("|") && !line.includes("Team") && !line.includes("----")) {
+            const parts = line.split("|").map(p => p.trim()).filter(Boolean);
+            if (parts.length >= 3) {
+              corners.push({ team: parts[0], avg: parts[1], expected: parts[2] });
+            }
           }
-        }
-        
-        if (currentSection === "valuebets" && line.startsWith("|") && !line.includes("Category") && !line.includes("----")) {
-          const parts = line.split("|").map(p => p.trim());
-          const cleanParts = parts.slice(1, parts.length - 1).map(p => p.trim());
-          if (cleanParts.length >= 5) {
-            if (cleanParts[0] === "" && cleanParts[1] === "" && cleanParts[2] === "" && cleanParts[3] === "") {
-              if (valueBets.length > 0) {
-                valueBets[valueBets.length - 1].edge += " " + cleanParts[4];
-              }
-            } else if (cleanParts[0] === "" && cleanParts[1] !== "") {
-              if (valueBets.length > 0) {
-                valueBets[valueBets.length - 1].market += " " + cleanParts[1];
-                if (cleanParts[4]) valueBets[valueBets.length - 1].edge += " " + cleanParts[4];
-              }
-            } else if (cleanParts[0] !== "") {
+          
+          if (currentSection === "valuebets" && line.startsWith("|") && !line.includes("Category") && !line.includes("----")) {
+            const parts = line.split("|").map(p => p.trim()).filter(Boolean);
+            if (parts.length >= 5) {
               valueBets.push({
-                category: cleanParts[0],
-                market: cleanParts[1],
-                modelProb: cleanParts[2],
-                price: cleanParts[3],
-                edge: cleanParts[4]
+                category: parts[0],
+                market: parts[1],
+                modelProb: parts[2],
+                price: parts[3],
+                edge: parts[4]
               });
             }
           }
-        }
-        
-        if (currentSection === "botbets" && line.startsWith("|")) {
-          if (line.includes("Magnus")) {
-            magnusBet = line.replace(/\|/g, '').replace(/\[\+\]|\[=\]/, '').trim();
-          } else if (line.includes("Athena")) {
-            athenaBet = line.replace(/\|/g, '').replace(/\[\+\]|\[=\]/, '').trim();
+          
+          if (currentSection === "botbets" && line.startsWith("|")) {
+            if (line.includes("Magnus")) {
+              magnusBet = line.replace(/\|/g, '').replace(/\[\+\]|\[=\]/, '').trim();
+            } else if (line.includes("Athena")) {
+              athenaBet = line.replace(/\|/g, '').replace(/\[\+\]|\[=\]/, '').trim();
+            }
           }
         }
-      }
-
-      let html = `
-        <div style="margin-bottom: 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-          <h3 style="color: var(--accent-cyan); font-family: var(--font-title); font-size: 1.1rem; text-transform: uppercase; margin: 0 0 0.25rem 0; letter-spacing: 0.05em;">🔮 ML Ensemble Prediction: ${matchTitle}</h3>
-          <span style="font-size: 0.8rem; color: var(--color-text-dark);">${eloDiff || 'Ensemble of 8 ML Models + Dixon-Coles Poisson Estimation'}</span>
-        </div>
         
-        <div style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%;">
+        let html = `
+          <div style="margin-bottom: 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <h3 style="color: var(--accent-cyan); font-family: var(--font-title); font-size: 1.1rem; text-transform: uppercase; margin: 0 0 0.25rem 0; letter-spacing: 0.05em;">🔮 ML Ensemble Prediction Results</h3>
+            <span style="font-size: 0.8rem; color: var(--color-text-dark);">Subprocess run completed for ${matchTitle}</span>
+          </div>
           
-          <!-- 1. Probabilities Grid -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; width: 100%;">
-            <!-- Forecast Matrix -->
+          <!-- Outcome Probabilities & To Qualify Side-by-Side -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; width: 100%;">
+            
+            <!-- 90 Min Outcomes -->
             <div style="background: rgba(30, 32, 48, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px);">
-              <h4 style="color: var(--accent-cyan); font-size: 0.85rem; font-family: var(--font-title); margin: 0 0 1rem 0; text-transform: uppercase; letter-spacing: 0.05em;">📊 Outcome Probabilities</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <h4 style="color: var(--accent-cyan); font-size: 0.85rem; font-family: var(--font-title); margin: 0 0 0.85rem 0; text-transform: uppercase; letter-spacing: 0.05em;">⏱️ 90m Outcome Forecast</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 ${outcomes.map(o => {
-                  const val = parseFloat(o.prob) || 0;
+                  const val = parseFloat(o.prob) || 0.0;
                   return `
                     <div>
                       <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
-                        <span style="color: #fff; font-weight: 600;">${o.outcome}</span>
+                        <span>${o.name}</span>
                         <strong style="color: var(--accent-cyan);">${o.prob}</strong>
                       </div>
-                      <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
-                        <div style="height: 100%; width: ${val}%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan)); border-radius: 3px;"></div>
+                      <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: var(--accent-cyan); width: ${val}%; height: 100%; border-radius: 3px; box-shadow: 0 0 8px var(--accent-cyan-glow);"></div>
                       </div>
                     </div>
                   `;
@@ -2504,52 +2592,30 @@
               </div>
             </div>
             
-            <!-- Progression To-Qualify -->
+            <!-- To Qualify -->
             <div style="background: rgba(30, 32, 48, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px);">
-              <h4 style="color: var(--accent-purple); font-size: 0.85rem; font-family: var(--font-title); margin: 0 0 1rem 0; text-transform: uppercase; letter-spacing: 0.05em;">🏆 To-Qualify Forecast</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <h4 style="color: var(--accent-purple); font-size: 0.85rem; font-family: var(--font-title); margin: 0 0 0.85rem 0; text-transform: uppercase; letter-spacing: 0.05em;">🏆 Advance / Progression Probability</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 ${toQualify.map(q => {
-                  const val = parseFloat(q.prob) || 0;
+                  const val = parseFloat(q.prob) || 0.0;
                   return `
                     <div>
                       <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
-                        <span style="color: #fff; font-weight: 600;">${q.team}</span>
+                        <span>${q.team}</span>
                         <strong style="color: var(--accent-purple);">${q.prob}</strong>
                       </div>
-                      <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
-                        <div style="height: 100%; width: ${val}%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); border-radius: 3px;"></div>
+                      <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: var(--accent-purple); width: ${val}%; height: 100%; border-radius: 3px; box-shadow: 0 0 8px var(--accent-purple-glow);"></div>
                       </div>
                     </div>
                   `;
                 }).join('')}
-              </div>
-            </div>
-            
-            <!-- Corners & Sentiment -->
-            <div style="background: rgba(30, 32, 48, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <h4 style="color: var(--accent-green); font-size: 0.85rem; font-family: var(--font-title); margin: 0 0 0.85rem 0; text-transform: uppercase; letter-spacing: 0.05em;">📈 ELO & News Sentiment</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;">
-                  <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.4rem;">
-                    <span style="color: var(--color-text-dark);">Sentiment Shift:</span>
-                    <strong style="color: var(--accent-green);">${sentimentDiff ? sentimentDiff.replace('News Sentiment Diff:', '').trim() : '0.00'}</strong>
-                  </div>
-                  <div style="padding-top: 0.25rem;">
-                    <div style="color: var(--color-text-dark); margin-bottom: 0.35rem; font-size: 0.75rem; text-transform: uppercase; font-family: var(--font-title);">Corners Won Expectation:</div>
-                    ${corners.map(c => `
-                      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.15rem;">
-                        <span>${c.team}:</span>
-                        <span>Avg: <strong>${c.avg}</strong> | Exp: <strong style="color: var(--accent-green);">${c.expected}</strong></span>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
           
           <!-- 2. Bot Placed Bets -->
-          <div class="debate-layout" style="margin-top: 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div class="debate-layout" style="margin-top: 0; display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
             <div class="speaker-card magnus" style="flex: 1; border: 1px solid var(--accent-pink); background: rgba(255, 122, 142, 0.03); min-width: 280px;">
               <div class="speaker-header">
                 <span class="speaker-avatar">👴</span>
@@ -2629,142 +2695,130 @@
 
     // Render parlay subprocess output beautifully to UI
     function renderParlayOutput(stdout) {
-      const contentArea = document.getElementById('debate-content-area');
-      const lines = stdout.split('\n');
+      const contentArea = document.getElementById('quant-content-area');
       
-      let summaryText = "Same-game parlay recommendations";
-      let combos = [];
-      let magnusParlay = null;
-      let athenaParlay = null;
-      
-      const summaryMatch = stdout.match(/Found (\d+) parlays/i);
-      if (summaryMatch) summaryText = `Found ${summaryMatch[1]} high-value parlays (positive edge & >= 5x payout)`;
-
-      let currentCombo = null;
-      let inBotbets = false;
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
+      try {
+        const lines = stdout.split('\n');
         
-        if (line.includes("Combo Recommendation #")) {
-          const match = line.match(/Combo Recommendation #(\d+)\s*\[Payout:\s*([^\]]+)\]/i);
-          if (match) {
-            if (currentCombo) combos.push(currentCombo);
-            currentCombo = {
-              num: match[1],
-              payout: match[2],
-              legs: [],
-              modelProb: "N/A",
-              kalshiProb: "N/A",
-              edge: "N/A"
-            };
+        let summaryText = "Same-game parlay recommendations";
+        let combos = [];
+        let magnusParlay = null;
+        let athenaParlay = null;
+        
+        const summaryMatch = stdout.match(/Found (\d+) parlays/i);
+        if (summaryMatch) summaryText = `Found ${summaryMatch[1]} high-value parlays (positive edge & >= 5x payout)`;
+
+        let currentCombo = null;
+        let inBotbets = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          if (line.includes("Combo Recommendation #")) {
+            const match = line.match(/Combo Recommendation #(\d+)\s*\[Payout:\s*([^\]]+)\]/i);
+            if (match) {
+              if (currentCombo) combos.push(currentCombo);
+              currentCombo = {
+                num: match[1],
+                payout: match[2],
+                legs: [],
+                modelProb: "N/A",
+                kalshiProb: "N/A",
+                edge: "N/A"
+              };
+            }
+            continue;
           }
-          continue;
+          
+          if (currentCombo) {
+            if (line.startsWith("-") || line.startsWith("*-") || line.startsWith("* -") || line.startsWith("  -") || line.match(/^\s*-\s+/)) {
+              currentCombo.legs.push(line.replace(/^[-\s\*]+/, '').trim());
+            } else if (line.includes("Model Combined Probability:") || line.includes("Probability:")) {
+              const mParts = line.split("|").map(p => p.trim());
+              mParts.forEach(part => {
+                if (part.toLowerCase().includes("probability")) {
+                  currentCombo.modelProb = part.split(":")[1].trim();
+                } else if (part.toLowerCase().includes("kalshi prob")) {
+                  currentCombo.kalshiProb = part.split(":")[1].trim();
+                } else if (part.toLowerCase().includes("edge")) {
+                  currentCombo.edge = part.split(":")[1].trim();
+                }
+              });
+            } else if (line.includes("+-----------") && currentCombo.legs.length > 0) {
+              combos.push(currentCombo);
+              currentCombo = null;
+            }
+          }
+          
+          if (line.includes("Parlay Portfolio Bot Paper Bets") || line.includes("Magnus updated Standard Parlay:") || line.includes("Athena updated Standard Parlay:")) {
+            inBotbets = true;
+            continue;
+          }
+          
+          if (inBotbets && line.startsWith("|")) {
+            if (line.includes("Magnus")) {
+              magnusParlay = line.replace(/\|/g, '').replace(/\[\!\]/, '').trim();
+            } else if (line.includes("Athena")) {
+              athenaParlay = line.replace(/\|/g, '').replace(/\[\!\]/, '').trim();
+            }
+          }
         }
         
         if (currentCombo) {
-          if (line.startsWith("-") || line.startsWith("*-") || line.startsWith("* -") || line.startsWith("  -") || line.match(/^\s*-\s+/)) {
-            currentCombo.legs.push(line.replace(/^[-\s\*]+/, '').trim());
-          } else if (line.includes("Model Combined Probability:") || line.includes("Probability:")) {
-            const mParts = line.split("|").map(p => p.trim());
-            mParts.forEach(part => {
-              if (part.toLowerCase().includes("probability")) {
-                currentCombo.modelProb = part.split(":")[1].trim();
-              } else if (part.toLowerCase().includes("kalshi prob")) {
-                currentCombo.kalshiProb = part.split(":")[1].trim();
-              } else if (part.toLowerCase().includes("edge")) {
-                currentCombo.edge = part.split(":")[1].trim();
-              }
-            });
-          } else if (line.includes("+-----------") && currentCombo.legs.length > 0) {
-            combos.push(currentCombo);
-            currentCombo = null;
-          }
+          combos.push(currentCombo);
         }
         
-        if (line.includes("Parlay Portfolio Bot Paper Bets")) {
-          inBotbets = true;
-          continue;
-        }
-        
-        if (inBotbets && line.startsWith("|")) {
-          if (line.includes("Magnus")) {
-            magnusParlay = line.replace(/\|/g, '').replace(/\[\!\]/, '').trim();
-          } else if (line.includes("Athena")) {
-            athenaParlay = line.replace(/\|/g, '').replace(/\[\!\]/, '').trim();
-          }
-        }
-      }
-      if (currentCombo) combos.push(currentCombo);
-
-      let html = `
-        <div style="margin-bottom: 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-          <h3 style="color: var(--accent-green); font-family: var(--font-title); font-size: 1.1rem; text-transform: uppercase; margin: 0 0 0.25rem 0; letter-spacing: 0.05em;">💵 Kalshi Same-Game Parlay Recommendations</h3>
-          <span style="font-size: 0.8rem; color: var(--color-text-dark);">${summaryText}</span>
-        </div>
-        
-        <!-- Bot Parlay Bets -->
-        <div class="debate-layout" style="margin-top: 0; margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-          <div class="speaker-card magnus" style="flex: 1; border: 1px solid var(--accent-pink); background: rgba(255, 122, 142, 0.03); min-width: 280px;">
-            <div class="speaker-header">
-              <span class="speaker-avatar">👴</span>
-              <div class="speaker-meta">
-                <h3>Magnus</h3>
-                <span>Scout Parlay Ticket Position</span>
-              </div>
-            </div>
-            <div style="margin-top: 1.25rem; padding: 0.85rem; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; line-height: 1.4; color: #fff;">
-              ${magnusParlay ? `<strong style="color: var(--accent-pink);">Active Parlay:</strong><br>${magnusParlay.replace('Magnus updated Standard Parlay:', '').trim()}` : '<span style="color: var(--color-text-dark); font-style: italic;">No active parlay recommended today.</span>'}
-            </div>
+        let html = `
+          <div style="margin-bottom: 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <h3 style="color: var(--accent-green); font-family: var(--font-title); font-size: 1.1rem; text-transform: uppercase; margin: 0 0 0.25rem 0; letter-spacing: 0.05em;">💵 Kalshi Same-Game Parlay Recommendations</h3>
+            <span style="font-size: 0.8rem; color: var(--color-text-dark);">${summaryText}</span>
           </div>
           
-          <div class="speaker-card athena" style="flex: 1; border: 1px solid var(--accent-purple); background: rgba(187, 154, 247, 0.03); min-width: 280px;">
-            <div class="speaker-header">
-              <span class="speaker-avatar">🤖</span>
-              <div class="speaker-meta">
-                <h3>Athena</h3>
-                <span>Quant Parlay Ticket Position</span>
+          <!-- Bot Parlay Bets -->
+          <div class="debate-layout" style="margin-top: 0; margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div class="speaker-card magnus" style="flex: 1; border: 1px solid var(--accent-pink); background: rgba(255, 122, 142, 0.03); min-width: 280px;">
+              <div class="speaker-header">
+                <span class="speaker-avatar">👴</span>
+                <div class="speaker-meta">
+                  <h3>Magnus</h3>
+                  <span>Scout Parlay Ticket Position</span>
+                </div>
+              </div>
+              <div style="margin-top: 1.25rem; padding: 0.85rem; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; line-height: 1.4; color: #fff;">
+                ${magnusParlay ? `<strong style="color: var(--accent-pink);">Active Parlay:</strong><br>${magnusParlay.replace('Magnus updated Standard Parlay:', '').trim()}` : '<span style="color: var(--color-text-dark); font-style: italic;">No active parlay recommended today.</span>'}
               </div>
             </div>
-            <div style="margin-top: 1.25rem; padding: 0.85rem; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; line-height: 1.4; color: #fff;">
-              ${athenaParlay ? `<strong style="color: var(--accent-purple);">Active Parlay:</strong><br>${athenaParlay.replace('Athena updated Standard Parlay:', '').trim()}` : '<span style="color: var(--color-text-dark); font-style: italic;">No active parlay recommended today.</span>'}
+            
+            <div class="speaker-card athena" style="flex: 1; border: 1px solid var(--accent-purple); background: rgba(187, 154, 247, 0.03); min-width: 280px;">
+              <div class="speaker-header">
+                <span class="speaker-avatar">🤖</span>
+                <div class="speaker-meta">
+                  <h3>Athena</h3>
+                  <span>Quant Parlay Ticket Position</span>
+                </div>
+              </div>
+              <div style="margin-top: 1.25rem; padding: 0.85rem; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; line-height: 1.4; color: #fff;">
+                ${athenaParlay ? `<strong style="color: var(--accent-purple);">Active Parlay:</strong><br>${athenaParlay.replace('Athena updated Standard Parlay:', '').trim()}` : '<span style="color: var(--color-text-dark); font-style: italic;">No active parlay recommended today.</span>'}
+              </div>
             </div>
           </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; width: 100%;">
-          ${combos.map(c => `
-            <div style="background: rgba(30, 32, 48, 0.45); border: 1px solid var(--accent-green); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px); box-shadow: 0 4px 20px rgba(0,0,0,0.25); display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
-                  <h4 style="color: var(--accent-green); font-size: 0.85rem; margin: 0; font-family: var(--font-title); text-transform: uppercase; letter-spacing: 0.05em;">🎫 Combo Recommendation #${c.num}</h4>
-                  <span style="font-size: 0.75rem; font-weight: bold; background: rgba(4, 215, 172, 0.12); color: var(--accent-green); padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid rgba(4, 215, 172, 0.25); font-family: var(--font-title);">
-                    Payout: ${c.payout}
-                  </span>
+  
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; width: 100%;">
+            ${combos.map(c => `
+              <div style="background: rgba(30, 32, 48, 0.45); border: 1px solid var(--accent-green); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(4px); box-shadow: 0 4px 20px rgba(0,0,0,0.25); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+                    <h4 style="color: var(--accent-green); font-size: 0.85rem; margin: 0; font-family: var(--font-title); text-transform: uppercase; letter-spacing: 0.05em;">🎫 Combo Recommendation #${c.num}</h4>
+                    <span style="font-size: 0.75rem; font-weight: bold; background: rgba(4, 215, 172, 0.12); color: var(--accent-green); padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid rgba(4, 215, 172, 0.25); font-family: var(--font-title);">
+                      Payout: ${c.payout}
+                    </span>
+                  </div>
+                  
+                  <ul style="margin: 0 0 1.25rem 0; padding-left: 1.25rem; font-size: 0.8rem; color: #fff; line-height: 1.5; font-family: var(--font-body);">
+                    ${c.legs.map(leg => `<li style="margin-bottom: 0.4rem;">${leg}</li>`).join('')}
+                  </ul>
                 </div>
                 
-                <ul style="margin: 0 0 1.25rem 0; padding-left: 1.25rem; font-size: 0.8rem; color: #fff; line-height: 1.5; font-family: var(--font-body);">
-                  ${c.legs.map(leg => `<li style="margin-bottom: 0.4rem;">${leg}</li>`).join('')}
-                </ul>
-              </div>
-              
-              <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.75rem; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; border: 1px solid rgba(255,255,255,0.05); font-family: var(--font-title);">
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: var(--color-text-dark);">Model Probability:</span>
-                  <strong style="color: var(--accent-cyan);">${c.modelProb}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: var(--color-text-dark);">Kalshi Implied:</span>
-                  <strong style="color: var(--accent-purple);">${c.kalshiProb}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.4rem; margin-top: 0.1rem;">
-                  <span style="color: #fff; font-weight: bold;">Calculated Edge:</span>
-                  <strong style="color: var(--accent-green); font-size: 0.8rem;">${c.edge}</strong>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
       `;
       contentArea.innerHTML = html;
     }
@@ -2772,6 +2826,13 @@
     // Setup interactive events
     window.addEventListener('DOMContentLoaded', () => {
       loadSimulationData();
+      loadPortfolioData();
+
+      // Refresh portfolios listener
+      const refreshPortBtn = document.getElementById('btn-refresh-portfolio');
+      if (refreshPortBtn) {
+        refreshPortBtn.addEventListener('click', () => loadPortfolioData());
+      }
 
       // Global Pipeline Triggers
       const globalUpdateBtn = document.getElementById('btn-global-update');

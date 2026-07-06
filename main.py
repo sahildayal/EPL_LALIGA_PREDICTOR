@@ -765,42 +765,93 @@ def run_complete(home: str, away: str, home_goals: int, away_goals: int):
 
 
 def run_portfolio():
-    console.print("\n[cyan]Retrieving Kalshi portfolio balance and closed positions...[/cyan]")
-    client = KalshiClient()
-    balance = client.get_balance()
-    closed = client.get_closed_positions()
-    
-    console.print(f"\n[bold white]Cash Balance:[/bold white] ${balance:,.2f}")
-    
-    table = Table(title="Closed Positions History", box=box.SIMPLE)
-    table.add_column("Trade ID", style="dim")
-    table.add_column("Match", style="white")
-    table.add_column("Bet Option", style="cyan")
-    table.add_column("Contracts", style="dim")
-    table.add_column("Price Paid", style="dim")
-    table.add_column("Result", style="bold green")
-    table.add_column("P&L ($)", style="bold green")
-    
-    total_pnl = 0.0
-    for pos in closed:
-        result_color = "green" if pos["result"] == "WIN" else "red"
-        pnl_val = pos["pnl"]
-        total_pnl += pnl_val
-        pnl_str = f"+${pnl_val:.2f}" if pnl_val >= 0 else f"-${abs(pnl_val):.2f}"
+    # 1. Try retrieving Kalshi live API details
+    try:
+        client = KalshiClient()
+        balance = client.get_balance()
+        closed = client.get_closed_positions()
         
-        table.add_row(
-            pos["id"],
-            pos["match"],
-            pos["outcome"],
-            str(pos["contracts"]),
-            f"${pos['price_paid']:.2f}",
-            f"[{result_color}]{pos['result']}[/{result_color}]",
-            f"[{result_color}]{pnl_str}[/{result_color}]"
-        )
+        console.print(Panel(
+            f"[bold cyan]Live Kalshi Exchange Brokerage Account[/bold cyan]\n"
+            f"[bold white]Cash Balance:[/bold white] ${balance:,.2f}",
+            border_style="cyan"
+        ))
         
-    console.print(table)
-    pnl_color = "green" if total_pnl >= 0 else "red"
-    console.print(f"\n[bold white]Total Realized P&L:[/bold white] [{pnl_color}]${total_pnl:+.2f}[/{pnl_color}]\n")
+        if closed:
+            table = Table(title="Live Closed Positions History", box=box.SIMPLE)
+            table.add_column("Trade ID", style="dim")
+            table.add_column("Match", style="white")
+            table.add_column("Bet Option", style="cyan")
+            table.add_column("Contracts", style="dim")
+            table.add_column("Price Paid", style="dim")
+            table.add_column("Result", style="bold green")
+            table.add_column("P&L ($)", style="bold green")
+            
+            total_pnl = 0.0
+            for pos in closed:
+                result_color = "green" if pos["result"] == "WIN" else "red"
+                pnl_val = pos["pnl"]
+                total_pnl += pnl_val
+                pnl_str = f"+${pnl_val:.2f}" if pnl_val >= 0 else f"-${abs(pnl_val):.2f}"
+                
+                table.add_row(
+                    pos["id"],
+                    pos["match"],
+                    pos["outcome"],
+                    str(pos["contracts"]),
+                    f"${pos['price_paid']:.2f}",
+                    f"[{result_color}]{pos['result']}[/{result_color}]",
+                    f"[{result_color}]{pnl_str}[/{result_color}]"
+                )
+            console.print(table)
+            pnl_color = "green" if total_pnl >= 0 else "red"
+            console.print(f"[bold white]Live Realized P&L:[/bold white] [{pnl_color}]${total_pnl:+.2f}[/{pnl_color}]\n")
+    except Exception as e:
+        console.print("[dim]Note: Live Kalshi API client not configured or offline. Showing Paper Trading Bot accounts only.[/dim]\n")
+
+    # 2. Retrieve Paper Trading Accounts for all Bot Categories
+    from src.market import paper_trading
+    console.print(Panel(
+        "[bold green]🤖 Bot Personalities Paper Trading Ledgers[/bold green]",
+        border_style="green"
+    ))
+    
+    portfolios = {
+        "predict": "🔮 ML Predict Moneylines",
+        "ask": "💬 LLM Expert Debate Game Lines",
+        "parlay_standard": "💵 Standard Parlay Tickets",
+        "parlay_longshot": "📅 Longshot Round-Robin Tickets"
+    }
+    
+    for port_key, port_name in portfolios.items():
+        table = Table(title=f"Category: {port_name}", box=box.SIMPLE)
+        table.add_column("Bot Personality", style="cyan")
+        table.add_column("Bankroll", style="bold white")
+        table.add_column("Net Profit (P&L)", style="bold")
+        table.add_column("Win Rate", style="yellow")
+        table.add_column("Total Bets", style="dim")
+        table.add_column("Active Wagers", style="dim")
+        
+        for personality in ["magnus", "athena"]:
+            summary = paper_trading.get_personality_summary(port_key, personality)
+            p_name = "👴 Magnus (Scout)" if personality == "magnus" else "🤖 Athena (Quant)"
+            
+            pnl = summary["total_pnl"]
+            pnl_color = "green" if pnl >= 0 else "red"
+            pnl_str = f"[bold {pnl_color}]+${pnl:.2f}[/bold {pnl_color}]" if pnl >= 0 else f"[bold {pnl_color}]-${abs(pnl):.2f}[/bold {pnl_color}]"
+            
+            active_wagers = len(summary["active_bets"])
+            active_wagers_str = f"{active_wagers} pending" if active_wagers > 0 else "0"
+            
+            table.add_row(
+                p_name,
+                f"${summary['bankroll']:.2f}",
+                pnl_str,
+                f"{summary['win_rate']:.1f}%",
+                str(summary['total_bets']),
+                active_wagers_str
+            )
+        console.print(table)
 
 
 def run_ask(query: str, user_model: str):

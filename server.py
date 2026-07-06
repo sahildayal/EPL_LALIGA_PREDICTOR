@@ -41,6 +41,23 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(active_debates).encode('utf-8'))
             except Exception as e:
                 self.send_error_response(str(e))
+        elif self.path == '/api/portfolio':
+            try:
+                from src.market import paper_trading
+                state = paper_trading.load_state()
+                summary = {}
+                for portfolio in ["predict", "ask", "parlay_standard", "parlay_longshot"]:
+                    summary[portfolio] = {}
+                    for personality in ["magnus", "athena"]:
+                        summary[portfolio][personality] = paper_trading.get_personality_summary(portfolio, personality)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(summary).encode('utf-8'))
+            except Exception as e:
+                self.send_error_response(str(e))
         else:
             super().do_GET()
 
