@@ -850,8 +850,32 @@ def run_portfolio():
                 f"{summary['win_rate']:.1f}%",
                 str(summary['total_bets']),
                 active_wagers_str
-            )
         console.print(table)
+        
+        # Print active bets details for this category if any exist
+        active_details = []
+        for personality in ["magnus", "athena"]:
+            summary = paper_trading.get_personality_summary(port_key, personality)
+            p_name = "Magnus" if personality == "magnus" else "Athena"
+            for bet in summary.get("active_bets", []):
+                h = (bet.get("home") or "").upper()
+                a = (bet.get("away") or "").upper()
+                legs = bet.get("legs", [])
+                
+                if bet.get("is_parlay"):
+                    leg_details = [f"({l.get('home', '').title()} vs {l.get('away', '').title()}: {l.get('bet_type')})" for l in legs]
+                    desc = f"Parlay Combo [{', '.join(leg_details)}]"
+                else:
+                    desc = f"{h} vs {a}: {bet.get('bet_type')}"
+                    
+                active_details.append(
+                    f"  - [bold yellow]{p_name}[/bold yellow] risking [bold white]${bet['stake']:.2f}[/bold white] on [cyan]{desc}[/cyan] @ {bet['odds']:.2f}x"
+                )
+        if active_details:
+            console.print("  [bold white]Active Wagers Pending Details:[/bold white]")
+            for detail in active_details:
+                console.print(detail)
+            console.print()
 
 
 def run_ask(query: str, user_model: str):

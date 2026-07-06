@@ -9,8 +9,6 @@ beautifulsoup4
 lxml
 python-dotenv
 rich
-fastapi
-uvicorn
 joblib
 matplotlib
 google-generativeai
