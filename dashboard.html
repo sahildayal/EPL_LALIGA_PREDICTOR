@@ -1475,7 +1475,7 @@
     }
 
     // Load simulation results
-    async function loadSimulationData() {
+    async function loadSimulationData(autoSelect = true) {
       try {
         const response = await fetch('data/processed/simulation_results.json');
         if (!response.ok) {
@@ -1492,10 +1492,12 @@
         buildBracket();
         
         // Auto-select the first bracket match
-        if (simulationData.probabilities && simulationData.probabilities.length === 16) {
-          selectMatch('ro16-1');
-        } else {
-          selectMatch('qf1');
+        if (autoSelect) {
+          if (simulationData.probabilities && simulationData.probabilities.length === 16) {
+            selectMatch('ro16-1');
+          } else {
+            selectMatch('qf1');
+          }
         }
 
       } catch (error) {
@@ -1946,7 +1948,7 @@
         
         if (resultSuccess) {
           termContent.textContent += `\n[SYSTEM] Command completed successfully!\n\n${resultText}`;
-          await loadSimulationData();
+          await loadSimulationData(false);
           await selectMatch(selectedMatchupId);
         } else {
           termContent.textContent += `\n[SYSTEM] Command failed with error:\n\n${errorMsg || resultText}`;
@@ -2015,9 +2017,9 @@
         <div class="news-accordion" style="margin-top: 1rem;">
           <div class="accordion-header" id="accordion-trigger">
             <span>💬 View Magnus vs Athena Qualitative Discussions & Team News</span>
-            <span id="accordion-icon">▼</span>
+            <span id="accordion-icon">▲</span>
           </div>
-          <div class="accordion-content" id="accordion-content">
+          <div class="accordion-content open" id="accordion-content">
             <!-- Dialogue Layout inside accordion -->
             <div class="debate-layout" style="margin-top: 0;">
               <!-- Magnus Scout Card -->
