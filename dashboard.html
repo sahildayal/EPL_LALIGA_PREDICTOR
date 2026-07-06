@@ -1810,6 +1810,37 @@
           console.error("Error fetching debate file:", path, e);
         }
       }
+      
+      // Fallback: If not found in debatesList, guess the filename using today's dates
+      if (!loadedData) {
+        const now = new Date();
+        const dates = [
+          now.toISOString().split('T')[0], // UTC date (e.g. 2026-07-06)
+          new Date(now.getTime() - 86400000).toISOString().split('T')[0], // Yesterday UTC
+          now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') // Local date
+        ];
+        
+        const cleanT1 = team1.replace(/\s+/g, '_');
+        const cleanT2 = team2.replace(/\s+/g, '_');
+        
+        for (const dStr of dates) {
+          const possiblePaths = [
+            `data/processed/debates/${dStr}-${cleanT1}-vs-${cleanT2}.json`,
+            `data/processed/debates/${dStr}-${cleanT2}-vs-${cleanT1}.json`
+          ];
+          
+          for (const path of possiblePaths) {
+            try {
+              const resp = await fetch(path);
+              if (resp.ok) {
+                loadedData = await resp.json();
+                break;
+              }
+            } catch (e) {}
+          }
+          if (loadedData) break;
+        }
+      }
 
       if (loadedData) {
         renderDebate(loadedData);
