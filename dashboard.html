@@ -1151,6 +1151,13 @@
           </div>
         </div>
         
+        <!-- Panel Tabs for toggling views -->
+        <div class="panel-tabs" id="panel-tabs" style="display: none; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; margin-bottom: 1rem; width: 100%;">
+          <button class="tab-btn active" id="tab-ask" style="background: transparent; border: none; color: var(--accent-purple); font-family: var(--font-title); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.25rem 0.75rem; border-bottom: 2px solid var(--accent-purple); outline: none; transition: all 0.2s ease;">💬 Debate Analysis</button>
+          <button class="tab-btn" id="tab-predict" style="background: transparent; border: none; color: var(--color-text-dark); font-family: var(--font-title); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.25rem 0.75rem; outline: none; transition: all 0.2s ease;">🔮 ML Prediction</button>
+          <button class="tab-btn" id="tab-parlay" style="background: transparent; border: none; color: var(--color-text-dark); font-family: var(--font-title); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.25rem 0.75rem; outline: none; transition: all 0.2s ease;">💵 Parlay Tickets</button>
+        </div>
+        
         <!-- Visual Progress Logger -->
         <div id="terminal-log" style="display: none; background: rgba(30, 32, 48, 0.75); border: 1px solid var(--accent-cyan); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; backdrop-filter: blur(8px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem;">
@@ -1212,6 +1219,10 @@
     let currentSortColumn = 'champ';
     let currentSortAscending = false;
     let selectedMatchupId = null;
+    
+    // Cache execution outputs
+    const matchRunOutputs = {};
+    let currentTabMode = 'ask';
 
     // Normalize team names consistently for flags, matching, etc.
     function cleanTeamName(team) {
@@ -1768,13 +1779,71 @@
 
       document.getElementById('debate-match-title').textContent = `${FLAGS[cleanTeamName(team1)] || ''} ${team1.toUpperCase()} vs ${FLAGS[cleanTeamName(team2)] || ''} ${team2.toUpperCase()}`;
 
-      // Show action triggers
+      // Show action triggers and tabs
       const triggers = document.getElementById('trigger-actions');
       if (triggers) triggers.style.display = 'flex';
+      
+      const tabWrap = document.getElementById('panel-tabs');
+      if (tabWrap) tabWrap.style.display = 'flex';
+      
+      // Update tab button classes dynamically
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--color-text-dark)';
+        btn.style.borderBottom = 'none';
+      });
+      const activeBtn = document.getElementById(`tab-${currentTabMode}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.color = currentTabMode === 'ask' ? 'var(--accent-purple)' : (currentTabMode === 'predict' ? 'var(--accent-cyan)' : 'var(--accent-green)');
+        activeBtn.style.borderBottom = `2px solid ${currentTabMode === 'ask' ? 'var(--accent-purple)' : (currentTabMode === 'predict' ? 'var(--accent-cyan)' : 'var(--accent-green)')}`;
+      }
 
       const contentArea = document.getElementById('debate-content-area');
       contentArea.innerHTML = `<div class="spinner"></div>`;
 
+      // Hide terminal log if selecting a new match to avoid confusion
+      document.getElementById('terminal-log').style.display = 'none';
+
+      // 1. Predict mode rendering
+      if (currentTabMode === 'predict') {
+        const cacheKey = `${matchId}_predict`;
+        if (matchRunOutputs[cacheKey]) {
+          renderPredictOutput(matchRunOutputs[cacheKey]);
+        } else {
+          contentArea.innerHTML = `
+            <div class="debate-empty-state">
+              <div class="debate-empty-icon">🔮</div>
+              <p>No ML prediction output loaded for this matchup.</p>
+              <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--color-text-dark); max-width: 400px; margin-left: auto; margin-right: auto;">
+                Click the <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="document.getElementById('btn-run-predict').click()">🔮 Run Predict</strong> button in the header to execute the forecast models and display target stakes.
+              </p>
+            </div>
+          `;
+        }
+        return;
+      }
+      
+      // 2. Parlay mode rendering
+      if (currentTabMode === 'parlay') {
+        const cacheKey = `${matchId}_parlay`;
+        if (matchRunOutputs[cacheKey]) {
+          renderParlayOutput(matchRunOutputs[cacheKey]);
+        } else {
+          contentArea.innerHTML = `
+            <div class="debate-empty-state">
+              <div class="debate-empty-icon">💵</div>
+              <p>No same-game parlay tickets generated for this matchup.</p>
+              <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--color-text-dark); max-width: 400px; margin-left: auto; margin-right: auto;">
+                Click the <strong style="color: var(--accent-green); cursor: pointer;" onclick="document.getElementById('btn-run-parlay').click()">💵 Run Parlay</strong> button in the header to execute the Kalshi same-game parlay engine.
+              </p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // 3. Ask / Debate mode rendering
       let loadedData = null;
       let debateFile = null;
       let debatesList = [];
@@ -1855,7 +1924,7 @@
               <code style="font-size: 0.75rem; color: var(--accent-pink); word-break: break-all;">${triedPath}</code>
             </p>
             <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--color-text-muted);">
-              Run \`python main.py ask "${team1} vs ${team2}"\` to generate a live Gemini debate transcript.
+              Run \`python main.py ask "${team1} vs ${team2}"\` or click <strong style="color: var(--accent-purple); cursor: pointer;" onclick="document.getElementById('btn-run-ask').click()">💬 Run Ask</strong> above to generate a live Gemini debate transcript.
             </p>
           </div>
         `;
@@ -1979,6 +2048,14 @@
         
         if (resultSuccess) {
           termContent.textContent += `\n[SYSTEM] Command completed successfully!\n\n${resultText}`;
+          
+          // Cache the output for this specific matchup and command
+          const cacheKey = `${selectedMatchupId}_${commandName}`;
+          matchRunOutputs[cacheKey] = resultText;
+          
+          // Auto-switch to the corresponding tab
+          currentTabMode = commandName;
+          
           await loadSimulationData(false);
           await selectMatch(selectedMatchupId);
         } else {
@@ -2320,6 +2397,30 @@
       const runParlayBtn = document.getElementById('btn-run-parlay');
       if (runParlayBtn) {
         runParlayBtn.addEventListener('click', () => executeCommand('parlay'));
+      }
+
+      // View Tab Click Listeners
+      const tabAsk = document.getElementById('tab-ask');
+      const tabPredict = document.getElementById('tab-predict');
+      const tabParlay = document.getElementById('tab-parlay');
+      
+      if (tabAsk) {
+        tabAsk.addEventListener('click', () => {
+          currentTabMode = 'ask';
+          if (selectedMatchupId) selectMatch(selectedMatchupId);
+        });
+      }
+      if (tabPredict) {
+        tabPredict.addEventListener('click', () => {
+          currentTabMode = 'predict';
+          if (selectedMatchupId) selectMatch(selectedMatchupId);
+        });
+      }
+      if (tabParlay) {
+        tabParlay.addEventListener('click', () => {
+          currentTabMode = 'parlay';
+          if (selectedMatchupId) selectMatch(selectedMatchupId);
+        });
       }
 
       // Customizer UI Toggles & Actions
