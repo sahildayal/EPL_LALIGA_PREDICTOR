@@ -1130,11 +1130,24 @@
 
       <!-- Bottom Details Section: Debate Logs -->
       <section class="panel debate-section" id="debate-panel" aria-label="Qualitative Debate Logs">
-        <div class="panel-header">
-          <h2 class="panel-title">💬 Qualitative Debate Logs</h2>
-          <div id="debate-match-title" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-purple);">
-            Select a match in the bracket to view Magnus vs Athena debate
+        <div class="panel-header" style="flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <h2 class="panel-title">💬 Qualitative Debate Logs</h2>
+            <div id="debate-match-title" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-purple); margin-left: 0.5rem;">
+              Select a match in the bracket to view Magnus vs Athena debate
+            </div>
           </div>
+          <div class="trigger-actions" id="trigger-actions" style="display: none; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="btn-run-predict" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-cyan); color: #1a1b26;">🔮 Run Predict</button>
+            <button class="btn btn-primary" id="btn-run-ask" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-purple); color: #fff;">💬 Run Ask</button>
+            <button class="btn btn-primary" id="btn-run-parlay" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-green); color: #1a1b26;">💵 Run Parlay</button>
+          </div>
+        </div>
+        
+        <!-- Terminal Log Viewer -->
+        <div id="terminal-log" style="display: none; background: #1a1b26; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.8rem; color: #a9b1d6; overflow-y: auto; max-height: 250px; white-space: pre-wrap; position: relative;">
+          <div style="position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.7rem; color: var(--color-text-dark); font-weight: bold; text-transform: uppercase;">System Terminal Log</div>
+          <div id="terminal-log-content">...</div>
         </div>
         
         <div id="debate-content-area">
@@ -1732,6 +1745,10 @@
 
       document.getElementById('debate-match-title').textContent = `${FLAGS[cleanTeamName(team1)] || ''} ${team1.toUpperCase()} vs ${FLAGS[cleanTeamName(team2)] || ''} ${team2.toUpperCase()}`;
 
+      // Show action triggers
+      const triggers = document.getElementById('trigger-actions');
+      if (triggers) triggers.style.display = 'flex';
+
       const contentArea = document.getElementById('debate-content-area');
       contentArea.innerHTML = `<div class="spinner"></div>`;
 
@@ -1775,6 +1792,49 @@
             </p>
           </div>
         `;
+    }
+
+    // Execute backend command via AJAX
+    async function executeCommand(commandName) {
+      if (!selectedMatchupId) return;
+      
+      const team1 = cleanTeamName(document.getElementById(`${selectedMatchupId}-team1`).getAttribute('data-team'));
+      const team2 = cleanTeamName(document.getElementById(`${selectedMatchupId}-team2`).getAttribute('data-team'));
+      const query = `${team1} vs ${team2}`;
+      
+      const term = document.getElementById('terminal-log');
+      const termContent = document.getElementById('terminal-log-content');
+      
+      term.style.display = 'block';
+      termContent.textContent = `[SYSTEM] Spawning subprocess: python main.py ${commandName} "${query}"...\n(Please wait, this can take up to 20-30 seconds to fetch news and query Gemini)\n`;
+      term.scrollIntoView({ behavior: 'smooth' });
+      
+      const buttons = document.querySelectorAll('.trigger-actions button');
+      buttons.forEach(b => b.disabled = true);
+      
+      try {
+        const response = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: commandName, query: query })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          termContent.textContent += `\n[SYSTEM] Command completed successfully!\n\n${result.output}`;
+          
+          // Re-load the simulation data to pick up the newly generated debate or parlay updates!
+          await loadSimulationData();
+          
+          // Select match again to update UI with the new logs
+          await selectMatch(selectedMatchupId);
+        } else {
+          termContent.textContent += `\n[SYSTEM] Command failed with error:\n\n${result.error || result.output}`;
+        }
+      } catch (err) {
+        termContent.textContent += `\n[SYSTEM] Network error: ${err.message}`;
+      } finally {
+        buttons.forEach(b => b.disabled = false);
       }
     }
 
@@ -1906,6 +1966,22 @@
     // Setup interactive events
     window.addEventListener('DOMContentLoaded', () => {
       loadSimulationData();
+
+      // Pipeline Run triggers click listeners
+      const runPredictBtn = document.getElementById('btn-run-predict');
+      if (runPredictBtn) {
+        runPredictBtn.addEventListener('click', () => executeCommand('predict'));
+      }
+      
+      const runAskBtn = document.getElementById('btn-run-ask');
+      if (runAskBtn) {
+        runAskBtn.addEventListener('click', () => executeCommand('ask'));
+      }
+      
+      const runParlayBtn = document.getElementById('btn-run-parlay');
+      if (runParlayBtn) {
+        runParlayBtn.addEventListener('click', () => executeCommand('parlay'));
+      }
 
       // Customizer UI Toggles & Actions
       const customizerPanel = document.getElementById('customizer-panel');

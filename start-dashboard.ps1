@@ -7,8 +7,6 @@ Write-Host "Port: 8080" -ForegroundColor Green
 Write-Host "URL: http://localhost:8080/dashboard.html" -ForegroundColor Cyan
 Write-Host "--------------------------------------------------------" -ForegroundColor Green
 
-# Automatically open browser
-Start-Process "http://localhost:8080/dashboard.html"
+# Run Python backend server
+python server.py
 
-# Run Python built-in HTTP server
-python -m http.server 8080
