@@ -53,7 +53,7 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
                 command = data.get('command')
                 query = data.get('query', '')
                 
-                if command not in ['predict', 'ask', 'parlay']:
+                if command not in ['predict', 'ask', 'parlay', 'update', 'run-daily']:
                     self.send_error_response("Invalid command")
                     return
                 
@@ -63,7 +63,7 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
                     args.append('--today')
                     if data.get('longshot', False):
                         args.append('--longshot')
-                else:
+                elif command in ['predict', 'ask']:
                     args.append(query)
                 
                 print(f"[SERVER] Executing subprocess: {' '.join(args)}")

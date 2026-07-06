@@ -837,12 +837,15 @@
   <div class="container">
     <!-- Header -->
     <header>
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 1rem; flex-wrap: wrap;">
         <div>
           <h1>🏆 2026 World Cup Monte Carlo Dashboard</h1>
-          <div class="subtitle">Phase 4 Unified Simulation & Expert Debate Ledger</div>
         </div>
-        <button class="customizer-toggle-btn" id="btn-toggle-customizer">🎛️ Customizer & What-If</button>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="customizer-toggle-btn" id="btn-global-update" style="border-color: var(--accent-green); color: var(--accent-green); background: rgba(158, 206, 106, 0.1);">🔄 Update Scores</button>
+          <button class="customizer-toggle-btn" id="btn-global-daily" style="border-color: var(--accent-purple); color: var(--accent-purple); background: rgba(187, 154, 243, 0.1);">📅 Run Daily Pipeline</button>
+          <button class="customizer-toggle-btn" id="btn-toggle-customizer">🎛️ Customizer & What-If</button>
+        </div>
       </div>
     </header>
 
@@ -2086,6 +2089,132 @@
       }
     }
 
+    // Execute global backend commands (update or run-daily)
+    async function executeGlobalCommand(commandName) {
+      const updateSteps = [
+        "Fetching live scores and game results from ESPN API scoreboard...",
+        "Parsing match data and updating ELO rating histories...",
+        "Recalibrating Dixon-Coles expected goal intensity parameters...",
+        "Running 10,000 Monte Carlo simulation trials to compute bracket probabilities...",
+        "Writing simulation_results.json ledger and updating dashboard views..."
+      ];
+      
+      const dailySteps = [
+        "Scanning today's fixtures and ELO differentials...",
+        "Pulling Kalshi market contract orderbooks...",
+        "Simulating game outcomes and running same-game parlay validators...",
+        "Running expert scout-quant debates for all active matches...",
+        "Saving debate logs and placing portfolio paper bets..."
+      ];
+      
+      let steps = commandName === 'update' ? updateSteps : dailySteps;
+      
+      const term = document.getElementById('terminal-log');
+      const termContent = document.getElementById('terminal-log-content');
+      const stepsContainer = document.getElementById('progress-steps-list');
+      const statusBadge = document.getElementById('term-status-badge');
+      
+      term.style.display = 'block';
+      termContent.textContent = `[SYSTEM] Spawning subprocess: python main.py ${commandName}...\n`;
+      term.scrollIntoView({ behavior: 'smooth' });
+      
+      statusBadge.textContent = "RUNNING";
+      statusBadge.style.color = "var(--accent-purple)";
+      statusBadge.style.background = "rgba(187, 154, 247, 0.15)";
+      
+      // Render steps
+      stepsContainer.innerHTML = "";
+      steps.forEach((step, idx) => {
+        const item = document.createElement("div");
+        item.id = `step-item-${idx}`;
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "0.5rem";
+        item.style.opacity = idx === 0 ? "1" : "0.35";
+        item.style.transition = "opacity 0.3s ease";
+        item.innerHTML = `
+          <span class="step-status-icon">${idx === 0 ? "⏳" : "⚫"}</span>
+          <span style="font-weight: 600; min-width: 60px;">Step ${idx + 1}:</span>
+          <span class="step-text" style="color: var(--color-text-dark);">${step}</span>
+        `;
+        stepsContainer.appendChild(item);
+      });
+      
+      // Disable trigger buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(b => b.disabled = true);
+      
+      let currentStepIdx = 0;
+      const stepInterval = setInterval(() => {
+        if (currentStepIdx < steps.length - 1) {
+          const curEl = document.getElementById(`step-item-${currentStepIdx}`);
+          if (curEl) {
+            curEl.querySelector('.step-status-icon').textContent = "✅";
+            curEl.querySelector('.step-status-icon').style.color = "var(--accent-green)";
+            curEl.querySelector('.step-text').style.color = "#fff";
+            curEl.style.opacity = "0.85";
+          }
+          currentStepIdx++;
+          const nextEl = document.getElementById(`step-item-${currentStepIdx}`);
+          if (nextEl) {
+            nextEl.querySelector('.step-status-icon').textContent = "⏳";
+            nextEl.style.opacity = "1";
+          }
+        } else {
+          clearInterval(stepInterval);
+        }
+      }, 3000);
+      
+      let resultSuccess = false;
+      let resultText = "";
+      let errorMsg = "";
+      
+      try {
+        const response = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: commandName })
+        });
+        
+        const result = await response.json();
+        resultSuccess = result.success;
+        resultText = result.output;
+        errorMsg = result.error || "";
+        
+        if (resultSuccess) {
+          termContent.textContent += `\n[SYSTEM] Global command completed successfully!\n\n${resultText}`;
+          await loadSimulationData(false); // Reload simulation results!
+          if (selectedMatchupId) {
+            await selectMatch(selectedMatchupId); // Refresh currently selected match view!
+          }
+        } else {
+          termContent.textContent += `\n[SYSTEM] Global command failed with error:\n\n${errorMsg || resultText}`;
+        }
+      } catch (err) {
+        errorMsg = err.message;
+        termContent.textContent += `\n[SYSTEM] Network error: ${err.message}`;
+      } finally {
+        clearInterval(stepInterval);
+        buttons.forEach(b => b.disabled = false);
+        
+        // Resolve steps visual state
+        for (let i = 0; i < steps.length; i++) {
+          const el = document.getElementById(`step-item-${i}`);
+          if (el) {
+            el.querySelector('.step-status-icon').textContent = resultSuccess ? "✅" : "❌";
+            el.querySelector('.step-status-icon').style.color = resultSuccess ? "var(--accent-green)" : "var(--accent-pink)";
+            el.querySelector('.step-text').style.color = "#fff";
+            el.style.opacity = "1";
+          }
+        }
+        
+        statusBadge.textContent = resultSuccess ? "COMPLETED" : "FAILED";
+        statusBadge.style.color = resultSuccess ? "var(--accent-green)" : "var(--accent-pink)";
+        statusBadge.style.background = resultSuccess ? "rgba(4, 215, 172, 0.15)" : "rgba(255, 122, 142, 0.15)";
+        statusBadge.style.border = resultSuccess ? "1px solid rgba(4, 215, 172, 0.3)" : "1px solid rgba(255, 122, 142, 0.3)";
+      }
+    }
+
     // Render debate log JSON to html
     function renderDebate(data) {
       const contentArea = document.getElementById('debate-content-area');
@@ -2622,6 +2751,16 @@
     // Setup interactive events
     window.addEventListener('DOMContentLoaded', () => {
       loadSimulationData();
+
+      // Global Pipeline Triggers
+      const globalUpdateBtn = document.getElementById('btn-global-update');
+      if (globalUpdateBtn) {
+        globalUpdateBtn.addEventListener('click', () => executeGlobalCommand('update'));
+      }
+      const globalDailyBtn = document.getElementById('btn-global-daily');
+      if (globalDailyBtn) {
+        globalDailyBtn.addEventListener('click', () => executeGlobalCommand('run-daily'));
+      }
 
       // Pipeline Run triggers click listeners
       const runPredictBtn = document.getElementById('btn-run-predict');
