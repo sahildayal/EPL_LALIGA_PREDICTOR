@@ -1137,17 +1137,38 @@
               Select a match in the bracket to view Magnus vs Athena debate
             </div>
           </div>
-          <div class="trigger-actions" id="trigger-actions" style="display: none; gap: 0.5rem; flex-wrap: wrap;">
+          <div class="trigger-actions" id="trigger-actions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
             <button class="btn btn-primary" id="btn-run-predict" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-cyan); color: #1a1b26;">🔮 Run Predict</button>
             <button class="btn btn-primary" id="btn-run-ask" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-purple); color: #fff;">💬 Run Ask</button>
-            <button class="btn btn-primary" id="btn-run-parlay" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--accent-green); color: #1a1b26;">💵 Run Parlay</button>
+            
+            <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(0,0,0,0.25); padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+              <button class="btn btn-primary" id="btn-run-parlay" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; background: var(--accent-green); color: #1a1b26; border: none; margin: 0;">💵 Run Parlay</button>
+              <select id="parlay-mode" style="background: transparent; border: none; color: var(--color-text); font-size: 0.75rem; font-family: var(--font-title); cursor: pointer; outline: none; padding: 0.1rem 0;">
+                <option value="standard" style="background: #1e2030; color: #fff;">Standard (Today)</option>
+                <option value="longshot" style="background: #1e2030; color: #fff;">Longshot (RR)</option>
+              </select>
+            </div>
           </div>
         </div>
         
-        <!-- Terminal Log Viewer -->
-        <div id="terminal-log" style="display: none; background: #1a1b26; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.8rem; color: #a9b1d6; overflow-y: auto; max-height: 250px; white-space: pre-wrap; position: relative;">
-          <div style="position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.7rem; color: var(--color-text-dark); font-weight: bold; text-transform: uppercase;">System Terminal Log</div>
-          <div id="terminal-log-content">...</div>
+        <!-- Visual Progress Logger -->
+        <div id="terminal-log" style="display: none; background: rgba(30, 32, 48, 0.75); border: 1px solid var(--accent-cyan); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; backdrop-filter: blur(8px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem;">
+            <h3 style="font-family: var(--font-title); font-size: 0.9rem; color: var(--accent-cyan); margin: 0; display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+              <span>⚡ Live Pipeline Subprocess Console</span>
+            </h3>
+            <span id="term-status-badge" style="font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 10px; background: rgba(187, 154, 247, 0.15); color: var(--accent-purple); border: 1px solid rgba(187, 154, 247, 0.3); text-transform: uppercase;">RUNNING</span>
+          </div>
+          
+          <div id="progress-steps-list" style="display: flex; flex-direction: column; gap: 0.75rem; font-family: var(--font-body); font-size: 0.85rem; color: #fff;">
+            <!-- Dynamic Steps -->
+          </div>
+          
+          <!-- Collapsible Raw Output details -->
+          <details style="margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem;">
+            <summary style="font-size: 0.75rem; color: var(--color-text-dark); cursor: pointer; user-select: none; font-weight: 600;">View Raw CLI Terminal stdout/stderr</summary>
+            <pre id="terminal-log-content" style="background: #1a1b26; border: 1px solid rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: #a9b1d6; overflow-y: auto; max-height: 180px; white-space: pre-wrap; margin-top: 0.5rem;"></pre>
+          </details>
         </div>
         
         <div id="debate-content-area">
@@ -1803,39 +1824,142 @@
       const team2 = cleanTeamName(document.getElementById(`${selectedMatchupId}-team2`).getAttribute('data-team'));
       const query = `${team1} vs ${team2}`;
       
+      let isLongshot = false;
+      if (commandName === 'parlay') {
+        const modeSelect = document.getElementById('parlay-mode');
+        if (modeSelect && modeSelect.value === 'longshot') {
+          isLongshot = true;
+        }
+      }
+      
+      const askSteps = [
+        "Ingesting recent tournament rosters, injury reports, and match histories from ESPN scoreboard...",
+        "Executing Athena quantitative Dixon-Coles goal intensity matrices...",
+        "Simulating regulatory time Poisson probability distributions...",
+        "Launching Magnus vs Athena expert debates using Gemini 3.5 LLMs...",
+        "Finalizing qualitative consensus forecast logs and caching debate data ledger..."
+      ];
+      
+      const predictSteps = [
+        "Analyzing pre-match feature vectors (ELOs, goalie ratios, previous goal rates)...",
+        "Executing ensemble model predictions (Logistic Regression, Random Forest, GDA)...",
+        "Blending Dixon-Coles expected distributions with dynamic ML outcomes...",
+        "Rendering prediction margins and qualification probability matrices..."
+      ];
+      
+      const parlaySteps = [
+        "Scraping Kalshi soccer sports contract API data structures...",
+        "Running Same-Game Parlay correlation validation constraints...",
+        "Iterating multi-leg portfolios with Dixon-Coles probabilities...",
+        "Applying Kelly Criterion fractional betting sizing models...",
+        "Compiling active SGP ticket recommendations and target bid limits..."
+      ];
+      
+      let steps = [];
+      if (commandName === 'ask') steps = askSteps;
+      else if (commandName === 'predict') steps = predictSteps;
+      else if (commandName === 'parlay') steps = parlaySteps;
+      
       const term = document.getElementById('terminal-log');
       const termContent = document.getElementById('terminal-log-content');
+      const stepsContainer = document.getElementById('progress-steps-list');
+      const statusBadge = document.getElementById('term-status-badge');
       
       term.style.display = 'block';
-      termContent.textContent = `[SYSTEM] Spawning subprocess: python main.py ${commandName} "${query}"...\n(Please wait, this can take up to 20-30 seconds to fetch news and query Gemini)\n`;
+      termContent.textContent = `[SYSTEM] Spawning subprocess: python main.py ${commandName} ${commandName === 'parlay' ? (isLongshot ? '--longshot --today' : '--today') : `"${query}"`}...\n`;
       term.scrollIntoView({ behavior: 'smooth' });
+      
+      statusBadge.textContent = "RUNNING";
+      statusBadge.style.color = "var(--accent-purple)";
+      statusBadge.style.background = "rgba(187, 154, 247, 0.15)";
+      
+      // Render console steps
+      stepsContainer.innerHTML = "";
+      steps.forEach((step, idx) => {
+        const item = document.createElement("div");
+        item.id = `step-item-${idx}`;
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "0.5rem";
+        item.style.opacity = idx === 0 ? "1" : "0.35";
+        item.style.transition = "opacity 0.3s ease";
+        item.innerHTML = `
+          <span class="step-status-icon">${idx === 0 ? "⏳" : "⚫"}</span>
+          <span style="font-weight: 600; min-width: 60px;">Step ${idx + 1}:</span>
+          <span class="step-text" style="color: var(--color-text-dark);">${step}</span>
+        `;
+        stepsContainer.appendChild(item);
+      });
       
       const buttons = document.querySelectorAll('.trigger-actions button');
       buttons.forEach(b => b.disabled = true);
+      
+      let currentStepIdx = 0;
+      const stepInterval = setInterval(() => {
+        if (currentStepIdx < steps.length - 1) {
+          const curEl = document.getElementById(`step-item-${currentStepIdx}`);
+          if (curEl) {
+            curEl.querySelector('.step-status-icon').textContent = "✅";
+            curEl.querySelector('.step-status-icon').style.color = "var(--accent-green)";
+            curEl.querySelector('.step-text').style.color = "#fff";
+            curEl.style.opacity = "0.85";
+          }
+          currentStepIdx++;
+          const nextEl = document.getElementById(`step-item-${currentStepIdx}`);
+          if (nextEl) {
+            nextEl.querySelector('.step-status-icon').textContent = "⏳";
+            nextEl.style.opacity = "1";
+          }
+        } else {
+          clearInterval(stepInterval);
+        }
+      }, 3000);
+      
+      let resultSuccess = false;
+      let resultText = "";
+      let errorMsg = "";
       
       try {
         const response = await fetch('/api/run', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command: commandName, query: query })
+          body: JSON.stringify({ command: commandName, query: query, longshot: isLongshot })
         });
         
         const result = await response.json();
-        if (result.success) {
-          termContent.textContent += `\n[SYSTEM] Command completed successfully!\n\n${result.output}`;
-          
-          // Re-load the simulation data to pick up the newly generated debate or parlay updates!
+        resultSuccess = result.success;
+        resultText = result.output;
+        errorMsg = result.error || "";
+        
+        if (resultSuccess) {
+          termContent.textContent += `\n[SYSTEM] Command completed successfully!\n\n${resultText}`;
           await loadSimulationData();
-          
-          // Select match again to update UI with the new logs
           await selectMatch(selectedMatchupId);
         } else {
-          termContent.textContent += `\n[SYSTEM] Command failed with error:\n\n${result.error || result.output}`;
+          termContent.textContent += `\n[SYSTEM] Command failed with error:\n\n${errorMsg || resultText}`;
         }
       } catch (err) {
+        errorMsg = err.message;
         termContent.textContent += `\n[SYSTEM] Network error: ${err.message}`;
       } finally {
+        clearInterval(stepInterval);
         buttons.forEach(b => b.disabled = false);
+        
+        // Resolve steps visual state
+        for (let i = 0; i < steps.length; i++) {
+          const el = document.getElementById(`step-item-${i}`);
+          if (el) {
+            el.querySelector('.step-status-icon').textContent = resultSuccess ? "✅" : "❌";
+            el.querySelector('.step-status-icon').style.color = resultSuccess ? "var(--accent-green)" : "var(--accent-pink)";
+            el.querySelector('.step-text').style.color = "#fff";
+            el.style.opacity = "1";
+          }
+        }
+        
+        statusBadge.textContent = resultSuccess ? "COMPLETED" : "FAILED";
+        statusBadge.style.color = resultSuccess ? "var(--accent-green)" : "var(--accent-pink)";
+        statusBadge.style.background = resultSuccess ? "rgba(4, 215, 172, 0.15)" : "rgba(255, 122, 142, 0.15)";
+        statusBadge.style.border = resultSuccess ? "1px solid rgba(4, 215, 172, 0.3)" : "1px solid rgba(255, 122, 142, 0.3)";
       }
     }
 
@@ -2100,6 +2224,13 @@
           
           const team = teamNode.getAttribute('data-team');
           highlightTeamPath(team);
+          
+          // Manually select parent match to update qualitative discussion area
+          const parentMatch = teamNode.closest('.bracket-match');
+          if (parentMatch) {
+            const matchId = parentMatch.getAttribute('data-match-id');
+            selectMatch(matchId);
+          }
         });
       });
 

@@ -29,6 +29,8 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
                 args = [sys.executable, 'main.py', command]
                 if command == 'parlay':
                     args.append('--today')
+                    if data.get('longshot', False):
+                        args.append('--longshot')
                 else:
                     args.append(query)
                 
