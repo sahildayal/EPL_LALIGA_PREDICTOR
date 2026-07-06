@@ -1775,9 +1775,22 @@
 
       let loadedData = null;
       let debateFile = null;
+      let debatesList = [];
       
-      if (simulationData && simulationData.active_debates) {
-        debateFile = simulationData.active_debates.find(d => {
+      try {
+        const resp = await fetch('/api/debates');
+        if (resp.ok) {
+          debatesList = await resp.json();
+        } else {
+          debatesList = (simulationData && simulationData.active_debates) ? simulationData.active_debates : [];
+        }
+      } catch (e) {
+        console.error("Failed to load debates list from server, fallback to local:", e);
+        debatesList = (simulationData && simulationData.active_debates) ? simulationData.active_debates : [];
+      }
+      
+      if (debatesList) {
+        debateFile = debatesList.find(d => {
           const dHome = cleanTeamName(d.home);
           const dAway = cleanTeamName(d.away);
           return (dHome === team1 && dAway === team2) || (dHome === team2 && dAway === team1);

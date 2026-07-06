@@ -12,6 +12,38 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         # Silence access logging to keep terminal clean
         pass
 
+    def do_GET(self):
+        if self.path == '/api/debates':
+            try:
+                debates_dir = os.path.join("data", "processed", "debates")
+                active_debates = []
+                if os.path.exists(debates_dir):
+                    for f in os.listdir(debates_dir):
+                        if f.endswith(".json"):
+                            parts = f[:-5].split("-")
+                            if len(parts) >= 4:
+                                date_str = "-".join(parts[:3])
+                                if "vs" in parts:
+                                    vs_idx = parts.index("vs")
+                                    home_clean = "_".join(parts[3:vs_idx]).replace("_", " ")
+                                    away_clean = "_".join(parts[vs_idx+1:]).replace("_", " ")
+                                    active_debates.append({
+                                        "filename": f,
+                                        "date": date_str,
+                                        "home": home_clean,
+                                        "away": away_clean
+                                    })
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(active_debates).encode('utf-8'))
+            except Exception as e:
+                self.send_error_response(str(e))
+        else:
+            super().do_GET()
+
     def do_POST(self):
         if self.path == '/api/run':
             content_length = int(self.headers['Content-Length'])
