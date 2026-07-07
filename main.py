@@ -850,6 +850,7 @@ def run_portfolio():
                 f"{summary['win_rate']:.1f}%",
                 str(summary['total_bets']),
                 active_wagers_str
+            )
         console.print(table)
         
         # Print active bets details for this category if any exist
