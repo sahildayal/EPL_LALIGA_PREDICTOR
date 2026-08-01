@@ -1438,6 +1438,30 @@ def run_daily():
     console.print("\n[bold green]=== Daily Pipeline Execution Completed ===[/bold green]")
 
 
+def run_schedule():
+    import time
+    from datetime import datetime, timezone
+    console.print(Panel(
+        "[bold green]⏰ Weekly Automated Matchday Update Scheduler Active[/bold green]\n"
+        "[dim]Automatically triggers 'python main.py update' every Sunday at 23:00 UTC.[/dim]",
+        border_style="green"
+    ))
+    console.print("[yellow]Scheduler running in background mode... Press Ctrl+C to stop.[/yellow]\n")
+    last_run_day = None
+    while True:
+        try:
+            now = datetime.now(timezone.utc)
+            # Sunday is weekday() == 6
+            if now.weekday() == 6 and now.hour == 23 and last_run_day != now.date():
+                console.print(f"\n[bold green][{now.strftime('%Y-%m-%d %H:%M:%S UTC')}] Weekly matchday update triggered![/bold green]")
+                run_update()
+                last_run_day = now.date()
+                time.sleep(3600)
+        except Exception as e:
+            console.print(f"[red]Error in scheduler: {e}[/red]")
+        time.sleep(30)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Premier League, La Liga & Champions League Predictor CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -1445,6 +1469,7 @@ def main():
     subparsers.add_parser("init", help="Run initial model training on history")
     subparsers.add_parser("update", help="Automatically sync completed match results & retrain")
     subparsers.add_parser("run-daily", help="Runs predictions & debates for all of today's matches")
+    subparsers.add_parser("schedule", help="Runs background weekly update scheduler (Sundays at 23:00 UTC)")
     
     pred_parser = subparsers.add_parser("predict", help="Predict match outcome")
     pred_parser.add_argument("query", help="Match query, e.g. 'Arsenal vs Chelsea' or 'Real Madrid vs Barcelona'")
@@ -1476,6 +1501,8 @@ def main():
         run_update()
     elif args.command == "run-daily":
         run_daily()
+    elif args.command == "schedule":
+        run_schedule()
     elif args.command == "predict":
         run_predict(args.query)
     elif args.command == "ask":
