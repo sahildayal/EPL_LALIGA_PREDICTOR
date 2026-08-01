@@ -1,0 +1,36 @@
+{
+  "home": "switzerland",
+  "away": "colombia",
+  "date": "2026-07-07",
+  "probabilities": {
+    "home_win": 0.2001,
+    "draw": 0.2277,
+    "away_win": 0.5722
+  },
+  "elo_diff": -10.2,
+  "sentiment": -0.04999999999999999,
+  "news_flags": [
+    "Could Switzerland find a winning XI out of 10 million? - Politico",
+    "Switzerland vs. Colombia\u2014World Cup: Preview, Predictions and Lineups - Sports Il",
+    "Experts release new Colombia vs. Switzerland predictions after Jhon Cordoba inju"
+  ],
+  "home_news_bullets": "- Switzerland vs Colombia FIFA World Cup 2026 Preview: Everything you need to know\n- World Cup 2026 Round of 16 Switzerland vs. Colombia Prediction & Best Bets\n- Canada facing key injuries in run-up to Switzerland match\n- Canada facing key injuries in run-up to Switzerland match\n- Granit Xhaka to captain Switzerland as World Cup squad revealed",
+  "away_news_bullets": "- Terrible news for the Colombia National Team: Jhon C\u00f3rdoba will miss the 2026 World Cup due to a serious injury\n- Switzerland vs Colombia lineups: Confirmed team news, predicted XIs and injury latest\n- 2026 World Cup rosters: The 26-man squads for all 48 teams\n- Colombia vs Ghana FIFA World Cup 2026 Preview: Everything you need to know\n- Argentina, World Cup fans on tenterhooks as Messi limps off",
+  "debate": {
+    "magnus": "Look, Colombia's been flying, no doubt. They've got the attacking talent, the swagger. But they just lost Jhon Cordoba to injury, and that's a real blow up top, a big body and a presence. You don't just replace that in a knockout game. Switzerland? They're tough, well-drilled, Granit Xhaka pulls the strings in the middle. They're not going to give much away easily. I've seen them play like this back in '06 against France, shut them down completely, grinded it out. This is a knockout stage, expect it tight. Colombia's still the better *team* on paper and I'd put money on them to advance, but it won't be a cakewalk.",
+    "athena": "While your qualitative assessment of team strengths and weaknesses is noted, Magnus, the quantitative data presents a clearer picture. Our blended probabilities give Colombia a 57.2% chance to win in regulation, with a 68.8% chance to advance, confirming their statistical advantage. However, the most significant statistical anomaly appears in the goal markets. Our model assigns a 99.7% probability to Over 2.5 Goals occurring in regulation, contrasting sharply with Kalshi's $0.41 implied probability. This yields an unparalleled 58.7% positive edge. Similarly, Over 1.5 Goals has a 100% model probability. This indicates a high-scoring encounter is statistically probable, irrespective of the moneyline outcome. The expected corner kicks also suggest offensive pressure, with Colombia projected for 3.8 to Switzerland's 1.2.",
+    "consensus": "Given the overwhelming statistical edge identified by the model, Over 2.5 Goals (from the Kalshi market, with implied odds of 1/0.41) is the recommended bet due to the significant positive expected value.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 20.0,
+        "odds": 2.439
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 84.03,
+        "odds": 2.439
+      }
+    }
+  }
+}

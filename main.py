@@ -24,17 +24,18 @@ console = Console()
 
 def banner():
     console.print(Panel(
-        "[bold cyan]🏆 2026 World Cup Predictor & Parlay Engine ⚽[/bold cyan]\n"
-        "[dim]Dynamic Machine Learning + Statistical Ensembles for Kalshi[/dim]\n\n"
+        "[bold cyan]🏆 Premier League, La Liga & Champions League Predictor ⚽[/bold cyan]\n"
+        "[dim]Unified Dynamic Machine Learning + Statistical Ensembles for Kalshi[/dim]\n\n"
         "[bold white]Available commands:[/bold white]\n"
-        "  [green]init[/green]            - Run initial training on master historical dataset\n"
-        "  [green]update[/green]          - Auto-sync completed tournament matches & retrain models\n"
-        "  [green]predict[/green] \"A vs B\" - Blends 8 models to predict upcoming match\n"
-        "  [green]ask[/green] \"A vs B\"     - Stages a scout vs quant debate on upcoming match\n"
-        "  [green]parlay[/green]          - Search live Kalshi markets for >= 5x parlay options\n"
-        "  [green]parlay -l[/green]       - Generate a portfolio of high-payout long-shot parlays\n"
-        "  [green]complete[/green] A B H A - Record completed match score and retrain models\n"
-        "  [green]portfolio[/green]       - Fetch live Kalshi balance and closed positions",
+        "  [green]init[/green]                     - Run initial training on master historical dataset\n"
+        "  [green]update[/green]                   - Auto-sync completed match scores across EPL/LaLiga/UCL & retrain\n"
+        "  [green]predict[/green] \"A vs B\"          - Blends 8 models to predict upcoming match (Auto-detects league or --league epl/laliga/ucl)\n"
+        "  [green]ask[/green] \"A vs B\"              - Stages a scout vs quant debate incorporating club news\n"
+        "  [green]parlay[/green]                   - Search live Kalshi markets for >= 5x parlay options\n"
+        "  [green]parlay -l[/green]                - Generate a portfolio of high-payout long-shot parlays\n"
+        "  [green]run-daily[/green]               - Run daily pipeline for all today's matches\n"
+        "  [green]complete[/green] A B H A          - Record completed match score and retrain models\n"
+        "  [green]portfolio[/green]                - Fetch Kalshi balances and bot paper trading ledgers",
         border_style="cyan"
     ))
 
@@ -114,14 +115,8 @@ def run_predict(query: str):
 
     h_elo = ELO_PREDICTOR.get(home)
     a_elo = ELO_PREDICTOR.get(away)
-    from src.predictor import TEAM_CONFEDERATION, CONFEDERATION_BOOST
-    h_conf = TEAM_CONFEDERATION.get(home, "neutral")
-    a_conf = TEAM_CONFEDERATION.get(away, "neutral")
-    h_boost = CONFEDERATION_BOOST.get(h_conf, 0.0)
-    a_boost = CONFEDERATION_BOOST.get(a_conf, 0.0)
-    
     console.print(f"\n[bold white]News Sentiment Diff:[/bold white] {result.sentiment:+.2f}")
-    console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts (Calibrated ELO: {home.title()} {h_elo+h_boost:.0f} vs {away.title()} {a_elo+a_boost:.0f} | Raw: {h_elo:.0f} vs {a_elo:.0f})")
+    console.print(f"[bold white]ELO ratings diff:[/bold white] {result.elo_diff:+.1f} pts ({home.title()} ELO: {h_elo:.0f} vs {away.title()} ELO: {a_elo:.0f})")
 
     # Under ELO ratings print in main.py:
     try:
@@ -1444,23 +1439,26 @@ def run_daily():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="World Cup Predictor & Parlay Engine CLI")
+    parser = argparse.ArgumentParser(description="Premier League, La Liga & Champions League Predictor CLI")
     subparsers = parser.add_subparsers(dest="command")
     
     subparsers.add_parser("init", help="Run initial model training on history")
-    subparsers.add_parser("update", help="Automatically sync completed tournament match results & retrain")
+    subparsers.add_parser("update", help="Automatically sync completed match results & retrain")
     subparsers.add_parser("run-daily", help="Runs predictions & debates for all of today's matches")
     
     pred_parser = subparsers.add_parser("predict", help="Predict match outcome")
-    pred_parser.add_argument("query", help="Match query, e.g. 'Argentina vs France'")
+    pred_parser.add_argument("query", help="Match query, e.g. 'Arsenal vs Chelsea' or 'Real Madrid vs Barcelona'")
+    pred_parser.add_argument("--league", "-l", default=os.getenv("DEFAULT_LEAGUE", "epl"), help="Target league: epl, laliga, or ucl")
     
     ask_parser = subparsers.add_parser("ask", help="Stages a Magnus & Athena debate on a match")
-    ask_parser.add_argument("query", help="Match query, e.g. 'Argentina vs France'")
+    ask_parser.add_argument("query", help="Match query, e.g. 'Arsenal vs Chelsea' or 'Real Madrid vs Barcelona'")
     ask_parser.add_argument("--model", "-m", default="Gemini 3.5 Flash (Medium)", help="Model to use for prediction/debate")
+    ask_parser.add_argument("--league", "-l", default=os.getenv("DEFAULT_LEAGUE", "epl"), help="Target league: epl, laliga, or ucl")
     
     parlay_parser = subparsers.add_parser("parlay", help="Find high edge parlays on Kalshi")
-    parlay_parser.add_argument("--longshot", "-l", action="store_true", help="Generate a portfolio of high-payout long-shot parlays (Round Robin)")
+    parlay_parser.add_argument("--longshot", action="store_true", help="Generate a portfolio of high-payout long-shot parlays")
     parlay_parser.add_argument("--today", "-t", action="store_true", help="Generate parlays only for matches playing today")
+    parlay_parser.add_argument("--league", "-l", default=os.getenv("DEFAULT_LEAGUE", "epl"), help="Target league: epl, laliga, or ucl")
     
     comp_parser = subparsers.add_parser("complete", help="Record completed match result")
     comp_parser.add_argument("home", help="Home team name")
@@ -1468,7 +1466,7 @@ def main():
     comp_parser.add_argument("home_goals", type=int, help="Home goals scored")
     comp_parser.add_argument("away_goals", type=int, help="Away goals scored")
     
-    subparsers.add_parser("portfolio", help="Fetch Kalshi balance and closed trades")
+    subparsers.add_parser("portfolio", help="Fetch Kalshi balance and bot paper trading ledgers")
     
     args = parser.parse_args()
     

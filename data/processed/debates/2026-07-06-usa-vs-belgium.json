@@ -1,0 +1,38 @@
+{
+  "home": "usa",
+  "away": "belgium",
+  "date": "2026-07-06",
+  "probabilities": {
+    "home_win": 0.3917,
+    "draw": 0.2189,
+    "away_win": 0.3894
+  },
+  "elo_diff": -122.0,
+  "sentiment": -0.04999999999999999,
+  "news_flags": [
+    "U.S. star Folarin Balogun's red card suspension lifted after Trump called FIFA p",
+    "FIFA lifts US star striker Balogun\u2019s red card suspension at World Cup after Trum",
+    "How to watch the US vs Belgium soccer game today - PhillyBurbs",
+    "How to watch the US vs Belgium soccer game today - PhillyBurbs",
+    "Trump\u2019s Intervention in Balogun\u2019s World Cup Suspension Adds to Conflict With Eur"
+  ],
+  "home_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- USA at the 2026 World Cup: Schedule, results, how to watch, news, analysis, injuries, more\n- USA men's soccer roster for World Cup 2026 vs. Turkey. See list\n- Without the injured Christian Pulisic, US beats Australia 2-0 to advance to World Cup knockout round\n- USMNT vs. Turkey is a rare World Cup dead rubber. So how should Pochettino approach it? - The Athletic",
+  "away_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Belgium XI vs Senegal: Starting lineup and confirmed team news\n- Romelu Lukaku in Belgium World Cup squad despite injury woes\n- Belgium World Cup 2026 Roster: Garcia's Squad and Kevin De Bruyne's Last World Cup\n- Lukaku included in Belgium\u2019s World Cup squad despite injury-plagued season",
+  "debate": {
+    "magnus": "Alright, lads, settle in. USA versus Belgium. This isn't some fancy spreadsheet match, this is a knockout game where guts matter. First off, Balogun back in for the Yanks? A massive boost, that. Don't care how it happened, but having a proper striker up top changes everything. Pulisic being out is a shame, a real creative force, but Balogun can make a nuisance of himself. Belgium? The 'golden generation' that's never quite shined their brightest when it counts. Lukaku's there, supposedly fit, but I've seen enough players 'fit' on paper only to be half-paced on the pitch.\n\nMy read? Both these teams have attacking talent, but their defenses? They've looked shaky. Belgium concede goals, and the US, especially without Pulisic, will be relying on hitting quick and hard. I've got a live bet on Both Teams to Score already in at 1.56x, and I'm sticking to that. My bankroll might be a bit battered lately, down a good six hundred, but my eye for where the goals are coming from hasn't failed me yet. This feels like an open game. Belgium might be ranked higher, but their *form* isn't screaming 'dominant.' Are they going to show up? That's the real question.",
+    "athena": "Magnus, your anecdotal observations, while colorful, lack predictive power. My machine learning ensemble model, which has driven my 60% win rate and a profit of over $247, provides a robust probabilistic assessment. The ELO difference of -122.0 points indicates Belgium is indeed the superior team on paper, aligning with our progression probabilities of 52.02% for Belgium to advance versus 47.98% for USA. The news regarding Balogun's lifted suspension is a variable, but one that is absorbed into our sentiment analysis and player availability adjustments; it does not fundamentally alter the underlying statistical probabilities.\n\nMy model identifies significant edges in the goals markets. 'Over 1.5 Goals' has a 97.5% model probability against Kalshi's $0.82, yielding a +15.5% edge. Critically, 'Over 2.5 Goals' has a 90.4% model probability against Kalshi's $0.58, presenting a staggering +32.4% edge. This is a clear mispricing by the market. 'Both Teams to Score,' which you favor, also shows a strong +22.0% edge. My existing wager on 'Over 2.5 Goals' at 1.72x is a statistically optimal bet given these metrics. Your bankroll performance underscores the difference between subjective 'gut feelings' and data-driven insights. This match is projected to be high-scoring, irrespective of the eventual winner.",
+    "consensus": "While Magnus leans on his eye-test for Both Teams to Score and Athena relies on her model for Over 2.5 Goals, both personalities converge on the high probability of goals in this knockout match. Given the substantial edges identified by Athena's model for both Over 2.5 Goals (+32.4%) and Both Teams to Score (+22.0%), and the attacking talent on display (Balogun for USA, Lukaku for Belgium), the recommendation is to target the goal markets. The highest edge lies with Over 2.5 Goals, making it the stronger consensus play for this encounter.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Both Teams to Score",
+        "stake": 11.95,
+        "odds": 1.56
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 68.12,
+        "odds": 1.72
+      }
+    }
+  }
+}

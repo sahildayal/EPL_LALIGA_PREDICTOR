@@ -1,0 +1,35 @@
+{
+  "home": "argentina",
+  "away": "france",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.42,
+    "draw": 0.28,
+    "away_win": 0.3
+  },
+  "elo_diff": 20.43,
+  "sentiment": 0.15,
+  "news_flags": [
+    "Messi fit",
+    "Mbappe sharp"
+  ],
+  "home_news_bullets": "- Lionel Messi is confirmed to start in the playmaker role.\n- Lautaro Martinez has been in excellent goalscoring form in recent training sessions.",
+  "away_news_bullets": "- Kylian Mbappe showed explosive speed in the final scrimmage.\n- N'Golo Kante returns to the midfield anchor position after resting.",
+  "debate": {
+    "magnus": "Look, I've watched Argentina play in major tournament knockouts since Messi was a teenager. The eye-test says they're playing with an emotional gravity that France can't match. Messi has that look in his eye. France has the speed with Mbappe, but Argentina's backline is mean, disciplined, and they will foul Mbappe before he gets into third gear. I'm going with my gut here: Argentina wins a tight, ugly battle. Hammer the Argentina moneyline.",
+    "athena": "The Dixon-Coles model predicts a low-scoring affair. Argentina has a 42% probability of winning in regulation, with a Draw at 28%. Given the Kalshi market odds of 2.15 for Argentina (+115), the mathematical edge is a mere 1.2%. However, the 'Under 2.5 Goals' contract exhibits a 62% probability, which is mispriced by the market at 1.75. I am sizing a position on the Under.",
+    "consensus": "Back both teams to play conservatively. Suggest buying YES on Under 2.5 Goals at any price below 1.80.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Moneyline - Argentina Win",
+        "stake": 50.0,
+        "odds": 2.15
+      },
+      "athena": {
+        "bet_type": "Game Lines - Under 2.5 Goals",
+        "stake": 40.0,
+        "odds": 1.75
+      }
+    }
+  }
+}

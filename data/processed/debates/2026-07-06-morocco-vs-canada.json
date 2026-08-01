@@ -1,0 +1,39 @@
+{
+  "home": "morocco",
+  "away": "canada",
+  "date": "2026-07-06",
+  "probabilities": {
+    "home_win": 0.5464,
+    "draw": 0.1437,
+    "away_win": 0.3099
+  },
+  "elo_diff": 107.5,
+  "sentiment": 0.0,
+  "news_flags": [
+    "France survive Paraguay's physicality and antics at World Cup, but Morocco will ",
+    "Morocco leading scorer Ismael Saibari leaves World Cup match vs. Canada with inj",
+    "Who Will Morocco Face In the World Cup Quarterfinals After Defeating Canada? Pos",
+    "Canada vs. Morocco\u2014World Cup: Preview, Predictions and Lineups - Sports Illustra",
+    "When will Canada play next after World Cup elimination? - Sportsnet.ca",
+    "Canada Exits Historic World Cup Run, Leaving Soccer in the Country Forever Chang"
+  ],
+  "home_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Morocco forced into two injury changes ahead of World Cup opener\n- Morocco Squad at Full Strength Ahead of Canada Match\n- Canada vs Morocco lineups: Predicted XI and confirmed team news\n- Brazil vs. Morocco 2026 World Cup predictions, odds, pick",
+  "away_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Canada facing key injuries in run-up to Switzerland match\n- Canada\u2019s World Cup exit revives questions over Alphonso Davies injury management\n- Inside the biggest, most heartbreaking day in Canada soccer history \u2014 by those who lived it - The Athletic\n- Canada's Kon\u00e9 feels the love after shocking World Cup injury",
+  "debate": {
+    "magnus": "Alright, son, listen up. Morocco against Canada, eh? This ain't no mystery. I've seen this movie a thousand times. Canada's coming into this bruised and broken, mentally checked out after that World Cup exit. Their key lads, like Davies, have been in and out, and the news flags tell you they're facing injuries and their morale is shot. Morocco, on the other hand? Full strength, physical, buzzing. They're like a pack of wolves right now, remember that Senegal team in '02? Same energy, same fight. These Moroccans will run through walls. They're the better team, plain and simple, and they're showing up to dominate. Canada? They'll be chasing shadows for 90 minutes. I don't care about your fancy corner kick numbers, kid, corners don't win matches. Goals do, and Morocco will get 'em. My bankroll might be in the red right now after a few rough calls, but this one's a gimme. Morocco wins this in regulation, no question.",
+    "athena": "Magnus, your anecdotal observations are noted, but let's apply a more rigorous analysis. Our ensemble model assigns Morocco a 54.6% probability of winning in regulation, supported by a significant ELO difference of +107.5 points in their favor. This aligns with your qualitative assessment of Morocco being the 'better team' and 'full strength,' especially with Canada's recent injury concerns and 'exit buzz.' However, the expected corner kicks present an interesting deviation. Canada is projected for 8.7 corners against Morocco's 1.7. This indicates Canada will likely control territorial advantage and generate offensive phases, despite their lower win probability. Such a discrepancy suggests either Canada's inability to convert opportunities or Morocco's highly efficient, counter-attacking style. Given this projected game flow, high-probability goal markets become quite attractive. The model shows an 81.1% probability for 'Over 2.5 Goals' and a 79.6% for 'Both Teams to Score.' These probabilities offer robust edges against average market pricing, irrespective of the precise winner, mitigating the variance introduced by Canada's expected offensive volume. My current P&L of +$302.46 reflects the efficacy of this data-driven approach.",
+    "consensus": "Athena: Alright, Magnus. While you might dismiss the metrics, the implication of Canada's projected attacking volume and Morocco's favored status is a game with scoring opportunities. We concur that Morocco is the stronger side. If Canada is pushing forward as the corner data suggests, and Morocco capitalizes, an 'Over 2.5 Goals' outcome is highly probable at 81.1%. This offers a strong edge and covers multiple game scenarios where both teams score or Morocco scores multiple. It mitigates the risk of Canada failing to convert their chances while still profiting from an active match.\nMagnus: *harrumphs* Fine, kid. If Canada's gonna be running around like headless chickens creating chances for Morocco to counter, then yeah, goals will happen. Your fancy numbers might actually be useful for once. Over 2.5 goals, then. But don't tell anyone I agreed with a spreadsheet.\nConsensus: Over 2.5 Goals. This bet has an 81.1% model probability. They agree to stake 5% of their combined bankroll on this, which is (138.95 + 816.72) * 0.05 = $47.78.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Morocco Win",
+        "stake": 13.89,
+        "odds": 1.83
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 81.67,
+        "odds": 1.23
+      }
+    }
+  }
+}

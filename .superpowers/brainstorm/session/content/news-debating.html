@@ -1,0 +1,38 @@
+<h2>📰 Active News Debates & Monte Carlo Execution</h2>
+<p class="subtitle">Select the preferred integration styles for the debating agents and simulation triggers</p>
+
+<h3>1. How should Magnus and Athena present their news debates?</h3>
+<div class="options" data-choice-group="debates">
+  <div class="option" data-choice="debates_web" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>(Recommended) HTML Report in Dashboard</h3>
+      <p>Save the structured LLM debates (highlighting injury updates, squad changes, and ELO comparisons) to a daily HTML report linked in the simulation dashboard.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="debates_cli" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>CLI Printout Only</h3>
+      <p>Print the debates dynamically to the terminal screen during <code>run-daily</code> execution (similar to the current <code>ask</code> command) without saving them to web HTML.</p>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top: 30px;">2. When should the 10,000x Monte Carlo simulation run?</h3>
+<div class="options" data-choice-group="trigger">
+  <div class="option" data-choice="trigger_update" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>(Recommended) Trigger on Update</h3>
+      <p>Run automatically during <code>python main.py update</code> or <code>run-daily</code>, caching the results in a JSON file. This keeps the web dashboard instantly responsive (0ms loading time).</p>
+    </div>
+  </div>
+  <div class="option" data-choice="trigger_on_load" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Run Dynamically On Page Load</h3>
+      <p>Run the 10,000 simulations in real-time when the user opens the web page. (Adds a 5-10 second loading delay on page open).</p>
+    </div>
+  </div>
+</div>

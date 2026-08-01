@@ -1,0 +1,38 @@
+{
+  "home": "portugal",
+  "away": "spain",
+  "date": "2026-07-06",
+  "probabilities": {
+    "home_win": 0.179,
+    "draw": 0.3294,
+    "away_win": 0.4916
+  },
+  "elo_diff": -38.1,
+  "sentiment": -0.15,
+  "news_flags": [
+    "Portugal's Cristiano Ronaldo: 'This will be my last World Cup' - ESPN",
+    "Portugal vs. Spain\u2014World Cup: Preview, Predictions and Lineups - Sports Illustra",
+    "Cristiano Ronaldo Confirms 2026 World Cup Will Be His Last - TMZ",
+    "Portugal vs. Spain\u2014World Cup: Preview, Predictions and Lineups - Sports Illustra",
+    "Portugal vs Spain: Complete Head-to-Head Record Ahead of World Cup Clash - Sport"
+  ],
+  "home_news_bullets": "- Portugal vs Spain: World Cup last 16 \u2013 Ronaldo, Yamal, start and prediction\n- Portugal name World Cup squad: Cristiano Ronaldo set for sixth tournament\n- Portugal XI vs Spain: Predicted lineup and confirmed team news\n- Portugal vs Croatia Injury Update Today: Cristiano Ronaldo Awaits High-Stakes Twist Before Kickoff\n- Portugal: 2026 World Cup Squad, Fixtures and Schedule",
+  "away_news_bullets": "- Portugal vs Spain: World Cup last 16 \u2013 Ronaldo, Yamal, start and prediction\n- Spain name World Cup squad: No Real Madrid players for first time, Lamine Yamal set for competition debut\n- Portugal XI vs Spain: Predicted lineup and confirmed team news\n- Spain, Brazil, Argentina, U.S. injuries could factor into World Cup\n- Spain\u2019s Yeremy Pino avoids collarbone fracture, Nico Williams suffers groin injury",
+  "debate": {
+    "magnus": "Alright, let's cut to the chase. Look, my numbers ain't pretty right now \u2013 30% win rate? That's what happens when you trust these youngsters with their fancy formations instead of pure grit. But I\u2019ve watched enough football to know when a team\u2019s got that look in their eye. Portugal, they've got Ronaldo's 'last dance' hanging over them. That can either make them play out of their skin or crumble under the pressure. I've seen it both ways. Remember Brazil in '50? That pressure\u2026\n\nSpain, on the other hand, they're technically sound, always moving the ball, but sometimes it feels like they\u2019re playing chess when they should be playing street football. Where\u2019s the killer instinct? And this news about no Real Madrid players for the first time? That\u2019s experience, championship mentality, gone from the squad. They\u2019re missing something intangible. Plus, those injuries to Pino and Williams, that's depth you need in a knockout. My gut says Spain are the better *team* on paper, no doubt. But this ain't played on paper, it's on the pitch. And in a knockout, anything can happen. Portugal's Ronaldo \"twist\" could be a distraction, or it could be a masterstroke from a coach trying to ignite the squad. My money\u2019s still on the big man to find the net. He lives for these moments, especially with all this 'last World Cup' talk flying around. He's got that look. It's a bold play given my current run, but sometimes you just gotta back the legend.",
+    "athena": "Magnus, while the emotional narratives surrounding player legacy and \"gut feelings\" are certainly compelling from a human interest perspective, they contribute negligible predictive power to outcomes. My ensemble of models, leveraging ELO ratings, Dixon-Coles Poisson distributions, and historical match data, presents a far more accurate assessment.\n\nSpain is the statistical favorite, with a 49.2% probability of winning in regulation, contrasting sharply with Portugal\u2019s 17.9%. Their progression probability stands at 66.6%, a significant advantage. The ELO difference of -38.1 points unambiguously confirms Spain's superior systemic strength. Furthermore, the expected corner kicks\u2014Spain at 6.2 versus Portugal at 0.5\u2014quantify Spain\u2019s projected territorial dominance and attacking volume.\n\nRegarding news sentiment, the -0.15 reading is a minor deviation, already factored into the model. The absence of specific club players or injury updates for individual players like Pino or Williams, while noteworthy, are embedded within the comprehensive data sets informing our probabilities. The most significant edges identified by my system are on Over 2.5 Goals (model: 87.8%, Kalshi: $0.54, Edge: +33.8%) and Both Teams to Score (model: 73.5%, Kalshi: $0.61, Edge: +12.5%). Cristiano Ronaldo to Score also presents a positive edge of +13.5%, primarily due to an undervaluation in the Kalshi market, not an endorsement of narrative-driven performance. My current position on Over 2.5 Goals remains the optimal allocation given its substantial, validated edge.",
+    "consensus": "Magnus: Alright, Athena, I hear you with your numbers. And frankly, your bankroll speaks louder than mine right now. This \"Over 2.5 Goals\"\u2026 you\u2019re saying there\u2019s a massive edge there, eh? I can see it. Spain likes to attack, Portugal, especially with Ronaldo, isn't shy either, even if they're playing on the counter. In a knockout, things tend to open up. You get a goal, the other team has to push. So yeah, I can get behind the idea of goals. It aligns with the high stakes and a team needing to chase a result.\n\nAthena: The data unequivocally supports the Over 2.5 Goals market as the highest value proposition, with a 33.8% edge against Kalshi odds. The high progression probabilities and knockout stage dynamics often lead to an increased pace of play and greater risk-taking, which is conducive to a higher goal count. While Magnus's qualitative insights on team motivation are not directly quantifiable, the underlying conditions do correlate with an elevated probability of goals.\n\nRecommendation: We recommend placing a significant stake on **Over 2.5 Goals**. Given the extremely high edge and Athena's proven track record, this is the most logical and profitable bet. We advise a stake of at least 10% of a typical bankroll for this market.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Cristiano Ronaldo to Score",
+        "stake": 12.76,
+        "odds": 0.43
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 73.65,
+        "odds": 0.54
+      }
+    }
+  }
+}

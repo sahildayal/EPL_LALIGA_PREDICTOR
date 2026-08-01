@@ -12,20 +12,32 @@ ESPN_HEADERS = {
 }
 
 
-def get_world_cup_fixtures(days_ahead: int = 3) -> list:
+ESPN_LEAGUES = {
+    "epl": "eng.1",
+    "laliga": "esp.1",
+    "ucl": "uefa.champions",
+    "worldcup": "fifa.world"
+}
+
+
+def get_league_fixtures(league_key: str = "all", days_ahead: int = 3) -> list:
     """
-    Scrapes upcoming World Cup fixtures from ESPN.
+    Scrapes upcoming fixtures across Premier League, La Liga, and Champions League from ESPN.
     """
-    cache_key = {"days": days_ahead}
-    cached = cache.get("wc_fixtures", cache_key)
+    cache_key = {"league": league_key, "days": days_ahead}
+    cached = cache.get("league_fixtures", cache_key)
     if cached:
         return cached
 
     today = datetime.now(timezone.utc)
     events = []
     
-    # Check "fifa.world" (World Cup) and "uefa.nations" as fallback
-    leagues = ["fifa.world", "uefa.nations"]
+    if league_key == "all":
+        leagues = ["eng.1", "esp.1", "uefa.champions"]
+    else:
+        target = ESPN_LEAGUES.get(league_key.lower().strip(), "eng.1")
+        leagues = [target]
+        
     for league in leagues:
         for offset in range(days_ahead + 1):
             date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
@@ -48,8 +60,11 @@ def get_world_cup_fixtures(days_ahead: int = 3) -> list:
                         status = status_obj.get("type", {}).get("description", "Scheduled")
                         clock = status_obj.get("displayClock", "")
 
+                        league_label = "Premier League" if league == "eng.1" else ("La Liga" if league == "esp.1" else "Champions League")
+
                         events.append({
-                            "league": "World Cup" if league == "fifa.world" else "Nations League",
+                            "league": league_label,
+                            "league_key": "epl" if league == "eng.1" else ("laliga" if league == "esp.1" else "ucl"),
                             "name": event.get("name", ""),
                             "date": event.get("date", ""),
                             "home": home.get("team", {}).get("displayName", ""),
@@ -58,11 +73,18 @@ def get_world_cup_fixtures(days_ahead: int = 3) -> list:
                             "away_score": away.get("score", ""),
                             "status": status,
                             "clock": clock,
-                            "venue": comp.get("venue", {}).get("fullName", ""),
-                            "source": "espn",
                         })
             except Exception:
                 pass
+
+    if events:
+        cache.set("league_fixtures", cache_key, events, ttl_seconds=1800)
+    return events
+
+
+def get_world_cup_fixtures(days_ahead: int = 3) -> list:
+    """Legacy alias for get_league_fixtures."""
+    return get_league_fixtures(league_key="all", days_ahead=days_ahead)
 
     # Sort & Deduplicate
     events.sort(key=lambda e: e.get("date", ""))

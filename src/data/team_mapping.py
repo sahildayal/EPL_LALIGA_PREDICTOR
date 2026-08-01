@@ -150,8 +150,148 @@ TEAM_ALIASES = {
     "equatorial guinea": "equatorial guinea",
     "papua new guinea": "papua new guinea",
     "new guinea": "papua new guinea",
-    "guinea": "guinea",
+    # Premier League & La Liga Club Aliases
+    "manc": "manchester city",
+    "man city": "manchester city",
+    "mc": "manchester city",
+    "manu": "manchester united",
+    "man utd": "manchester united",
+    "man united": "manchester united",
+    "mu": "manchester united",
+    "tot": "tottenham",
+    "spurs": "tottenham",
+    "tottenham hotspur": "tottenham",
+    "ars": "arsenal",
+    "che": "chelsea",
+    "liv": "liverpool",
+    "nwc": "newcastle",
+    "newcastle united": "newcastle",
+    "avl": "aston villa",
+    "villa": "aston villa",
+    "whu": "west ham",
+    "west ham united": "west ham",
+    "wol": "wolverhampton",
+    "wolves": "wolverhampton",
+    "wolverhampton wanderers": "wolverhampton",
+    "nfo": "nottingham forest",
+    "forest": "nottingham forest",
+    "bha": "brighton",
+    "brighton & hove albion": "brighton",
+    "bou": "bournemouth",
+    "afc bournemouth": "bournemouth",
+    "cry": "crystal palace",
+    "palace": "crystal palace",
+    "eve": "everton",
+    "ful": "fulham",
+    "bre": "brentford",
+    "lei": "leicester",
+    "leicester city": "leicester",
+    "sou": "southampton",
+    "ips": "ipswich",
+    "ipswich town": "ipswich",
+
+    # La Liga
+    "rma": "real madrid",
+    "madrid": "real madrid",
+    "bar": "barcelona",
+    "barca": "barcelona",
+    "fc barcelona": "barcelona",
+    "atm": "atletico madrid",
+    "atletico": "atletico madrid",
+    "atlético": "atletico madrid",
+    "atlétic madrid": "atletico madrid",
+    "ath": "athletic bilbao",
+    "athletic": "athletic bilbao",
+    "athletic club": "athletic bilbao",
+    "rso": "real sociedad",
+    "la real": "real sociedad",
+    "vil": "villarreal",
+    "bet": "real betis",
+    "betis": "real betis",
+    "sev": "sevilla",
+    "gir": "girona",
+    "osa": "osasuna",
+    "cel": "celta vigo",
+    "celta": "celta vigo",
+    "ray": "rayo vallecano",
+    "mlo": "mallorca",
+    "lpa": "las palmas",
+    "ala": "alaves",
+    "alavés": "alaves",
+    "get": "getafe",
+    "esp": "espanyol",
+    "leg": "leganes",
+    "vll": "real valladolid",
+    "valladolid": "real valladolid",
+
+    # Other UCL European Clubs
+    "bayern": "bayern munich",
+    "fc bayern": "bayern munich",
+    "psg": "paris saint-germain",
+    "paris sg": "paris saint-germain",
+    "dortmund": "borussia dortmund",
+    "bvb": "borussia dortmund",
+    "leverkusen": "bayer leverkusen",
+    "bayer 04": "bayer leverkusen",
+    "inter": "inter milan",
+    "internazionale": "inter milan",
+    "milan": "ac milan",
+    "juve": "juventus",
+    "leipzig": "rb leipzig",
+    "sporting": "sporting cp",
 }
+
+TEAM_COMPETITION = {
+    # Premier League
+    "arsenal": "epl", "manchester city": "epl", "man city": "epl", "liverpool": "epl", "chelsea": "epl",
+    "tottenham": "epl", "spurs": "epl", "manchester united": "epl", "man united": "epl", "man utd": "epl",
+    "aston villa": "epl", "newcastle": "epl", "brighton": "epl", "west ham": "epl", "fulham": "epl",
+    "bournemouth": "epl", "brentford": "epl", "crystal palace": "epl", "everton": "epl", "wolverhampton": "epl",
+    "wolves": "epl", "nottingham forest": "epl", "forest": "epl", "leicester": "epl", "southampton": "epl",
+    "ipswich": "epl",
+
+    # La Liga
+    "real madrid": "laliga", "barcelona": "laliga", "atletico madrid": "laliga", "atletico": "laliga",
+    "girona": "laliga", "athletic bilbao": "laliga", "athletic club": "laliga", "real sociedad": "laliga",
+    "villarreal": "laliga", "real betis": "laliga", "betis": "laliga", "sevilla": "laliga", "osasuna": "laliga",
+    "celta vigo": "laliga", "rayo vallecano": "laliga", "mallorca": "laliga", "las palmas": "laliga",
+    "alaves": "laliga", "getafe": "laliga", "espanyol": "laliga", "leganes": "laliga", "real valladolid": "laliga",
+    "valladolid": "laliga",
+
+    # UCL Other European Giants
+    "bayern munich": "ucl", "bayern": "ucl", "psg": "ucl", "paris saint-germain": "ucl",
+    "inter milan": "ucl", "inter": "ucl", "bayer leverkusen": "ucl", "leverkusen": "ucl",
+    "borussia dortmund": "ucl", "dortmund": "ucl", "atalanta": "ucl", "juventus": "ucl",
+    "rb leipzig": "ucl", "leipzig": "ucl", "sporting cp": "ucl", "sporting": "ucl",
+    "ac milan": "ucl", "milan": "ucl", "benfica": "ucl", "porto": "ucl",
+}
+
+def get_match_league(home_team: str, away_team: str, user_league: str = None) -> str:
+    """
+    Determines the league context for a match query.
+    If user_league is explicitly provided and valid, returns it.
+    Otherwise auto-detects based on team affiliations (epl, laliga, or cross-league ucl).
+    """
+    if user_league and user_league.lower().strip() in ["epl", "laliga", "ucl"]:
+        return user_league.lower().strip()
+        
+    h_norm = normalize_team_name(home_team)
+    a_norm = normalize_team_name(away_team)
+    
+    h_comp = TEAM_COMPETITION.get(h_norm)
+    a_comp = TEAM_COMPETITION.get(a_norm)
+    
+    # Cross-league match (e.g., EPL team vs La Liga team) or explicit UCL club -> Champions League
+    if h_comp == "ucl" or a_comp == "ucl":
+        return "ucl"
+    if h_comp and a_comp and h_comp != a_comp:
+        return "ucl"
+    if h_comp:
+        return h_comp
+    if a_comp:
+        return a_comp
+        
+    return "epl"
 
 # Precompute alias mapping and sorted order at module level
 from src.data.scrapers.elo_db import NATIONAL_TEAM_ELO

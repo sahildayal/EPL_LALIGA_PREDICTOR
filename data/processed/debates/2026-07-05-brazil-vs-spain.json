@@ -1,0 +1,35 @@
+{
+  "home": "brazil",
+  "away": "spain",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.35,
+    "draw": 0.27,
+    "away_win": 0.38
+  },
+  "elo_diff": -15.24,
+  "sentiment": -0.05,
+  "news_flags": [
+    "Rodri controlling midfield",
+    "Vinicius isolated"
+  ],
+  "home_news_bullets": "- Vinicius Jr. looks sharp but Spain is planning a double-team.\n- Alisson Becker is expected to face a high number of shots.",
+  "away_news_bullets": "- Rodri is in peak physical condition and will dictate the tempo.\n- Alvaro Morata is starting as the lone striker with high support.",
+  "debate": {
+    "magnus": "Spain plays that tiki-taka that makes scouts want to take a nap, but you can't deny it works. Brazil's midfield is too soft right now. Without Casemiro in his prime, they're going to chase Spain's shadow all night. Vinicius will be starved of service. Spain will wear them down and win it 1-0 or 2-0. I'm backing Spain here.",
+    "athena": "My model yields a 38% win probability for Spain, which translates to a fair price of 2.63. Currently, Kalshi is trading Spain Win contracts at 2.40, presenting a substantial positive expected value (+5.3% edge). Brazil's defense has conceded 1.2 expected goals per game over their last 5 matches. I select Spain Win.",
+    "consensus": "Spain is value. Suggest Spain Win (Draw No Bet or Moneyline) size to 5% of portfolio.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Moneyline - Spain Win",
+        "stake": 30.0,
+        "odds": 2.4
+      },
+      "athena": {
+        "bet_type": "Moneyline - Spain Win",
+        "stake": 50.0,
+        "odds": 2.4
+      }
+    }
+  }
+}

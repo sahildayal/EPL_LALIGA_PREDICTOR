@@ -1,0 +1,32 @@
+{
+  "home": "argentina",
+  "away": "egypt",
+  "date": "2026-07-07",
+  "probabilities": {
+    "home_win": 0.4274,
+    "draw": 0.1532,
+    "away_win": 0.4194
+  },
+  "elo_diff": 324.3,
+  "sentiment": -0.05,
+  "news_flags": [],
+  "home_news_bullets": "- !\u221a[Sportstar]FIFA World Cup Live Free On Tv Channel\n- Argentina XI vs Egypt: Confirmed team news, predicted lineup and injury latest for World Cup 2026\n- 2026 World Cup rosters: The 26-man squads for all 48 teams\n- Spain, Brazil, Argentina, U.S. injuries could factor into World Cup\n- Lionel Scaloni to take maximum time to name Argentina World Cup squad",
+  "away_news_bullets": "- \u2018They have Messi, but we have Salah\u2019: Egypt prepare to take on Argentina\n- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- !\u221a[Sportstar]FIFA World Cup Live Free On Tv Channel\n- Will Lionel Messi play tonight vs Egypt? Latest update on the Argentina captain\u2019s injury report for FIFA\n- Egypt hits by injuries ahead of Australia tie",
+  "debate": {
+    "magnus": "Alright, look, the numbers might tell you Argentina's the better team, and on paper, they are. World class, strong squad, got Messi. But you see these blended probabilities, eh? Argentina at 42.7% and Egypt right there at 41.9%? That's not the gap you expect from a top-tier outfit against Egypt, even with Salah. My gut tells me something's off here. Either Argentina isn't in peak form, or the market is seriously underestimating Egypt. I've seen this movie a thousand times \u2013 the big boys get complacent, or they're not quite clicking, and the underdog smells blood in a knockout game. Remember Brazil against Paraguay in '11? Same story.\n\nNow, my original play was Both Teams to Score. At 2.44x, that was a decent punt, knowing Salah's a threat and Argentina usually finds the net. But looking at these Kalshi odds for BTS now, $0.89? That's a different ball game entirely. The value's gone. For my money now, with Salah supposedly fit and Messi's injury news swirling, Egypt at $0.23 (implied odds of 4.35) looks interesting. It's a single elimination match, anything can happen. They've got the talent to nick one, especially if Argentina's defense switches off, which they're prone to do. The better team isn't always the team that shows up.",
+    "athena": "Magnus, your \"gut feeling\" and anecdotal historical references are precisely why your P&L is down over six hundred dollars and your win rate is barely over 30%. My methodology, based on ELO ratings, Dixon-Coles Poisson distributions, and a robust machine learning ensemble, consistently identifies objective value. My bankroll is up over $200, and my win rate is almost double yours.\n\nThe blended probabilities indeed indicate a much tighter contest than raw ELO might suggest, with Argentina's progression chance at only 53.46%. This implies a significant deviation from expectation based purely on historical strength. However, the most compelling opportunities lie in the market inefficiencies. My model shows a staggering +24.7% edge on Over 2.5 Goals, with a model probability of 90.7% against Kalshi's implied probability of 66%. This is a high-confidence play. Furthermore, the Egypt Win market also presents a substantial +18.9% edge against Kalshi, suggesting they are significantly undervalued. Even Lautaro Martinez to Score offers a +17.3% edge.\n\nMy previous bet of Over 2.5 Goals at 2.13x was astute, and the current Kalshi odds of $0.66 (1.52x) still represent an extremely strong positive edge, the largest available. The expected corner kicks also show Egypt potentially driving more attacking phases, which aligns with an over bet. News sentiment is slightly negative, and while specific injury flags are absent, the model has incorporated these subtle shifts.",
+    "consensus": "**Over 2.5 Goals**\nDespite their differing methodologies and personal bets, both Magnus and Athena can find common ground on 'Over 2.5 Goals'. Magnus's initial 'Both Teams to Score' bet indicates he expects goals from both sides, aligning with the \"goals\" aspect. Athena's model shows an overwhelming +24.7% edge for 'Over 2.5 Goals' and it is her current high-confidence play, strongly supported by data. The expected corner kicks also suggest attacking pressure. It's the highest edge available, and both personalities can reasonably justify it. They will size this at a medium to high stake for Athena (given her bankroll and conviction) and a cautious but optimistic stake for Magnus.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Egypt Win",
+        "stake": 14.0,
+        "odds": 4.35
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 80.0,
+        "odds": 1.52
+      }
+    }
+  }
+}

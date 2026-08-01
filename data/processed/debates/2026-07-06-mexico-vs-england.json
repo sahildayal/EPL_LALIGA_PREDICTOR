@@ -1,0 +1,32 @@
+{
+  "home": "mexico",
+  "away": "england",
+  "date": "2026-07-06",
+  "probabilities": {
+    "home_win": 0.3377,
+    "draw": 0.1981,
+    "away_win": 0.4642
+  },
+  "elo_diff": -159.5,
+  "sentiment": 0.15,
+  "news_flags": [],
+  "home_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- England XI vs Mexico: Confirmed team news and predicted lineup\n- Mexico World Cup 2026 Roster: Aguirre's Squad and Ochoa's Record Sixth World Cup\n- Who will start? Predicted XIs for 2026 World Cup contenders, hosts\n- Twists and turns on Korean players' road to World Cup",
+  "away_news_bullets": "- England National Team 2026: All 26 World Cup Players And Club Teams\n- England XI vs Mexico: Confirmed team news and predicted lineup\n- Noni Madueke's Injury Raises Concerns for England's World Cup Squad Selection\n- Nine injured in shooting near England\u2019s World Cup base in Kansas City - The Athletic\n- FIFA World Cup 2026: Mass shooting near England's Kansas City base camp leaves 9 injured ahead of team ar",
+  "debate": {
+    "magnus": "Alright, let's talk brass tacks. England versus Mexico. You look at England, they're the better team, plain and simple. Got the pedigree, the talent, the players who can turn a game on its head. ELO difference, whatever that means for you numbers folks, just tells me what my eyes have seen for decades: England's got the stronger squad. They'll be bringing the hammer.\n\nBut here's the rub. You got this Madueke fella with an injury concern, and more importantly, that shooting incident near their base camp. That's not just a distraction, that's heavy. I've seen teams with all the talent in the world come out flat, play with concrete boots, because their heads weren't in the game. Remember France in '02? Or even that Argentina side back in '94 after Maradona's incident? These lads are human. They might have the class, but are they *showing up* today, mentally? That's what I'm asking.\n\nMy gut tells me this will still be an open game. England's attack is too potent not to score, and even a distracted side can bang in a few. Mexico, they'll play with heart, they always do. Memo Ochoa's seen it all, he'll rally them. We're gonna see goals, more than a couple. My active bet on Over 2.5 Goals feels even better now. The market moving that much on the odds? It means the books are underpricing the chaos, and chaos means goals.",
+    "athena": "Magnus, while I acknowledge the unquantifiable psychological component of external events, our ensemble model does not register a significant shift in England's predictive performance due to sentiment alone, especially when contrasted with their objective statistical superiority. The ELO differential of -159.5 points for England indicates a substantial advantage. Our blended probabilities assign England a 46.4% win probability in regular time, significantly higher than Mexico's 33.8%, and a 58.85% chance to advance.\n\nFurthermore, the expected corner kicks distribution of 9.5 for England versus 1.1 for Mexico strongly suggests sustained offensive pressure from England. This aligns with our highest-edge propositions. The Over 2.5 Goals market, for instance, presents a staggering +62.8% edge against Kalshi's $0.25 odds, with our model projecting an 87.8% probability. This is an even larger edge than when we initially placed our active bets, making it an extremely favorable position. Similarly, Both Teams to Score holds a +35.5% edge, and various player props for England's key attackers also show positive expected value.\n\nThe data indicates England will dominate offensively, and given the knockout stage context, a relatively high-scoring affair is probable as both teams push for progression. My current bankroll performance of +$302.46 is a direct result of adhering to these data-driven edges.",
+    "consensus": "Given both Magnus and Athena have already placed active bets on Over 2.5 Goals, and Athena's model now shows an even larger edge on this market, the consensus recommendation is to **reinforce the Over 2.5 Goals bet.** Both the eye test (Magnus's expectation of an open, possibly chaotic game with goals) and the quantitative analysis (Athena's massive edge and high model probability) align on this outcome.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Both Teams to Score",
+        "stake": 12.5,
+        "odds": 0.38
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 73.5,
+        "odds": 0.25
+      }
+    }
+  }
+}

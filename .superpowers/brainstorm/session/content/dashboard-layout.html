@@ -1,0 +1,67 @@
+<h2>📊 Monte Carlo Tournament Simulation Dashboard Layout</h2>
+<p class="subtitle">Select the preferred layout for the visual simulation dashboard</p>
+
+<div class="options">
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>(Recommended) Unified Split View</h3>
+      <p>A side-by-side dashboard: the interactive tournament bracket tree on the left, and the probability table/heatmap rankings on the right.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Interactive Bracket Tree</h3>
+      <p>Focuses entirely on a visual branching bracket (Quarterfinals -> Semifinals -> Finals), with click-to-expand match statistics and progression path histories.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tabular Heatmap & Metrics</h3>
+      <p>A clean, sortable grid listing every team's ELO, expected tournament stage exit, and simulated probabilities of reaching each subsequent round.</p>
+    </div>
+  </div>
+</div>
+
+<div class="split" style="margin-top: 30px;">
+  <div class="mockup">
+    <div class="mockup-header">Unified Split View Mockup</div>
+    <div class="mockup-body" style="padding: 15px; background: #1a1b26; border-radius: 4px; color: #a9b1d6; font-family: monospace;">
+      <div style="display: flex; gap: 15px; min-height: 250px;">
+        <div style="flex: 2; border: 1px dashed #414868; padding: 10px; border-radius: 4px;">
+          <h4 style="margin-top:0; color: #7aa2f7;">Tournament Bracket</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px;">
+            <div style="border: 1px solid #565f89; padding: 5px;">FRA (68%)<br>SWE (32%)</div>
+            <div style="width: 30px; height: 1px; background: #565f89;"></div>
+            <div style="border: 1px solid #7aa2f7; padding: 5px;">Winner QF1</div>
+            <div style="width: 30px; height: 1px; background: #565f89;"></div>
+            <div style="border: 1px solid #bb9af3; padding: 5px; font-weight:bold;">Finals</div>
+          </div>
+        </div>
+        <div style="flex: 1; border: 1px dashed #414868; padding: 10px; border-radius: 4px;">
+          <h4 style="margin-top:0; color: #2ac3de;">Simulated Odds</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <tr style="border-bottom: 1px solid #414868; text-align: left;">
+              <th>Team</th>
+              <th>Win %</th>
+            </tr>
+            <tr>
+              <td>France</td>
+              <td style="color:#9ece6a;">24.5%</td>
+            </tr>
+            <tr>
+              <td>Brazil</td>
+              <td style="color:#9ece6a;">18.2%</td>
+            </tr>
+            <tr>
+              <td>Argentina</td>
+              <td style="color:#9ece6a;">12.1%</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

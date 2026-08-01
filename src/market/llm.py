@@ -40,13 +40,13 @@ def map_model_name(friendly_name: str) -> str:
     return friendly_name
 
 
-def get_tournament_stage() -> str:
-    from datetime import datetime, timezone
-    # World Cup 2026 Group Stage: June 11 to June 27. Knockout Stage: June 28 to July 19.
-    today = datetime.now(timezone.utc)
-    if today.year > 2026 or (today.year == 2026 and (today.month > 6 or (today.month == 6 and today.day >= 28))):
-        return "Knockout Stage (Single Elimination - Extra Time & Penalties apply if tied at 120 mins. Note: Kalshi Moneyline markets still resolve based on regulation 90 mins + injury time scoreline)."
-    return "Group Stage (Round Robin - Matches can end in a Draw/Tie after 90 mins + injury time)."
+def get_tournament_stage(league: str = "epl") -> str:
+    l_lower = (league or "epl").lower().strip()
+    if l_lower == "ucl":
+        return "UEFA Champions League (European Elite Competition — Mid-week fixture congestion, cross-league clash)."
+    elif l_lower == "laliga":
+        return "La Liga Matchday (Spanish Top Flight — Tactical possession, derby rivalries & technical football)."
+    return "Premier League Matchday (English Top Flight — High pace, physical intensity & heavy fixture schedule)."
 
 
 def generate_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, news_flags: list, target_bets: list, user_model: str = None, progression_probs: dict = None, corners_expectation: dict = None, home_bullets: str = "", away_bullets: str = "") -> dict:

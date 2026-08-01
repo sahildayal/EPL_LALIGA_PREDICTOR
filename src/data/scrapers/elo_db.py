@@ -11,6 +11,35 @@ HEADERS = {
 }
 
 # Sourced from World Football ELO ratings — accurate for World Cup 2026 participants
+# Club Football ELO ratings for EPL, La Liga, and Champions League participants
+CLUB_ELO = {
+    # Tier 1 Elite UCL Contenders
+    "real madrid": 1980, "manchester city": 1970, "man city": 1970, "bayern munich": 1930,
+    "arsenal": 1910, "barcelona": 1900, "liverpool": 1900, "psg": 1910, "paris saint-germain": 1910,
+    "inter milan": 1890, "inter": 1890, "atletico madrid": 1870, "atletico": 1870,
+    "bayer leverkusen": 1880, "leverkusen": 1880, "borussia dortmund": 1860, "dortmund": 1860,
+
+    # Tier 2 Top Contenders & European Qualifiers
+    "chelsea": 1850, "atalanta": 1850, "juventus": 1840, "rb leipzig": 1840, "leipzig": 1840,
+    "aston villa": 1830, "sporting cp": 1830, "sporting": 1830, "ac milan": 1830, "milan": 1830,
+    "tottenham": 1820, "spurs": 1820, "newcastle": 1820, "benfica": 1820,
+    "manchester united": 1810, "man united": 1810, "man utd": 1810,
+    "girona": 1810, "athletic bilbao": 1810, "athletic club": 1810,
+    "real sociedad": 1800, "porto": 1800, "villarreal": 1790, "real betis": 1780, "betis": 1780,
+    "brighton": 1780, "sevilla": 1780, "west ham": 1760,
+
+    # Mid-Table Premier League & La Liga
+    "fulham": 1740, "bournemouth": 1730, "crystal palace": 1730, "osasuna": 1730,
+    "brentford": 1720, "celta vigo": 1720, "everton": 1710, "rayo vallecano": 1710, "mallorca": 1710,
+    "wolverhampton": 1700, "wolves": 1700, "nottingham forest": 1700, "forest": 1700,
+    "las palmas": 1690, "alaves": 1690, "getafe": 1680, "leicester": 1680,
+
+    # Lower Table / Promoted
+    "espanyol": 1670, "southampton": 1660, "leganes": 1650, "ipswich": 1640,
+    "real valladolid": 1640, "valladolid": 1640,
+}
+
+# Sourced from World Football ELO ratings — accurate for international fallback
 NATIONAL_TEAM_ELO = {
     "argentina": 2087, "france": 2053, "brazil": 2037, "england": 1966,
     "spain": 2019, "portugal": 1989, "netherlands": 1945, "belgium": 1881,
@@ -33,14 +62,25 @@ NATIONAL_TEAM_ELO = {
 }
 
 
-def get_national_elo(team_name: str) -> float:
-    """Return ELO for a national team."""
+def get_team_elo(team_name: str) -> float:
+    """Return ELO for a club or national team."""
     from src.data.team_mapping import normalize_team_name
     key = normalize_team_name(team_name)
+    if key in CLUB_ELO:
+        return float(CLUB_ELO[key])
     if key in NATIONAL_TEAM_ELO:
         return float(NATIONAL_TEAM_ELO[key])
     # Fuzzy match
+    for name, elo in CLUB_ELO.items():
+        if name in key or key in name:
+            return float(elo)
     for name, elo in NATIONAL_TEAM_ELO.items():
         if name in key or key in name:
             return float(elo)
     return 1700.0
+
+
+def get_national_elo(team_name: str) -> float:
+    """Legacy alias for get_team_elo."""
+    return get_team_elo(team_name)
+

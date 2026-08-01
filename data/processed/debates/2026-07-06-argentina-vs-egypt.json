@@ -1,0 +1,32 @@
+{
+  "home": "argentina",
+  "away": "egypt",
+  "date": "2026-07-06",
+  "probabilities": {
+    "home_win": 0.635,
+    "draw": 0.1594,
+    "away_win": 0.2056
+  },
+  "elo_diff": 324.3,
+  "sentiment": 0.05,
+  "news_flags": [],
+  "home_news_bullets": "- Argentina set to rotate squad against eliminated Jordan, may rest Messi\n- Argentina 'calm' with Lionel Messi, Emiliano Mart\u00ednez and Juli\u00e1n \u00c1lvarez fit ahead of Algeria\n- Spain, Brazil, Argentina, U.S. injuries could factor into World Cup\n- 2026 World Cup rosters: The 26-man squads for all 48 teams\n- Returns, concerns and changes: The latest on Argentina before its World Cup debut",
+  "away_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Socceroos \u2018prepared\u2019 to face Egypt\u2019s Mo Salah who is fit for last-32 clash after injury\n- Australia vs Egypt lineups: Predicted XIs and confirmed team news\n- Egypt sweat on Salah fitness ahead of historic World Cup clash with Australia\n- Egypt hits by injuries ahead of Australia tie",
+  "debate": {
+    "magnus": "Alright, let's talk about Argentina vs. Egypt. On paper, it's clear who the better side is, no need for your fancy spreadsheets, Athena. Argentina's ELO lead, whatever that is, just confirms what anyone with eyes can see. They\u2019ve got top-tier talent, a roster deep enough to win tournaments. But here's the rub: I'm seeing reports about them rotating the squad, maybe even resting Messi. You pull that stunt in a knockout game, and you\u2019re asking for trouble. I remember '06, Brazil against Ghana \u2013 same situation, Brazil thought they could coast. Almost bit them in the backside. My concern here is the better team *not* showing up. If Argentina comes out lazy, if they underestimate Egypt because Salah was just injured (though now he's fit, mind you), then this isn't a walk in the park. My bankroll's down bad right now, $170 in the hole, barely above water. I can't afford to back a team that's going to play with their flip-flops on. I need to see hunger, and I\u2019m just not sure Argentina will bring it for a full 90.",
+    "athena": "Magnus, your anecdotal references to historical matches are statistically irrelevant. My model ensemble, incorporating ELO, Dixon-Coles Poisson, and a neural network architecture, computes Argentina's win probability in regulation at 63.5%. However, the Kalshi market offers $0.71 on that outcome, which translates to an implied probability of 71.4%. This represents a negative edge of 7.5% for an Argentina win. Similarly, the Draw market and a Messi anytime goal are also negative edge propositions.\n\nConversely, the model identifies significant positive edges elsewhere. For example, an Egypt Win, despite their lower ELO difference of +324.3 points, has a model probability of 20.6% against Kalshi odds of $0.10 (implied 10%), yielding a substantial +10.6% edge. More compelling are the goal markets. The model predicts a 97.6% chance for Over 1.5 Goals, offering a +24.6% edge against Kalshi's $0.73. Over 2.5 Goals has a 90.7% probability and a remarkable +43.7% edge against Kalshi's $0.47. Both Teams to Score registers 84.1% probability with a +43.1% edge against $0.41. The expected corner kick data, with Egypt projected at 7.8 corners versus Argentina's 4.4, also supports a scenario where Egypt is actively attacking and creating opportunities. My current P&L of +$302.46 is a direct consequence of systematically exploiting these positive edges.",
+    "consensus": "Given Magnus's concern about Argentina's potential complacency and rotation leading to a less dominant performance, and Athena's model identifying massive positive edges in the goal markets, they agree that a high-scoring game is the most probable and profitable outcome. The \"Over 2.5 Goals\" market presents the highest positive edge and aligns with both the eye-test (Egypt pushing, Argentina potentially less defensively focused) and the data. They recommend placing on **Over 2.5 Goals** with a moderate-to-high stake, as the model's confidence (90.7% probability) is exceptionally strong.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Both Teams to Score",
+        "stake": 17.0,
+        "odds": 2.44
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 100.0,
+        "odds": 2.13
+      }
+    }
+  }
+}

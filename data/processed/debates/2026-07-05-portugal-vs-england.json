@@ -1,0 +1,35 @@
+{
+  "home": "portugal",
+  "away": "england",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.39,
+    "draw": 0.29,
+    "away_win": 0.32
+  },
+  "elo_diff": 8.28,
+  "sentiment": 0.08,
+  "news_flags": [
+    "Ronaldo starting",
+    "Kane fatigue concerns"
+  ],
+  "home_news_bullets": "- Cristiano Ronaldo remains the focal point of the Portuguese attack.\n- Bruno Fernandes is fit and has created 4.2 chances per game recently.",
+  "away_news_bullets": "- Harry Kane is showing slight fatigue indicators but will start.\n- Jude Bellingham is fully fit and will play advanced midfield.",
+  "debate": {
+    "magnus": "England is too cautious under pressure. They have all the talent in the world, but they play like they're afraid of their own shadows in the knockout stages. Portugal has veterans who know how to win these games. Bruno Fernandes will find Ronaldo, and even at his age, Ronaldo only needs one half-chance. Portugal advances.",
+    "athena": "England's defensive block is statistically very sound, conceding only 0.85 goals per 90 mins. The Dixon-Coles simulation indicates a 29% probability of a Draw in regulation. The parlay engine identifies Both Teams to Score (BTTS) 'No' as a strong component at 58% probability. I will bet on BTTS - No.",
+    "consensus": "A low scoring match where Portugal has a slight edge. Suggest Portugal to Qualify or BTTS 'No'.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Moneyline - Portugal Win",
+        "stake": 40.0,
+        "odds": 2.6
+      },
+      "athena": {
+        "bet_type": "Game Lines - Both Teams to Score (No)",
+        "stake": 35.0,
+        "odds": 1.8
+      }
+    }
+  }
+}

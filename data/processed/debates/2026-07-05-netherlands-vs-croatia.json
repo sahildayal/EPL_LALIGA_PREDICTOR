@@ -1,0 +1,35 @@
+{
+  "home": "netherlands",
+  "away": "croatia",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.52,
+    "draw": 0.26,
+    "away_win": 0.22
+  },
+  "elo_diff": 41.14,
+  "sentiment": 0.12,
+  "news_flags": [
+    "Modric final tournament",
+    "Dutch squad youth energy"
+  ],
+  "home_news_bullets": "- Cody Gakpo is in sensational form along the left wing.\n- Virgil van Dijk is commanding the defensive line with absolute authority.",
+  "away_news_bullets": "- Luka Modric is prepared to play the full 120 minutes if needed.\n- Croatia's midfield remains highly experienced but lacks depth.",
+  "debate": {
+    "magnus": "Never write off Croatia. They are the cockroaches of international football; you think they're dead, and then they win on penalties. But Modric can't carry this midfield forever. The Dutch have too much pace and legs for them. Cody Gakpo is going to run circles around their fullbacks. Netherlands wins this comfortably.",
+    "athena": "The Dutch possess a 52% probability of regulation victory. However, Croatia's goalie has a 30% penalty save rate, and Croatia has won 4 of their last 5 shootouts. The value is actually on the Over 2.5 Goals at 2.10, as both teams have showed defensive vulnerabilities on set pieces. I select Over 2.5 Goals.",
+    "consensus": "Netherlands is the logical winner, but goals offer better pricing. Buy Over 2.5 Goals at 2.10.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Moneyline - Netherlands Win",
+        "stake": 60.0,
+        "odds": 1.85
+      },
+      "athena": {
+        "bet_type": "Game Lines - Over 2.5 Goals",
+        "stake": 30.0,
+        "odds": 2.1
+      }
+    }
+  }
+}

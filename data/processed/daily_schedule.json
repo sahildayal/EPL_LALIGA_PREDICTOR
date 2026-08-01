@@ -1,0 +1,22 @@
+[
+  {
+    "home": "france",
+    "away": "morocco",
+    "date": "2026-07-09T20:00Z"
+  },
+  {
+    "home": "spain",
+    "away": "belgium",
+    "date": "2026-07-10T19:00Z"
+  },
+  {
+    "home": "norway",
+    "away": "england",
+    "date": "2026-07-11T21:00Z"
+  },
+  {
+    "home": "argentina",
+    "away": "switzerland",
+    "date": "2026-07-12T01:00Z"
+  }
+]

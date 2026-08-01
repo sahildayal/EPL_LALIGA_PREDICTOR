@@ -1,0 +1,34 @@
+{
+  "home": "mexico",
+  "away": "england",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.3565,
+    "draw": 0.2037,
+    "away_win": 0.4398
+  },
+  "elo_diff": -159.5,
+  "sentiment": 0.0,
+  "news_flags": [
+    "Alan Shearer thinks England-Mexico will be a battle, could come down to Thomas T"
+  ],
+  "home_news_bullets": "- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- England XI vs Mexico: Confirmed team news and predicted lineup\n- Mexico World Cup 2026 Roster: Aguirre's Squad and Ochoa's Record Sixth World Cup\n- Who will start? Predicted XIs for 2026 World Cup contenders, hosts\n- Twists and turns on Korean players' road to World Cup",
+  "away_news_bullets": "- England National Team 2026: All 26 World Cup Players And Club Teams\n- England XI vs Mexico: Confirmed team news and predicted lineup\n- Noni Madueke's Injury Raises Concerns for England's World Cup Squad Selection\n- Nine injured in shooting near England\u2019s World Cup base in Kansas City - The Athletic\n- FIFA World Cup 2026: Mass shooting near England's Kansas City base camp leaves 9 injured ahead of team ar",
+  "debate": {
+    "magnus": "\"Alright, another one. My books are bleeding, Athena, and I've seen enough footy to know a trap when I smell one. England on paper, no doubt. Higher ranked, more talent. But tell me, how much does your fancy model weigh a team's head space? I'm looking at that news about the shooting near their base camp in Kansas City. That's not just a minor distraction, that's heavy stuff for a locker room. And Madueke's injury, even if it's not a starter, it affects depth in a long tournament. Are they going to be focused or looking over their shoulders?\n\nMexico, on the other hand, is a proud nation in a knockout game. Ochoa's playing his sixth World Cup, they'll have fire. They're not the better side, but they'll play with heart. I remember a game back in '98, Brazil looked miles better than Denmark, but Denmark just kept coming. Scored two against them. Alan Shearer's right, this is a battle. England *should* win, but they've got to show up. They're capable of putting on a show, but also of playing lazy if their heads aren't in it. With my current run, I'm wary of blindly backing the 'better' team without considering the human element.\"",
+    "athena": "\"Magnus, emotion is a variable, not a constant. My ensemble model, which incorporates ELO ratings, Dixon-Coles Poisson distributions for goal expectancy, and various proprietary features, has processed all available data. News sentiment, while a factor, registered at +0.00, indicating no statistically significant impact on projected performance. The model accounts for squad depth and player availability; Madueke's status is factored into the team's overall strength metrics. The incident near the base camp also showed no statistically significant shift in predictive metrics.\n\nQuantitatively, England holds a -159.5 ELO point advantage, which translates to a clear performance superiority. Our blended probabilities indicate an England win at 44.0%, with a positive edge of +8.0% against Kalshi odds. However, the most compelling opportunities lie in the total goals market. The model projects England to achieve 9.5 expected corner kicks to Mexico's 1.1, a significant offensive disparity. This aggressive attacking posture directly informs the goal probabilities. 'Over 2.5 Goals' presents an astronomical +48.8% edge with a model probability of 87.8% compared to Kalshi's $0.39. We also see robust edges on 'Both Teams to Score' (+22.5%) and 'Over 1.5 Goals' (+26.9%). My strategy dictates identifying and capitalizing on positive expected value. The data suggests an open, high-scoring game driven by England's offensive superiority, with a non-zero probability for Mexico to contribute a goal.\"",
+    "consensus": "**Magnus:** \"Alright, Athena, I hear you. Nine expected corners for England, one for Mexico... that's a damn siege. Even if England's heads aren't 100%, they'll be pressing hard, generating chances. And Mexico, in a knockout, they might catch a break. You're saying the numbers scream goals. My gut says England wins, but my wallet needs a sure thing after this last run.\"\n**Athena:** \"The statistical certainty for 'Over 2.5 Goals' is overwhelming, Magnus. It aligns with England's offensive pressure and the nature of knockout football, where teams often push for a result, rather than settling. The implied probability from the Kalshi market is significantly under-representing the true probability of this outcome according to our model.\"\n**Magnus:** \"'Over 2.5 Goals', you say? At that value... I've seen that kind of game. If England comes out firing like they should, and Mexico doesn't just fold and gets one on a counter... It fits. Let's do it. It's a proper value bet, even for an old dog like me.\"\n\n**Recommendation:** 'Over 2.5 Goals'\n**Sizing:** Given the significant edge identified by Athena's model and Magnus's need for a strong bet after his recent performance, a moderate-to-large stake is appropriate. Athena will likely bet close to her max allowed, while Magnus might bet a smaller portion of his bankroll due to recent losses, but still on a bet he can get behind.",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 15.0,
+        "odds": 0.39
+      },
+      "athena": {
+        "bet_type": "Over 2.5 Goals",
+        "stake": 75.0,
+        "odds": 0.39
+      }
+    }
+  }
+}

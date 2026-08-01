@@ -1,0 +1,35 @@
+{
+  "home": "brazil",
+  "away": "norway",
+  "date": "2026-07-05",
+  "probabilities": {
+    "home_win": 0.4622,
+    "draw": 0.1131,
+    "away_win": 0.4247
+  },
+  "elo_diff": 183.4,
+  "sentiment": -0.1,
+  "news_flags": [
+    "Brazil vs. Norway\u2014World Cup: Live Score and Match Stats - Sports Illustrated",
+    "Why Neymar Isn\u2019t Playing for Brazil vs. Norway at 2026 World Cup - Sports Illust"
+  ],
+  "home_news_bullets": "- Where is Neymar? Why Brazil star is on World Cup bench with Raphinha and not playing from start\n- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Brazil XI vs Norway: Confirmed team news and predicted lineup\n- Injured Neymar not travelling with Brazil squad for Haiti match\n- Neymar to miss Brazil\u2019s game against Haiti with calf injury - The Athletic",
+  "away_news_bullets": "- \ud83c\udde7\ud83c\uddf7 Brazil v Norway: likely line-ups, absentees and chances\n- Brazil vs Norway: FIFA World Cup last 16 \u2013 Vinicius, Haaland and prediction\n- SOCCER@TV!FIFA World Cup Live Free On Tv Channel\n- World Cup Buzz: Mohamed Salah Starting For Egypt After Knockout Round Injury\n- Brazil vs Norway FIFA World Cup 2026 Preview: Everything you need to know",
+  "debate": {
+    "magnus": "Alright, look, Brazil's the top dog, plain and simple. Always have been, always will be. But this Neymar business? He's out, not even travelling with the squad for matches. That\u2019s a big hole in the lineup, a real gut punch. I remember '98, when Ronaldo wasn't 100%, and Brazil just wasn't the same. It changes the whole dynamic, makes a team play timid. On the other side, Norway's got Haaland, a proper beast, a legitimate threat to anyone, even the Brazilians. This is a knockout game, no room for lazy play, no sitting back. My big question is always, \"Is the better team actually showing up today?\" On paper, Brazil is, but without their main man, there's always a doubt. If they come out complacent, Norway could spring a surprise.",
+    "athena": "Magnus, while your historical anecdotes are... quaint, they lack the predictive power of current data. My machine learning ensemble, which has consistently delivered a 57.1% win rate and a positive P&L of +$62.46, processes a far more comprehensive data set. The ELO difference clearly favors Brazil by +183.4 points, establishing their statistical superiority. However, the negative news sentiment of -0.10, directly correlated to Neymar's absence, significantly adjusts expectations. My model now projects a 46.2% probability for a Brazil win in regulation against Norway's 42.5%, indicating a much tighter contest than raw rankings might suggest. This is further reflected in the progression probabilities, with Brazil only having a slight edge at 53.59%.\n\nFor betting, we must focus on market inefficiencies. Kalshi is currently pricing 'Over 2.5 Goals' at $0.25. My model, however, predicts a 94.1% probability of this occurring, translating to an extraordinary +69.1% positive edge. Similarly, 'Both Teams to Score' at Kalshi's $0.15 price point carries a 75.9% model probability, a +60.9% edge. The expected corner kicks\u2014Brazil at 10.4 versus Norway at 3.8\u2014strongly indicates Brazil's offensive dominance and sustained pressure, which typically leads to goals. Even without Neymar, Brazil's attacking depth and Norway's clinical finishing, epitomized by Haaland, make a high-scoring encounter highly probable.",
+    "consensus": "After some deliberation, even Magnus concedes that goals are likely. Athena points to the overwhelmingly positive edge for 'Over 2.5 Goals'. Given her strong performance record and the clear statistical advantage, the consensus is to back the data.\n\n**Bet: Over 2.5 Goals**\n**Stake: $75** (Athena leads with a significant portion given the enormous edge, Magnus contributes a smaller amount)\n**Odds: 4.0** (1 / Kalshi's $0.25 price)",
+    "personal_bets": {
+      "magnus": {
+        "bet_type": "Moneyline - Brazil Win",
+        "stake": 15.0,
+        "odds": 100.0
+      },
+      "athena": {
+        "bet_type": "Game Lines - Over 2.5 Goals",
+        "stake": 80.0,
+        "odds": 4.0
+      }
+    }
+  }
+}
