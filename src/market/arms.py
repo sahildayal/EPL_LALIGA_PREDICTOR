@@ -64,6 +64,18 @@ ARM_CONFIGS = {
     # model error than opportunity.
     ARM_C: ArmConfig(ARM_C, "Model-only + quarter-Kelly",
                      fair_source="model", staking="kelly", min_edge=0.04),
+    # Arm D's threshold is 5% and is NOT to be lowered to make it bet more.
+    #
+    # A dry run over five fixtures with an unusually generous 5-6c per-leg
+    # divergence produced zero qualifying parlays: once the same-game
+    # correlation is priced into the ask as well as the probability (see
+    # parlay_arm.price_parlay), Kalshi's per-leg fee eats the compounded edge.
+    # Real divergences run nearer 1-4c, so this arm may bet rarely or never.
+    #
+    # That is the answer, not a malfunction. "The parlay structure essentially
+    # never clears its own compounded vig" is exactly what arm D was funded to
+    # find out. Tuning the threshold downward until the arm starts betting would
+    # replace that finding with one about the threshold.
     ARM_D: ArmConfig(ARM_D, "Parlay / SGP",
                      fair_source="sharp", staking="kelly", min_edge=0.05),
 }

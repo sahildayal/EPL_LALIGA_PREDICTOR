@@ -48,12 +48,12 @@ jobs:
     outputs:
       status: ${{ steps.job.outputs.status }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The ledger is committed back, so we need real history to push onto.
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -68,7 +68,7 @@ jobs:
       # which is the whole point of rebuilding weekly.
       - name: Cache football-data seasons
         if: ${{ inputs.job == 'stake' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/raw/football_data
           key: football-data-${{ hashFiles('src/data/dataset.py') }}
@@ -128,7 +128,7 @@ jobs:
 
       - name: Upload run log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.job }}-${{ github.run_number }}
           path: |
