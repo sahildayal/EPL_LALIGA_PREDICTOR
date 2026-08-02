@@ -49,16 +49,104 @@ def _emit(report, verbose: bool) -> int:
     return EXIT_WARN if report.errors else EXIT_OK
 
 
+def preflight() -> dict:
+    """
+    Proves every credential and data source works, without needing live fixtures.
+
+    This exists because `stake` collects Kalshi markets FIRST and fails closed if
+    none are listed — so out of season, or on any week Kalshi has not posted the
+    fixtures, the run aborts before the Odds API is ever contacted. A credential
+    could be wrong for months and look identical to "no markets yet".
+
+    Every check reports its own outcome. Nothing here places, prices or writes
+    anything, so it is safe to run at any time.
+    """
+    checks, ok = {}, True
+
+    # Kalshi: an authenticated call. A 200 with zero markets is a PASS — it means
+    # the signature verified and there simply are no fixtures listed.
+    try:
+        from src.market.kalshi_client import KalshiClient
+        from src.pipeline import kalshi_markets as km
+        client = KalshiClient()
+        if client.mock_mode:
+            raise RuntimeError("no usable credentials (see the warning above)")
+        tickers = km.all_series_tickers()
+        resp = client._request("GET", "/trade-api/v2/markets",
+                               params={"series_ticker": tickers[0],
+                                       "status": "open", "limit": 1})
+        if resp.status_code == 200:
+            checks["kalshi"] = {
+                "ok": True,
+                "credential_source": client.credential_source,
+                "series_checked": tickers[0],
+                "open_markets_seen": len(resp.json().get("markets", [])),
+                "note": "authenticated; zero markets is expected out of season",
+            }
+        else:
+            raise RuntimeError(f"HTTP {resp.status_code} — signature or key ID rejected")
+    except Exception as exc:
+        ok = False
+        checks["kalshi"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+    # The Odds API: a free probe that does not consume quota.
+    try:
+        from src.data.odds_api import quota_remaining
+        remaining = quota_remaining()
+        checks["odds_api"] = {"ok": True, "requests_remaining": remaining}
+        if remaining is not None and remaining < 50:
+            checks["odds_api"]["warning"] = (
+                f"only {remaining} requests left; stake uses ~2 per week")
+    except Exception as exc:
+        ok = False
+        checks["odds_api"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+    # The training dataset, which arm C needs and which CI rebuilds each Friday.
+    try:
+        from pathlib import Path
+        import pandas as pd
+        path = Path("data/processed/matches.csv")
+        if not path.exists():
+            raise FileNotFoundError(f"{path} missing; run `python -m src.data.dataset`")
+        df = pd.read_csv(path, parse_dates=["date"])
+        checks["dataset"] = {"ok": True, "matches": len(df),
+                             "latest": str(df.date.max().date()),
+                             "leagues": sorted(df.league.unique())}
+    except Exception as exc:
+        ok = False
+        checks["dataset"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+    # The ledger: readable, right schema, four funded arms.
+    try:
+        from src.market import ledger
+        state = ledger.load_state()
+        checks["ledger"] = {
+            "ok": True, "schema": state["schema_version"], "season": state["season"],
+            "arms": {a: round(b["bankroll"], 2) for a, b in state["arms"].items()},
+        }
+    except Exception as exc:
+        ok = False
+        checks["ledger"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+    return {"job": "preflight", "ok": ok, "checks": checks}
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m src.pipeline.run",
         description="Scheduled matchweek jobs for the four-arm paper season.")
-    parser.add_argument("job", choices=("stake", "snapshot", "settle", "report"))
+    parser.add_argument("job", choices=("stake", "snapshot", "settle", "report",
+                                        "preflight"))
     parser.add_argument("--dry-run", action="store_true",
                         help="stake only: price and log the plan, write nothing")
     parser.add_argument("--verbose", action="store_true",
                         help="print full run details to stdout")
     args = parser.parse_args(argv)
+
+    if args.job == "preflight":
+        report = preflight()
+        print(json.dumps(report, indent=2, default=str))
+        return EXIT_OK if report["ok"] else EXIT_FAILED
 
     if args.job == "report":
         from src.market import ledger
