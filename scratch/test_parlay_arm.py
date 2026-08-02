@@ -141,6 +141,57 @@ def test_shrinkage_compounds_across_legs():
     assert gap3 / raw3 > gap2 / raw2
 
 
+def test_correlated_sgp_legs_with_no_edge_produce_no_edge():
+    """
+    Regression, and the worst bug this module has had.
+
+    Correlation raises the joint probability above the product of the marginals.
+    An earlier version took that uplift in the numerator while leaving the ask at
+    the plain product of leg asks — so BTTS-yes plus over-2.5 quoted at
+    0.48 x 0.50 = 0.24 against a true joint of 0.41 showed an 11-point "edge"
+    that was pure artefact. Arm D would have posted spectacular fake returns all
+    season for a reason that has nothing to do with betting skill.
+
+    Here every leg is priced exactly at fair, so there is no edge anywhere. The
+    parlay must therefore show none either — after fees and penalties, strictly
+    negative.
+    """
+    m = score_matrix(1.6, 1.3)
+    btts = joint_from_score_matrix([leg(market="btts", sel="yes")], m)
+    over = joint_from_score_matrix([leg(market="totals", sel="over", line=2.5)], m)
+    legs = [leg(market="btts", sel="yes", fair=btts, ask=btts),
+            leg(market="totals", sel="over", line=2.5, fair=over, ask=over)]
+
+    p = price_parlay(legs, {("arsenal", "chelsea"): m})
+    assert p is not None
+    # The correlation uplift must appear on BOTH sides, so they cancel.
+    assert p["ask"] == pytest.approx(p["fair_prob"], abs=1e-9)
+    assert p["net_edge"] < 0                       # only fees and penalty remain
+    # And it must be well above the naive product, which is the artefact price.
+    assert p["ask"] > btts * over
+
+
+def test_sgp_ask_carries_the_correlation_multiplier():
+    m = score_matrix(1.7, 1.2)
+    legs = [leg(market="btts", sel="yes", fair=0.55, ask=0.50),
+            leg(market="totals", sel="over", line=2.5, fair=0.58, ask=0.52)]
+    p = price_parlay(legs, {("arsenal", "chelsea"): m})
+    exact = joint_from_score_matrix(legs, m)
+    correlation = exact / (0.55 * 0.58)
+    assert correlation > 1.0                       # these legs are correlated
+    assert p["ask"] == pytest.approx(0.50 * 0.52 * correlation)
+
+
+def test_genuine_per_leg_edge_still_compounds_in_an_sgp():
+    """The fix must remove the artefact without removing the real signal."""
+    m = score_matrix(1.7, 1.2)
+    legs = [leg(market="btts", sel="yes", fair=0.60, ask=0.50),
+            leg(market="totals", sel="over", line=2.5, fair=0.63, ask=0.52)]
+    p = price_parlay(legs, {("arsenal", "chelsea"): m})
+    assert p["fair_prob"] > p["ask"]               # real overlay survives
+    assert p["net_edge"] > 0
+
+
 def test_sgp_carries_an_extra_penalty():
     m = score_matrix(1.7, 1.0)
     sgp = price_parlay([leg(sel="home"), leg(market="totals", sel="over", line=2.5)],

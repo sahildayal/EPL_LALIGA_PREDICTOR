@@ -258,38 +258,67 @@ def price_parlay(legs: list, score_matrices: dict = None) -> Optional[dict]:
     fixtures = [l.fixture for l in legs]
     is_sgp = len(set(fixtures)) < len(fixtures)
 
-    ask = 1.0
-    for l in legs:
-        ask *= l.ask
-    if not 0.0 < ask < 1.0:
-        return None
-
     if is_sgp:
-        # Every same-fixture group must be priced off that fixture's matrix.
-        groups, joint, method = {}, 1.0, "score_matrix"
+        # Every same-fixture group must be priced off that fixture's matrix --
+        # BOTH sides of the comparison, not just the fair probability.
+        #
+        # Correlation raises the joint probability above the product of the
+        # marginals. If we take that uplift in the numerator but leave the ask
+        # at the plain product of leg asks, we manufacture edge out of nothing:
+        # BTTS-yes plus over-2.5 priced at 0.48 x 0.50 = 0.24 against a true
+        # joint of 0.41 looks like an 11-point edge, and it is entirely an
+        # artefact. No book quotes the product for correlated legs.
+        #
+        # So the synthetic ask carries the same correlation multiplier the fair
+        # probability does. What survives is only the genuine compounded
+        # divergence of the individual legs -- which is exactly the question
+        # arm D exists to answer.
+        groups, joint, ask, method = {}, 1.0, 1.0, "score_matrix"
         for l in legs:
             groups.setdefault(l.fixture, []).append(l)
+
         for fixture, group in groups.items():
+            group_ask = 1.0
+            for l in group:
+                group_ask *= l.ask
+
             if len(group) == 1:
                 joint *= _shrunk(group[0].fair_prob, group[0].ask)
+                ask *= group_ask
                 continue
+
             matrix = score_matrices.get(fixture)
             if matrix is None:
                 return None
             exact = joint_from_score_matrix(group, matrix)
             if exact is None:
                 return None
-            # Shrink the joint estimate once, using the group's product of asks
-            # as the reference. Shrinking each leg first then combining would
-            # apply the correction len(group) times over.
-            group_ask = 1.0
+
+            independent = 1.0
             for l in group:
-                group_ask *= l.ask
+                independent *= l.fair_prob
+            if independent <= 0.0:
+                return None
+
+            correlation = exact / independent
+            group_ask *= correlation
+            if not 0.0 < group_ask < 1.0:
+                # A correlation-adjusted price at or above $1 is not a market
+                # anyone could take the other side of.
+                return None
+            ask *= group_ask
+            # Shrink the joint estimate once, against the corrected group price.
+            # Shrinking each leg first then combining would apply the correction
+            # len(group) times over.
             joint *= _shrunk(exact, group_ask)
     else:
-        joint, method = 1.0, "independent"
+        joint, ask, method = 1.0, 1.0, "independent"
         for l in legs:
             joint *= _shrunk(l.fair_prob, l.ask)
+            ask *= l.ask
+
+    if not 0.0 < ask < 1.0:
+        return None
 
     # Fees are charged per leg against a single payout. This is the arithmetic
     # that makes parlays hard, so it is computed explicitly rather than folded
