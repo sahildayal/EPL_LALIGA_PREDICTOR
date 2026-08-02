@@ -14,8 +14,12 @@ name: Matchweek — snapshot
 
 on:
   schedule:
-    - cron: "0 11 * * 6,7"     # Sat & Sun 11:00 UTC
-    - cron: "0 14 * * 6,7"     # Sat & Sun 14:00 UTC
+    # Day-of-week is 0-6 with 0 = SUNDAY. Not 1-7, and not 0-7: this originally
+    # read "6,7", which is out of range and invalidated the whole file, so the
+    # job would never have run. Silently, and for the entire season — taking
+    # CLV, the primary metric, down with it.
+    - cron: "0 11 * * 6,0"     # Sat & Sun 11:00 UTC
+    - cron: "0 14 * * 6,0"     # Sat & Sun 14:00 UTC
   workflow_dispatch:
 
 permissions:
