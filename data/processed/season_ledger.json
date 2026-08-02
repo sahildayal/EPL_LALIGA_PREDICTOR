@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "season": "2026-27",
   "created_utc": "2026-08-02T02:15:06.573496+00:00",
   "arms": {
@@ -8,28 +8,44 @@
       "bankroll": 10000.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
-      "history": []
+      "history": [],
+      "active_parlays": [],
+      "parlay_history": []
     },
     "B_divergence_flat": {
       "label": "Divergence + flat 1%",
       "bankroll": 10000.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
-      "history": []
+      "history": [],
+      "active_parlays": [],
+      "parlay_history": []
     },
     "C_model_kelly": {
       "label": "Model-only + quarter-Kelly",
       "bankroll": 10000.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
-      "history": []
+      "history": [],
+      "active_parlays": [],
+      "parlay_history": []
     },
     "D_parlay": {
       "label": "Parlay / SGP",
       "bankroll": 10000.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
-      "history": []
+      "history": [],
+      "active_parlays": [],
+      "parlay_history": []
     }
-  }
+  },
+  "migrations": [
+    {
+      "utc": "2026-08-02T17:24:38.629667+00:00",
+      "from": 2,
+      "to": 3,
+      "note": "added active_parlays/parlay_history for arm D"
+    }
+  ]
 }
