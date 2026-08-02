@@ -232,6 +232,16 @@ def run_stake(dry_run: bool = False) -> RunReport:
         model = collect_model_probs(fixtures)
         matrices = build_score_matrices(fair)
 
+        # Kalshi listed a fixture we could not attach a sharp price to.
+        #
+        # build_opportunities drops these silently — it looks up (home, away) in
+        # the fair-value map and moves on if it misses — so a broken team-name
+        # mapping produces exactly the same output as a genuinely quiet week:
+        # fewer bets, no error. That is the single most plausible way this
+        # pipeline could underperform all season without anyone noticing.
+        unpriced = sorted(f for f in fixtures if f not in fair)
+        no_matrix = sorted(f for f in fixtures if f in fair and f not in matrices)
+
         state = ledger.load_state()
         plans = arms_mod.plan_all(markets, fair, model, state=state,
                                   score_matrices=matrices)
@@ -241,10 +251,27 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "fixtures": len(fixtures),
             "fair_fixtures": len(fair),
             "score_matrices": len(matrices),
+            "unpriced_fixtures": [list(f) for f in unpriced],
+            "fixtures_without_score_matrix": [list(f) for f in no_matrix],
             "planned": {a: len(p) for a, p in plans.items()},
             "dry_run": dry_run,
             "bets": {a: [_describe_plan(p) for p in ps] for a, ps in plans.items()},
         }
+
+        # Surfaced as warnings (exit 2), not failures: the bets we COULD price
+        # are still good, and refusing the whole week over one unmappable club
+        # would cost more than it saves. But it must never pass as a clean run.
+        if unpriced:
+            report.errors.append(
+                f"{len(unpriced)} Kalshi fixture(s) had no sharp price and were "
+                f"NOT bet: {[list(f) for f in unpriced]}. Usually a team-name "
+                "mapping gap in canonical_teams, or an odds feed missing the fixture.")
+        if no_matrix:
+            report.errors.append(
+                f"{len(no_matrix)} fixture(s) priced but with no score matrix, so "
+                f"BTTS and same-game parlays were skipped: {[list(f) for f in no_matrix]}. "
+                "Usually a missing totals line, or a solve that did not reproduce "
+                "the sharp 1X2.")
 
         if not dry_run:
             placed = {a: arms_mod.place_arm(a, ps, state=state) for a, ps in plans.items()}

@@ -7,6 +7,37 @@ from src.pipeline import kalshi_markets as km
 from src.pipeline import matchweek
 
 
+def test_unpriced_kalshi_fixture_is_warned_not_silently_dropped(monkeypatch, tmp_path):
+    """
+    A Kalshi fixture with no sharp price is skipped by build_opportunities with
+    no error, so a broken team-name mapping looks exactly like a quiet week.
+    The run must complete (the bets we could price are still good) but must not
+    pass as clean.
+    """
+    from src.market import ledger as _ledger
+    from src.pipeline import matchweek as mw
+    monkeypatch.setattr(_ledger, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(_ledger, "LEDGER_PATH", str(tmp_path / "l.json"))
+    monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
+
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "arsenal", "away": "chelsea", "market": "1x2",
+         "selection": "home", "ask": 0.40, "league": "epl"},
+        {"home": "liverpool", "away": "everton", "market": "1x2",
+         "selection": "home", "ask": 0.40, "league": "epl"},
+    ])
+    # Only one of the two fixtures has a sharp price.
+    monkeypatch.setattr(mw, "collect_fair_values", lambda: {
+        ("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
+    })
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+
+    report = mw.run_stake(dry_run=True)
+    assert report.ok                                   # the priced fixture still runs
+    assert report.details["unpriced_fixtures"] == [["liverpool", "everton"]]
+    assert any("no sharp price" in e for e in report.errors)
+
+
 @pytest.fixture(autouse=True)
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(ledger, "DATA_DIR", str(tmp_path))
