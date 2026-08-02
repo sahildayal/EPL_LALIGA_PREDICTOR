@@ -33,34 +33,13 @@ jobs:
       - run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      # Scoped to the 2026/27 rebuild suite, not all of scratch/.
+      # Deliberately a bare `pytest`. Scope lives in pytest.ini, so this command
+      # means the same thing here as it does on a developer machine — when CI
+      # and local differ, the local one is the one you start trusting.
       #
-      # scratch/ also holds ~40 World Cup-era test files. They are slow (several
-      # hit the live ESPN and news feeds — one takes 45s on its own) and four of
-      # them assert behaviour the rebuild deliberately removed: the deleted
-      # browser dashboard, World Cup confederation calibration, and the retired
-      # paper_trading module whose string grader is disabled precisely so it
-      # cannot corrupt the season. A gate that is red for reasons nobody intends
-      # to fix stops being read, so it gates the code that actually runs
-      # unattended each week.
-      #
-      # These files are offline by construction: no secrets are provided, so
-      # anything reaching for the network must already be mocked. A test that
-      # only passes with live credentials cannot gate a deploy.
-      - name: Rebuild test suite
-        run: |
-          python -m pytest -q \
-            scratch/test_arms.py \
-            scratch/test_calibration.py \
-            scratch/test_canonical_teams.py \
-            scratch/test_dataset.py \
-            scratch/test_dixon_coles.py \
-            scratch/test_eval.py \
-            scratch/test_grading.py \
-            scratch/test_implied_goals.py \
-            scratch/test_ledger.py \
-            scratch/test_odds_api.py \
-            scratch/test_parlay_arm.py \
-            scratch/test_pipeline.py \
-            scratch/test_results.py \
-            scratch/test_staking.py
+      # No secrets are provided, so anything reaching for the network must
+      # already be mocked. A test that only passes with live credentials cannot
+      # gate a deploy. Archived World Cup-era tests live in scratch/legacy/ and
+      # are excluded; see that directory's README.
+      - name: Test suite
+        run: python -m pytest -q

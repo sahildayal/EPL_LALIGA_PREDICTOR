@@ -1,3 +1,27 @@
+"""
+LEGACY — exploratory predictor. NOT on the betting path.
+
+This is the pre-rebuild multi-model ensemble, kept because it is useful for
+ad-hoc "who wins A vs B?" questions from the CLI. Nothing here sizes, prices or
+grades a bet.
+
+**Its output must never reach the ledger.** The weekly automation
+(`src/pipeline/matchweek.py`) does not import this module at all. Bets are
+priced off the de-vigged sharp consensus in `src/market/edge.py`, and the only
+model on that path is `src/models/dixon_coles.py`, used for arm C — a funded
+control that is expected to lose.
+
+That is an empirical finding, not a style preference. Walk-forward CV over 16
+seasons in two leagues found no standalone model beating the market in any of
+32 fold-league combinations, and a market/model blend weight fitted
+walk-forward converged to ZERO model weight in both leagues. Reading a
+confident-looking number out of this file and treating it as an edge is the
+specific mistake that evidence rules out.
+
+Some paths here still assume international football (national-team Elo,
+confederation-era helpers) and are only as correct as the World Cup work that
+produced them.
+"""
 import math
 import numpy as np
 import pandas as pd
