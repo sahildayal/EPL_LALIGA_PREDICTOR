@@ -1,0 +1,34 @@
+# Saturday and Sunday: capture pre-kickoff Kalshi prices. Read-only.
+#
+# This job exists entirely for Closing Line Value. CLV is the season's primary
+# metric because at roughly 150 bets per arm, P&L is dominated by variance while
+# CLV converges far faster — but CLV only exists if the closing price is
+# recorded before the market resolves. Miss this job and the week's bets can
+# still be settled, but they contribute nothing to the metric that will actually
+# decide which arm won.
+#
+# Two runs per day. The later one is close to the main kickoff blocks (15:00 UK
+# Saturday, 16:15 CET Sunday); the earlier one is insurance, since a stamped
+# price from four hours out is far better than none.
+name: Matchweek — snapshot
+
+on:
+  schedule:
+    - cron: "0 11 * * 6,7"     # Sat & Sun 11:00 UTC
+    - cron: "0 14 * * 6,7"     # Sat & Sun 14:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  snapshot:
+    uses: ./.github/workflows/_matchweek.yml
+    with:
+      job: snapshot
+      commit: true
+    secrets:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
+      KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}

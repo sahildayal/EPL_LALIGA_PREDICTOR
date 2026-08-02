@@ -19,29 +19,89 @@ ELO_PREDICTOR = EloModel()
 ELO_FILE_PATH = Path(__file__).parent.parent / "data" / "processed" / "elo_ratings.json"
 
 def load_elo():
-    if ELO_FILE_PATH.exists():
-        try:
-            with open(ELO_FILE_PATH, "r") as f:
-                ratings = json.load(f)
-                for t, elo in ratings.items():
-                    ELO_PREDICTOR.set(t, elo)
-                return
-        except Exception:
-            pass
-    # Fallback to static seeds (Club + National)
-    for t, elo in elo_db.CLUB_ELO.items():
-        ELO_PREDICTOR.set(t, elo)
+    """
+    Populates ELO_PREDICTOR with live club ratings from ClubElo, plus national
+    ratings for legacy international fixtures.
+
+    Ordering matters. The previous implementation loaded elo_ratings.json (which
+    holds only national teams) and returned early, leaving the club table
+    unreachable — so every EPL/La Liga club fell through to the 1700 default and
+    Elo emitted an identical prediction for every club fixture.
+
+    ClubElo is the source of truth for clubs and is refreshed daily. We do not
+    persist our own club Elo drift: ClubElo already updates continuously and is
+    better calibrated than a hand-rolled K-factor loop.
+    """
+    loaded_clubs = 0
+
+    # 1. Live club ratings (cached 24h by the scraper).
+    try:
+        from src.data.scrapers import club_elo
+        club_ratings = club_elo.get_club_ratings()
+        for t, elo in club_ratings.items():
+            ELO_PREDICTOR.set(t, elo)
+        loaded_clubs = len(club_ratings)
+        _persist_club_snapshot(club_ratings)
+    except Exception as exc:
+        print(f"Warning: live ClubElo unavailable ({exc}). Falling back to last saved snapshot.")
+        loaded_clubs = _load_club_snapshot()
+
+    # 2. National teams occupy a different Elo scale; only used by legacy
+    #    international fixtures, and never blended with club ratings.
     for t, elo in elo_db.NATIONAL_TEAM_ELO.items():
         if t not in ELO_PREDICTOR.ratings:
             ELO_PREDICTOR.set(t, elo)
 
-def save_elo():
-    ELO_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if loaded_clubs == 0:
+        print(
+            "Warning: no club Elo ratings loaded. Club predictions will fall back "
+            "to the default rating and will not discriminate between teams."
+        )
+
+
+CLUB_ELO_SNAPSHOT_PATH = Path(__file__).parent.parent / "data" / "processed" / "club_elo_snapshot.json"
+
+
+def _persist_club_snapshot(ratings: dict):
+    """Saves the last good ClubElo pull so an API outage degrades gracefully."""
     try:
-        with open(ELO_FILE_PATH, "w") as f:
-            json.dump(ELO_PREDICTOR.ratings, f, indent=2)
+        CLUB_ELO_SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(CLUB_ELO_SNAPSHOT_PATH, "w") as f:
+            json.dump(ratings, f, indent=2)
     except Exception:
         pass
+
+
+def _load_club_snapshot() -> int:
+    """Loads the last good ClubElo pull. Returns the number of clubs loaded."""
+    if not CLUB_ELO_SNAPSHOT_PATH.exists():
+        return 0
+    try:
+        with open(CLUB_ELO_SNAPSHOT_PATH, "r") as f:
+            ratings = json.load(f)
+        for t, elo in ratings.items():
+            ELO_PREDICTOR.set(t, elo)
+        return len(ratings)
+    except Exception:
+        return 0
+
+
+def has_elo(team: str) -> bool:
+    """True if we hold a real rating for this team rather than the default."""
+    return normalize_team_name(team) in ELO_PREDICTOR.ratings
+
+def save_elo():
+    """
+    Deprecated. Club ratings are owned by ClubElo and refreshed daily via
+    _persist_club_snapshot(); persisting our own drift here would mix the club
+    and national Elo scales into one file and be silently discarded on reload.
+    Retained only so any external caller fails loudly rather than silently
+    writing a file nothing reads.
+    """
+    raise NotImplementedError(
+        "save_elo() is deprecated: club Elo is sourced from ClubElo and cached "
+        "in club_elo_snapshot.json. See docs/superpowers/specs/2026-08-01-season-rebuild-design.md"
+    )
 
 # Load ratings
 load_elo()

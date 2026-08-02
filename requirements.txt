@@ -5,6 +5,9 @@ scikit-learn
 xgboost
 lightgbm
 requests
+# RSA-PSS request signing for the Kalshi V2 API. Was absent, so kalshi_client
+# silently fell back to "no credentials" on any clean install, including CI.
+cryptography
 beautifulsoup4
 lxml
 python-dotenv
@@ -12,3 +15,4 @@ rich
 joblib
 matplotlib
 google-generativeai
+pytest

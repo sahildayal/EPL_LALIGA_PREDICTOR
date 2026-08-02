@@ -1,0 +1,39 @@
+# Friday: price the matchweek and place this week's bets.
+#
+# 09:00 UTC is chosen to sit ahead of the earliest kickoff of the weekend. EPL
+# and La Liga both schedule Friday-night fixtures (20:00 UK / 21:00 CET), so a
+# Friday-evening run would price part of the matchweek after it had started.
+#
+# Note the schedule is UTC year-round while the leagues run on local time, so
+# these fire an hour "later" in local terms once the clocks go back. 09:00 UTC
+# leaves enough margin that this never matters.
+name: Matchweek — stake
+
+on:
+  schedule:
+    - cron: "0 9 * * 5"        # Fridays 09:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Price and log the plan without staking anything
+        type: boolean
+        default: false
+
+# A reusable workflow can only narrow the caller's token, never widen it, so
+# these must be granted here as well as in _matchweek.yml.
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  stake:
+    uses: ./.github/workflows/_matchweek.yml
+    with:
+      job: stake
+      # A dry run must never write the ledger, or "dry" would be a lie.
+      commit: ${{ !inputs.dry_run }}
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
+      KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}

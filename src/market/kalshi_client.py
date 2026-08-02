@@ -19,6 +19,16 @@ load_dotenv()
 KALSHI_BASE_URL = "https://api.elections.kalshi.com"
 
 
+class KalshiUnavailable(RuntimeError):
+    """
+    Raised when Kalshi data cannot be retrieved.
+
+    Never substitute fabricated prices, balances or fills. A pipeline that
+    silently prices bets off invented markets produces a season of results that
+    look real and mean nothing.
+    """
+
+
 class KalshiClient:
     """
     Authenticated Kalshi V2 API client using RSA key signature.
@@ -27,28 +37,53 @@ class KalshiClient:
     def __init__(self):
         self.key_id = os.getenv("KALSHI_API_KEY_ID")
         self.private_key_path = os.getenv("KALSHI_PRIVATE_KEY_PATH")
+        # CI has no filesystem to put a key on, and writing one to disk in a
+        # runner leaves it in the workspace for anything else in the job to read.
+        # Supplying the PEM directly keeps the private key in process memory only.
+        self.private_key_pem = os.getenv("KALSHI_PRIVATE_KEY_PEM")
         self.private_key = None
         self.mock_mode = False
+        self.credential_source = None
 
         if not CRYPTOGRAPHY_AVAILABLE:
-            print("Warning: 'cryptography' library not installed. Switch to Demo/Mock mode.")
+            print("Warning: 'cryptography' not installed. Kalshi calls will raise.")
             self.mock_mode = True
-        elif not self.key_id or not self.private_key_path:
-            print("Warning: Kalshi RSA Key credentials not found in .env. Switch to Demo/Mock mode.")
+        elif not self.key_id:
+            print("Warning: KALSHI_API_KEY_ID not set. Kalshi calls will raise.")
+            self.mock_mode = True
+        elif not (self.private_key_pem or self.private_key_path):
+            print("Warning: no Kalshi private key (KALSHI_PRIVATE_KEY_PEM or "
+                  "KALSHI_PRIVATE_KEY_PATH). Kalshi calls will raise.")
             self.mock_mode = True
         else:
             self._load_private_key()
 
     def _load_private_key(self):
+        """
+        Loads the RSA key from the PEM env var if present, else from a file.
+
+        The env var wins so a CI secret cannot be silently overridden by a stale
+        key path inherited from a local .env.
+        """
         try:
-            with open(self.private_key_path, "rb") as key_file:
-                self.private_key = serialization.load_pem_private_key(
-                    key_file.read(),
-                    password=None
-                )
-            print("Successfully loaded Kalshi RSA Private Key.")
+            if self.private_key_pem:
+                # GitHub secrets round-trip newlines inconsistently depending on
+                # how the secret was pasted; normalise escaped newlines so a
+                # correct key is not rejected as malformed PEM.
+                pem = self.private_key_pem.replace("\\n", "\n").strip().encode("utf-8")
+                self.private_key = serialization.load_pem_private_key(pem, password=None)
+                self.credential_source = "KALSHI_PRIVATE_KEY_PEM"
+            else:
+                with open(self.private_key_path, "rb") as key_file:
+                    self.private_key = serialization.load_pem_private_key(
+                        key_file.read(), password=None)
+                self.credential_source = "KALSHI_PRIVATE_KEY_PATH"
+            print(f"Loaded Kalshi RSA private key from {self.credential_source}.")
         except Exception as e:
-            print(f"Error loading private key: {e}. Switching to Demo/Mock mode.")
+            # Never echo the exception's payload — a PEM parse failure can quote
+            # key material back into the log, and CI logs are retained.
+            print(f"Error loading Kalshi private key ({type(e).__name__}). "
+                  "Kalshi calls will raise.")
             self.mock_mode = True
 
     def _sign_request(self, timestamp: str, method: str, path: str) -> str:
@@ -100,41 +135,43 @@ class KalshiClient:
 
     def get_balance(self) -> float:
         """
-        Returns cash balance in USD.
+        Returns real Kalshi cash balance in USD.
+
+        Raises KalshiUnavailable rather than returning a number we made up. The
+        previous implementation returned a hardcoded 1450.75 both in mock mode
+        and on *any* API error, so an outage silently reported fake money as a
+        real balance.
+
+        Note: the season experiment is run entirely on simulated bankrolls in
+        paper_trading; this method exists only for reading the real account and
+        is not part of the betting loop.
         """
         if self.mock_mode:
-            return 1450.75
+            raise KalshiUnavailable(
+                "Kalshi client is in mock mode (no credentials loaded); no real balance available."
+            )
 
         path = "/trade-api/v2/portfolio/balance"
         try:
             resp = self._request("GET", path)
-            if resp.status_code == 200:
-                # Balance is returned in cents
-                cents = resp.json().get("balance", 0)
-                return cents / 100.0
-            else:
-                print(f"Kalshi request failed (Status: {resp.status_code}): {resp.text}")
         except Exception as e:
-            print(f"Kalshi request error: {e}")
-        return 1450.75
+            raise KalshiUnavailable(f"Kalshi balance request errored: {e}") from e
+
+        if resp.status_code != 200:
+            raise KalshiUnavailable(
+                f"Kalshi balance request failed (status {resp.status_code}): {resp.text}"
+            )
+        # Balance is returned in cents
+        return resp.json().get("balance", 0) / 100.0
 
     def get_closed_positions(self) -> list:
         """
         Returns completed fills/trades history.
         """
         if self.mock_mode:
-            return [
-                {
-                    "id": "t-8fa2",
-                    "match": "Argentina vs France",
-                    "outcome": "Argentina Win",
-                    "contracts": 120,
-                    "price_paid": 0.58,
-                    "result": "WIN",
-                    "pnl": 50.40,
-                    "date": "2026-06-21"
-                }
-            ]
+            raise KalshiUnavailable(
+                "Kalshi client is in mock mode (no credentials loaded); no real fills available."
+            )
 
         path = "/trade-api/v2/portfolio/settlements"
         try:
@@ -188,35 +225,13 @@ class KalshiClient:
         Queries trade-api/v2/markets directly for sports tickers to bypass event exclusions.
         """
         if self.mock_mode:
-            return [
-                {
-                    "event_title": "Arsenal vs Chelsea",
-                    "subtitle": "Premier League",
-                    "category": "Sports",
-                    "occurrence_time": "2026-08-15T16:30:00Z",
-                    "markets": [
-                        {"ticker": "KXEPLGAME-ARS-CHE-YES", "title": "Arsenal Win", "yes_price": 0.52, "no_price": 0.48, "status": "open"},
-                        {"ticker": "KXEPLGAME-ARS-CHE-NO", "title": "Chelsea Win", "yes_price": 0.24, "no_price": 0.76, "status": "open"},
-                        {"ticker": "KXEPLGAME-ARS-CHE-DRAW", "title": "Draw", "yes_price": 0.24, "no_price": 0.76, "status": "open"},
-                        {"ticker": "KXEPLBTTS-ARS-CHE", "title": "Both Teams to Score", "yes_price": 0.62, "no_price": 0.38, "status": "open"},
-                        {"ticker": "KXEPLTOTAL-ARS-CHE-O1.5", "title": "Over 1.5 Goals", "yes_price": 0.82, "no_price": 0.18, "status": "open"},
-                        {"ticker": "KXEPLTOTAL-ARS-CHE-O2.5", "title": "Over 2.5 Goals", "yes_price": 0.54, "no_price": 0.46, "status": "open"},
-                    ]
-                },
-                {
-                    "event_title": "Real Madrid vs Barcelona",
-                    "subtitle": "La Liga",
-                    "category": "Sports",
-                    "occurrence_time": "2026-08-16T19:00:00Z",
-                    "markets": [
-                        {"ticker": "KXLALIGAGAME-RMA-BAR-YES", "title": "Real Madrid Win", "yes_price": 0.48, "no_price": 0.52, "status": "open"},
-                        {"ticker": "KXLALIGAGAME-RMA-BAR-NO", "title": "Barcelona Win", "yes_price": 0.28, "no_price": 0.72, "status": "open"},
-                        {"ticker": "KXLALIGAGAME-RMA-BAR-DRAW", "title": "Draw", "yes_price": 0.24, "no_price": 0.76, "status": "open"},
-                        {"ticker": "KXLALIGABTTS-RMA-BAR", "title": "Both Teams to Score", "yes_price": 0.68, "no_price": 0.32, "status": "open"},
-                        {"ticker": "KXLALIGATOTAL-RMA-BAR-O2.5", "title": "Over 2.5 Goals", "yes_price": 0.58, "no_price": 0.42, "status": "open"},
-                    ]
-                }
-            ]
+            # This previously returned invented Arsenal-Chelsea and Real-Barca
+            # markets with invented prices. Downstream code cannot tell a
+            # fabricated price from a real one, so it priced and placed bets
+            # against fiction.
+            raise KalshiUnavailable(
+                "Kalshi client is in mock mode (no credentials loaded); no live market prices available."
+            )
 
         series_tickers = [
             "KXEPLGAME", "KXEPLTOTAL", "KXEPLBTTS", "KXEPLGOAL", "KXEPLCORNERS",

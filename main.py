@@ -2,8 +2,8 @@
 import sys
 import argparse
 from src.models import trainer, statistical
-from src.predictor import predict_match, ELO_PREDICTOR, math_log, save_elo
-from src.market.kalshi_client import KalshiClient
+from src.predictor import predict_match, ELO_PREDICTOR, math_log
+from src.market.kalshi_client import KalshiClient, KalshiUnavailable
 from src.parlay.parlay_engine import ParlayEngine
 from src.data.scrapers import fbref, player_stats, news, fixtures
 from src.data.scrapers.corners import get_team_recent_corners
@@ -40,6 +40,22 @@ def banner():
     ))
 
 
+def fetch_kalshi_markets() -> list:
+    """
+    Returns live Kalshi soccer markets, or an empty list if they are unavailable.
+
+    Empty means empty. The client used to fabricate Arsenal-Chelsea and
+    Real-Barca markets with invented prices whenever credentials were missing,
+    which meant the pipeline happily priced and staked bets against fiction.
+    Callers must treat [] as "no prices, do not bet".
+    """
+    try:
+        return KalshiClient().get_soccer_markets()
+    except KalshiUnavailable as exc:
+        console.print(f"[yellow]Kalshi markets unavailable: {exc}[/yellow]")
+        return []
+
+
 def run_init():
     console.print("\n[yellow]Starting initial training loop...[/yellow]")
     trainer.train_and_save_all()
@@ -58,8 +74,7 @@ def run_predict(query: str):
     console.print(f"\n[cyan]Predicting match: {home.title()} vs {away.title()}...[/cyan]")
     
     # Run public search on Kalshi for current prices to serve as feature input
-    client = KalshiClient()
-    markets = client.get_soccer_markets()
+    markets = fetch_kalshi_markets()
     
     kalshi_probs = None
     for ev in markets:
@@ -391,8 +406,7 @@ def run_predict(query: str):
 
 def run_parlay(longshot: bool = False, today_only: bool = False):
     console.print("\n[yellow]Retrieving live Kalshi markets and matches...[/yellow]")
-    client = KalshiClient()
-    markets = client.get_soccer_markets()
+    markets = fetch_kalshi_markets()
     
     matches = []
     if markets:
@@ -498,28 +512,12 @@ def run_parlay(longshot: bool = False, today_only: bool = False):
         console.print(f"[cyan]Filtering for matches playing today ({today_str})... Found {len(matches)} matches.[/cyan]")
 
     if not matches:
-        if today_only:
-            console.print("[yellow]No active match markets found playing today on Kalshi.[/yellow]")
-            return
-        console.print("[yellow]No active match markets found on Kalshi. Generating sample/demo parlays.[/yellow]")
-        # Mock matches for generating demo parlays
-        matches = [
-            {
-                "home": "argentina", "away": "chile",
-                "market_odds": {"home_win": 0.65, "draw": 0.22, "away_win": 0.13, "over_1.5": 0.70, "over_2.5": 0.50, "btts": 0.48},
-                "players": [("lionel messi", True)]
-            },
-            {
-                "home": "france", "away": "poland",
-                "market_odds": {"home_win": 0.70, "draw": 0.20, "away_win": 0.10, "over_1.5": 0.75, "over_2.5": 0.55, "btts": 0.45},
-                "players": [("kylian mbappe", True)]
-            },
-            {
-                "home": "england", "away": "usa",
-                "market_odds": {"home_win": 0.58, "draw": 0.25, "away_win": 0.17, "over_1.5": 0.65, "over_2.5": 0.45, "btts": 0.50},
-                "players": [("harry kane", True)]
-            }
-        ]
+        # This previously fabricated three fixtures with invented market odds
+        # (argentina vs chile at 0.65/0.22/0.13, ...) and then placed real paper
+        # bets on them. Those bets could never resolve, so they sat pending
+        # forever while polluting the season ledger.
+        console.print("[yellow]No active match markets found on Kalshi. Nothing to price.[/yellow]")
+        return
 
     # Limit to the next 8 upcoming matches to keep computation fast and focus on soonest games
     if len(matches) > 8:
@@ -728,17 +726,18 @@ def run_complete(home: str, away: str, home_goals: int, away_goals: int):
     elif home_goals < away_goals:
         res = 0.0
         
-    # Update ELO
-    h_elo = ELO_PREDICTOR.get(home)
-    a_elo = ELO_PREDICTOR.get(away)
-    ELO_PREDICTOR.update(home, away, res)
-    console.print(f"Updated ELOs: {home.title()}: {h_elo:.1f} -> {ELO_PREDICTOR.get(home):.1f} | {away.title()}: {a_elo:.1f} -> {ELO_PREDICTOR.get(away):.1f}")
-    
+    # Club Elo is sourced from ClubElo and refreshed daily, so we deliberately do
+    # not apply an in-house K-factor update here: it would be silently discarded
+    # on the next load and would drift away from the published ratings.
+    console.print(
+        f"[dim]Club Elo: {home.title()} {ELO_PREDICTOR.get(home):.1f} | "
+        f"{away.title()} {ELO_PREDICTOR.get(away):.1f} (refreshed daily from ClubElo)[/dim]"
+    )
+
     # Append match to master training CSV and retrain ML models
     trainer.add_completed_match(home, away, home_goals, away_goals)
     console.print("[bold green]Success! Models retrained dynamically.[/bold green]")
-    save_elo()
-    
+
     # Resolve paper bets
     from src.market import paper_trading
     results = paper_trading.resolve_pending_bets(home, away, home_goals, away_goals)
@@ -801,8 +800,11 @@ def run_portfolio():
             console.print(table)
             pnl_color = "green" if total_pnl >= 0 else "red"
             console.print(f"[bold white]Live Realized P&L:[/bold white] [{pnl_color}]${total_pnl:+.2f}[/{pnl_color}]\n")
+    except KalshiUnavailable as e:
+        console.print(f"[dim]Live Kalshi account unavailable ({e}). Showing paper trading ledgers only.[/dim]\n")
     except Exception as e:
-        console.print("[dim]Note: Live Kalshi API client not configured or offline. Showing Paper Trading Bot accounts only.[/dim]\n")
+        console.print(f"[dim]Unexpected error reading live Kalshi account ({type(e).__name__}: {e}). "
+                      f"Showing paper trading ledgers only.[/dim]\n")
 
     # 2. Retrieve Paper Trading Accounts for all Bot Categories
     from src.market import paper_trading
@@ -886,8 +888,7 @@ def run_ask(query: str, user_model: str):
     console.print(f"\n[cyan]Running forecasting pipeline for: {home.title()} vs {away.title()}...[/cyan]")
     
     # Run public search on Kalshi for current prices to serve as feature input
-    client = KalshiClient()
-    markets = client.get_soccer_markets()
+    markets = fetch_kalshi_markets()
     
     kalshi_probs = None
     for ev in markets:
@@ -1255,11 +1256,10 @@ def run_update():
             # 2. Calculate pre-match features (using current ELO ratings before update)
             features = get_match_features(home_team, away_team)
             
-            # 3. Update ELO rating
-            h_elo_before = ELO_PREDICTOR.get(home_team)
-            a_elo_before = ELO_PREDICTOR.get(away_team)
-            ELO_PREDICTOR.update(home_team, away_team, res_val)
-            
+            # 3. Club Elo comes from ClubElo and is refreshed daily; no in-house update.
+            h_elo_now = ELO_PREDICTOR.get(home_team)
+            a_elo_now = ELO_PREDICTOR.get(away_team)
+
             # 4. Resolve any pending paper bets
             from src.market import paper_trading
             bets_resolved = paper_trading.resolve_pending_bets(home_team, away_team, home_goals, away_goals)
@@ -1280,13 +1280,12 @@ def run_update():
             df = pd.concat([df, pd.DataFrame([row_dict])], ignore_index=True)
             
             console.print(f"  [green]- Ingested:[/green] {home_team} {home_goals} - {away_goals} {away_team} ({match_date}) "
-                          f"[dim]| ELOs updated: {home_team} ({h_elo_before:.0f}->{ELO_PREDICTOR.get(home_team):.0f}), {away_team} ({a_elo_before:.0f}->{ELO_PREDICTOR.get(away_team):.0f})[/dim]")
+                          f"[dim]| Club Elo: {home_team} {h_elo_now:.0f}, {away_team} {a_elo_now:.0f}[/dim]")
             updated = True
             new_count += 1
             
     if updated:
         df.to_csv(trainer.MASTER_CSV_PATH, index=False)
-        save_elo()
         console.print(f"\n[bold green]Ingested {new_count} new matches. Starting dynamic ML model retraining...[/bold green]")
         trainer.train_and_save_all()
         console.print("[bold green]Success! Synchronized all models & ratings.[/bold green]")

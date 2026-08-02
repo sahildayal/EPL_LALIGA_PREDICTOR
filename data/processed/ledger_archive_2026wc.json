@@ -1,0 +1,5358 @@
+{
+  "archived_utc": "2026-08-02T02:15:06.558725+00:00",
+  "note": "2026 World Cup paper trading, archived at the start of the 2026/27 season rebuild. Bets here were priced against expired markets and graded by the pre-rebuild string grader; treat their results as unreliable.",
+  "data": {
+    "predict": {
+      "magnus": {
+        "bankroll": 1675.89,
+        "active_bets": [],
+        "history": [
+          {
+            "home": "bosnia and herzegovina",
+            "away": "qatar",
+            "bet_type": "Moneyline - Bosnia And Herzegovina Win",
+            "stake": 100.0,
+            "odds": 1.56,
+            "result": "LOSS",
+            "pnl": -100.0
+          },
+          {
+            "home": "switzerland",
+            "away": "canada",
+            "bet_type": "Moneyline - Switzerland Win",
+            "stake": 90.0,
+            "odds": 2.5,
+            "result": "WIN",
+            "pnl": 135.0
+          },
+          {
+            "home": "morocco",
+            "away": "haiti",
+            "bet_type": "Moneyline - Morocco Win",
+            "stake": 81.0,
+            "odds": 1.23,
+            "result": "WIN",
+            "pnl": 18.63
+          },
+          {
+            "home": "scotland",
+            "away": "brazil",
+            "bet_type": "Moneyline - Brazil Win",
+            "stake": 72.9,
+            "odds": 1.32,
+            "result": "WIN",
+            "pnl": 23.33
+          },
+          {
+            "home": "czechia",
+            "away": "mexico",
+            "bet_type": "Moneyline - Mexico Win",
+            "stake": 65.61,
+            "odds": 1.75,
+            "result": "WIN",
+            "pnl": 49.21
+          },
+          {
+            "home": "south africa",
+            "away": "south korea",
+            "bet_type": "Moneyline - South Korea Win",
+            "stake": 59.05,
+            "odds": 1.72,
+            "result": "LOSS",
+            "pnl": -59.05
+          },
+          {
+            "home": "croatia",
+            "away": "ghana",
+            "bet_type": "Moneyline - Croatia Win",
+            "stake": 86.44,
+            "odds": 1.82,
+            "result": "WIN",
+            "pnl": 70.88
+          },
+          {
+            "home": "panama",
+            "away": "england",
+            "bet_type": "Moneyline - England Win",
+            "stake": 106.71,
+            "odds": 1.18,
+            "result": "WIN",
+            "pnl": 19.21
+          },
+          {
+            "home": "south africa",
+            "away": "canada",
+            "bet_type": "Moneyline - South Africa Win",
+            "stake": 96.04,
+            "odds": 5.56,
+            "result": "LOSS",
+            "pnl": -96.04
+          },
+          {
+            "home": "brazil",
+            "away": "japan",
+            "bet_type": "Moneyline - Brazil Win",
+            "stake": 95.5,
+            "odds": 1.89,
+            "result": "WIN",
+            "pnl": 85.0
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "Moneyline - France Win",
+            "stake": 114.62,
+            "odds": 1.28,
+            "result": "WIN",
+            "pnl": 32.09
+          },
+          {
+            "home": "mexico",
+            "away": "ecuador",
+            "bet_type": "Moneyline - Draw",
+            "stake": 103.15,
+            "odds": 2.86,
+            "result": "LOSS",
+            "pnl": -103.15
+          },
+          {
+            "home": "england",
+            "away": "congo dr",
+            "bet_type": "Moneyline - England Win",
+            "stake": 107.51,
+            "odds": 1.3,
+            "result": "WIN",
+            "pnl": 32.25
+          },
+          {
+            "home": "belgium",
+            "away": "senegal",
+            "bet_type": "Moneyline - Belgium Win",
+            "stake": 96.76,
+            "odds": 4.17,
+            "result": "WIN",
+            "pnl": 306.73
+          },
+          {
+            "home": "usa",
+            "away": "bosnia-herzegovina",
+            "bet_type": "Moneyline - Usa Win",
+            "stake": 87.08,
+            "odds": 1.37,
+            "result": "WIN",
+            "pnl": 32.22
+          },
+          {
+            "home": "spain",
+            "away": "austria",
+            "bet_type": "Moneyline - Spain Win",
+            "stake": 144.63,
+            "odds": 1.3,
+            "result": "WIN",
+            "pnl": 43.39
+          },
+          {
+            "home": "canada",
+            "away": "morocco",
+            "bet_type": "Moneyline - Morocco Win",
+            "stake": 123.5,
+            "odds": 2.94,
+            "result": "WIN",
+            "pnl": 239.59
+          },
+          {
+            "home": "paraguay",
+            "away": "france",
+            "bet_type": "Moneyline - France Win",
+            "stake": 123.21,
+            "odds": 1.19,
+            "result": "WIN",
+            "pnl": 23.41
+          },
+          {
+            "home": "brazil",
+            "away": "norway",
+            "bet_type": "Moneyline - Brazil Win",
+            "stake": 175.27,
+            "odds": 100.0,
+            "result": "LOSS",
+            "pnl": -175.27
+          },
+          {
+            "home": "mexico",
+            "away": "england",
+            "bet_type": "Moneyline - England Win",
+            "stake": 119.27,
+            "odds": 1.79,
+            "result": "WIN",
+            "pnl": 94.22
+          },
+          {
+            "home": "portugal",
+            "away": "spain",
+            "bet_type": "Moneyline - Spain Win",
+            "stake": 131.35,
+            "odds": 1.96,
+            "result": "WIN",
+            "pnl": 126.1
+          },
+          {
+            "home": "usa",
+            "away": "belgium",
+            "bet_type": "Moneyline - Usa Win",
+            "stake": 129.03,
+            "odds": 2.5,
+            "result": "LOSS",
+            "pnl": -129.03
+          },
+          {
+            "home": "argentina",
+            "away": "egypt",
+            "bet_type": "Moneyline - Argentina Win",
+            "stake": 152.67,
+            "odds": 2.04,
+            "result": "WIN",
+            "pnl": 158.78
+          },
+          {
+            "home": "switzerland",
+            "away": "colombia",
+            "bet_type": "Moneyline - Colombia Win",
+            "stake": 151.6,
+            "odds": 2.33,
+            "result": "LOSS",
+            "pnl": -151.6
+          }
+        ]
+      },
+      "athena": {
+        "bankroll": 1248.23,
+        "active_bets": [],
+        "history": [
+          {
+            "home": "bosnia and herzegovina",
+            "away": "qatar",
+            "bet_type": "Moneyline - Qatar Win",
+            "stake": 50.0,
+            "odds": 6.67,
+            "result": "LOSS",
+            "pnl": -50.0
+          },
+          {
+            "home": "switzerland",
+            "away": "canada",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 47.5,
+            "odds": 2.56,
+            "result": "WIN",
+            "pnl": 74.1
+          },
+          {
+            "home": "morocco",
+            "away": "haiti",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 45.12,
+            "odds": 2.63,
+            "result": "WIN",
+            "pnl": 73.55
+          },
+          {
+            "home": "scotland",
+            "away": "brazil",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 42.87,
+            "odds": 2.38,
+            "result": "LOSS",
+            "pnl": -42.87
+          },
+          {
+            "home": "czechia",
+            "away": "mexico",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 40.73,
+            "odds": 1.92,
+            "result": "LOSS",
+            "pnl": -40.73
+          },
+          {
+            "home": "south africa",
+            "away": "south korea",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 36.75,
+            "odds": 3.23,
+            "result": "LOSS",
+            "pnl": -36.75
+          },
+          {
+            "home": "croatia",
+            "away": "ghana",
+            "bet_type": "Player Props - Elisha Owusu Score or Assist",
+            "stake": 44.34,
+            "odds": 20.0,
+            "result": "LOSS",
+            "pnl": -44.34
+          },
+          {
+            "home": "panama",
+            "away": "england",
+            "bet_type": "Player Props - Fidel Escobar Score or Assist",
+            "stake": 44.1,
+            "odds": 25.0,
+            "result": "LOSS",
+            "pnl": -44.1
+          },
+          {
+            "home": "south africa",
+            "away": "canada",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 42.12,
+            "odds": 2.86,
+            "result": "LOSS",
+            "pnl": -42.12
+          },
+          {
+            "home": "brazil",
+            "away": "japan",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 120.66,
+            "odds": 3.45,
+            "result": "WIN",
+            "pnl": 295.62
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 169.21,
+            "odds": 1.82,
+            "result": "LOSS",
+            "pnl": -169.21
+          },
+          {
+            "home": "mexico",
+            "away": "ecuador",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 145.97,
+            "odds": 3.45,
+            "result": "LOSS",
+            "pnl": -145.97
+          },
+          {
+            "home": "england",
+            "away": "congo dr",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 124.08,
+            "odds": 2.86,
+            "result": "WIN",
+            "pnl": 230.79
+          },
+          {
+            "home": "belgium",
+            "away": "senegal",
+            "bet_type": "Player Props - Ismail Jakobs Score or Assist",
+            "stake": 73.92,
+            "odds": 10.0,
+            "result": "LOSS",
+            "pnl": -73.92
+          },
+          {
+            "home": "usa",
+            "away": "bosnia-herzegovina",
+            "bet_type": "Moneyline - Bosnia-Herzegovina Win",
+            "stake": 51.96,
+            "odds": 10.0,
+            "result": "LOSS",
+            "pnl": -51.96
+          },
+          {
+            "home": "spain",
+            "away": "austria",
+            "bet_type": "Player Props - Cucurella Score or Assist",
+            "stake": 101.74,
+            "odds": 5.0,
+            "result": "LOSS",
+            "pnl": -101.74
+          },
+          {
+            "home": "canada",
+            "away": "morocco",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 89.99,
+            "odds": 6.67,
+            "result": "WIN",
+            "pnl": 510.24
+          },
+          {
+            "home": "paraguay",
+            "away": "france",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 95.17,
+            "odds": 2.5,
+            "result": "LOSS",
+            "pnl": -95.17
+          },
+          {
+            "home": "brazil",
+            "away": "norway",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 186.81,
+            "odds": 3.85,
+            "result": "WIN",
+            "pnl": 532.41
+          },
+          {
+            "home": "mexico",
+            "away": "england",
+            "bet_type": "Player Props - Bukayo Saka 1+ Goals",
+            "stake": 108.99,
+            "odds": 9.09,
+            "result": "LOSS",
+            "pnl": -108.99
+          },
+          {
+            "home": "portugal",
+            "away": "spain",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 172.24,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -172.24
+          },
+          {
+            "home": "usa",
+            "away": "belgium",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 163.13,
+            "odds": 1.72,
+            "result": "WIN",
+            "pnl": 117.45
+          },
+          {
+            "home": "argentina",
+            "away": "egypt",
+            "bet_type": "Player Props - Haissem Hassan Score or Assist",
+            "stake": 145.54,
+            "odds": 12.5,
+            "result": "LOSS",
+            "pnl": -145.54
+          },
+          {
+            "home": "switzerland",
+            "away": "colombia",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 220.28,
+            "odds": 2.44,
+            "result": "LOSS",
+            "pnl": -220.28
+          }
+        ]
+      }
+    },
+    "ask": {
+      "magnus": {
+        "bankroll": 124.24,
+        "active_bets": [
+          {
+            "home": "croatia",
+            "away": "panama",
+            "bet_type": "Moneyline - Croatia Win",
+            "stake": 70.09,
+            "odds": 1.45
+          },
+          {
+            "home": "columbia",
+            "away": "congo dr",
+            "bet_type": "Moneyline - Draw",
+            "stake": 45.42,
+            "odds": 3.1
+          },
+          {
+            "home": "portugal",
+            "away": "uzbekistan",
+            "bet_type": "Moneyline - Portugal Win",
+            "stake": 50.54,
+            "odds": 1.45
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "France Win",
+            "stake": 19.0,
+            "odds": 1.26
+          },
+          {
+            "home": "argentina",
+            "away": "brazil",
+            "bet_type": "Brazil Win",
+            "stake": 26.65,
+            "odds": 4.1
+          },
+          {
+            "home": "morocco",
+            "away": "canada",
+            "bet_type": "Morocco Win",
+            "stake": 13.89,
+            "odds": 1.83
+          }
+        ],
+        "history": [
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Moneyline - England Win",
+            "stake": 100.0,
+            "odds": 1.45,
+            "result": "WIN",
+            "pnl": 45.0
+          },
+          {
+            "home": "portugal",
+            "away": "uzbekistan",
+            "bet_type": "Moneyline - Portugal Win",
+            "stake": 63.08,
+            "odds": 1.45,
+            "result": "WIN",
+            "pnl": 28.39
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Moneyline - England Win",
+            "stake": 104.5,
+            "odds": 1.45,
+            "result": "LOSS",
+            "pnl": -104.5
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Moneyline - England Win",
+            "stake": 94.05,
+            "odds": 1.45,
+            "result": "LOSS",
+            "pnl": -94.05
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Moneyline - England Win",
+            "stake": 84.65,
+            "odds": 1.45,
+            "result": "LOSS",
+            "pnl": -84.65
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Moneyline - England Win",
+            "stake": 52.23,
+            "odds": 1.45,
+            "result": "LOSS",
+            "pnl": -52.23
+          },
+          {
+            "home": "bosnia and herzegovina",
+            "away": "qatar",
+            "bet_type": "Moneyline - Draw",
+            "stake": 37.61,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -37.61
+          },
+          {
+            "home": "switzerland",
+            "away": "canada",
+            "bet_type": "Moneyline - Draw",
+            "stake": 40.88,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -40.88
+          },
+          {
+            "home": "morocco",
+            "away": "haiti",
+            "bet_type": "Moneyline - Morocco Win",
+            "stake": 43.25,
+            "odds": 1.45,
+            "result": "WIN",
+            "pnl": 19.46
+          },
+          {
+            "home": "scotland",
+            "away": "brazil",
+            "bet_type": "Moneyline - Draw",
+            "stake": 60.94,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -60.94
+          },
+          {
+            "home": "czechia",
+            "away": "mexico",
+            "bet_type": "Moneyline - Draw",
+            "stake": 28.65,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -28.65
+          },
+          {
+            "home": "south africa",
+            "away": "south korea",
+            "bet_type": "Moneyline - Draw",
+            "stake": 31.14,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -31.14
+          },
+          {
+            "home": "ecuador",
+            "away": "germany",
+            "bet_type": "Moneyline - Draw",
+            "stake": 31.37,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -31.37
+          },
+          {
+            "home": "japan",
+            "away": "sweden",
+            "bet_type": "Moneyline - Draw",
+            "stake": 26.55,
+            "odds": 3.1,
+            "result": "WIN",
+            "pnl": 55.76
+          },
+          {
+            "home": "tunisia",
+            "away": "netherlands",
+            "bet_type": "Moneyline - Draw",
+            "stake": 28.86,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -28.86
+          },
+          {
+            "home": "turkey",
+            "away": "usa",
+            "bet_type": "Moneyline - Draw",
+            "stake": 24.43,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -24.43
+          },
+          {
+            "home": "croatia",
+            "away": "ghana",
+            "bet_type": "Moneyline - Draw",
+            "stake": 26.74,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -26.74
+          },
+          {
+            "home": "panama",
+            "away": "england",
+            "bet_type": "Moneyline - Draw",
+            "stake": 29.06,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -29.06
+          },
+          {
+            "home": "south africa",
+            "away": "canada",
+            "bet_type": "Moneyline - Draw",
+            "stake": 24.6,
+            "odds": 3.1,
+            "result": "LOSS",
+            "pnl": -24.6
+          },
+          {
+            "home": "brazil",
+            "away": "japan",
+            "bet_type": "Moneyline - Brazil Win",
+            "stake": 28.29,
+            "odds": 1.45,
+            "result": "WIN",
+            "pnl": 12.73
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 25.0,
+            "odds": 0.7,
+            "result": "WIN",
+            "pnl": -7.5
+          },
+          {
+            "home": "mexico",
+            "away": "ecuador",
+            "bet_type": "Draw",
+            "stake": 25.0,
+            "odds": 2.86,
+            "result": "LOSS",
+            "pnl": -25.0
+          },
+          {
+            "home": "england",
+            "away": "congo dr",
+            "bet_type": "Player Props - Harry Kane to Score",
+            "stake": 26.3,
+            "odds": 0.68,
+            "result": "LOSS",
+            "pnl": -26.3
+          },
+          {
+            "home": "belgium",
+            "away": "senegal",
+            "bet_type": "Belgium Win",
+            "stake": 20.0,
+            "odds": 4.16,
+            "result": "WIN",
+            "pnl": 63.2
+          },
+          {
+            "home": "usa",
+            "away": "bosnia-herzegovina",
+            "bet_type": "Bosnia-Herzegovina Win",
+            "stake": 20.0,
+            "odds": 0.1,
+            "result": "LOSS",
+            "pnl": -20.0
+          },
+          {
+            "home": "spain",
+            "away": "austria",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 25.0,
+            "odds": 1.22,
+            "result": "WIN",
+            "pnl": 5.5
+          },
+          {
+            "home": "canada",
+            "away": "morocco",
+            "bet_type": "Both Teams to Score",
+            "stake": 19.88,
+            "odds": 3.7,
+            "result": "LOSS",
+            "pnl": -19.88
+          },
+          {
+            "home": "paraguay",
+            "away": "france",
+            "bet_type": "Both Teams to Score",
+            "stake": 19.0,
+            "odds": 0.4,
+            "result": "LOSS",
+            "pnl": -19.0
+          },
+          {
+            "home": "brazil",
+            "away": "norway",
+            "bet_type": "Moneyline - Brazil Win",
+            "stake": 15.0,
+            "odds": 100.0,
+            "result": "LOSS",
+            "pnl": -15.0
+          },
+          {
+            "home": "mexico",
+            "away": "england",
+            "bet_type": "Both Teams to Score",
+            "stake": 12.5,
+            "odds": 0.38,
+            "result": "WIN",
+            "pnl": -7.75
+          },
+          {
+            "home": "portugal",
+            "away": "spain",
+            "bet_type": "Cristiano Ronaldo to Score",
+            "stake": 12.76,
+            "odds": 0.37,
+            "result": "LOSS",
+            "pnl": -12.76
+          },
+          {
+            "home": "usa",
+            "away": "belgium",
+            "bet_type": "Both Teams to Score",
+            "stake": 11.95,
+            "odds": 1.56,
+            "result": "WIN",
+            "pnl": 6.69
+          },
+          {
+            "home": "argentina",
+            "away": "egypt",
+            "bet_type": "Egypt Win",
+            "stake": 14.0,
+            "odds": 4.35,
+            "result": "LOSS",
+            "pnl": -14.0
+          },
+          {
+            "home": "switzerland",
+            "away": "colombia",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 20.0,
+            "odds": 2.44,
+            "result": "LOSS",
+            "pnl": -20.0
+          }
+        ]
+      },
+      "athena": {
+        "bankroll": 877.89,
+        "active_bets": [
+          {
+            "home": "croatia",
+            "away": "panama",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 42.29,
+            "odds": 1.55
+          },
+          {
+            "home": "columbia",
+            "away": "congo dr",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 30.53,
+            "odds": 1.85
+          },
+          {
+            "home": "portugal",
+            "away": "uzbekistan",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 37.92,
+            "odds": 1.55
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 50.0,
+            "odds": 1.14
+          },
+          {
+            "home": "argentina",
+            "away": "brazil",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 60.0,
+            "odds": 1.05
+          },
+          {
+            "home": "morocco",
+            "away": "canada",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 81.67,
+            "odds": 1.23
+          }
+        ],
+        "history": [
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 50.0,
+            "odds": 1.55,
+            "result": "WIN",
+            "pnl": 27.5
+          },
+          {
+            "home": "portugal",
+            "away": "uzbekistan",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 40.17,
+            "odds": 1.55,
+            "result": "WIN",
+            "pnl": 22.09
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 51.38,
+            "odds": 1.55,
+            "result": "LOSS",
+            "pnl": -51.38
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 48.81,
+            "odds": 1.55,
+            "result": "LOSS",
+            "pnl": -48.81
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 46.37,
+            "odds": 1.55,
+            "result": "LOSS",
+            "pnl": -46.37
+          },
+          {
+            "home": "england",
+            "away": "ghana",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 36.64,
+            "odds": 1.55,
+            "result": "LOSS",
+            "pnl": -36.64
+          },
+          {
+            "home": "bosnia and herzegovina",
+            "away": "qatar",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 27.66,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 23.51
+          },
+          {
+            "home": "switzerland",
+            "away": "canada",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 28.82,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 24.5
+          },
+          {
+            "home": "morocco",
+            "away": "haiti",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 33.2,
+            "odds": 1.55,
+            "result": "WIN",
+            "pnl": 18.26
+          },
+          {
+            "home": "scotland",
+            "away": "brazil",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 35.24,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -35.24
+          },
+          {
+            "home": "czechia",
+            "away": "mexico",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 24.22,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -24.22
+          },
+          {
+            "home": "south africa",
+            "away": "south korea",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 25.23,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -25.23
+          },
+          {
+            "home": "ecuador",
+            "away": "germany",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 29.49,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 25.07
+          },
+          {
+            "home": "japan",
+            "away": "sweden",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 27.18,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 23.1
+          },
+          {
+            "home": "tunisia",
+            "away": "netherlands",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 28.31,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 24.06
+          },
+          {
+            "home": "turkey",
+            "away": "usa",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 26.09,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 22.18
+          },
+          {
+            "home": "croatia",
+            "away": "ghana",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 31.93,
+            "odds": 1.85,
+            "result": "WIN",
+            "pnl": 27.14
+          },
+          {
+            "home": "panama",
+            "away": "england",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 33.27,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -33.27
+          },
+          {
+            "home": "south africa",
+            "away": "canada",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 33.02,
+            "odds": 1.85,
+            "result": "LOSS",
+            "pnl": -33.02
+          },
+          {
+            "home": "brazil",
+            "away": "japan",
+            "bet_type": "Game Lines - Over 1.5 Goals",
+            "stake": 39.62,
+            "odds": 1.55,
+            "result": "WIN",
+            "pnl": 21.79
+          },
+          {
+            "home": "france",
+            "away": "sweden",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 73.0,
+            "odds": 0.7,
+            "result": "WIN",
+            "pnl": -21.9
+          },
+          {
+            "home": "mexico",
+            "away": "ecuador",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 70.0,
+            "odds": 3.45,
+            "result": "LOSS",
+            "pnl": -70.0
+          },
+          {
+            "home": "england",
+            "away": "congo dr",
+            "bet_type": "Game Lines - Both Teams to Score",
+            "stake": 72.23,
+            "odds": 0.35,
+            "result": "WIN",
+            "pnl": -46.95
+          },
+          {
+            "home": "belgium",
+            "away": "senegal",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 60.0,
+            "odds": 1.82,
+            "result": "WIN",
+            "pnl": 49.2
+          },
+          {
+            "home": "usa",
+            "away": "bosnia-herzegovina",
+            "bet_type": "Bosnia-Herzegovina Win",
+            "stake": 50.0,
+            "odds": 0.1,
+            "result": "LOSS",
+            "pnl": -50.0
+          },
+          {
+            "home": "spain",
+            "away": "austria",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 60.0,
+            "odds": 1.7,
+            "result": "WIN",
+            "pnl": 42.0
+          },
+          {
+            "home": "canada",
+            "away": "morocco",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 50.28,
+            "odds": 6.67,
+            "result": "WIN",
+            "pnl": 285.09
+          },
+          {
+            "home": "paraguay",
+            "away": "france",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 50.0,
+            "odds": 0.6,
+            "result": "LOSS",
+            "pnl": -50.0
+          },
+          {
+            "home": "brazil",
+            "away": "norway",
+            "bet_type": "Game Lines - Over 2.5 Goals",
+            "stake": 80.0,
+            "odds": 4.0,
+            "result": "WIN",
+            "pnl": 240.0
+          },
+          {
+            "home": "mexico",
+            "away": "england",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 73.5,
+            "odds": 0.25,
+            "result": "WIN",
+            "pnl": -55.12
+          },
+          {
+            "home": "portugal",
+            "away": "spain",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 73.65,
+            "odds": 0.56,
+            "result": "LOSS",
+            "pnl": -73.65
+          },
+          {
+            "home": "usa",
+            "away": "belgium",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 68.12,
+            "odds": 1.72,
+            "result": "WIN",
+            "pnl": 49.05
+          },
+          {
+            "home": "argentina",
+            "away": "egypt",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 80.0,
+            "odds": 1.52,
+            "result": "WIN",
+            "pnl": 41.6
+          },
+          {
+            "home": "switzerland",
+            "away": "colombia",
+            "bet_type": "Over 2.5 Goals",
+            "stake": 84.03,
+            "odds": 2.44,
+            "result": "LOSS",
+            "pnl": -84.03
+          }
+        ]
+      }
+    },
+    "parlay_standard": {
+      "magnus": {
+        "bankroll": 566.12,
+        "active_bets": [
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 62.9,
+            "odds": 5.91,
+            "is_parlay": true,
+            "legs": [
+              {
+                "home": "levski sofia",
+                "away": "kairat",
+                "bet_type": "Levski Sofia vs Kairat Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "levski sofia",
+                "away": "kairat",
+                "bet_type": "Levski Sofia vs Kairat Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "ararat-armenia",
+                "away": "nk celje",
+                "bet_type": "Ararat-Armenia vs Nk Celje Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          }
+        ],
+        "history": [
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 100.0,
+            "odds": 5.41,
+            "result": "LOSS",
+            "pnl": -100.0,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 90.0,
+            "odds": 5.49,
+            "result": "LOSS",
+            "pnl": -90.0,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 72.9,
+            "odds": 5.7,
+            "result": "LOSS",
+            "pnl": -72.9,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "ivory coast",
+                "away": "norway",
+                "bet_type": "Moneyline: Norway",
+                "result": "WIN"
+              },
+              {
+                "home": "france",
+                "away": "sweden",
+                "bet_type": "France vs Sweden Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 73.71,
+            "odds": 5.15,
+            "result": "WIN",
+            "pnl": 305.9,
+            "legs": [
+              {
+                "home": "england",
+                "away": "congo dr",
+                "bet_type": "England vs Congo Dr Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "belgium",
+                "away": "senegal",
+                "bet_type": "Belgium vs Senegal Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "england",
+                "away": "congo dr",
+                "bet_type": "England vs Congo Dr Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 104.3,
+            "odds": 8.97,
+            "result": "LOSS",
+            "pnl": -104.3,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "spain",
+                "away": "austria",
+                "bet_type": "Spain vs Austria Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 84.48,
+            "odds": 29.75,
+            "result": "LOSS",
+            "pnl": -84.48,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 77.65,
+            "odds": 6.59,
+            "result": "LOSS",
+            "pnl": -77.65,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 77.66,
+            "odds": 5.6,
+            "result": "LOSS",
+            "pnl": -77.66,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 69.89,
+            "odds": 7.06,
+            "result": "LOSS",
+            "pnl": -69.89,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          }
+        ]
+      },
+      "athena": {
+        "bankroll": 766.94,
+        "active_bets": [
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 40.37,
+            "odds": 5.91,
+            "is_parlay": true,
+            "legs": [
+              {
+                "home": "levski sofia",
+                "away": "kairat",
+                "bet_type": "Levski Sofia vs Kairat Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "levski sofia",
+                "away": "kairat",
+                "bet_type": "Levski Sofia vs Kairat Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "ararat-armenia",
+                "away": "nk celje",
+                "bet_type": "Ararat-Armenia vs Nk Celje Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          }
+        ],
+        "history": [
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 50.0,
+            "odds": 5.41,
+            "result": "LOSS",
+            "pnl": -50.0,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 47.5,
+            "odds": 5.49,
+            "result": "LOSS",
+            "pnl": -47.5,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 42.87,
+            "odds": 5.7,
+            "result": "LOSS",
+            "pnl": -42.87,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "ivory coast",
+                "away": "norway",
+                "bet_type": "Moneyline: Norway",
+                "result": "WIN"
+              },
+              {
+                "home": "france",
+                "away": "sweden",
+                "bet_type": "France vs Sweden Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 42.98,
+            "odds": 5.15,
+            "result": "WIN",
+            "pnl": 178.37,
+            "legs": [
+              {
+                "home": "england",
+                "away": "congo dr",
+                "bet_type": "England vs Congo Dr Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "belgium",
+                "away": "senegal",
+                "bet_type": "Belgium vs Senegal Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "england",
+                "away": "congo dr",
+                "bet_type": "England vs Congo Dr Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 51.9,
+            "odds": 8.97,
+            "result": "LOSS",
+            "pnl": -51.9,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "spain",
+                "away": "austria",
+                "bet_type": "Spain vs Austria Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 46.84,
+            "odds": 29.75,
+            "result": "LOSS",
+            "pnl": -46.84,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 44.73,
+            "odds": 6.59,
+            "result": "LOSS",
+            "pnl": -44.73,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 44.73,
+            "odds": 5.6,
+            "result": "LOSS",
+            "pnl": -44.73,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "standard",
+            "bet_type": "Standard Parlay (3 legs)",
+            "stake": 42.49,
+            "odds": 7.06,
+            "result": "LOSS",
+            "pnl": -42.49,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "parlay_longshot": {
+      "magnus": {
+        "bankroll": 1603.88,
+        "active_bets": [],
+        "history": [
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 20.0,
+            "odds": 11.8,
+            "result": "LOSS",
+            "pnl": -20.0,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (4 legs)",
+            "stake": 19.6,
+            "odds": 11.26,
+            "result": "LOSS",
+            "pnl": -19.6,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Both Teams to Score",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 19.21,
+            "odds": 11.13,
+            "result": "LOSS",
+            "pnl": -19.21,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 18.82,
+            "odds": 17.79,
+            "result": "LOSS",
+            "pnl": -18.82,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Moneyline: Scotland",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 18.45,
+            "odds": 10.54,
+            "result": "LOSS",
+            "pnl": -18.45,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "ecuador",
+                "away": "germany",
+                "bet_type": "Ecuador vs Germany Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "ecuador",
+                "away": "germany",
+                "bet_type": "Ecuador vs Germany Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 17.36,
+            "odds": 14.59,
+            "result": "LOSS",
+            "pnl": -17.36,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 16.67,
+            "odds": 11.45,
+            "result": "LOSS",
+            "pnl": -16.67,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 18.08,
+            "odds": 11.67,
+            "result": "WIN",
+            "pnl": 192.91,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (4 legs)",
+            "stake": 17.72,
+            "odds": 11.81,
+            "result": "WIN",
+            "pnl": 191.55,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (4 legs)",
+            "stake": 17.02,
+            "odds": 17.96,
+            "result": "WIN",
+            "pnl": 288.66,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 30.86,
+            "odds": 15.1,
+            "result": "LOSS",
+            "pnl": -30.86,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "belgium",
+                "away": "senegal",
+                "bet_type": "Belgium vs Senegal Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 30.24,
+            "odds": 17.82,
+            "result": "LOSS",
+            "pnl": -30.24,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (3 legs)",
+            "stake": 28.46,
+            "odds": 11.23,
+            "result": "LOSS",
+            "pnl": -28.46,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 27.92,
+            "odds": 18.06,
+            "result": "LOSS",
+            "pnl": -27.92,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 27.9,
+            "odds": 10.26,
+            "result": "WIN",
+            "pnl": 258.35,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.73,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 102.88,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Moneyline: Canada (Canada vs Morocco)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (3 legs)",
+            "stake": 2.0,
+            "odds": 89.25,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "pending"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 123.46,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (3 legs)",
+            "stake": 2.0,
+            "odds": 69.44,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Moneyline: Canada (Canada vs Morocco)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.79,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (3 legs)",
+            "stake": 2.0,
+            "odds": 160.64,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (3 legs)",
+            "stake": 2.0,
+            "odds": 85.47,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (3 legs)",
+            "stake": 2.0,
+            "odds": 222.22,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 83.33,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (6 legs)",
+            "stake": 2.0,
+            "odds": 56.72,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 51.31,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 2.0,
+            "odds": 59.26,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 53.15,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 2.0,
+            "odds": 59.62,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (4 legs)",
+            "stake": 2.0,
+            "odds": 50.66,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (4 legs)",
+            "stake": 2.0,
+            "odds": 69.34,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (4 legs)",
+            "stake": 2.0,
+            "odds": 53.8,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (4 legs)",
+            "stake": 2.0,
+            "odds": 51.17,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (4 legs)",
+            "stake": 2.0,
+            "odds": 50.14,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (6 legs)",
+            "stake": 2.0,
+            "odds": 57.15,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (5 legs)",
+            "stake": 2.0,
+            "odds": 53.85,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (5 legs)",
+            "stake": 2.0,
+            "odds": 53.82,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (4 legs)",
+            "stake": 2.0,
+            "odds": 51.31,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (4 legs)",
+            "stake": 2.0,
+            "odds": 54.78,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (5 legs)",
+            "stake": 2.0,
+            "odds": 52.29,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 5.5 Corners",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (4 legs)",
+            "stake": 2.0,
+            "odds": 60.28,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 67.1,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (5 legs)",
+            "stake": 2.0,
+            "odds": 51.37,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 62.47,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 2.0,
+            "odds": 67.1,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 88.18,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (3 legs)",
+            "stake": 2.0,
+            "odds": 150.56,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.59,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 2.0,
+            "odds": 62.21,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (3 legs)",
+            "stake": 2.0,
+            "odds": 93.53,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (3 legs)",
+            "stake": 2.0,
+            "odds": 79.71,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (3 legs)",
+            "stake": 2.0,
+            "odds": 121.04,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 57.25,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Lionel Messi to Score (Anytime) in Argentina vs Egypt",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 86.94,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Lionel Messi to Score (Anytime) in Argentina vs Egypt",
+                "result": "LOSS"
+              }
+            ]
+          }
+        ]
+      },
+      "athena": {
+        "bankroll": 1275.66,
+        "active_bets": [],
+        "history": [
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 10.0,
+            "odds": 11.8,
+            "result": "LOSS",
+            "pnl": -10.0,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (4 legs)",
+            "stake": 9.9,
+            "odds": 11.26,
+            "result": "LOSS",
+            "pnl": -9.9,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Both Teams to Score",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 9.8,
+            "odds": 11.13,
+            "result": "LOSS",
+            "pnl": -9.8,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "morocco",
+                "away": "haiti",
+                "bet_type": "Morocco vs Haiti Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 9.7,
+            "odds": 17.79,
+            "result": "LOSS",
+            "pnl": -9.7,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Moneyline: Scotland",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "switzerland",
+                "away": "canada",
+                "bet_type": "Switzerland vs Canada Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 9.61,
+            "odds": 10.54,
+            "result": "LOSS",
+            "pnl": -9.61,
+            "legs": [
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "scotland",
+                "away": "brazil",
+                "bet_type": "Scotland vs Brazil Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "ecuador",
+                "away": "germany",
+                "bet_type": "Ecuador vs Germany Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "ecuador",
+                "away": "germany",
+                "bet_type": "Ecuador vs Germany Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 9.32,
+            "odds": 14.59,
+            "result": "LOSS",
+            "pnl": -9.32,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 9.14,
+            "odds": 11.45,
+            "result": "LOSS",
+            "pnl": -9.14,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "colombia",
+                "away": "portugal",
+                "bet_type": "Colombia vs Portugal Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 9.51,
+            "odds": 11.67,
+            "result": "WIN",
+            "pnl": 101.47,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (4 legs)",
+            "stake": 9.41,
+            "odds": 11.81,
+            "result": "WIN",
+            "pnl": 101.72,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (4 legs)",
+            "stake": 9.23,
+            "odds": 17.96,
+            "result": "WIN",
+            "pnl": 156.54,
+            "legs": [
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "brazil",
+                "away": "japan",
+                "bet_type": "Brazil vs Japan Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "jordan",
+                "away": "argentina",
+                "bet_type": "Jordan vs Argentina Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 12.92,
+            "odds": 15.1,
+            "result": "LOSS",
+            "pnl": -12.92,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "belgium",
+                "away": "senegal",
+                "bet_type": "Belgium vs Senegal Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 12.79,
+            "odds": 17.82,
+            "result": "LOSS",
+            "pnl": -12.79,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (3 legs)",
+            "stake": 12.41,
+            "odds": 11.23,
+            "result": "LOSS",
+            "pnl": -12.41,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "mexico",
+                "away": "ecuador",
+                "bet_type": "Mexico vs Ecuador Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 12.29,
+            "odds": 18.06,
+            "result": "LOSS",
+            "pnl": -12.29,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Moneyline: Croatia",
+                "result": "LOSS"
+              },
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 12.29,
+            "odds": 10.26,
+            "result": "WIN",
+            "pnl": 113.81,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "croatia",
+                "bet_type": "Portugal vs Croatia Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "argentina",
+                "away": "cape verde",
+                "bet_type": "Argentina vs Cape Verde Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.73,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 102.88,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Moneyline: Canada (Canada vs Morocco)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (3 legs)",
+            "stake": 2.0,
+            "odds": 89.25,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "pending"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 123.46,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (3 legs)",
+            "stake": 2.0,
+            "odds": 69.44,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Moneyline: Canada (Canada vs Morocco)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.79,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (3 legs)",
+            "stake": 2.0,
+            "odds": 160.64,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 1.5 Goals",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (3 legs)",
+            "stake": 2.0,
+            "odds": 85.47,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 1.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (3 legs)",
+            "stake": 2.0,
+            "odds": 222.22,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "canada",
+                "away": "morocco",
+                "bet_type": "Canada vs Morocco Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 83.33,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Paraguay vs France Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "paraguay",
+                "away": "france",
+                "bet_type": "Moneyline: Paraguay (Paraguay vs France)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (6 legs)",
+            "stake": 2.0,
+            "odds": 56.72,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 51.31,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (4 legs)",
+            "stake": 2.0,
+            "odds": 59.26,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 53.15,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 2.0,
+            "odds": 59.62,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (4 legs)",
+            "stake": 2.0,
+            "odds": 50.66,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (4 legs)",
+            "stake": 2.0,
+            "odds": 69.34,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (4 legs)",
+            "stake": 2.0,
+            "odds": 53.8,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (4 legs)",
+            "stake": 2.0,
+            "odds": 51.17,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (4 legs)",
+            "stake": 2.0,
+            "odds": 50.14,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "mexico",
+                "away": "england",
+                "bet_type": "Mexico vs England Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (6 legs)",
+            "stake": 2.0,
+            "odds": 57.15,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (5 legs)",
+            "stake": 2.0,
+            "odds": 53.85,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (5 legs)",
+            "stake": 2.0,
+            "odds": 53.82,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 6.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 1.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (4 legs)",
+            "stake": 2.0,
+            "odds": 51.31,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 3.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (4 legs)",
+            "stake": 2.0,
+            "odds": 54.78,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Cristiano Ronaldo to Score (Anytime) in Portugal vs Spain",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (5 legs)",
+            "stake": 2.0,
+            "odds": 52.29,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 1.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Both Teams to Score",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 5.5 Corners",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (4 legs)",
+            "stake": 2.0,
+            "odds": 60.28,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 67.1,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Portugal vs Spain Over 2.5 Goals",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "pending"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (5 legs)",
+            "stake": 2.0,
+            "odds": 51.37,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Both Teams to Score",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Moneyline: Usa (Usa vs Belgium)",
+                "result": "WIN"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 62.47,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 2.5 Goals",
+                "result": "WIN"
+              },
+              {
+                "home": "usa",
+                "away": "belgium",
+                "bet_type": "Usa vs Belgium Over 8.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "portugal",
+                "away": "spain",
+                "bet_type": "Moneyline: Portugal (Portugal vs Spain)",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_1",
+            "bet_type": "Longshot Card #1 (3 legs)",
+            "stake": 2.0,
+            "odds": 67.1,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 1.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_2",
+            "bet_type": "Longshot Card #2 (3 legs)",
+            "stake": 2.0,
+            "odds": 88.18,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 1.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_3",
+            "bet_type": "Longshot Card #3 (3 legs)",
+            "stake": 2.0,
+            "odds": 150.56,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_4",
+            "bet_type": "Longshot Card #4 (3 legs)",
+            "stake": 2.0,
+            "odds": 61.59,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_5",
+            "bet_type": "Longshot Card #5 (4 legs)",
+            "stake": 2.0,
+            "odds": 62.21,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 4.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_6",
+            "bet_type": "Longshot Card #6 (3 legs)",
+            "stake": 2.0,
+            "odds": 93.53,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 2.5 Goals",
+                "result": "WIN"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_7",
+            "bet_type": "Longshot Card #7 (3 legs)",
+            "stake": 2.0,
+            "odds": 79.71,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_8",
+            "bet_type": "Longshot Card #8 (3 legs)",
+            "stake": 2.0,
+            "odds": 121.04,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Both Teams to Score",
+                "result": "pending"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_9",
+            "bet_type": "Longshot Card #9 (3 legs)",
+            "stake": 2.0,
+            "odds": 57.25,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Switzerland vs Colombia Over 2.5 Goals",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Lionel Messi to Score (Anytime) in Argentina vs Egypt",
+                "result": "LOSS"
+              }
+            ]
+          },
+          {
+            "home": "parlay",
+            "away": "longshot_10",
+            "bet_type": "Longshot Card #10 (3 legs)",
+            "stake": 2.0,
+            "odds": 86.94,
+            "result": "LOSS",
+            "pnl": -2.0,
+            "legs": [
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Argentina vs Egypt Over 6.5 Corners",
+                "result": "LOSS"
+              },
+              {
+                "home": "switzerland",
+                "away": "colombia",
+                "bet_type": "Moneyline: Switzerland (Switzerland vs Colombia)",
+                "result": "pending"
+              },
+              {
+                "home": "argentina",
+                "away": "egypt",
+                "bet_type": "Lionel Messi to Score (Anytime) in Argentina vs Egypt",
+                "result": "LOSS"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

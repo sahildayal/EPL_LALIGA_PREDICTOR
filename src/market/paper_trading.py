@@ -4,6 +4,18 @@ import json
 DATA_DIR = os.path.join("data", "processed")
 FILE_PATH = os.path.join(DATA_DIR, "paper_trading.json")
 
+# ESPN league slugs searched when settling a bet, in priority order. EPL and
+# La Liga are the 2026/27 season's betting scope; UCL is present for later; the
+# international slugs remain only for legacy World Cup fixtures in the ledger.
+SETTLEMENT_LEAGUES = [
+    "eng.1",
+    "esp.1",
+    "uefa.champions",
+    "fifa.world",
+    "uefa.nations",
+    "uefa.euro",
+]
+
 def load_state() -> dict:
     """Loads the paper trading state from JSON file with migration to multi-portfolio format."""
     if not os.path.exists(DATA_DIR):
@@ -80,8 +92,40 @@ def save_state(state: dict):
     with open(FILE_PATH, "w") as f:
         json.dump(state, f, indent=2)
 
-def place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: str, stake: float, odds: float, is_parlay: bool = False, legs: list = None) -> bool:
-    """Places a paper bet for a personality within a specific portfolio."""
+_DEPRECATION = (
+    "src.market.paper_trading is retired. The 2026/27 season runs on "
+    "src.market.ledger (4 arms x $10,000) with structured bets graded by "
+    "src.market.grading. This module's string-typed bets were graded by a "
+    "substring matcher that mis-resolved player props as moneylines and booked "
+    "corners/advance/anytime legs as automatic losses. Writing new bets through "
+    "it is disabled so it cannot corrupt the season experiment."
+)
+
+
+def _warn_retired(fn: str):
+    print(f"[paper_trading.{fn}] SKIPPED — {_DEPRECATION}")
+
+
+def place_bet(*args, **kwargs) -> bool:
+    """Retired. See _DEPRECATION. Returns False without recording anything."""
+    _warn_retired("place_bet")
+    return False
+
+
+def update_bet(*args, **kwargs) -> dict:
+    """Retired. Returns an action the CLI ignores, so callers do not crash."""
+    _warn_retired("update_bet")
+    return {"action": "disabled", "message": _DEPRECATION}
+
+
+def resolve_pending_bets(*args, **kwargs) -> list:
+    """Retired. Settlement now runs through src.market.ledger.settle_match."""
+    _warn_retired("resolve_pending_bets")
+    return []
+
+
+def _legacy_place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: str, stake: float, odds: float, is_parlay: bool = False, legs: list = None) -> bool:
+    """Original implementation, retained for reference only. Do not call."""
     from src.data.team_mapping import normalize_team_name
     state = load_state()
     if portfolio not in state:
@@ -114,7 +158,7 @@ def place_bet(portfolio: str, personality: str, home: str, away: str, bet_type: 
     save_state(state)
     return True
 
-def update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_type: str, new_stake: float, new_odds: float, is_parlay: bool = False, legs: list = None) -> dict:
+def _legacy_update_bet(portfolio: str, personality: str, home: str, away: str, new_bet_type: str, new_stake: float, new_odds: float, is_parlay: bool = False, legs: list = None) -> dict:
     """
     Checks if there is an existing active bet for this match in the portfolio.
     If the new bet is identical to the active one, does nothing.
@@ -238,10 +282,17 @@ def _find_completed_event_id(team1_norm: str, team2_norm: str) -> tuple | None:
     import requests
     
     today = datetime.now(timezone.utc)
-    # Search scoreboard from 3 days ago to today
-    for offset in range(-3, 1):
+    # Club competitions first: they are what we actually bet, so the loop
+    # short-circuits on the common case. The previous list contained only
+    # international competitions, which meant no EPL or La Liga bet could ever
+    # resolve — bets accumulated as permanently pending and bankrolls froze.
+    leagues = SETTLEMENT_LEAGUES
+    # 10-day lookback covers postponements and Monday settlement of a Friday
+    # fixture. Responses are cached per (league, date), so the extra days cost
+    # one request each and nothing thereafter.
+    for offset in range(-10, 1):
         date_str = (today + timedelta(days=offset)).strftime("%Y%m%d")
-        for league in ["fifa.world", "uefa.nations", "uefa.euro"]:
+        for league in leagues:
             cached_sb = cache.get("espn_scoreboard", {"league": league, "date": date_str})
             if cached_sb is not None:
                 events = cached_sb.get("events", [])
@@ -445,7 +496,7 @@ def _update_player_stats_from_completed_match(home_norm: str, away_norm: str, ma
             save_player_stats(p_name_clean, p_stats.get("position", "FW"), new_xg, new_g, new_a, p_stats.get("club_team", ""), p_stats.get("intl_team", ""))
 
 
-def resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int) -> list:
+def _legacy_resolve_pending_bets(home: str, away: str, home_goals: int, away_goals: int) -> list:
     """
     Resolves pending single bets and parlay legs across all portfolios.
     Updates bankrolls and moves resolved bets to history.
