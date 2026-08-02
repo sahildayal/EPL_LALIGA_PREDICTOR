@@ -1,0 +1,66 @@
+# Test suite, on every push and pull request.
+#
+# The point is not code hygiene. The staking, grading and settlement code runs
+# unattended every week against a ledger that is committed back to main, so a
+# regression that lands on Thursday is a regression that silently mis-grades a
+# matchweek on Tuesday. This is the gate in front of that.
+name: tests
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      # The matchweek bot commits only these; running the suite on its own
+      # commits would burn minutes to test data it just wrote.
+      - "data/processed/season_ledger.json"
+      - "data/processed/matchweek_logs/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      # Scoped to the 2026/27 rebuild suite, not all of scratch/.
+      #
+      # scratch/ also holds ~40 World Cup-era test files. They are slow (several
+      # hit the live ESPN and news feeds — one takes 45s on its own) and four of
+      # them assert behaviour the rebuild deliberately removed: the deleted
+      # browser dashboard, World Cup confederation calibration, and the retired
+      # paper_trading module whose string grader is disabled precisely so it
+      # cannot corrupt the season. A gate that is red for reasons nobody intends
+      # to fix stops being read, so it gates the code that actually runs
+      # unattended each week.
+      #
+      # These files are offline by construction: no secrets are provided, so
+      # anything reaching for the network must already be mocked. A test that
+      # only passes with live credentials cannot gate a deploy.
+      - name: Rebuild test suite
+        run: |
+          python -m pytest -q \
+            scratch/test_arms.py \
+            scratch/test_calibration.py \
+            scratch/test_canonical_teams.py \
+            scratch/test_dataset.py \
+            scratch/test_dixon_coles.py \
+            scratch/test_eval.py \
+            scratch/test_grading.py \
+            scratch/test_implied_goals.py \
+            scratch/test_ledger.py \
+            scratch/test_odds_api.py \
+            scratch/test_parlay_arm.py \
+            scratch/test_pipeline.py \
+            scratch/test_results.py \
+            scratch/test_staking.py

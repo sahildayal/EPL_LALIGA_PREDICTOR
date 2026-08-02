@@ -1,0 +1,30 @@
+# Tuesday: settle the weekend, void postponements, score the season.
+#
+# Tuesday rather than Monday. A Monday-morning job runs BEFORE Monday Night
+# Football, so every MNF bet would sit pending for a further week and the
+# weekly standings would be permanently one fixture behind. One day of
+# reporting latency buys a complete matchweek.
+#
+# The ten-day results lookback means a missed Tuesday is recoverable: the next
+# run picks up everything the skipped one would have settled.
+name: Matchweek — settle
+
+on:
+  schedule:
+    - cron: "0 9 * * 2"        # Tuesdays 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  settle:
+    uses: ./.github/workflows/_matchweek.yml
+    with:
+      job: settle
+      commit: true
+    secrets:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
+      KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}

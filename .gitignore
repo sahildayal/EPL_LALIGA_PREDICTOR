@@ -18,12 +18,31 @@ venv/
 env/
 ENV/
 
-# Local database/trading state (optional, ignored to prevent git churn)
+# Local caches and derived state
+# (retired World Cup ledger; superseded by season_ledger.json)
 data/processed/paper_trading.json
+# (superseded by club_elo_snapshot.json)
 data/processed/elo_ratings.json
-data/processed/master_dataset.csv
 data/models/
 data/cache/
+
+# Large training data. Rebuilt from football-data.co.uk by `python -m
+# src.data.dataset`, so it is reproducible rather than precious — and a
+# committed copy would freeze the model on last season's results while the
+# current season is exactly what it is supposed to be learning from.
+data/processed/master_dataset.csv
+data/processed/matches.csv
+data/processed/matches_epl.csv
+data/processed/matches_laliga.csv
+data/raw/
+
+# The season ledger and its archive are deliberately TRACKED. They are the
+# experiment's record, the GitHub Actions job commits them back each matchweek,
+# and a public, timestamped git history is what makes the season's result
+# credible: results cannot be quietly revised after the fact.
+!data/processed/season_ledger.json
+!data/processed/ledger_archive_2026wc.json
+!data/processed/club_elo_snapshot.json
 
 
 # IDE configurations

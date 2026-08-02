@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "season": "2026-27",
+  "created_utc": "2026-08-02T02:15:06.573496+00:00",
+  "arms": {
+    "A_divergence_kelly": {
+      "label": "Divergence + quarter-Kelly",
+      "bankroll": 10000.0,
+      "starting_bankroll": 10000.0,
+      "active_bets": [],
+      "history": []
+    },
+    "B_divergence_flat": {
+      "label": "Divergence + flat 1%",
+      "bankroll": 10000.0,
+      "starting_bankroll": 10000.0,
+      "active_bets": [],
+      "history": []
+    },
+    "C_model_kelly": {
+      "label": "Model-only + quarter-Kelly",
+      "bankroll": 10000.0,
+      "starting_bankroll": 10000.0,
+      "active_bets": [],
+      "history": []
+    },
+    "D_parlay": {
+      "label": "Parlay / SGP",
+      "bankroll": 10000.0,
+      "starting_bankroll": 10000.0,
+      "active_bets": [],
+      "history": []
+    }
+  }
+}

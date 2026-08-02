@@ -1,0 +1,181 @@
+# Reusable body for every matchweek job.
+#
+# The three scheduled workflows differ only in which job they run and whether
+# they commit. Keeping the body here means the checkout, environment, commit and
+# alerting logic exist ONCE — three near-identical copies is how a fix lands in
+# two of them and quietly not the third.
+name: matchweek
+
+on:
+  workflow_call:
+    inputs:
+      job:
+        description: stake | snapshot | settle
+        required: true
+        type: string
+      commit:
+        description: commit the ledger back to main
+        required: false
+        default: true
+        type: boolean
+      dry_run:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      ODDS_API_KEY:
+        required: true
+      KALSHI_API_KEY_ID:
+        required: true
+      KALSHI_PRIVATE_KEY_PEM:
+        required: true
+
+permissions:
+  contents: write      # commit the ledger
+  issues: write        # open/close the failure alert
+
+concurrency:
+  # Two jobs writing the ledger at once would interleave reads and writes around
+  # a non-atomic read-modify-write. Serialised across ALL matchweek jobs, not
+  # per-job, because stake and snapshot can otherwise overlap on a Saturday.
+  group: matchweek-ledger
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.job.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The ledger is committed back, so we need real history to push onto.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Historical league-seasons never change, so they are cached across runs.
+      # The in-progress season is always re-fetched regardless (see dataset.py),
+      # which is the whole point of rebuilding weekly.
+      - name: Cache football-data seasons
+        if: ${{ inputs.job == 'stake' }}
+        uses: actions/cache@v4
+        with:
+          path: data/raw/football_data
+          key: football-data-${{ hashFiles('src/data/dataset.py') }}
+          restore-keys: football-data-
+
+      - name: Build dataset
+        if: ${{ inputs.job == 'stake' }}
+        # 23 MB of derived data, so it is not committed. Rebuilt each Friday so
+        # the model trains on results up to and including last weekend — a
+        # season run as a learning layer has to actually learn from itself.
+        run: python -m src.data.dataset
+
+      - name: Run ${{ inputs.job }}
+        id: job
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
+          # Supplied as PEM text, never written to the runner's filesystem.
+          KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set +e
+          python -m src.pipeline.run "${{ inputs.job }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }} | tee run_output.json
+          code=${PIPESTATUS[0]}
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          case "$code" in
+            0) echo "status=ok" >> "$GITHUB_OUTPUT" ;;
+            2) echo "status=warn" >> "$GITHUB_OUTPUT" ;;
+            *) echo "status=failed" >> "$GITHUB_OUTPUT" ;;
+          esac
+          # Exit 0 here so the commit and alert steps always run. The real
+          # outcome is carried in the status output and re-raised at the end.
+          exit 0
+
+      - name: Commit ledger
+        if: ${{ inputs.commit && steps.job.outputs.status != 'failed' }}
+        run: |
+          git config user.name  "matchweek-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/processed/season_ledger.json data/processed/matchweek_logs
+          if git diff --cached --quiet; then
+            echo "No ledger change to commit."
+            exit 0
+          fi
+          git commit -m "chore(${{ inputs.job }}): matchweek ${{ github.run_number }} [skip ci]"
+          # The ledger is the only thing this job writes and it is serialised by
+          # the concurrency group, so a rebase here can only be picking up
+          # unrelated commits pushed to main while the job ran.
+          for attempt in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            echo "push attempt $attempt failed; retrying"
+            sleep 5
+          done
+          exit 1
+
+      - name: Upload run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.job }}-${{ github.run_number }}
+          path: |
+            run_output.json
+            data/processed/matchweek_logs/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Open or update alert issue
+        if: ${{ steps.job.outputs.status != 'ok' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.job.outputs.status }}
+          JOB: ${{ inputs.job }}
+        run: |
+          title="matchweek: ${JOB} needs attention"
+          # gh issue create fails outright on an unknown label, which would turn
+          # a recoverable alert into a second silent failure.
+          gh label create matchweek-alert --color B60205 \
+            --description "Automated matchweek job needs a human" 2>/dev/null || true
+          # A skipped matchweek is a data-loss event for the experiment, so it
+          # gets a durable in-repo record rather than an email that gets filtered.
+          body=$(printf '**Job:** `%s`\n**Status:** `%s`\n**Run:** %s/%s/actions/runs/%s\n\n<details><summary>Output</summary>\n\n```json\n%s\n```\n\n</details>\n' \
+            "$JOB" "$STATUS" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" \
+            "$(head -c 40000 run_output.json 2>/dev/null || echo 'no output captured')")
+          existing=$(gh issue list --state open --label matchweek-alert \
+            --search "$title in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label matchweek-alert --body "$body"
+          fi
+
+      - name: Close alert issue on success
+        if: ${{ steps.job.outputs.status == 'ok' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB: ${{ inputs.job }}
+        run: |
+          title="matchweek: ${JOB} needs attention"
+          for n in $(gh issue list --state open --label matchweek-alert \
+                       --search "$title in:title" --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Recovered: run ${GITHUB_RUN_ID} completed cleanly."
+          done
+
+      - name: Re-raise failure
+        if: ${{ steps.job.outputs.status == 'failed' }}
+        run: |
+          echo "::error::${{ inputs.job }} failed (exit ${{ steps.job.outputs.exit_code }}). No bets placed."
+          exit 1

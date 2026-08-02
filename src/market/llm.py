@@ -203,75 +203,11 @@ Example format:
         raise RuntimeError(f"Error calling Gemini API: {e}. Enforced: Mock fallback debates are disabled to prevent nonsensical data.")
  
  
-def _get_fallback_debate(home: str, away: str, probs: dict, elo_diff: float, sentiment: float, d_summary: dict, s_summary: dict) -> dict:
-    """
-    Fallback mock dialogue if Gemini is not configured/errored.
-    """
-    h_title = home.title()
-    a_title = away.title()
-    stage = get_tournament_stage()
-    is_knockout = "Knockout" in stage
-    
-    # Simple logic-based mock debate
-    if elo_diff > 100:
-        magnus = (
-            f"Look, I've watched {h_title} play a thousand times. They've got the historical pedigree and "
-            f"they are clearly the better squad here. ELO difference is {elo_diff:.0f} points? I don't need your ELO. "
-            f"My eyes tell me they are going to control the tempo from the whistle. {a_title} doesn't have the size "
-            f"to deal with them. Hammer {h_title} win. Don't overcomplicate it. My bankroll is at ${d_summary['bankroll']:.2f} "
-            f"and I'm ready to size this up!"
-        )
-        athena = (
-            f"Statistically, {h_title} is favored at {probs.get('home_win', 0.5)*100:.1f}%. However, the market "
-            f"has already priced this in. Our Dixon-Coles goal expectation shows {a_title} +1.5 has an implied probability "
-            f"that is undervalued. I trust the mathematics. With my bankroll at ${s_summary['bankroll']:.2f}, "
-            f"I'm placing a calculated bet on the handicap."
-        )
-        consensus = f"Buy YES on {h_title} Over 1.5 Goals or {h_title} Win if the contract is under ${probs.get('home_win', 0.5):.2f}."
-        personal_bets = {
-            "magnus": {
-                "bet_type": f"Moneyline - {h_title} Win",
-                "stake": round(d_summary["bankroll"] * 0.1, 2),
-                "odds": 1.45
-            },
-            "athena": {
-                "bet_type": "Game Lines - Over 1.5 Goals",
-                "stake": round(s_summary["bankroll"] * 0.05, 2),
-                "odds": 1.55
-            }
-        }
-    else:
-        stage_desc = "Nobody wants to risk elimination in the knockouts." if is_knockout else "Nobody wants to lose the group stages."
-        magnus = (
-            f"This is a classic trap match. {h_title} and {a_title} are too close in form. "
-            f"I see both teams playing safe, keeping it compact in the first half. It's going to be a slugfest. "
-            f"I smell a Draw all over this. {stage_desc} Let's place a gut bet on the Draw!"
-        )
-        athena = (
-            f"The model agrees the Draw probability is elevated at {probs.get('draw', 0.3)*100:.1f}%. "
-            f"Dixon-Coles score expectations point to a high frequency of 1-1. The math matches your intuition "
-            f"for once, Magnus. The edge on the Draw Yes contract is positive. I will allocate capital accordingly."
-        )
-        consensus = f"Buy YES on the Draw contract or BTTS (Both Teams to Score)."
-        personal_bets = {
-            "magnus": {
-                "bet_type": "Moneyline - Draw",
-                "stake": round(d_summary["bankroll"] * 0.08, 2),
-                "odds": 3.10
-            },
-            "athena": {
-                "bet_type": "Game Lines - Both Teams to Score",
-                "stake": round(s_summary["bankroll"] * 0.04, 2),
-                "odds": 1.85
-            }
-        }
- 
-    return {
-        "magnus": magnus,
-        "athena": athena,
-        "consensus": consensus,
-        "personal_bets": personal_bets
-    }
+# _get_fallback_debate() was removed here. It fabricated a debate with invented
+# odds (1.45 / 1.55 / 3.10) untied to any market, and returned personal_bets that
+# downstream code would have staked real bankroll against. It was already dead
+# code, and under the 2026/27 design the LLM layer is commentary only: it never
+# selects or sizes a bet. See docs/superpowers/specs/2026-08-01-season-rebuild-design.md
 
 
 def search_web(query: str) -> dict:
