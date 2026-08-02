@@ -100,7 +100,26 @@ def _read_csv_tolerant(text: str) -> pd.DataFrame:
     body = [r + [""] * (width - len(r)) for r in body]
 
     df = pd.DataFrame(body, columns=header)
-    return df.apply(lambda s: pd.to_numeric(s, errors="ignore"))
+    return df.apply(_numeric_if_possible)
+
+
+def _numeric_if_possible(series: pd.Series) -> pd.Series:
+    """
+    Converts a column to numbers, or leaves it exactly as it was.
+
+    This used to be `pd.to_numeric(series, errors="ignore")`. That option was
+    deprecated in pandas 2.2 and REMOVED in 3.0, where it raises outright — so
+    the dataset build worked on a developer machine pinned to 2.x and died on a
+    fresh CI runner that resolved to 3.x.
+
+    `errors="coerce"` is NOT the replacement: it would turn every team name into
+    NaN and silently produce a dataset of unnamed fixtures. Try-and-fall-back is
+    the only translation that preserves the original meaning.
+    """
+    try:
+        return pd.to_numeric(series)
+    except (ValueError, TypeError):
+        return series
 
 
 def download_season(league: str, season: str, refresh: bool = False) -> pd.DataFrame:
