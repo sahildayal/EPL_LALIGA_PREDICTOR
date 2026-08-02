@@ -1,221 +1,287 @@
-# 🏆 2026 FIFA World Cup Predictor & Parlay Engine ⚽
+# Football Betting Lab — EPL & La Liga, 2026/27
 
-A unified machine learning and statistical forecasting suite designed specifically for the ongoing **2026 FIFA World Cup**. It combines 8 prediction models (Dixon-Coles score expectations, ELO ratings, and 6 ML classification/regression algorithms) with live news sentiment, Google News RSS, ESPN corner statistics, and Kalshi V2 exchange data to identify high-edge betting value and parlay combinations.
+An automated paper-betting system that runs itself. Every week it prices Premier
+League and La Liga fixtures against sharp bookmaker consensus, finds where the
+Kalshi prediction market disagrees, stakes four competing strategies with
+$10,000 of fake money each, and commits the result back to this repo.
 
-It also features a persistent **Multi-Portfolio Paper Trading System** where two rival AI personalities (**Magnus**, the old-school qualitative scout, and **Athena**, the cold-blooded quant) debate predictions, allocate stakes, and manage their own simulated bankrolls across four separate prediction categories to track which methodology yields the highest return.
+At the end of the season one of those four strategies will have won, and the git
+history will show it wasn't decided after the fact.
+
+> **No real money, and no order placement.** Kalshi credentials are read-only,
+> and there is no `POST /orders` code path anywhere in this repository — it was
+> deleted rather than guarded, so no configuration mistake can make this real.
+
+> The repo name is historical. This began as a 2026 World Cup predictor; that
+> tournament is over and the system was rebuilt around club football.
 
 ---
 
-## 📂 Repository Structure
+## The finding that shapes everything
+
+**No model beat the market.** Walk-forward cross-validation over 16 seasons in
+two leagues found zero fold-league combinations where a standalone model beat
+the de-vigged sharp line. When a market/model blend weight was fitted
+walk-forward, it converged to **0.00 in both leagues**.
+
+| Model | EPL log loss | La Liga log loss |
+|---|---|---|
+| **Market (de-vigged sharp)** | **0.9633** | **0.9544** |
+| Dixon-Coles (goals) | 0.9887 | 0.9734 |
+| Logistic regression | 0.9961 | 0.9898 |
+| XGBoost | 1.0231 | 1.0104 |
+| XGBoost + time decay | 1.0560 | 1.0353 |
+
+Lower is better, and complexity hurt at every step. So this system doesn't try
+to out-predict the market. It treats the sharp line as truth and hunts for
+places where Kalshi disagrees with it. The model earns its keep only where no
+sharp line exists.
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/sahildayal/WorldCupPredictor.git
+cd WorldCupPredictor
+pip install -r requirements.txt
+
+cp .env.example .env          # then fill in your keys
+python -m src.data.dataset    # build the training set (~2 min, 19,760 matches)
+python -m src.pipeline.run preflight
+```
+
+`preflight` proves your credentials and data sources work without placing
+anything. You want `"ok": true` on all four checks.
+
+### Credentials
+
+```bash
+ODDS_API_KEY=...                            # the-odds-api.com
+KALSHI_API_KEY_ID=...                       # UUID from Kalshi's API keys page
+KALSHI_PRIVATE_KEY_PATH=/path/to/kalshi.pem # local runs
+```
+
+In GitHub Actions, supply `KALSHI_PRIVATE_KEY_PEM` — the file's full contents,
+including the `-----BEGIN/END-----` lines — so the key never touches the
+runner's filesystem. The env var wins when both are set, so a stale local path
+can't override a CI secret.
+
+---
+
+## How a matchweek works
+
+```
+Thursday 09:00 UTC   preflight  check credentials before it matters
+Friday   09:00 UTC   stake      price the matchweek, place bets
+Sat/Sun  11:00,14:00 snapshot   capture closing prices (read-only)
+Tuesday  09:00 UTC   settle     grade results, void postponements, score
+```
+
+Run any of them by hand:
+
+```bash
+python -m src.pipeline.run stake --dry-run   # price and log, write nothing
+python -m src.pipeline.run stake
+python -m src.pipeline.run snapshot
+python -m src.pipeline.run settle
+python -m src.pipeline.run report            # current standings
+```
+
+**Why Friday morning.** Both leagues schedule Friday-night fixtures, so a
+Friday-evening run would price part of the matchweek after it had started.
+
+**Why Tuesday, not Monday.** A Monday-morning settle runs *before* Monday Night
+Football, so every MNF bet would sit pending for another full week.
+
+**Why the weekend snapshots.** Closing Line Value is the season's primary metric
+— at ~150 bets per arm, P&L is mostly variance while CLV converges far faster.
+But CLV only exists if the closing price is captured before the market resolves.
+
+### Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | clean run |
+| 2 | completed, but a human should look (score dispute, unrecognised team) |
+| 1 | failed — **no bets placed** |
+
+Code 2 is the one that matters: a bet graded on a score ESPN and
+football-data.co.uk disagree about must not look identical to a clean week.
+Anything non-zero opens a GitHub issue labelled `matchweek-alert`, closed
+automatically by the next clean run of that job.
+
+**The pipeline fails closed.** If any required source is unavailable it places
+zero bets and exits non-zero. There is no "bet the half we could price" path — a
+missed matchweek costs a little sample size, while betting on stale or partial
+prices costs money and corrupts the experiment the season exists to run.
+
+---
+
+## The four arms
+
+Each starts with $10,000. No reloads — an arm that busts is done.
+
+| Arm | Fair value from | Staking | What it isolates |
+|---|---|---|---|
+| **A** Divergence + quarter-Kelly | de-vigged sharp consensus | quarter-Kelly, 3% cap | the flagship |
+| **B** Divergence + flat | de-vigged sharp consensus | flat 1% of starting bankroll | A vs B → the staking rule |
+| **C** Model-only | Dixon-Coles | quarter-Kelly, 4% min edge | A vs C → the edge source |
+| **D** Parlay / SGP | sharp consensus, compounded | flat 1% | does the parlay structure clear its own vig? |
+
+**Arm C is expected to lose.** It's funded anyway, because without a control
+that loses, "divergence works" and "we got lucky" look identical.
+
+**Arm D is the subtle one.** Three things make parlays structurally hard, and
+each is handled rather than assumed away:
+
+- **Fees compound per leg** against a single payout. This is the main reason
+  parlays lose.
+- **Same-game legs are priced off the fitted Dixon-Coles score matrix**, never
+  by multiplying correlated probabilities. Critically, the correlation
+  multiplier is applied to *both* the joint probability and the synthetic ask.
+  Applying it only to the numerator manufactures enormous fake edge — a bug this
+  code had, and now has three regression tests against.
+- **Legs are shrunk toward their ask before compounding.** Enumerating
+  combinations and keeping the best selects for estimation error, and that bias
+  multiplies across legs.
+
+The combined ask is assumed to be the product of leg asks, which *flatters*
+arm D, since a real quote would be worse. Every parlay records
+`ask_is_synthetic` and pays a penalty for it.
+
+---
+
+## How an edge is found
+
+1. **Sharp consensus** from The Odds API — Pinnacle preferred, median across
+   Betfair/Smarkets/Matchbook otherwise.
+2. **De-vig with Shin (1993)**, not proportional. Shin corrects the
+   favourite-longshot bias, shading favourites up relative to naive
+   normalisation.
+3. **Kalshi ask** for the same selection.
+4. **Net edge** = fair − ask − fee − derivation penalty. Kalshi's fee is
+   `roundup_to_cent(0.07 × contracts × price × (1 − price))`, a far heavier tax
+   on cheap contracts than on even-money ones.
+5. Anything below the arm's threshold, or outside 5c–95c, is dropped. One bet
+   per fixture per market, so correlated selections can't quietly concentrate
+   risk beyond what the per-bet cap implies.
+
+**BTTS is derived, not quoted.** The odds feed serves 1X2 and totals but not
+BTTS, so the system solves for the `(λ_home, λ_away, ρ)` triple whose
+Dixon-Coles scoreline distribution reproduces the sharp 1X2 *and* totals prices,
+then reads BTTS off it. That's interpolation from prices the market already set,
+not prediction — and if the fit doesn't reproduce those prices, the fixture
+simply isn't bet.
+
+Asian totals lines are handled explicitly: half lines (2.5) are a plain
+threshold, integer lines (3.0) condition on no push, quarter lines (2.75) split
+across the two halves.
+
+---
+
+## Repository layout
 
 ```text
-WorldCupPredictor/
+src/
+├── pipeline/
+│   ├── run.py              CLI: stake | snapshot | settle | report | preflight
+│   ├── matchweek.py        the three jobs, fail-closed
+│   ├── results.py          ESPN results + football-data.co.uk reconciliation
+│   └── kalshi_markets.py   exact series tickers, normalisation
+├── market/
+│   ├── edge.py             divergence pricing — the strategy in one module
+│   ├── arms.py             the four arms
+│   ├── parlay_arm.py       joint pricing, correlation, winner's-curse shrinkage
+│   ├── staking.py          quarter-Kelly and flat, no minimum-stake floor
+│   ├── fees.py             Kalshi's actual fee schedule
+│   ├── grading.py          structured bets, tri-state grading
+│   └── ledger.py           four arms, atomic writes, schema v3
+├── models/
+│   ├── dixon_coles.py      bivariate Poisson, low-score correction, time decay
+│   ├── implied_goals.py    recover goal expectations from sharp prices
+│   └── calibration.py      temperature scaling, isotonic
 ├── data/
-│   ├── raw/                   # Raw historical international datasets (2018–2026)
-│   ├── processed/             # Master training CSV, ELO ledger, and paper trading state
-│   └── models/                # Saved weights/pickles for the 6 ML models
-├── src/
-│   ├── data/
-│   │   ├── scrapers/          # Scrapers (FBRef stats, ESPN rosters, corners, upcoming_and_stats)
-│   │   └── preprocessor.py    # Feature engineering (17 team/sentiment variables)
-│   ├── models/
-│   │   ├── base.py            # Unified ML model wrapper interface
-│   │   ├── statistical.py     # Dixon-Coles and ELO models
-│   │   ├── player_props.py    # Player anytime goals/assists binomial predictor
-│   │   └── trainer.py         # ML training algorithms and master dataset appenders
-│   ├── market/
-│   │   ├── kalshi_client.py   # Kalshi V2 API authenticated portfolio client
-│   │   ├── paper_trading.py   # Fake bankroll manager and completed match resolver
-│   │   └── llm.py             # Prompt constructor and model mappings for AI debates
-│   ├── parlay/
-│   │   └── parlay_engine.py   # Correlated same-game scoreline joint probabilities
-│   └── predictor.py           # Core orchestrator blending the 8 forecasting models
-├── main.py                    # Main CLI Entrypoint
-├── show_project_summary.py    # Interactive dashboard printing project stats
-├── requirements.txt           # Required Python packages
-├── scratch/
-│   ├── test_corners.py        # ESPN corners scraper tests
-│   ├── test_stats_ingestion.py# Upcoming fixtures and tournament stats scraper tests
-│   ├── test_longshot_portfolio.py # Diverse parlay portfolio math tests
-│   ├── test_run_daily.py      # Daily execution pipeline runner tests
-│   └── test_integration.py    # E2E CLI pipeline integration tests
-└── .env                       # Environment credentials and configurations
+│   ├── dataset.py          19,760 matches; one FeatureBuilder for train + serve
+│   ├── odds_api.py         sharp consensus, Shin de-vig
+│   └── canonical_teams.py  one name per club across six sources
+└── eval/                   log loss, Brier, ECE, CLV, walk-forward backtest
+
+scratch/            live test suite (321 tests, ~11s, fully offline)
+scratch/legacy/     archived World Cup-era tests and scripts — never run
+docs/AUTOMATION.md  operator manual: secrets, schedules, failure handling
 ```
 
 ---
 
-## 📊 System Architecture
+## Design rules
 
-### 1. Forecasting & Capital Allocation Flow
-```mermaid
-graph TD
-    A["Input Match Query (e.g., England vs Senegal)"] --> B["Data Scrapers, Sentiment & Corners"]
-    B --> C["17 Engineered Features + Corners Stats"]
-    C --> D["8-Model Ensemble Orchestrator"]
-    D --> D1["Dixon-Coles Model"]
-    D --> D2["Elo Rating Predictor"]
-    D --> D3["6 ML Classifiers (XGBoost, Neural Net, Random Forest, etc.)"]
-    D1 & D2 & D3 --> E["Forecast Probabilities & Value Edge Calculations"]
-    E --> F["Automated Paper Trading Portfolio Allocation"]
-    F --> F1["predict: Edge-Based Single Bets"]
-    F --> F2["ask: LLM Debated Bets (Magnus vs Athena)"]
-    F --> F3["parlay_standard: Top Combined Bets (5x-150x)"]
-    F --> F4["parlay_longshot: Diverse portfolios (50x-400x)"]
-```
+These are load-bearing. Breaking one is how a ledger stops being trustworthy.
 
-### 2. Parlay Leg Resolution Pipeline
-```mermaid
-graph TD
-    A["Match Result Ingested (Sc Sync or Manual complete)"] --> B["Iterate through All Portfolios"]
-    B --> C["Iterate through Active Bets"]
-    C --> D{"Is Parlay Bet?"}
-    D -- "Yes" --> E["Resolve Completed Match Leg Status (WIN/LOSS)"]
-    E --> F{"Any Leg marked LOSS?"}
-    F -- "Yes" --> G["Mark Parlay as LOSS (Settle -Stake, remove from Active)"]
-    F -- "No" --> H{"All Legs marked WIN?"}
-    H -- "Yes" --> I["Mark Parlay as WIN (Credit Payout, Settle Profit, remove)"]
-    H -- "No" --> J["Keep Parlay as PENDING (Retain in Active Bets)"]
-    D -- "No" --> K["Settle Single Bet Outcome (WIN/LOSS)"]
-```
+**Nothing invents data.** Every fabrication site from the original codebase now
+raises instead — the synthetic training seed, demo parlay fixtures, a hardcoded
+balance returned on an API *error*, two mock Kalshi payloads. An empty market
+list means "do not bet", never "make something up".
+
+**Grading is tri-state.** A bet that can't be graded raises `UngradeableBet` and
+stays pending. It is never resolved as a loss. The previous grader matched
+substrings, so "Da**rwin** Nunez to Score in Liverpool vs Arsenal" was graded
+purely on whether Liverpool won, and corners, to-advance and anytime legs fell
+through every branch to a silent LOSS.
+
+**Bets are structured, never parsed.** `Bet.label` is for humans and is never
+read back.
+
+**Disagreements are reported, never auto-applied.** When ESPN and
+football-data.co.uk disagree on a score, the run exits 2 and raises an issue.
+Rewriting a settled bet from a scraper disagreement is how a public ledger stops
+being credible.
+
+**Arms are never reloaded.** Insufficient bankroll stops an arm; it doesn't top
+it up.
+
+**The ledger is tracked, and the bot commits it.** A public, timestamped git
+history is what makes the season's result credible — results can't be quietly
+revised afterwards. Schema migrations are strictly additive; anything that would
+reinterpret an existing record raises instead.
 
 ---
 
-## 💼 Paper Trading Portfolios
-To evaluate which method performs best, the AI personalities (**Magnus** and **Athena**) maintain isolated bankrolls of **$1,000.00** each across four distinct portfolios:
+## Testing
 
-1. **`predict` (Match Forecasts):** Automated bets placed when you query a match. 
-   - **Magnus** places a gut bet (10% of bankroll) on the moneyline of the team with the highest model probability.
-   - **Athena** scans all moneyline and game line edges and places a calculated bet (5% of bankroll) on the option with the highest positive edge.
-2. **`ask` (Debates & LLM Plays):** Capital allocated dynamically during the scout-quant LLM debates. If live odds change, the bots can choose to stick with or hedge/update their positions, triggering automatic stake refunds.
-3. **`parlay_standard` (Standard Parlays):** Both bots place bets on the top recommended standard or today-only parlay. (Magnus: 10% stake, Athena: 5% stake).
-4. **`parlay_longshot` (Longshot portfolios):** The bots allocate a flat **$2.00** stake per card across all 10 generated round-robin cards (Magnus: $2.00 flat, Athena: $2.00 flat).
-
----
-
-## 🛠️ Configuration & Credentials
-
-Create a `.env` file in the root of the repository:
-
-```env
-# Kalshi V2 API RSA Credentials (Read-Only)
-KALSHI_API_KEY_ID=your-kalshi-api-key-uuid
-KALSHI_PRIVATE_KEY_PATH=C:/path/to/your/private_key.txt
-
-# Google Generative AI / Gemini API Credentials
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-1.5-flash
-```
-
----
-
-## 💻 CLI Commands Reference
-
-All orchestration is managed via [main.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/main.py). The available commands are:
-
-### 1. `init` - Initial Model Training
-Trains the 6 machine learning models on the master historical match records dataset.
 ```bash
-python main.py init
+pytest              # 321 tests, ~11s, no network, no credentials
 ```
 
-### 2. `update` - Scoreboard Auto-Sync & Ingestion
-Fetches completed tournament match results from ESPN scoreboard, updates ELOs, resolves active paper trades, and retrains all models. It also parses:
-- Upcoming fixtures scheduled for today and the next 2 days $\rightarrow$ writes to `data/processed/daily_schedule.json`.
-- Live tournament statistics (top goals and assists leaders) $\rightarrow$ writes to `data/processed/tournament_player_stats.json`.
-```bash
-python main.py update
-```
+Scope lives in `pytest.ini`, so a bare `pytest` means the same thing locally as
+in CI — when the two differ, the local one is what you start trusting. Archived
+World Cup-era tests in `scratch/legacy/` are excluded; they hit live feeds and
+assert pre-rebuild behaviour. See that directory's README.
 
-### 3. `run-daily` - Daily Betting Pipeline Runner
-Reads the prepared `daily_schedule.json`, filters for games scheduled for the current UTC date, and sequentially executes the forecasting pipeline (`predict` + `ask` debate + standard/longshot parlay portfolios placement) automatically.
-```bash
-python main.py run-daily
-```
-
-### 4. `predict` - Match Forecast & Corner Expectations
-Blends ELO ratings, news sentiment, and all 8 models to output the forecast probabilities for Home Win, Draw, and Away Win, prints expected corners won/conceded, and places paper bets in the `predict` portfolio.
-```bash
-python main.py predict "England vs Senegal"
-```
-
-### 5. `ask` - Personality Debates & Paper Bets
-Stages an LLM debate between **Magnus** and **Athena** analyzing the game, including corners and knockout qualification, placing paper bets in the `ask` portfolio.
-```bash
-python main.py ask "England vs Senegal"
-```
-
-### 6. `parlay` - Correlated Kalshi Combo Builder
-Searches live Kalshi markets to construct parlay/combo recommendations.
-- `-t`, `--today`: Generate parlays/combos playing today only, sorted by highest joint probability.
-- `-l`, `--longshot`: Generate a hedged portfolio of **10 distinct cards** targeting **50x to 400x** payout longshots, keeping overlap under 3 legs.
-```bash
-# Standard parlays
-python main.py parlay -t
-
-# Long-shot portfolios (flat $2.00 stakes per card)
-python main.py parlay -l
-```
+Dependency majors are capped in `requirements.txt`. That isn't fussiness: this
+pipeline runs unattended and fails closed, so an upstream major release doesn't
+arrive as a deprecation warning — it arrives as a matchweek with zero bets
+placed. It has already happened once, when pandas 3.0 removed
+`to_numeric(errors="ignore")`.
 
 ---
 
-## ⚽ Player Stats & Props Predictions
+## Legacy CLI
 
-The predictor features a complete pipeline for scraping starting lineups, blending player statistics, calculating anytime goals/assists binomial distributions, matching props to live Kalshi contracts, and resolving them automatically.
+`main.py` and `src/predictor.py` hold the pre-rebuild multi-model ensemble —
+Elo, Dixon-Coles and six ML classifiers — still useful for ad-hoc questions:
 
-### 1. Tournament Statistics Blending
-- **Prior Blending**: Blends the player's club/country statistics (60% country stats weight, 40% club stats weight) or uses position-specific default profiles.
-- **World Cup Form Boost**: Blends the player's historical stats 50/50 with their current World Cup performance (World Cup goals divided by their team's completed tournament match count).
-- **Binomial Matrix Integration**: Conditional binomial probability distribution calculates the odds of the player scoring or assisting given the Dixon-Coles match-level scoreline expectation joint matrix:
-  $$P(\text{at least } k \text{ events}) = \sum_{g=k}^{6} P(\text{Team Goals} = g) \times \sum_{j=k}^{g} \binom{g}{j} s^j (1 - s)^{g - j}$$
-  where $s$ is the player's share of team goalscoring/assisting per 90.
+```bash
+python main.py predict "Arsenal vs Chelsea"
+```
 
----
-
-## 🧠 Advanced Model & Algorithm Refinements
-
-### 1. ESPN Corners & Poisson CDF modeling
-- **Rolling Scraper**: Scrapes up to 5 of the team's most recent completed World Cup matches to calculate rolling corners won and conceded averages.
-- **Corners Expectation**: Evaluates corner kick scoring intensities $\lambda_{\text{Home}}$ and $\lambda_{\text{Away}}$ based on rolling averages and a tournament baseline factor.
-- **Poisson Probabilities**: Models total corners using a Poisson distribution and calculates precise probabilities for over/under lines (e.g. Over 7.5, 8.5, and 9.5 corners) using the Poisson CDF.
-
-### 2. Knockout Progression (To Qualify)
-- **Advancement Forecasts**: Estimates advancement probabilities during single-elimination knockout matches, incorporating goalie shootout saving rates (e.g., Alisson: 33%, Pickford: 28%).
-- **Same-Game Parlay Correlation**: Implements SGP joint probability math. If a team wins in regulation, their advancement probability is $1.0$. If a team draws, the conditional probability of qualifying is:
-  $$P(\text{Qualify} \mid \text{Draw}) = \frac{P(\text{Qualify}) - P(\text{Regulation Win})}{P(\text{Draw})}$$
-
-### 3. Diverse Parlay portfolios (Round Robin Hedging)
-- **Shared Leg Filtering**: Sorts candidates by edge descending, and greedily compiles a 10-card portfolio.
-- **Diversity Rules**: To prevent combinatorial overlap, a parlay is only added if it shares **at most 2 legs** with any already-selected parlay in the portfolio.
-- **Description Collisions**: Avoids key collisions by appending match titles to generic outcome descriptions (e.g., `"Moneyline: Draw (France vs Sweden)"`).
-
-### 4. Same-Game Parlay (SGP) Sandbox Validator
-- **Programmatic SGP Rules**: Enforces Kalshi SGP rules programmatically via `SgpSandboxValidator` in [sgp_validator.py](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/src/parlay/sgp_validator.py) before recommending or placing combos.
-- **Mutually Exclusive/Redundant Discards**:
-  - **BTTS & Over 1.5 Goals**: Blocked (BTTS YES guarantees 2+ goals, making Over 1.5 redundant).
-  - **Moneyline & To Advance**: Blocked (regulation win implies qualifying).
-  - **Spread & Moneyline**: Blocked (beating spread implies winning).
-  - **Player Goal & Team Goals (Over 0.5)**: Blocked (player scoring implies team scores 1+ goals).
-  - **Multi-Selection Caps**: Disallows more than 1 Moneyline leg, 1 Spread leg, or 1 Totals leg per match.
-
-### 5. Knockout SGP Leg Expansion
-- **Corners & To Advance Integration**: Automatically queries and parses `KXWCQUAL` (To Advance) and `KXWCTCORNERS` (Total Corners) tickers from Kalshi, enabling rich 5-leg to 8-leg parlays per match even when the daily slate has only 1 or 2 games.
-
-### 6. Active News Debating Agents
-- **Dynamic News Retrieval**: Before starting debates, retrieves recent team injuries and roster changes from the Google News RSS feed.
-- **Context Injection**: Bullet summaries are injected directly into the Magnus vs Athena prompt templates.
-- **Debate Caching**: Debate logs are serialized and saved to `data/processed/debates/` with full probability and sentiment metadata.
-
-### 7. Tournament Monte Carlo Simulation Engine
-- **10,000x Bracket Simulation**: Simulates the remaining single-elimination tournament bracket from Quarterfinals to the Final.
-- **Match Resolutions**: Simulates 90m (Dixon-Coles score expectations), 30m Extra Time (scaled expected goal rates), and penalty shootouts (goalkeeper save rate ratios: Brazil/Alisson 33%, England/Pickford 28%, default 25%).
-- **Cached Results**: Outputs are saved to `data/processed/simulation_results.json` during data update commands.
+**It is not on the betting path.** The weekly automation never imports it, and
+no number it prints is an edge. The board at the top of this README is why.
 
 ---
 
-## 🖥️ Interactive Web Dashboard
-An interactive dashboard [dashboard.html](file:///C:/Users/Bikash/Desktop/CODEBASE/WorldCupPredictor/dashboard.html) provides a premium dark-mode (Tokyo Night Theme) user interface:
-- **Left Pane (Knockout Bracket)**: A responsive tournament bracket displaying the progression of teams. Clicking a matchup highlights stage progression paths.
-- **Right Pane (Simulation Table)**: A sortable table ranking teams based on their simulation probabilities (QF, SF, Final, Champion) using clean accent progress bars.
-- **Bottom Pane (Qualitative Accordion)**: Renders live Magnus vs Athena debates and recent team injury/news bullet points dynamically using AJAX fetch.
+## Status
 
-
+Rebuilt and automated ahead of the 2026/27 season. La Liga opens 2026-08-15 and
+the Premier League 2026-08-21, so the first live `stake` run is Friday
+2026-08-14. Champions League is deferred until the draw is known.
