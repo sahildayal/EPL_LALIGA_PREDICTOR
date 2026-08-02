@@ -12,8 +12,10 @@ history will show it wasn't decided after the fact.
 > and there is no `POST /orders` code path anywhere in this repository — it was
 > deleted rather than guarded, so no configuration mistake can make this real.
 
-> The repo name is historical. This began as a 2026 World Cup predictor; that
-> tournament is over and the system was rebuilt around club football.
+> **No LLM makes any prediction here.** Prices come from bookmaker consensus and
+> a Dixon-Coles statistical model. There is no Claude, GPT or Gemini anywhere on
+> the betting path — see [Legacy CLI](#legacy-cli) for the one place an LLM is
+> used, which is off that path entirely.
 
 ---
 
@@ -42,8 +44,8 @@ sharp line exists.
 ## Quick start
 
 ```bash
-git clone https://github.com/sahildayal/WorldCupPredictor.git
-cd WorldCupPredictor
+git clone https://github.com/sahildayal/EPL_LALIGA_PREDICTOR.git
+cd EPL_LALIGA_PREDICTOR
 pip install -r requirements.txt
 
 cp .env.example .env          # then fill in your keys
