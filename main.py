@@ -1,4 +1,21 @@
 #!/usr/bin/env python3
+"""
+LEGACY — interactive exploration CLI. NOT the betting system.
+
+The `predict`, `ask`, `parlay`, `init`, `update` and `run-daily` commands here
+are the pre-rebuild multi-model tooling. They are kept because they are genuinely
+useful for asking "who wins A vs B?", and they cost nothing to keep: the season
+automation never imports this file.
+
+**The betting system is `python -m src.pipeline.run`** (stake / snapshot /
+settle / report), driven weekly by the workflows in `.github/workflows/`. That
+path prices bets off the de-vigged sharp consensus, stakes four arms of $10,000
+paper money, and writes `data/processed/season_ledger.json`.
+
+Nothing in this file can place, size or grade a season bet, and no number it
+prints should be treated as an edge — walk-forward CV found no standalone model
+beating the market in any of 32 fold-league combinations. See docs/AUTOMATION.md.
+"""
 import sys
 import argparse
 from src.models import trainer, statistical
