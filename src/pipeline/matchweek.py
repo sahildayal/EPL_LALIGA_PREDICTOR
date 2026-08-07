@@ -15,7 +15,7 @@ import os
 import re
 import traceback
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.data.canonical_teams import canonical
@@ -29,6 +29,23 @@ from src.pipeline import kalshi_markets as km
 
 LOG_DIR = Path("data/processed/matchweek_logs")
 LEAGUES = ("epl", "laliga")
+
+# Only bet fixtures kicking off before the NEXT stake run.
+#
+# Kalshi lists fixtures roughly two weeks ahead, so without this a Friday run
+# stakes matches up to 14 days out and the following Friday stakes several of
+# them again — double exposure on one outcome, silently doubling the per-fixture
+# cap. Seven days is exactly the gap between scheduled runs, so each fixture
+# falls inside exactly one window.
+#
+# Eight days would NOT be safe: Friday + 8 reaches into the next Friday's
+# window, and the Friday/Saturday fixtures in the overlap would be bet twice.
+#
+# It also keeps CLV meaningful. Closing prices are captured by the weekend
+# snapshot jobs, so a bet placed 14 days early would be compared against a
+# "closing" price a fortnight later, measuring something quite different from a
+# bet placed two days out.
+BET_WINDOW_DAYS = 7
 
 
 class PipelineAborted(RuntimeError):
@@ -74,6 +91,44 @@ def collect_kalshi() -> list:
             m.setdefault("series_ticker", ticker)
             raw.append(m)
     return km.normalise(raw)
+
+
+def within_bet_window(markets: list, now=None, days: int = BET_WINDOW_DAYS) -> tuple:
+    """
+    Splits markets into (in_window, outside, undated).
+
+    The window is half-open: `now <= kickoff < now + days`.
+
+    Both bounds matter. The lower one excludes fixtures that have already kicked
+    off — Kalshi can leave a market open into the match, and betting a game in
+    progress is not the experiment we are running. The upper one is EXCLUSIVE so
+    that consecutive runs cannot both claim a fixture landing exactly on the
+    boundary; an inclusive bound would double-stake it.
+
+    A market with no parseable kickoff is UNDATED and not bet. We cannot show it
+    falls in exactly one window, so betting it risks the double exposure this
+    window exists to prevent, and the standing rule is that an unverifiable
+    input means no bet rather than a guess.
+    """
+    now = now or datetime.now(timezone.utc)
+    horizon = now + timedelta(days=days)
+    keep, outside, undated = [], [], []
+
+    for m in markets:
+        raw = m.get("kickoff")
+        if not raw:
+            undated.append(m)
+            continue
+        try:
+            ko = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            undated.append(m)
+            continue
+        if ko.tzinfo is None:
+            ko = ko.replace(tzinfo=timezone.utc)
+        (keep if now <= ko < horizon else outside).append(m)
+
+    return keep, outside, undated
 
 
 def collect_fair_values() -> dict:
@@ -224,9 +279,34 @@ def run_stake(dry_run: bool = False) -> RunReport:
     """Friday: collect, price, stake, log."""
     report = RunReport(job="stake", started_utc=_now())
     try:
-        markets = collect_kalshi()
-        if not markets:
+        listed = collect_kalshi()
+        if not listed:
             raise PipelineAborted("Kalshi listed no in-scope markets.")
+        markets, outside, undated = within_bet_window(listed)
+        if not markets:
+            # Not a failure. Markets ARE listed, they simply kick off later —
+            # an international break looks exactly like this, and there are
+            # about five a season. Treating a legitimately quiet week as a
+            # failure would fire an alert each time and train us to ignore them.
+            #
+            # Zero markets listed at all is different, and is still an abort
+            # above: that is the signature of the parsing bug that silently
+            # dropped every market on the exchange.
+            report.details = {
+                "markets_listed": len(listed),
+                "markets": 0,
+                "bet_window_days": BET_WINDOW_DAYS,
+                "skipped_outside_window": len(outside),
+                "skipped_undated": len(undated),
+                "dry_run": dry_run,
+            }
+            report.errors.append(
+                f"No bets: Kalshi listed {len(listed)} market(s) but none kick off "
+                f"within {BET_WINDOW_DAYS} days. Normal during an international "
+                "break or out of season.")
+            report.ok = True
+            report.write()
+            return report
         fair = collect_fair_values()
         fixtures = {(m["home"], m["away"]) for m in markets}
         model = collect_model_probs(fixtures)
@@ -247,7 +327,11 @@ def run_stake(dry_run: bool = False) -> RunReport:
                                   score_matrices=matrices)
 
         report.details = {
+            "markets_listed": len(listed),
             "markets": len(markets),
+            "bet_window_days": BET_WINDOW_DAYS,
+            "skipped_outside_window": len(outside),
+            "skipped_undated": len(undated),
             "fixtures": len(fixtures),
             "fair_fixtures": len(fair),
             "score_matrices": len(matrices),
@@ -261,6 +345,11 @@ def run_stake(dry_run: bool = False) -> RunReport:
         # Surfaced as warnings (exit 2), not failures: the bets we COULD price
         # are still good, and refusing the whole week over one unmappable club
         # would cost more than it saves. But it must never pass as a clean run.
+        if undated:
+            report.errors.append(
+                f"{len(undated)} market(s) had no parseable kickoff and were NOT bet. "
+                "Without a kickoff we cannot show a fixture falls in exactly one "
+                "weekly window, so betting it risks double exposure.")
         if unpriced:
             report.errors.append(
                 f"{len(unpriced)} Kalshi fixture(s) had no sharp price and were "

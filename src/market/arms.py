@@ -122,6 +122,16 @@ def plan_arm(arm: str, kalshi_markets: list, fair_by_fixture: dict,
 
     opps = deduplicate_by_fixture(filter_bettable(opps, min_edge=cfg.min_edge))
 
+    # Never stake a fixture+market this arm already holds.
+    #
+    # deduplicate_by_fixture only looks within a single run. Re-running a failed
+    # Friday job, or any overlap between weekly windows, would otherwise place a
+    # second bet on the same outcome and silently double the per-fixture cap the
+    # staking rules are supposed to enforce.
+    held = {(b.get("home"), b.get("away"), b.get("market"))
+            for b in book.get("active_bets", [])}
+    opps = [o for o in opps if (o.home, o.away, o.market) not in held]
+
     plans, running = [], bankroll
     for opp in opps[:max_bets]:
         if cfg.staking == "kelly":
@@ -170,6 +180,13 @@ def plan_parlay_arm(kalshi_markets: list, fair_by_fixture: dict,
     legs = legs_from_opportunities(opps)
     if len(legs) < MIN_LEGS:
         return []
+
+    # Same rule as the single-bet arms: never re-stake a leg this arm already
+    # holds inside an open parlay, or the true exposure to that outcome doubles.
+    held = {(l.get("home"), l.get("away"), l.get("market"), l.get("selection"))
+            for p in book.get("active_parlays", []) for l in p.get("legs", [])}
+    legs = [l for l in legs
+            if (l.home, l.away, l.market, l.selection) not in held]
 
     priced = enumerate_parlays(legs, score_matrices, min_edge=cfg.min_edge)
     chosen = select_parlays(priced, max_parlays=max_parlays)

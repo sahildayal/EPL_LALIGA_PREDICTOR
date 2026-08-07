@@ -1,5 +1,12 @@
 """Pipeline tests: market parsing and the fail-closed guarantee."""
+from datetime import datetime, timedelta, timezone
+
 import pytest
+
+
+def _soon(days=2):
+    """A kickoff inside the bet window, for mocks that predate it."""
+    return (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
 
 from src.market import ledger
 from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS, MatchResult
@@ -21,10 +28,10 @@ def test_unpriced_kalshi_fixture_is_warned_not_silently_dropped(monkeypatch, tmp
     monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
 
     monkeypatch.setattr(mw, "collect_kalshi", lambda: [
-        {"home": "arsenal", "away": "chelsea", "market": "1x2",
-         "selection": "home", "ask": 0.40, "league": "epl"},
-        {"home": "liverpool", "away": "everton", "market": "1x2",
-         "selection": "home", "ask": 0.40, "league": "epl"},
+        {"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon()},
+        {"home": "liverpool", "away": "everton", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon()},
     ])
     # Only one of the two fixtures has a sharp price.
     monkeypatch.setattr(mw, "collect_fair_values", lambda: {
@@ -149,6 +156,78 @@ def test_unresolvable_trailing_text_returns_none():
     assert km._resolve_trailing("Definitely Not A Club") is None
 
 
+# --- Bet window --------------------------------------------------------------
+
+from datetime import datetime, timedelta, timezone
+
+
+def _mk(days_ahead, **kw):
+    ko = (datetime(2026, 8, 14, 9, tzinfo=timezone.utc)
+          + timedelta(days=days_ahead)).isoformat().replace("+00:00", "Z")
+    return {"home": "arsenal", "away": "chelsea", "market": MARKET_1X2,
+            "selection": "home", "ask": 0.4, "kickoff": ko, **kw}
+
+
+NOW = datetime(2026, 8, 14, 9, tzinfo=timezone.utc)
+
+
+def test_window_keeps_the_coming_week_and_drops_the_rest():
+    keep, far, undated = matchweek.within_bet_window(
+        [_mk(1), _mk(6), _mk(9), _mk(14)], now=NOW)
+    assert len(keep) == 2 and len(far) == 2 and undated == []
+
+
+def test_consecutive_runs_never_overlap():
+    """
+    The whole point of the window. Kalshi lists ~14 days ahead, so without this
+    a Friday run stakes fixtures the NEXT Friday run would stake again --
+    double exposure on one outcome, silently doubling the per-fixture cap.
+
+    Eight days would not be safe: Friday + 8 reaches into the next Friday's
+    window, so the fixtures in the overlap get bet twice.
+    """
+    fixtures = [_mk(d) for d in range(0, 15)]
+    week1, _, _ = matchweek.within_bet_window(fixtures, now=NOW)
+    week2, _, _ = matchweek.within_bet_window(fixtures, now=NOW + timedelta(days=7))
+    assert week1 and week2
+    assert not ({m["kickoff"] for m in week1} & {m["kickoff"] for m in week2})
+
+
+def test_undated_market_is_never_bet():
+    """No kickoff means we cannot prove it falls in exactly one window."""
+    keep, far, undated = matchweek.within_bet_window(
+        [_mk(1), {"home": "a", "away": "b", "market": MARKET_1X2, "ask": 0.4}], now=NOW)
+    assert len(keep) == 1 and len(undated) == 1
+
+
+def test_quiet_week_is_a_warning_not_a_failure(monkeypatch):
+    """
+    Markets listed but all kicking off later is a normal week during an
+    international break — about five a season. Failing would fire an alert each
+    time and train us to ignore them. Zero markets listed at all IS still a
+    failure: that is the signature of the parsing bug that silently dropped
+    every market on the exchange.
+    """
+    far = dict(_mk(0), kickoff=(datetime.now(timezone.utc) + timedelta(days=30)).isoformat())
+    monkeypatch.setattr(matchweek, "collect_kalshi", lambda: [far])
+    rep = matchweek.run_stake(dry_run=True)
+    assert rep.ok                                        # not a failure
+    assert any("none kick off within" in e for e in rep.errors)   # but still visible
+    assert rep.details["markets_listed"] == 1 and rep.details["markets"] == 0
+
+
+def test_no_markets_at_all_is_still_a_failure(monkeypatch):
+    monkeypatch.setattr(matchweek, "collect_kalshi", lambda: [])
+    rep = matchweek.run_stake(dry_run=True)
+    assert not rep.ok
+    assert any("no in-scope markets" in e for e in rep.errors)
+
+
+def test_unparseable_kickoff_is_undated_not_kept():
+    keep, _, undated = matchweek.within_bet_window([_mk(1, kickoff="not a date")], now=NOW)
+    assert keep == [] and len(undated) == 1
+
+
 # --- Series safety ----------------------------------------------------------
 
 def test_laliga2_is_excluded():
@@ -251,7 +330,8 @@ def test_stake_places_nothing_when_odds_unavailable(monkeypatch):
     from src.data.odds_api import OddsUnavailable
     monkeypatch.setattr(matchweek, "collect_kalshi",
                         lambda: [{"home": "arsenal", "away": "chelsea", "league": "epl",
-                                  "market": MARKET_1X2, "selection": "home", "ask": 0.40}])
+                                  "market": MARKET_1X2, "selection": "home",
+                                  "ask": 0.40, "kickoff": _soon()}])
     monkeypatch.setattr(matchweek, "collect_fair_values",
                         lambda: (_ for _ in ()).throw(OddsUnavailable("no odds")))
     rep = matchweek.run_stake()
@@ -268,7 +348,8 @@ def test_stake_aborts_when_no_markets_listed(monkeypatch):
 def test_dry_run_plans_without_placing(monkeypatch):
     monkeypatch.setattr(matchweek, "collect_kalshi",
                         lambda: [{"home": "arsenal", "away": "chelsea", "league": "epl",
-                                  "market": MARKET_1X2, "selection": "home", "ask": 0.40}])
+                                  "market": MARKET_1X2, "selection": "home",
+                                  "ask": 0.40, "kickoff": _soon()}])
     monkeypatch.setattr(matchweek, "collect_fair_values",
                         lambda: {("arsenal", "chelsea"): {MARKET_1X2: {"home": 0.55}}})
     monkeypatch.setattr(matchweek, "collect_model_probs", lambda fx: {})

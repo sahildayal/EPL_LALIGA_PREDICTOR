@@ -190,6 +190,31 @@ def test_place_arm_stops_rather_than_reloading_on_exhaustion():
     assert ledger.load_state()["arms"][ARM_A]["bankroll"] == 10.0
 
 
+def test_arm_will_not_restake_a_fixture_it_already_holds():
+    """
+    deduplicate_by_fixture only looks within one run. Re-running a failed Friday
+    job, or any overlap between weekly windows, would otherwise place a second
+    bet on the same outcome and silently double the per-fixture cap.
+    """
+    first = plan_arm(ARM_A, [mkt(ask=0.40)], FAIR)
+    assert len(first) == 1
+    place_arm(ARM_A, first)
+
+    again = plan_arm(ARM_A, [mkt(ask=0.40)], FAIR)
+    assert again == []
+
+
+def test_the_guard_is_per_arm_and_per_market():
+    """Arm B must still bet what arm A holds, and other markets are unaffected."""
+    place_arm(ARM_A, plan_arm(ARM_A, [mkt(ask=0.40)], FAIR))
+    assert plan_arm(ARM_B, [mkt(ask=0.40)], FAIR)          # different arm
+
+    fair = {("arsenal", "chelsea"): {"1x2": {"home": 0.55},
+                                     "btts": {"yes": 0.60}}}
+    other = plan_arm(ARM_A, [mkt(sel="yes", market="btts", ask=0.45)], fair)
+    assert other                                            # different market
+
+
 def test_plan_all_covers_every_funded_arm():
     """
     All four arms are funded, so all four must be planned. Arm D was omitted
