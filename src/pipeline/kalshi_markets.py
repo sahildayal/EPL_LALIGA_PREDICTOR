@@ -55,34 +55,77 @@ def _price(market: dict, side: str = "yes"):
     return None
 
 
+def _resolve_trailing(text: str):
+    """
+    Resolves a team name that may carry trailing title words, or None.
+
+    Kalshi titles read "Arsenal vs Coventry Winner?", so a regex capturing the
+    away side also swallows "Winner". Candidates are tried LONGEST FIRST and the
+    first hit wins, which is what makes this safe: "Manchester United Winner"
+    resolves at "Manchester United" and never reaches the bare "Manchester",
+    where it could match a different club.
+    """
+    parts = text.split()
+    for k in range(len(parts), 0, -1):
+        try:
+            return canonical(" ".join(parts[:k]))
+        except UnknownTeam:
+            continue
+    return None
+
+
 def parse_teams(market: dict) -> tuple:
-    """Extracts (home, away) canonical names, or (None, None) if unresolvable."""
+    """
+    Extracts (home, away) canonical names, or (None, None) if unresolvable.
+
+    Regression: the capture group for the away side is greedy over ordinary
+    letters, so Kalshi's "Arsenal vs Coventry Winner?" yielded "Coventry Winner",
+    which is not a club. canonical() raised, every field fell through, and EVERY
+    1X2 market on the exchange was silently dropped — the pipeline reported
+    "Kalshi listed no in-scope markets" and placed nothing, which is
+    indistinguishable from the season not having started yet.
+    """
     for field in ("title", "event_title", "rules_primary"):
         text = market.get(field) or ""
         m = re.search(r"([A-Za-z .'&-]+?)\s+(?:vs\.?|at|@)\s+([A-Za-z .'&-]+)", text)
         if not m:
             continue
-        try:
-            return canonical(m.group(1).strip()), canonical(m.group(2).strip())
-        except UnknownTeam:
-            continue
+        home = _resolve_trailing(m.group(1).strip())
+        away = _resolve_trailing(m.group(2).strip())
+        if home and away and home != away:
+            return home, away
     return None, None
 
 
 def _selection_1x2(market: dict, home: str, away: str):
-    sub = (market.get("yes_sub_title") or market.get("subtitle") or market.get("title") or "").lower()
-    if "draw" in sub or "tie" in sub:
+    """
+    Which side this contract pays on, or None if it cannot be determined safely.
+
+    Kalshi lists 1X2 as three separate binary markets sharing one title, and the
+    side lives ONLY in yes_sub_title ("Arsenal" / "Coventry" / "Tie"). The title
+    is therefore useless here — it names both clubs, so matching against it would
+    resolve all three contracts of a fixture to the same side.
+
+    Two prior heuristics are deliberately gone. `sub.replace("win", "")` stripped
+    the substring anywhere it appeared, mangling any club containing those
+    letters. Worse, a fallback matched on the first word of a club's name: for
+    "Real Betis vs Real Sociedad" both sides begin "Real", so a contract on the
+    away team resolved to "home" and would have staked real conviction on the
+    wrong club. Returning None costs one skipped market; guessing costs money.
+    """
+    sub = (market.get("yes_sub_title") or market.get("subtitle") or "").strip()
+    if not sub:
+        return None
+    low = sub.lower()
+    if low in ("tie", "draw") or low.startswith(("tie ", "draw ")):
         return "draw"
-    try:
-        if canonical(sub.replace("win", "").strip()) == home:
-            return "home"
-        if canonical(sub.replace("win", "").strip()) == away:
-            return "away"
-    except UnknownTeam:
-        pass
-    if home.split()[0] in sub:
+
+    # Trailing "Win"/"Winner" is a title word, not part of the club's name.
+    cleaned = re.sub(r"\s+(win|winner)$", "", sub, flags=re.IGNORECASE).strip()
+    team = _resolve_trailing(cleaned)
+    if team == home:
         return "home"
-    if away.split()[0] in sub:
+    if team == away:
         return "away"
     return None
 
