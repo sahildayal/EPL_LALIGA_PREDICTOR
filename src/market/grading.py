@@ -66,6 +66,12 @@ class Bet:
     fair_prob: Optional[float] = None   # de-vigged sharp consensus, for CLV
     closing_price: Optional[float] = None
     result: Optional[str] = None        # WIN|LOSS, set at settlement
+    # Fill realism. `price` is the volume-weighted price actually obtainable for
+    # this stake, walking the order book; `quoted_ask` is the top-of-book price
+    # it was sized at. Keeping both makes the slippage auditable rather than
+    # invisible — recording only the quote would claim a fill we never had.
+    quoted_ask: Optional[float] = None
+    fill_contracts: Optional[float] = None
 
     def __post_init__(self):
         if self.market not in ALL_MARKETS:

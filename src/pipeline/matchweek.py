@@ -23,6 +23,7 @@ from src.data.odds_api import fetch_fair_prices, OddsUnavailable
 from src.market import arms as arms_mod
 from src.market import ledger
 from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS
+from src.market.edge import Opportunity
 from src.market.kalshi_client import KalshiClient, KalshiUnavailable
 from src.models.implied_goals import derive_markets
 from src.pipeline import kalshi_markets as km
@@ -129,6 +130,91 @@ def within_bet_window(markets: list, now=None, days: int = BET_WINDOW_DAYS) -> t
         (keep if now <= ko < horizon else outside).append(m)
 
     return keep, outside, undated
+
+
+def fetch_orderbook(client, ticker: str) -> dict:
+    """Raw order book for one market. Raises so the caller can fail that bet closed."""
+    resp = client._request("GET", f"/trade-api/v2/markets/{ticker}/orderbook",
+                           params={"depth": 50})
+    if resp.status_code != 200:
+        raise KalshiUnavailable(f"orderbook {ticker} returned {resp.status_code}")
+    return resp.json()
+
+
+def reprice_at_fill(plans: dict, client=None) -> tuple:
+    """
+    Re-prices every planned bet at the price it could ACTUALLY have been filled
+    at, and drops those that no longer clear their arm's threshold.
+
+    The quoted ask is the price of the first contract only. Sizing at the ask and
+    then recording the ask assumes infinite depth there, which is false: a live
+    example wanted 979 contracts of Elche at $0.30 against 490 resting, filling
+    at ~$0.3105. Booking that at $0.30 would put an unobtainable price in the
+    ledger and overstate the edge by about a cent — half the 2% edge budget.
+
+    Bets whose book cannot be read, or cannot absorb the stake, are dropped
+    rather than booked at an optimistic price. Returns (plans, adjustments).
+    """
+    from src.market.arms import ARM_CONFIGS
+    client = client or KalshiClient()
+    out, notes = {}, []
+
+    for arm, ps in plans.items():
+        cfg = ARM_CONFIGS[arm]
+        kept = []
+        for p in ps:
+            # Parlays are priced off their legs' quoted asks; walking several
+            # books for one synthetic combined price is not meaningful, and the
+            # combined ask is already flagged synthetic and penalised.
+            if "parlay" in p:
+                kept.append(p)
+                continue
+
+            bet, opp = p["bet"], p["opportunity"]
+            if not opp.ticker:
+                notes.append({"arm": arm, "bet": bet.label, "action": "dropped",
+                              "reason": "no ticker, cannot verify fill price"})
+                continue
+            try:
+                ladder = km.ask_ladder(fetch_orderbook(client, opp.ticker))
+                fill = km.vwap_fill(ladder, bet.stake)
+            except Exception as exc:
+                notes.append({"arm": arm, "bet": bet.label, "action": "dropped",
+                              "reason": f"orderbook unavailable: {exc}"})
+                continue
+            if fill is None:
+                notes.append({"arm": arm, "bet": bet.label, "action": "dropped",
+                              "reason": f"book too thin to fill ${bet.stake:.2f}"})
+                continue
+
+            filled = Opportunity(
+                home=opp.home, away=opp.away, market=opp.market,
+                selection=opp.selection, fair_prob=opp.fair_prob,
+                ask=fill["vwap"], fair_source=opp.fair_source,
+                league=opp.league, kickoff=opp.kickoff, line=opp.line,
+                ticker=opp.ticker, sharp_book=opp.sharp_book,
+                model_prob=opp.model_prob,
+            )
+            if filled.net_edge < cfg.min_edge:
+                notes.append({
+                    "arm": arm, "bet": bet.label, "action": "dropped",
+                    "reason": f"edge did not survive slippage: quoted {opp.ask:.4f} "
+                              f"-> fill {fill['vwap']:.4f}, net edge "
+                              f"{opp.net_edge:.4f} -> {filled.net_edge:.4f}"})
+                continue
+
+            if abs(fill["vwap"] - opp.ask) > 1e-9:
+                notes.append({
+                    "arm": arm, "bet": bet.label, "action": "repriced",
+                    "quoted": opp.ask, "fill": fill["vwap"],
+                    "contracts": fill["contracts"]})
+            bet.price = fill["vwap"]
+            bet.fill_contracts = fill["contracts"]
+            bet.quoted_ask = opp.ask
+            kept.append({**p, "opportunity": filled, "fill": fill})
+        out[arm] = kept
+
+    return out, notes
 
 
 def collect_fair_values() -> dict:
@@ -271,6 +357,7 @@ def _describe_plan(plan: dict) -> dict:
                 "joint_method": p.joint_method}
     bet, opp = plan["bet"], plan["opportunity"]
     return {"label": bet.label, "stake": bet.stake, "ask": bet.price,
+            "quoted_ask": bet.quoted_ask, "fill_contracts": bet.fill_contracts,
             "fair": opp.fair_prob, "net_edge": round(opp.net_edge, 4),
             "fair_source": opp.fair_source}
 
@@ -325,6 +412,9 @@ def run_stake(dry_run: bool = False) -> RunReport:
         state = ledger.load_state()
         plans = arms_mod.plan_all(markets, fair, model, state=state,
                                   score_matrices=matrices)
+        # Book every bet at the price it could actually have been filled at, not
+        # at the top-of-book quote it was sized against.
+        plans, fill_notes = reprice_at_fill(plans)
 
         report.details = {
             "markets_listed": len(listed),
@@ -338,6 +428,7 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "unpriced_fixtures": [list(f) for f in unpriced],
             "fixtures_without_score_matrix": [list(f) for f in no_matrix],
             "planned": {a: len(p) for a, p in plans.items()},
+            "fill_adjustments": fill_notes,
             "dry_run": dry_run,
             "bets": {a: [_describe_plan(p) for p in ps] for a, ps in plans.items()},
         }
@@ -377,6 +468,42 @@ def run_stake(dry_run: bool = False) -> RunReport:
     return report
 
 
+def _edge_distribution(markets: list) -> dict:
+    """
+    Where Kalshi sits versus the sharp line right now, whether or not we bet.
+
+    Arms A and B require a 2% net edge and the first live snapshot showed a
+    maximum of 1.63% across every listed market, so they may bet rarely. The
+    threshold is NOT being tuned to fix that — tuning a threshold until an arm
+    starts betting measures the threshold, not the strategy. Instead the
+    distribution is recorded every snapshot, close to kickoff where divergence
+    is most likely, so the question can eventually be answered with a month of
+    evidence rather than one far-out reading.
+
+    Purely observational. Nothing here influences a bet.
+    """
+    try:
+        from src.market.edge import build_opportunities
+        fair = collect_fair_values()
+        opps = build_opportunities(markets, fair)
+        if not opps:
+            return {"n": 0}
+        edges = sorted((o.net_edge for o in opps), reverse=True)
+        mid = len(edges) // 2
+        return {
+            "n": len(edges),
+            "max": round(edges[0], 4),
+            "median": round(edges[mid], 4),
+            "min": round(edges[-1], 4),
+            "count_over": {f"{t:.3f}": sum(1 for e in edges if e >= t)
+                           for t in (0.005, 0.01, 0.015, 0.02, 0.03, 0.04)},
+        }
+    except Exception as exc:
+        # Observational only — it must never take down the CLV capture, which is
+        # the job's actual purpose.
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
 def run_snapshot() -> RunReport:
     """Sat/Sun: read-only price capture for CLV. Never places or settles anything."""
     report = RunReport(job="snapshot", started_utc=_now())
@@ -386,6 +513,7 @@ def run_snapshot() -> RunReport:
                   for m in markets}
         stamped = ledger.record_closing_prices(prices)
         report.details = {"markets": len(markets), "stamped": stamped}
+        report.details["edge_distribution"] = _edge_distribution(markets)
         report.ok = True
     except Exception as exc:
         report.errors.append(f"{type(exc).__name__}: {exc}")

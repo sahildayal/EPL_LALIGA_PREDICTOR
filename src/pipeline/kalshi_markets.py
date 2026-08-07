@@ -7,6 +7,7 @@ fixtures we have neither ratings nor sharp lines for, and we would price them
 against La Liga fair values. Verified live against /trade-api/v2/series.
 """
 import re
+from typing import Optional
 
 from src.data.canonical_teams import canonical, UnknownTeam
 from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS
@@ -140,6 +141,65 @@ def _line(market: dict):
             except ValueError:
                 continue
     return None
+
+
+def ask_ladder(orderbook: dict) -> list:
+    """
+    What it costs to BUY YES, cheapest first, as [(price, contracts)].
+
+    Kalshi's book is quoted from both sides: buying YES at price p means matching
+    a resting NO order at (1 - p). So the YES ask ladder is derived from the NO
+    side, not the YES side — reading `yes_dollars` here would give the resting
+    BIDS, i.e. what someone would pay us, which is the wrong side of the spread
+    and would make every bet look cheaper than it is.
+    """
+    book = orderbook.get("orderbook_fp") or orderbook.get("orderbook") or orderbook
+    levels = []
+    for px, size in (book.get("no_dollars") or []):
+        try:
+            levels.append((round(1.0 - float(px), 4), float(size)))
+        except (TypeError, ValueError):
+            continue
+    return sorted(levels)
+
+
+def vwap_fill(ladder: list, budget: float) -> Optional[dict]:
+    """
+    Walks the book spending `budget` dollars. Returns the fill, or None if the
+    book cannot absorb it.
+
+    The quoted ask is only the price of the FIRST contract. A live example: arm C
+    wanted 979 contracts of Elche at the quoted $0.30, but only 490 rested there;
+    the true fill walked to ~$0.3105. Recording $0.30 would have put a price in
+    the ledger that could never have been obtained, and overstated the edge by
+    roughly a cent — half the entire 2% edge budget.
+
+    Returning None on a book too thin to fill is deliberate: a partial fill is a
+    different bet from the one the staking rule sized, and quietly shrinking the
+    stake would override Kelly without saying so.
+    """
+    if budget <= 0 or not ladder:
+        return None
+    spent, contracts = 0.0, 0.0
+    for price, size in ladder:
+        if price <= 0:
+            continue
+        remaining = budget - spent
+        if remaining <= 1e-9:
+            break
+        affordable = remaining / price
+        take = min(size, affordable)
+        spent += take * price
+        contracts += take
+        if take < size:
+            break
+    if contracts <= 0 or spent <= 0:
+        return None
+    if spent < budget - 0.01:            # book exhausted before the budget
+        return None
+    return {"vwap": round(spent / contracts, 6),
+            "contracts": round(contracts, 4),
+            "spent": round(spent, 4)}
 
 
 def normalise(raw_markets: list) -> list:

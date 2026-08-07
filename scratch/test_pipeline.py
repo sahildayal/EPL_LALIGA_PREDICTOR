@@ -156,6 +156,125 @@ def test_unresolvable_trailing_text_returns_none():
     assert km._resolve_trailing("Definitely Not A Club") is None
 
 
+# --- Fill realism ------------------------------------------------------------
+#
+# Levels below are the real KXLALIGAGAME-26AUG17DEPELC-ELC book on 2026-08-07.
+# Kalshi quotes the YES ask from the resting NO side, so buying YES at p matches
+# a NO order at (1 - p).
+
+ELC_BOOK = {"orderbook_fp": {"no_dollars": [
+    ["0.7000", "490.00"],    # -> buy YES @ 0.30
+    ["0.6900", "201.00"],    # -> 0.31
+    ["0.6800", "1552.00"],   # -> 0.32
+    ["0.6700", "6776.00"],   # -> 0.33
+]}}
+
+
+def test_ask_ladder_reads_the_no_side():
+    """
+    Reading yes_dollars would give the resting BIDS — what someone would pay us,
+    the wrong side of the spread — making every bet look cheaper than it is.
+    """
+    ladder = km.ask_ladder(ELC_BOOK)
+    assert ladder[0] == (0.30, 490.0)
+    assert [p for p, _ in ladder] == sorted(p for p, _ in ladder)
+
+
+def test_small_order_fills_at_the_quote():
+    fill = km.vwap_fill(km.ask_ladder(ELC_BOOK), 100.0)
+    assert fill["vwap"] == pytest.approx(0.30)
+
+
+def test_large_order_walks_the_book():
+    """
+    The live case: a $293.76 stake at a quoted $0.30 against only 490 contracts
+    resting there. The true fill is $0.3076 — 0.76 cents of slippage, which is
+    over a third of the entire 2% edge budget. Booking it at the quote would
+    record a price that was never obtainable.
+    """
+    fill = km.vwap_fill(km.ask_ladder(ELC_BOOK), 293.76)
+    assert fill["vwap"] == pytest.approx(0.307632, abs=1e-5)
+    assert fill["contracts"] == pytest.approx(954.9, abs=0.5)
+    assert fill["spent"] == pytest.approx(293.76, abs=0.01)
+
+
+def test_book_too_thin_returns_none():
+    """
+    A partial fill is a different bet from the one Kelly sized. Quietly shrinking
+    the stake would override the staking rule without saying so.
+    """
+    thin = {"orderbook_fp": {"no_dollars": [["0.7000", "10.00"]]}}
+    assert km.vwap_fill(km.ask_ladder(thin), 500.0) is None
+
+
+def test_empty_book_returns_none():
+    assert km.vwap_fill([], 100.0) is None
+    assert km.vwap_fill(km.ask_ladder({"orderbook_fp": {}}), 100.0) is None
+
+
+def test_reprice_drops_a_bet_whose_edge_dies_in_the_slippage(monkeypatch):
+    """
+    A bet sized on a 2.1% quoted edge that fills 1c worse is no longer a bet the
+    arm would have taken. It must be dropped, not booked at the quote.
+    """
+    from src.market.arms import ARM_A
+    from src.market.edge import Opportunity
+    from src.market.grading import Bet
+
+    opp = Opportunity(home="a", away="b", market=MARKET_1X2, selection="home",
+                      fair_prob=0.55, ask=0.50, fair_source="sharp_consensus",
+                      ticker="TKR")
+    bet = Bet(market=MARKET_1X2, selection="home", home="arsenal", away="chelsea",
+              stake=300.0, price=0.50)
+    monkeypatch.setattr(matchweek, "fetch_orderbook",
+                        lambda c, t: {"orderbook_fp": {"no_dollars": [
+                            ["0.5000", "100.00"], ["0.4000", "100000.00"]]}})
+    plans, notes = matchweek.reprice_at_fill(
+        {ARM_A: [{"bet": bet, "opportunity": opp, "stake_plan": None}]}, client=object())
+    assert plans[ARM_A] == []
+    assert notes and "did not survive slippage" in notes[0]["reason"]
+
+
+def test_reprice_records_the_fill_price_on_the_bet(monkeypatch):
+    from src.market.arms import ARM_A
+    from src.market.edge import Opportunity
+    from src.market.grading import Bet
+
+    opp = Opportunity(home="a", away="b", market=MARKET_1X2, selection="home",
+                      fair_prob=0.70, ask=0.40, fair_source="sharp_consensus",
+                      ticker="TKR")
+    bet = Bet(market=MARKET_1X2, selection="home", home="arsenal", away="chelsea",
+              stake=100.0, price=0.40)
+    monkeypatch.setattr(matchweek, "fetch_orderbook",
+                        lambda c, t: {"orderbook_fp": {"no_dollars": [
+                            ["0.6000", "100.00"], ["0.5900", "100000.00"]]}})
+    plans, notes = matchweek.reprice_at_fill(
+        {ARM_A: [{"bet": bet, "opportunity": opp, "stake_plan": None}]}, client=object())
+    kept = plans[ARM_A][0]["bet"]
+    assert kept.price > 0.40                    # true fill, worse than the quote
+    assert kept.quoted_ask == 0.40              # and the quote is preserved
+    assert kept.fill_contracts > 0
+
+
+def test_unreadable_book_drops_the_bet_rather_than_booking_the_quote(monkeypatch):
+    from src.market.arms import ARM_A
+    from src.market.edge import Opportunity
+    from src.market.grading import Bet
+
+    opp = Opportunity(home="a", away="b", market=MARKET_1X2, selection="home",
+                      fair_prob=0.70, ask=0.40, fair_source="sharp_consensus",
+                      ticker="TKR")
+    bet = Bet(market=MARKET_1X2, selection="home", home="arsenal", away="chelsea",
+              stake=100.0, price=0.40)
+    def boom(c, t):
+        raise RuntimeError("503")
+    monkeypatch.setattr(matchweek, "fetch_orderbook", boom)
+    plans, notes = matchweek.reprice_at_fill(
+        {ARM_A: [{"bet": bet, "opportunity": opp, "stake_plan": None}]}, client=object())
+    assert plans[ARM_A] == []
+    assert "orderbook unavailable" in notes[0]["reason"]
+
+
 # --- Bet window --------------------------------------------------------------
 
 from datetime import datetime, timedelta, timezone
@@ -346,10 +465,14 @@ def test_stake_aborts_when_no_markets_listed(monkeypatch):
 
 
 def test_dry_run_plans_without_placing(monkeypatch):
+    # A dry run still walks the order book: showing what WOULD be bet is only
+    # useful if the prices shown are ones we could actually have got.
+    monkeypatch.setattr(matchweek, "fetch_orderbook",
+                        lambda c, t: {"orderbook_fp": {"no_dollars": [["0.6000", "1000000.00"]]}})
     monkeypatch.setattr(matchweek, "collect_kalshi",
                         lambda: [{"home": "arsenal", "away": "chelsea", "league": "epl",
                                   "market": MARKET_1X2, "selection": "home",
-                                  "ask": 0.40, "kickoff": _soon()}])
+                                  "ask": 0.40, "kickoff": _soon(), "ticker": "TKR"}])
     monkeypatch.setattr(matchweek, "collect_fair_values",
                         lambda: {("arsenal", "chelsea"): {MARKET_1X2: {"home": 0.55}}})
     monkeypatch.setattr(matchweek, "collect_model_probs", lambda fx: {})
