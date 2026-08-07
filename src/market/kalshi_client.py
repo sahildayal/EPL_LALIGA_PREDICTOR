@@ -42,19 +42,19 @@ class KalshiClient:
         # Supplying the PEM directly keeps the private key in process memory only.
         self.private_key_pem = os.getenv("KALSHI_PRIVATE_KEY_PEM")
         self.private_key = None
-        self.mock_mode = False
+        self.credentials_missing = False
         self.credential_source = None
 
         if not CRYPTOGRAPHY_AVAILABLE:
             print("Warning: 'cryptography' not installed. Kalshi calls will raise.")
-            self.mock_mode = True
+            self.credentials_missing = True
         elif not self.key_id:
             print("Warning: KALSHI_API_KEY_ID not set. Kalshi calls will raise.")
-            self.mock_mode = True
+            self.credentials_missing = True
         elif not (self.private_key_pem or self.private_key_path):
             print("Warning: no Kalshi private key (KALSHI_PRIVATE_KEY_PEM or "
                   "KALSHI_PRIVATE_KEY_PATH). Kalshi calls will raise.")
-            self.mock_mode = True
+            self.credentials_missing = True
         else:
             self._load_private_key()
 
@@ -84,7 +84,7 @@ class KalshiClient:
             # key material back into the log, and CI logs are retained.
             print(f"Error loading Kalshi private key ({type(e).__name__}). "
                   "Kalshi calls will raise.")
-            self.mock_mode = True
+            self.credentials_missing = True
 
     def _sign_request(self, timestamp: str, method: str, path: str) -> str:
         """
@@ -110,9 +110,10 @@ class KalshiClient:
         """
         url = f"{KALSHI_BASE_URL}{api_path}"
         
-        if self.mock_mode:
-            # Simulated requests
-            raise ConnectionError("Running in mock mode")
+        if self.credentials_missing:
+            raise KalshiUnavailable(
+                "No Kalshi credentials loaded; refusing to return data. "
+                "Set KALSHI_API_KEY_ID and KALSHI_PRIVATE_KEY_PEM (or _PATH).")
 
         timestamp = str(int(time.time() * 1000))
         signature = self._sign_request(timestamp, method, api_path)
@@ -138,17 +139,17 @@ class KalshiClient:
         Returns real Kalshi cash balance in USD.
 
         Raises KalshiUnavailable rather than returning a number we made up. The
-        previous implementation returned a hardcoded 1450.75 both in mock mode
-        and on *any* API error, so an outage silently reported fake money as a
+        previous implementation returned a hardcoded 1450.75 when credentials
+        were absent and on *any* API error, so an outage silently reported fake money as a
         real balance.
 
-        Note: the season experiment is run entirely on simulated bankrolls in
-        paper_trading; this method exists only for reading the real account and
-        is not part of the betting loop.
+        Note: the season experiment runs entirely on the simulated bankrolls in
+        src/market/ledger.py. This method only reads the real account and is not
+        part of the betting loop.
         """
-        if self.mock_mode:
+        if self.credentials_missing:
             raise KalshiUnavailable(
-                "Kalshi client is in mock mode (no credentials loaded); no real balance available."
+                "No Kalshi credentials loaded; no real balance available."
             )
 
         path = "/trade-api/v2/portfolio/balance"
@@ -168,9 +169,9 @@ class KalshiClient:
         """
         Returns completed fills/trades history.
         """
-        if self.mock_mode:
+        if self.credentials_missing:
             raise KalshiUnavailable(
-                "Kalshi client is in mock mode (no credentials loaded); no real fills available."
+                "No Kalshi credentials loaded; no real fills available."
             )
 
         path = "/trade-api/v2/portfolio/settlements"
@@ -224,13 +225,13 @@ class KalshiClient:
         Fetches open soccer markets (using public API, doesn't require signature).
         Queries trade-api/v2/markets directly for sports tickers to bypass event exclusions.
         """
-        if self.mock_mode:
+        if self.credentials_missing:
             # This previously returned invented Arsenal-Chelsea and Real-Barca
             # markets with invented prices. Downstream code cannot tell a
             # fabricated price from a real one, so it priced and placed bets
             # against fiction.
             raise KalshiUnavailable(
-                "Kalshi client is in mock mode (no credentials loaded); no live market prices available."
+                "No Kalshi credentials loaded; no live market prices available."
             )
 
         series_tickers = [

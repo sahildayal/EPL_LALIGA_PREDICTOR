@@ -69,7 +69,7 @@ def preflight() -> dict:
         from src.market.kalshi_client import KalshiClient
         from src.pipeline import kalshi_markets as km
         client = KalshiClient()
-        if client.mock_mode:
+        if client.credentials_missing:
             raise RuntimeError("no usable credentials (see the warning above)")
         tickers = km.all_series_tickers()
         resp = client._request("GET", "/trade-api/v2/markets",
