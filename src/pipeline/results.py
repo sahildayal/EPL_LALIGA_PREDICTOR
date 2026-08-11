@@ -24,11 +24,22 @@ from src.data.canonical_teams import canonical, UnknownTeam
 from src.market.grading import MatchResult
 
 ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer"
+
+# NOT a browser-spoofing header. It used to impersonate Chrome, which is
+# precisely what got it blocked: ESPN's Akamai WAF started returning 403 for
+# every request carrying a browser-shaped User-Agent (Chrome AND Firefox both
+# tested blocked), while a request with no custom header, or an honest one
+# naming this project, passed cleanly. Pretending to be a browser bought
+# nothing and cost the entire Tuesday settle job.
 ESPN_HEADERS = {
-    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                   "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"),
-    "Referer": "https://www.espn.com/soccer/scoreboard/",
+    "User-Agent": "EPLLaLigaPredictor/1.0 (+github.com/sahildayal/EPL_LALIGA_PREDICTOR)",
 }
+# Fallback used only on a 403. requests' own default identifier (no custom
+# header at all) passed reliably in testing when the identifying UA above did
+# not exist yet, so it is kept as a second attempt rather than a single point
+# of failure — if Akamai ever starts blocking our identifying string too, this
+# is one retry away from working again instead of a repeat of this incident.
+ESPN_FALLBACK_HEADERS = {}
 
 # Only the two leagues in scope. The old settlement path iterated six leagues
 # including three that had no bets, which cost requests and hid failures.
@@ -54,10 +65,27 @@ class ResultsUnavailable(RuntimeError):
 
 
 def _get(url: str, params: dict = None, timeout: int = 20):
+    """
+    GETs a URL, retrying ONCE with a bare request if the first attempt is
+    blocked with a 403.
+
+    The retry is narrow on purpose: a 403 is the WAF-block signature we hit in
+    production (see ESPN_HEADERS), so it is worth a second header set. A 404,
+    500, or timeout means something else is wrong and retrying with different
+    headers would not fix it — those still fail immediately, as they should.
+    """
     try:
         resp = requests.get(url, params=params, headers=ESPN_HEADERS, timeout=timeout)
     except requests.RequestException as exc:
         raise ResultsUnavailable(f"{url}: {exc}") from exc
+
+    if resp.status_code == 403:
+        try:
+            resp = requests.get(url, params=params, headers=ESPN_FALLBACK_HEADERS,
+                                timeout=timeout)
+        except requests.RequestException as exc:
+            raise ResultsUnavailable(f"{url}: {exc}") from exc
+
     if resp.status_code != 200:
         raise ResultsUnavailable(f"{url} returned {resp.status_code}")
     return resp

@@ -74,6 +74,63 @@ def test_malformed_event_is_ignored():
     assert R._parse_event({"competitions": [{"competitors": []}]}) is None
 
 
+# --- WAF-block retry ----------------------------------------------------------
+#
+# Incident 2026-08-11: ESPN's Akamai WAF started returning 403 for every
+# request carrying a browser-shaped User-Agent (Chrome and Firefox both
+# tested blocked live), which failed all 22 requests in fetch_espn's sweep and
+# aborted the Tuesday settle job. A request with no custom header at all
+# passed reliably. _get() now retries once, with a bare request, on a 403.
+
+class _FakeResponse:
+    def __init__(self, status_code, payload=None):
+        self.status_code = status_code
+        self._payload = payload or {}
+    def json(self):
+        return self._payload
+
+
+def test_403_triggers_one_retry_with_bare_headers(monkeypatch):
+    calls = []
+
+    def fake_get(url, params=None, headers=None, timeout=20):
+        calls.append(dict(headers or {}))
+        if headers == R.ESPN_HEADERS:
+            return _FakeResponse(403)
+        return _FakeResponse(200, {"ok": True})
+
+    monkeypatch.setattr(R.requests, "get", fake_get)
+    resp = R._get("https://example.test")
+    assert resp.status_code == 200
+    assert len(calls) == 2
+    assert calls[0] == R.ESPN_HEADERS
+    assert calls[1] == R.ESPN_FALLBACK_HEADERS
+
+
+def test_non_403_error_does_not_retry(monkeypatch):
+    """A 404 or 500 means something else is broken; a different header set
+    will not fix it, so retrying would only mask the real problem."""
+    calls = []
+
+    def fake_get(url, params=None, headers=None, timeout=20):
+        calls.append(headers)
+        return _FakeResponse(500)
+
+    monkeypatch.setattr(R.requests, "get", fake_get)
+    with pytest.raises(R.ResultsUnavailable):
+        R._get("https://example.test")
+    assert len(calls) == 1
+
+
+def test_retry_that_still_403s_raises(monkeypatch):
+    """If the fallback header set is blocked too, this is a real outage, not a
+    one-off block, and must still fail closed rather than retry forever."""
+    monkeypatch.setattr(R.requests, "get",
+                        lambda url, params=None, headers=None, timeout=20: _FakeResponse(403))
+    with pytest.raises(R.ResultsUnavailable):
+        R._get("https://example.test")
+
+
 # --- Sweep -------------------------------------------------------------------
 
 def _fake_get(payload_by_call):
