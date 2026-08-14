@@ -1,0 +1,59 @@
+{
+  "job": "stake",
+  "started_utc": "2026-08-14T10:10:00.292905+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 96,
+    "markets": 21,
+    "bet_window_days": 7,
+    "skipped_outside_window": 75,
+    "skipped_undated": 0,
+    "fixtures": 7,
+    "fair_fixtures": 30,
+    "score_matrices": 30,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 2,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Deportivo La Coruna vs Elche \u2014 Moneyline: Elche Win",
+          "stake": 300.0,
+          "ask": 0.28,
+          "quoted_ask": 0.28,
+          "fill_contracts": 1071.4286,
+          "fair": 0.3966527641304438,
+          "net_edge": 0.1025,
+          "fair_source": "model"
+        },
+        {
+          "label": "Racing Santander vs Villarreal \u2014 Moneyline: Villarreal Win",
+          "stake": 291.0,
+          "ask": 0.44,
+          "quoted_ask": 0.44,
+          "fill_contracts": 661.3636,
+          "fair": 0.5503112790029752,
+          "net_edge": 0.093,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 2,
+      "D_parlay": 0
+    }
+  }
+}
