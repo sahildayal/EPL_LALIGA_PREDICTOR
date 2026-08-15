@@ -44,6 +44,7 @@ Repository → Settings → Secrets and variables → Actions:
 | `ODDS_API_KEY` | the-odds-api.com key, for the sharp consensus line |
 | `KALSHI_API_KEY_ID` | Kalshi API key ID |
 | `KALSHI_PRIVATE_KEY_PEM` | the **contents** of your Kalshi RSA private key |
+| `ANTHROPIC_API_KEY` | *(optional — see Weekly review, below)* |
 
 Paste the PEM in full, `-----BEGIN…` through `-----END…`, newlines included.
 The client reads it from the environment and loads it in memory; it is never
@@ -59,6 +60,21 @@ that lands in a commit as burned.
 `Settings → Actions → General → Workflow permissions` must be **Read and write**.
 The jobs commit the ledger and open alert issues; with read-only permissions
 every run fails at the commit step after doing all its work.
+
+### Weekly review (optional, currently off)
+
+`src/pipeline/review.py` asks Haiku for a short plain-English summary after
+each settle — which arm is ahead, what CLV shows, anything needing a human —
+and posts it to a running "Weekly review" issue. It is read-only: it never
+prices, stakes, or writes to the ledger.
+
+**Left dormant on purpose.** It needs `ANTHROPIC_API_KEY` — an Anthropic
+*Developer API* key from console.anthropic.com, billed separately from a
+Claude Pro subscription, which cannot authorize an unattended script. Without
+the secret, the workflow step prints `ANTHROPIC_API_KEY not set; skipping` and
+exits clean, and `preflight` reports it unset without failing the check — the
+rest of the pipeline is completely unaffected either way. To turn it on later,
+set the secret; there is nothing else to change.
 
 ## Where state lives
 
