@@ -4,7 +4,9 @@ CLI entry point for the scheduled matchweek jobs.
     python -m src.pipeline.run stake     [--dry-run]   Fri 09:00 UTC
     python -m src.pipeline.run snapshot                Sat/Sun pre-kickoff
     python -m src.pipeline.run settle                  Tue 09:00 UTC
+    python -m src.pipeline.run review                  after settle; advisory only
     python -m src.pipeline.run report                  read-only standings
+    python -m src.pipeline.run preflight                credentials + data sources
 
 Exit codes are the contract with GitHub Actions, and they distinguish three
 states that a plain pass/fail would flatten:
@@ -128,6 +130,25 @@ def preflight() -> dict:
         ok = False
         checks["ledger"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
+    # Anthropic: powers the post-settle weekly review only (Phase 6a) — advisory
+    # and never on the betting path. Deliberately does NOT affect the overall
+    # `ok` verdict: the review already degrades to a silent skip when the key is
+    # absent, so failing preflight over it would raise an alert for something
+    # that was never going to block a bet.
+    try:
+        import os
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            checks["anthropic"] = {"ok": False, "note": "unset — weekly review will be skipped"}
+        else:
+            import anthropic
+            resp = anthropic.Anthropic().messages.create(
+                model="claude-haiku-4-5", max_tokens=8,
+                messages=[{"role": "user", "content": "Say OK."}])
+            checks["anthropic"] = {"ok": resp.stop_reason != "refusal",
+                                   "model": resp.model}
+    except Exception as exc:
+        checks["anthropic"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
     return {"job": "preflight", "ok": ok, "checks": checks}
 
 
@@ -136,7 +157,7 @@ def main(argv=None) -> int:
         prog="python -m src.pipeline.run",
         description="Scheduled matchweek jobs for the four-arm paper season.")
     parser.add_argument("job", choices=("stake", "snapshot", "settle", "report",
-                                        "preflight"))
+                                        "preflight", "review"))
     parser.add_argument("--dry-run", action="store_true",
                         help="stake only: price and log the plan, write nothing")
     parser.add_argument("--verbose", action="store_true",
@@ -147,6 +168,14 @@ def main(argv=None) -> int:
         report = preflight()
         print(json.dumps(report, indent=2, default=str))
         return EXIT_OK if report["ok"] else EXIT_FAILED
+
+    if args.job == "review":
+        from src.pipeline.review import run_review
+        report = run_review()
+        print(report.text if report.ok else f"REVIEW FAILED: {report.error}")
+        # Advisory only: a broken review must never fail the workflow that also
+        # commits the ledger. ok=False still exits 0.
+        return EXIT_OK
 
     if args.job == "report":
         from src.market import ledger

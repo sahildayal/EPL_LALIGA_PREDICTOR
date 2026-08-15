@@ -29,6 +29,9 @@ on:
         required: true
       KALSHI_PRIVATE_KEY_PEM:
         required: true
+      ANTHROPIC_API_KEY:
+        description: only used by the post-settle weekly review (Haiku); optional
+        required: false
 
 permissions:
   contents: write      # commit the ledger
@@ -125,6 +128,37 @@ jobs:
             sleep 5
           done
           exit 1
+
+      - name: Weekly review (Haiku)
+        # Only after settle, and only when it produced something worth
+        # summarising -- a warn still has real settled bets; a failure has
+        # nothing new to say. Never blocks the ledger commit above, which has
+        # already happened by this point.
+        if: ${{ inputs.job == 'settle' && steps.job.outputs.status != 'failed' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY not set; skipping weekly review."
+            exit 0
+          fi
+          set +e
+          review=$(python -m src.pipeline.run review)
+          set -e
+          echo "$review"
+          title="Weekly review"
+          gh label create weekly-review --color 0E8A16 \
+            --description "Automated post-settle summary" 2>/dev/null || true
+          existing=$(gh issue list --state open --label weekly-review \
+            --search "$title in:title" --json number --jq '.[0].number // empty')
+          body=$(printf '**Run:** %s/%s/actions/runs/%s\n\n%s\n' \
+            "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$review")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label weekly-review --body "$body"
+          fi
 
       - name: Upload run log
         if: always()

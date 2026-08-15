@@ -21,6 +21,11 @@ scikit-learn>=1.4,<2.0
 cryptography>=42.0,<48.0
 requests>=2.31,<3.0
 
+# Phase 6a: the post-settle weekly review (Haiku). Advisory-only and never
+# blocks the ledger commit, so this is the one dependency on the betting path
+# that is allowed to be absent -- see src/pipeline/review.py.
+anthropic>=0.40,<1.0
+
 # Legacy CLI only — not imported by the weekly automation.
 xgboost>=2.0,<4.0
 lightgbm>=4.0,<5.0
