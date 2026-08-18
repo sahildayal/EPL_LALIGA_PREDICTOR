@@ -1,0 +1,106 @@
+{
+  "job": "settle",
+  "started_utc": "2026-08-18T09:34:55.495517+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "results_seen": 5,
+    "settled": 2,
+    "parlays_settled": 0,
+    "still_pending": 0,
+    "voided": 0,
+    "void_fixtures": [],
+    "season": [
+      {
+        "arm": "A_divergence_kelly",
+        "label": "Divergence + quarter-Kelly",
+        "bankroll": 10000.0,
+        "exposure": 0,
+        "equity": 10000.0,
+        "settled_bets": 0,
+        "voided_bets": 0,
+        "open_bets": 0,
+        "open_parlays": 0,
+        "settled_parlays": 0,
+        "wins": 0,
+        "win_rate": null,
+        "total_staked": 0,
+        "pnl": 0,
+        "roi_pct": null,
+        "clv_pct": null,
+        "is_bust": false
+      },
+      {
+        "arm": "B_divergence_flat",
+        "label": "Divergence + flat 1%",
+        "bankroll": 10000.0,
+        "exposure": 0,
+        "equity": 10000.0,
+        "settled_bets": 0,
+        "voided_bets": 0,
+        "open_bets": 0,
+        "open_parlays": 0,
+        "settled_parlays": 0,
+        "wins": 0,
+        "win_rate": null,
+        "total_staked": 0,
+        "pnl": 0,
+        "roi_pct": null,
+        "clv_pct": null,
+        "is_bust": false
+      },
+      {
+        "arm": "C_model_kelly",
+        "label": "Model-only + quarter-Kelly",
+        "bankroll": 9409.0,
+        "exposure": 0,
+        "equity": 9409.0,
+        "settled_bets": 2,
+        "voided_bets": 0,
+        "open_bets": 0,
+        "open_parlays": 0,
+        "settled_parlays": 0,
+        "wins": 0,
+        "win_rate": 0.0,
+        "total_staked": 591.0,
+        "pnl": -591.0,
+        "roi_pct": -100.0,
+        "clv_pct": 2.76,
+        "is_bust": false
+      },
+      {
+        "arm": "D_parlay",
+        "label": "Parlay / SGP",
+        "bankroll": 10000.0,
+        "exposure": 0,
+        "equity": 10000.0,
+        "settled_bets": 0,
+        "voided_bets": 0,
+        "open_bets": 0,
+        "open_parlays": 0,
+        "settled_parlays": 0,
+        "wins": 0,
+        "win_rate": null,
+        "total_staked": 0,
+        "pnl": 0,
+        "roi_pct": null,
+        "clv_pct": null,
+        "is_bust": false
+      }
+    ],
+    "reconciliation": {
+      "confirmed": 4,
+      "mismatches": [],
+      "awaiting_archive": [
+        {
+          "fixture": [
+            "deportivo la coruna",
+            "elche"
+          ],
+          "note": "not yet published by football-data"
+        }
+      ]
+    },
+    "unknown_teams": []
+  }
+}
