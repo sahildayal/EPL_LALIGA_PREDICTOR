@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  issues: write        # open/close the failure alert
 
 jobs:
   preflight:
@@ -31,12 +32,66 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build dataset
+        id: dataset
+        # A dataset failure here is exactly what preflight is for: a day's
+        # warning that tomorrow's stake run would crash on this same step
+        # before ever pricing a bet. Never let it silently fail the whole job
+        # without a durable record -- continue to the alert step below.
+        continue-on-error: true
         run: python -m src.data.dataset
 
       - name: Preflight
+        id: checks
+        if: ${{ steps.dataset.outcome == 'success' }}
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
           KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}
           PYTHONUNBUFFERED: "1"
-        run: python -m src.pipeline.run preflight
+        run: |
+          set +e
+          python -m src.pipeline.run preflight | tee preflight_output.json
+          code=${PIPESTATUS[0]}
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update alert issue
+        if: ${{ steps.dataset.outcome != 'success' || steps.checks.outputs.code != '0' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="matchweek: preflight needs attention"
+          gh label create matchweek-alert --color B60205 \
+            --description "Automated matchweek job needs a human" 2>/dev/null || true
+          # Preflight runs Thursday specifically to catch a problem a day
+          # before Friday's stake run touches real prices. A failure here
+          # that only shows up as a red X in Actions defeats that purpose --
+          # this is the same durable, hard-to-miss record the matchweek jobs
+          # already get.
+          body=$(printf '**Run:** %s/%s/actions/runs/%s\n\n<details><summary>Output</summary>\n\n```json\n%s\n```\n\n</details>\n' \
+            "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" \
+            "$(head -c 40000 preflight_output.json 2>/dev/null || echo 'dataset build failed before preflight could run')")
+          existing=$(gh issue list --state open --label matchweek-alert \
+            --search "$title in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label matchweek-alert --body "$body"
+          fi
+
+      - name: Close alert issue on success
+        if: ${{ steps.dataset.outcome == 'success' && steps.checks.outputs.code == '0' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="matchweek: preflight needs attention"
+          for n in $(gh issue list --state open --label matchweek-alert \
+                       --search "$title in:title" --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Recovered: run ${GITHUB_RUN_ID} completed cleanly."
+          done
+
+      - name: Re-raise failure
+        if: ${{ steps.dataset.outcome != 'success' || steps.checks.outputs.code != '0' }}
+        run: |
+          echo "::error::preflight failed. See the matchweek-alert issue for detail."
+          exit 1
