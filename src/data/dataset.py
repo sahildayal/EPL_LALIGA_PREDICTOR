@@ -135,12 +135,31 @@ def download_season(league: str, season: str, refresh: bool = False) -> pd.DataF
     url = BASE_URL.format(season=season, code=LEAGUE_CODES[league])
     try:
         resp = requests.get(url, timeout=40)
-        resp.raise_for_status()
     except Exception as exc:
         raise DatasetUnavailable(f"Could not download {url}: {exc}") from exc
 
+    # `raise_for_status()` only raises on 4xx/5xx — it waves a 3xx straight
+    # through. Found live: a not-yet-published current-season file returns
+    # HTTP 300 with an HTML "did you mean" page (football-data.co.uk's
+    # fuzzy-match 404), not the 404 you would expect from a missing file. That
+    # page was silently cached to disk and parsed as a one-column CSV, and the
+    # first real column lookup (`raw["HomeTeam"]`) crashed the entire 27-season,
+    # both-league build — taking every other season down with the one file
+    # that was never there. 200 is the only response we treat as the file.
+    if resp.status_code != 200:
+        raise DatasetUnavailable(f"{url} returned HTTP {resp.status_code}, expected 200")
+
+    text = resp.content.decode("latin-1")
+    if text.lstrip()[:15].lower().startswith(("<!doctype", "<html")):
+        raise DatasetUnavailable(
+            f"{url} returned an HTML page instead of a CSV — the season's "
+            "file is most likely not published yet")
+
+    # Cache only after validation. Caching an unvalidated response means one
+    # transient bad fetch poisons every future run — the ragged-header handling
+    # a few lines up would happily "parse" the HTML forever.
     path.write_bytes(resp.content)
-    return _read_csv_tolerant(resp.content.decode("latin-1"))
+    return _read_csv_tolerant(text)
 
 
 def _first_available(row: pd.Series, candidates: list):
@@ -171,9 +190,20 @@ def load_matches(leagues=("epl", "laliga"), first: int = FIRST_SEASON,
                 # results it is meant to be learning from.
                 is_current = season == season_codes(LAST_SEASON, LAST_SEASON)[0]
                 raw = download_season(league, season, refresh=refresh or is_current)
-            except DatasetUnavailable:
+                raw = raw[raw["HomeTeam"].notna() & raw["AwayTeam"].notna()].copy()
+            except DatasetUnavailable as exc:
+                print(f"Warning: skipping {league} {season} ({exc})")
                 continue
-            raw = raw[raw["HomeTeam"].notna() & raw["AwayTeam"].notna()].copy()
+            except Exception as exc:
+                # download_season validates HTTP status and HTML content, but
+                # this is a second, deliberately broad net: one file shaped in
+                # a way neither of us anticipated must cost this one
+                # league-season, never the other 51 combinations being built.
+                # The Aug 2026 incident this guards against was exactly this —
+                # a KeyError from one malformed file took the whole build down.
+                print(f"Warning: skipping {league} {season} — unexpected "
+                     f"{type(exc).__name__}: {exc}")
+                continue
             if raw.empty:
                 continue
 

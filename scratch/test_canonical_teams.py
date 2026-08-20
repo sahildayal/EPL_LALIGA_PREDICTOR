@@ -25,6 +25,11 @@ from src.data.canonical_teams import (
     # Promoted 2026/27 clubs, where ClubElo uses very short forms
     (["Santander", "Real Racing Club de Santander"], "racing santander"),
     (["Depor", "Deportivo La Coruña", "Deportivo"], "deportivo la coruna"),
+    # football-data.co.uk's 2026/27 file spells the club with the Galician
+    # "A Coruna" rather than the Spanish "La Coruna" used every prior season.
+    # Missing this alias split one club's record into two canonical keys and
+    # handed the model a "new" team with no history -- found 2026-08-20.
+    (["Dep. A Coruna", "Dep A Coruna", "Deportivo A Coruna"], "deportivo la coruna"),
     (["Malaga", "Málaga", "Malaga CF"], "malaga"),
     (["Oviedo", "Real Oviedo"], "real oviedo"),
 ])

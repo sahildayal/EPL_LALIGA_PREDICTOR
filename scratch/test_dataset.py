@@ -5,7 +5,82 @@ point-in-time leakage, and train/serve feature skew.
 import pandas as pd
 import pytest
 
-from src.data.dataset import FeatureBuilder, build_training_matrix, season_codes
+from src.data import dataset as D
+from src.data.dataset import (
+    DatasetUnavailable, FeatureBuilder, build_training_matrix, download_season,
+    load_matches, season_codes,
+)
+
+
+# --- download_season: the 2026-08-20 incident -------------------------------
+#
+# football-data.co.uk's not-yet-published 2026/27 EPL file returned HTTP 300
+# with an HTML "did you mean" page, not a 404. `raise_for_status()` only raises
+# on 4xx/5xx and let the 300 through; the page was cached to disk and parsed as
+# a one-column CSV, and the first real column lookup crashed the entire
+# 27-season, both-league dataset build the morning before the EPL's opening
+# weekend -- taking every OTHER season down with the one file that was never
+# there.
+
+class _FakeResponse:
+    def __init__(self, status_code, content):
+        self.status_code = status_code
+        self.content = content
+
+
+def test_non_200_status_raises_without_caching(tmp_path, monkeypatch):
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get",
+                        lambda url, timeout=40: _FakeResponse(300, b"<!DOCTYPE HTML><html>nope</html>"))
+    with pytest.raises(DatasetUnavailable, match="HTTP 300"):
+        download_season("epl", "2627")
+    assert list(tmp_path.iterdir()) == []          # never written to the cache
+
+
+def test_html_body_on_a_200_also_refuses_to_cache(tmp_path, monkeypatch):
+    """Defense in depth: some other host quirk could return 200 with an error
+    page body. Status alone is not sufficient evidence of a real CSV."""
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get",
+                        lambda url, timeout=40: _FakeResponse(200, b"<!doctype html><html>error</html>"))
+    with pytest.raises(DatasetUnavailable, match="HTML"):
+        download_season("epl", "2627")
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_real_csv_is_cached_and_parsed(tmp_path, monkeypatch):
+    csv = b"Date,HomeTeam,AwayTeam,FTHG,FTAG\n15/08/2026,Arsenal,Chelsea,2,0\n"
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get", lambda url, timeout=40: _FakeResponse(200, csv))
+    df = download_season("epl", "2627")
+    assert len(df) == 1
+    assert list(tmp_path.iterdir()) != []           # a genuine CSV IS cached
+
+
+def test_one_broken_season_does_not_crash_the_whole_build(tmp_path, monkeypatch):
+    """
+    The second half of the incident: even with download_season fixed, one
+    season/league combination shaped in a way nobody anticipated must cost
+    only that combination, never the others being built in the same call.
+    Mirrors the real shape of the incident: EPL's current season was broken
+    while La Liga's current season, and every prior season of both leagues,
+    were fine.
+    """
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    good = pd.DataFrame({"Date": ["15/08/2026"], "HomeTeam": ["Alaves"],
+                         "AwayTeam": ["Getafe"], "FTHG": [1], "FTAG": [1]})
+    current = season_codes(D.LAST_SEASON, D.LAST_SEASON)[0]
+
+    def fake_download(league, season, refresh=False):
+        if league == "epl" and season == current:
+            raise KeyError("HomeTeam")               # simulates the unanticipated shape
+        return good.copy()
+
+    monkeypatch.setattr(D, "download_season", fake_download)
+    df = load_matches(leagues=("epl", "laliga"), first=D.LAST_SEASON, last=D.LAST_SEASON)
+    # EPL's current season contributed nothing, but La Liga's came through --
+    # the whole call did not go down with the one broken combination.
+    assert len(df) == 1 and set(df["league"]) == {"laliga"}
 
 
 def match(date, home, away, hg, ag, season="2425", league="epl"):

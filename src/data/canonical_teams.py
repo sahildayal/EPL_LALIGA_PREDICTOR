@@ -127,6 +127,14 @@ _RAW_ALIASES = {
     "valladolid": "real valladolid", "real valladolid cf": "real valladolid",
     "deportivo": "deportivo la coruna", "la coruna": "deportivo la coruna",
     "dep la coruna": "deportivo la coruna", "deportivo de la coruna": "deportivo la coruna",
+    # football-data.co.uk's 2026/27 file uses the Galician "A Coruna" form
+    # rather than the Spanish "La Coruna" spelling used in every prior season on
+    # record. Without this, the club's 2026/27 rows canonicalise to a different
+    # key than its own history, splitting one team's record into two and
+    # handing Arm C's model a "new" team with no past. Kalshi's market titles
+    # spell the club out in full and were unaffected; this was training-data
+    # only, not a live-betting mismatch.
+    "dep a coruna": "deportivo la coruna", "deportivo a coruna": "deportivo la coruna",
     "sp gijon": "sporting gijon", "sporting de gijon": "sporting gijon",
     "gimnastic tarragona": "gimnastic",
     "cadiz cf": "cadiz", "ud almeria": "almeria", "ud las palmas": "las palmas",
