@@ -45,6 +45,79 @@ def test_unpriced_kalshi_fixture_is_warned_not_silently_dropped(monkeypatch, tmp
     assert any("no sharp price" in e for e in report.errors)
 
 
+def _synthetic_matches(proc):
+    """
+    Two leagues, disjoint clubs, lopsided records — so a model that knows a
+    fixture's clubs must separate them, and one that doesn't cannot.
+    """
+    import pandas as pd
+    base = datetime(2026, 5, 1, tzinfo=timezone.utc)
+    clubs = {"epl": ("ehigh", "emid", "elow"), "laliga": ("lhigh", "lmid", "llow")}
+    rows = []
+    for week in range(40):
+        day = base - timedelta(days=week * 7)
+        for league, (high, mid, low) in clubs.items():
+            rows += [
+                {"league": league, "date": day, "home": high, "away": low,
+                 "home_goals": 3, "away_goals": 0},
+                {"league": league, "date": day, "home": low, "away": high,
+                 "home_goals": 0, "away_goals": 2},
+                {"league": league, "date": day, "home": mid, "away": low,
+                 "home_goals": 2, "away_goals": 1},
+                {"league": league, "date": day, "home": high, "away": mid,
+                 "home_goals": 2, "away_goals": 1},
+            ]
+    proc.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(proc / "matches.csv", index=False)
+
+
+def test_fixture_is_never_priced_by_another_leagues_model(monkeypatch, tmp_path):
+    """
+    Every fixture must be priced by the model for ITS OWN league.
+
+    Regression, found live the night before the EPL's opening weekend:
+    collect_model_probs looped over every league and, inside each pass, wrote a
+    probability for every fixture regardless of league. La Liga is last in
+    LEAGUES, so its pass overwrote all EPL fixtures with a single
+    attack/defence fallback — five EPL fixtures priced identically to sixteen
+    decimal places, turning a roughly-fair Kalshi ask into an apparent
+    35-point edge for arm C. Latent for as long as only one league had
+    fixtures in the betting window.
+    """
+    from src.pipeline import matchweek as mw
+
+    _synthetic_matches(tmp_path / "data" / "processed")
+    monkeypatch.chdir(tmp_path)
+
+    probs = mw.collect_model_probs({
+        ("ehigh", "elow"): "epl",
+        ("elow", "ehigh"): "epl",
+        ("lhigh", "llow"): "laliga",
+    })
+
+    strong = probs[("ehigh", "elow")][MARKET_1X2]["home"]
+    weak = probs[("elow", "ehigh")][MARKET_1X2]["home"]
+
+    # Under the bug both EPL fixtures carried the La Liga model's fallback and
+    # were byte-identical. The strong side at home must dominate the weak one.
+    assert strong != weak
+    assert strong > weak + 0.25, f"EPL fixtures priced alike: {strong} vs {weak}"
+
+    # And the La Liga fixture in the same call is still priced by its own model.
+    assert probs[("lhigh", "llow")][MARKET_1X2]["home"] > 0.5
+
+
+def test_model_probs_skips_leagues_with_no_fixtures(monkeypatch, tmp_path):
+    """Only leagues actually in the window are fitted — no wasted Dixon-Coles fit."""
+    from src.pipeline import matchweek as mw
+
+    _synthetic_matches(tmp_path / "data" / "processed")
+    monkeypatch.chdir(tmp_path)
+
+    probs = mw.collect_model_probs({("ehigh", "elow"): "epl"})
+    assert set(probs) == {("ehigh", "elow")}
+
+
 @pytest.fixture(autouse=True)
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(ledger, "DATA_DIR", str(tmp_path))

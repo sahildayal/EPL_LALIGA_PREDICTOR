@@ -299,14 +299,31 @@ def build_score_matrices(fair: dict) -> dict:
     return out
 
 
-def collect_model_probs(fixtures) -> dict:
+def collect_model_probs(fixture_leagues) -> dict:
     """
-    Dixon-Coles probabilities for arm C.
+    Dixon-Coles probabilities for arm C, keyed (home, away).
+
+    Takes {(home, away): league} and prices each fixture with ITS OWN league's
+    model. That pairing is load-bearing, not incidental.
+
+    An earlier version took a bare set of fixtures and, inside each league's
+    pass, wrote a probability for every fixture regardless of which league it
+    belonged to. La Liga is last in LEAGUES, so its pass overwrote every EPL
+    fixture with an identical attack/defence fallback: five different EPL
+    fixtures came out with the same home-win probability to sixteen decimal
+    places. That is not a prediction, it is a league-average prior wearing the
+    shape of one — and it turned a roughly-fair Kalshi ask into an apparent
+    35-point edge (Hull v Manchester United: real model 0.125, overwritten
+    0.466, ask 0.11). It was invisible for as long as only one league had
+    fixtures in the betting window, and would have fired on the first week both
+    did, which was the EPL's opening weekend.
 
     Arm C is a control expected to lose — walk-forward CV found no model beating
     the market in any of 32 fold-league combinations — but it must actually place
-    bets for that negative result to mean anything.
+    bets for that negative result to mean anything, and they have to be the bets
+    the model actually implies.
     """
+    import numpy as np
     import pandas as pd
     from src.models.dixon_coles import DixonColes
 
@@ -317,6 +334,9 @@ def collect_model_probs(fixtures) -> dict:
 
     out = {}
     for league in LEAGUES:
+        wanted = [f for f, lg in fixture_leagues.items() if lg == league]
+        if not wanted:
+            continue
         sub = df[df.league == league]
         if sub.empty:
             continue
@@ -326,12 +346,12 @@ def collect_model_probs(fixtures) -> dict:
             sub.home_goals.to_numpy(), sub.away_goals.to_numpy(),
             (ref - sub.date).dt.days.to_numpy())
 
-        import numpy as np
+        # A promoted club with no top-flight history is priced as a weak side —
+        # bottom-quintile attack, bottom-quintile defence — rather than as an
+        # average one. Applied per missing team, never to a whole fixture.
         fallback = (float(np.percentile(model.attack, 20)),
                     float(np.percentile(model.defence, 80)))
-        for home, away in fixtures:
-            if home in out or (home, away) in out:
-                pass
+        for home, away in wanted:
             priors = {t: fallback for t in (home, away) if t not in model.index}
             try:
                 mk = model.market_probs(home, away, priors=priors)
@@ -395,8 +415,11 @@ def run_stake(dry_run: bool = False) -> RunReport:
             report.write()
             return report
         fair = collect_fair_values()
-        fixtures = {(m["home"], m["away"]) for m in markets}
-        model = collect_model_probs(fixtures)
+        # Carry each fixture's league through to the model step, so a fixture is
+        # only ever priced by the model that has ratings for its clubs.
+        fixture_leagues = {(m["home"], m["away"]): m["league"] for m in markets}
+        fixtures = set(fixture_leagues)
+        model = collect_model_probs(fixture_leagues)
         matrices = build_score_matrices(fair)
 
         # Kalshi listed a fixture we could not attach a sharp price to.
