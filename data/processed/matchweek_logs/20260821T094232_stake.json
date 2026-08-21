@@ -1,0 +1,129 @@
+{
+  "job": "stake",
+  "started_utc": "2026-08-21T09:42:32.770305+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 123,
+    "markets": 66,
+    "bet_window_days": 7,
+    "skipped_outside_window": 57,
+    "skipped_undated": 0,
+    "fixtures": 22,
+    "fair_fixtures": 23,
+    "score_matrices": 23,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Ipswich vs Sunderland \u2014 Moneyline: Sunderland Win",
+          "stake": 282.27,
+          "ask": 0.37,
+          "quoted_ask": 0.37,
+          "fill_contracts": 762.8919,
+          "fair": 0.5264293724864078,
+          "net_edge": 0.14,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Deportivo La Coruna \u2014 Moneyline: Draw",
+          "stake": 273.8,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 855.625,
+          "fair": 0.4583155208003956,
+          "net_edge": 0.123,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Racing Santander \u2014 Moneyline: Racing Santander Win",
+          "stake": 265.59,
+          "ask": 0.24,
+          "quoted_ask": 0.24,
+          "fill_contracts": 1106.625,
+          "fair": 0.35064302574375694,
+          "net_edge": 0.0978,
+          "fair_source": "model"
+        },
+        {
+          "label": "Fulham vs Chelsea \u2014 Moneyline: Fulham Win",
+          "stake": 237.95,
+          "ask": 0.25,
+          "quoted_ask": 0.25,
+          "fill_contracts": 951.8,
+          "fair": 0.3463265728521452,
+          "net_edge": 0.0831,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Liverpool \u2014 Moneyline: Newcastle Win",
+          "stake": 220.15,
+          "ask": 0.25,
+          "quoted_ask": 0.25,
+          "fill_contracts": 880.6,
+          "fair": 0.3423009857618847,
+          "net_edge": 0.0791,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brentford vs Tottenham \u2014 Moneyline: Brentford Win",
+          "stake": 243.88,
+          "ask": 0.39,
+          "quoted_ask": 0.39,
+          "fill_contracts": 625.3333,
+          "fair": 0.48051807592003754,
+          "net_edge": 0.0738,
+          "fair_source": "model"
+        },
+        {
+          "label": "Espanyol vs Real Madrid \u2014 Moneyline: Espanyol Win",
+          "stake": 145.18,
+          "ask": 0.12,
+          "quoted_ask": 0.12,
+          "fill_contracts": 1209.8333,
+          "fair": 0.19220603674669978,
+          "net_edge": 0.0648,
+          "fair_source": "model"
+        },
+        {
+          "label": "Elche vs Barcelona \u2014 Moneyline: Elche Win",
+          "stake": 103.34,
+          "ask": 0.11,
+          "quoted_ask": 0.11,
+          "fill_contracts": 939.4545,
+          "fair": 0.16443166804535203,
+          "net_edge": 0.0475,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Betis vs Real Sociedad \u2014 Moneyline: Real Betis Win",
+          "stake": 163.18,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 347.1915,
+          "fair": 0.5327986643178702,
+          "net_edge": 0.0453,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    }
+  }
+}
