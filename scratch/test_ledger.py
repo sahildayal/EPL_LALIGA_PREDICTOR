@@ -215,3 +215,34 @@ def test_closing_price_flows_into_clv_after_settlement():
     ledger.record_closing_prices({("liverpool", "arsenal", MARKET_1X2, "home"): 0.60})
     ledger.settle_match(MatchResult("liverpool", "arsenal", 2, 1))
     assert ledger.arm_summary("A_divergence_kelly")["clv_pct"] == pytest.approx(20.0)
+
+
+def test_closing_price_not_stamped_after_kickoff():
+    """
+    A price observed after kickoff is an in-play price, not a closing price.
+
+    Kalshi can leave a market open into the match, so without this guard the
+    Saturday 11:00 snapshot would overwrite a Friday-night fixture's good
+    Friday 18:00 stamp with a post-kickoff number and report it as the close.
+    """
+    from datetime import datetime, timedelta, timezone
+    past = (datetime.now(timezone.utc) - timedelta(hours=3)).isoformat()
+    ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.50, kickoff=past))
+    key = ("liverpool", "arsenal", MARKET_1X2, "home")
+    assert ledger.record_closing_prices({key: 0.58}) == 0
+    bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
+    assert bet["closing_price"] is None
+
+
+def test_final_pre_kickoff_price_survives_a_later_snapshot():
+    """CLV is measured against the last price seen BEFORE kickoff, not the last seen."""
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    ledger.place_bet("A_divergence_kelly",
+                     mk(stake=100.0, price=0.50,
+                        kickoff=(now + timedelta(hours=2)).isoformat()))
+    key = ("liverpool", "arsenal", MARKET_1X2, "home")
+    ledger.record_closing_prices({key: 0.58})                          # pre-kickoff
+    ledger.record_closing_prices({key: 0.99}, now=now + timedelta(hours=5))  # in-play
+    bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
+    assert bet["closing_price"] == 0.58

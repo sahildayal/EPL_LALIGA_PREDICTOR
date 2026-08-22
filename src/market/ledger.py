@@ -371,23 +371,55 @@ def void_parlay(arm: str, index: int, reason: str, state: dict = None) -> dict:
 
 # --- Reporting ---------------------------------------------------------------
 
-def record_closing_prices(prices: dict, state: dict = None) -> int:
+def _kicked_off(entry, now=None) -> bool:
     """
-    Stamps the latest observed Kalshi price onto every matching active bet.
+    True when this bet's fixture has already started.
 
-    Called by the read-only pre-kickoff snapshot job. CLV is the season's primary
-    metric because at ~150 bets per arm, P&L is dominated by variance while CLV
+    A price observed after kickoff is not a closing price — it is an in-play
+    price, and on a market Kalshi leaves open during the match it can be
+    arbitrarily far from the close. Stamping one would not merely lose CLV for
+    that bet, it would overwrite a good earlier stamp with a worse number and
+    report it as the close.
+
+    An unparseable or missing kickoff returns False: active bets always carry
+    one (undated markets are refused at staking), so this is a guard against
+    corruption, not a filter we want silently dropping stamps.
+    """
+    raw = entry.get("kickoff")
+    if not raw:
+        return False
+    try:
+        ko = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return False
+    if ko.tzinfo is None:
+        ko = ko.replace(tzinfo=timezone.utc)
+    return (now or datetime.now(timezone.utc)) >= ko
+
+
+def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
+    """
+    Stamps the latest observed PRE-KICKOFF Kalshi price onto every active bet.
+
+    Called by the read-only snapshot job. CLV is the season's primary metric
+    because at ~150 bets per arm, P&L is dominated by variance while CLV
     converges far faster — but it only exists if we capture the closing price
     before the market settles.
 
     `prices` maps (home, away, market, selection) -> price. Later snapshots
-    overwrite earlier ones, so the final pre-kickoff call wins.
+    overwrite earlier ones, so the final pre-kickoff call wins — and a fixture
+    that has already started is skipped entirely, so "final pre-kickoff" is
+    literally what gets kept rather than merely what usually got kept. Without
+    that, the Saturday runs could clobber a Friday-night fixture's good Friday
+    18:00 stamp with a post-match price.
     """
     owns = state is None
     state = state or load_state()
     stamped = 0
     for book in state["arms"].values():
         for bet in book["active_bets"]:
+            if _kicked_off(bet, now):
+                continue
             key = (bet.get("home"), bet.get("away"), bet.get("market"), bet.get("selection"))
             if key in prices:
                 bet["closing_price"] = float(prices[key])
@@ -398,6 +430,8 @@ def record_closing_prices(prices: dict, state: dict = None) -> int:
         # price against a mixture of entry and closing legs, which is not CLV.
         for parlay in book.get("active_parlays", []):
             for leg in parlay.get("legs", []):
+                if _kicked_off(leg, now):
+                    continue
                 key = (leg.get("home"), leg.get("away"), leg.get("market"), leg.get("selection"))
                 if key in prices:
                     leg["closing_price"] = float(prices[key])

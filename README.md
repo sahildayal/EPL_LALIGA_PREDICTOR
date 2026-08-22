@@ -76,7 +76,9 @@ can't override a CI secret.
 ```
 Thursday 09:00 UTC   preflight  check credentials before it matters
 Friday   09:00 UTC   stake      price the matchweek, place bets
+Friday   18:00 UTC   snapshot   closing prices for Friday-night fixtures
 Sat/Sun  11:00,14:00 snapshot   capture closing prices (read-only)
+Monday   20:00 UTC   snapshot   closing prices before Monday-night football
 Tuesday  09:00 UTC   settle     grade results, void postponements, score
 ```
 
@@ -96,9 +98,16 @@ Friday-evening run would price part of the matchweek after it had started.
 **Why Tuesday, not Monday.** A Monday-morning settle runs *before* Monday Night
 Football, so every MNF bet would sit pending for another full week.
 
-**Why the weekend snapshots.** Closing Line Value is the season's primary metric
-— at ~150 bets per arm, P&L is mostly variance while CLV converges far faster.
-But CLV only exists if the closing price is captured before the market resolves.
+**Why the snapshots bracket the whole week.** Closing Line Value is the season's
+primary metric — at ~150 bets per arm, P&L is mostly variance while CLV
+converges far faster. But CLV only exists if the closing price is captured
+before the market resolves, and a Saturday/Sunday-only cadence failed that on
+the EPL's opening weekend: a Friday 22:00 fixture had already resolved thirteen
+hours before the first snapshot and its CLV is permanently gone, while
+Monday-night fixtures were stamped from the Sunday 14:00 run — a price some 32
+hours before kickoff, recorded as the close. The Friday and Monday evening runs
+close both gaps. A price seen *after* kickoff is now refused outright, so the
+last genuine pre-kickoff price is what CLV is measured against.
 
 ### Exit codes
 

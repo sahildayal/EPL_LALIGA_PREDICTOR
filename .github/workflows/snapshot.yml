@@ -1,4 +1,4 @@
-# Saturday and Sunday: capture pre-kickoff Kalshi prices. Read-only.
+# Capture pre-kickoff Kalshi prices across the whole matchweek. Read-only.
 #
 # This job exists entirely for Closing Line Value. CLV is the season's primary
 # metric because at roughly 150 bets per arm, P&L is dominated by variance while
@@ -7,9 +7,25 @@
 # still be settled, but they contribute nothing to the metric that will actually
 # decide which arm won.
 #
-# Two runs per day. The later one is close to the main kickoff blocks (15:00 UK
-# Saturday, 16:15 CET Sunday); the earlier one is insurance, since a stamped
-# price from four hours out is far better than none.
+# The weekend runs are two per day. The later one is close to the main kickoff
+# blocks (15:00 UK Saturday, 16:15 CET Sunday); the earlier one is insurance,
+# since a stamped price from four hours out is far better than none.
+#
+# Friday and Monday evening runs were added after the EPL's opening weekend,
+# where a Saturday/Sunday-only cadence left a third of the week's bets with a
+# missing or meaningless closing price:
+#
+#   * Real Betis v Real Sociedad kicked off Friday 22:00 UTC — thirteen hours
+#     BEFORE the first snapshot. The market had already resolved, so it was
+#     never stamped and its CLV is permanently gone. Both leagues schedule
+#     Friday-night fixtures every week, which is the very reason `stake` runs
+#     Friday MORNING, so this was not a one-off.
+#   * Monday-night fixtures were stamped from the Sunday 14:00 run and settled
+#     Tuesday, recording a price ~32 hours before kickoff as the "closing"
+#     price. Present, but measuring something other than the close.
+#
+# 18:00 UTC Friday sits ahead of 19:00–22:00 Friday kickoffs; 20:00 UTC Monday
+# sits ahead of Monday Night Football and the 22:30 CET La Liga slot.
 name: Matchweek — snapshot
 
 on:
@@ -20,6 +36,8 @@ on:
     # CLV, the primary metric, down with it.
     - cron: "0 11 * * 6,0"     # Sat & Sun 11:00 UTC
     - cron: "0 14 * * 6,0"     # Sat & Sun 14:00 UTC
+    - cron: "0 18 * * 5"       # Fri 18:00 UTC — ahead of Friday-night kickoffs
+    - cron: "0 20 * * 1"       # Mon 20:00 UTC — ahead of Monday-night kickoffs
   workflow_dispatch:
 
 permissions:

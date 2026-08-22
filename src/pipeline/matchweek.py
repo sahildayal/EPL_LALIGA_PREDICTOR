@@ -452,6 +452,8 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "fixtures_without_score_matrix": [list(f) for f in no_matrix],
             "planned": {a: len(p) for a, p in plans.items()},
             "fill_adjustments": fill_notes,
+            # Reuses the fair values already built above — no extra Odds API call.
+            "edge_distribution": _edge_distribution(markets, fair),
             "dry_run": dry_run,
             "bets": {a: [_describe_plan(p) for p in ps] for a, ps in plans.items()},
         }
@@ -491,7 +493,7 @@ def run_stake(dry_run: bool = False) -> RunReport:
     return report
 
 
-def _edge_distribution(markets: list) -> dict:
+def _edge_distribution(markets: list, fair: dict = None) -> dict:
     """
     Where Kalshi sits versus the sharp line right now, whether or not we bet.
 
@@ -499,15 +501,24 @@ def _edge_distribution(markets: list) -> dict:
     maximum of 1.63% across every listed market, so they may bet rarely. The
     threshold is NOT being tuned to fix that — tuning a threshold until an arm
     starts betting measures the threshold, not the strategy. Instead the
-    distribution is recorded every snapshot, close to kickoff where divergence
-    is most likely, so the question can eventually be answered with a month of
-    evidence rather than one far-out reading.
+    distribution is recorded on every run, so the question can eventually be
+    answered with a month of evidence rather than one far-out reading.
+
+    Recorded at BOTH ends of the week, because they answer different questions.
+    The snapshots sample close to kickoff, where divergence is most likely. The
+    Friday `stake` run samples the exact moment arms A and B decline to bet —
+    without it the ledger records that they planned nothing and gives no way to
+    tell "nowhere near the bar" from "missed it by a basis point", which is the
+    evidence the season's A-versus-B conclusion has to rest on.
+
+    `fair` may be passed in by a caller that has already built it, so adding
+    this to `stake` costs no extra Odds API calls.
 
     Purely observational. Nothing here influences a bet.
     """
     try:
         from src.market.edge import build_opportunities
-        fair = collect_fair_values()
+        fair = collect_fair_values() if fair is None else fair
         opps = build_opportunities(markets, fair)
         if not opps:
             return {"n": 0}

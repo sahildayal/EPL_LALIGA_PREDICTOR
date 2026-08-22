@@ -577,3 +577,59 @@ def test_settle_records_results_and_voids():
     assert rep.details["settled"] == 1 and rep.details["voided"] == 1
     st = ledger.load_state()
     assert st["arms"]["B_divergence_flat"]["bankroll"] == 10_000.0     # refunded
+
+
+def test_stake_records_edge_distribution_at_decision_time(monkeypatch, tmp_path):
+    """
+    The Friday run must record how far the market sat from the arms' bar.
+
+    Arms A and B decline most weeks. Recording only that they planned nothing
+    cannot distinguish "nowhere near the bar" from "missed it by a basis
+    point", and that distinction is the entire evidence base for the season's
+    A-versus-B conclusion. The snapshots sample near kickoff; this samples the
+    moment the decision is actually made.
+    """
+    from src.market import ledger as _ledger
+    from src.pipeline import matchweek as mw
+    monkeypatch.setattr(_ledger, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(_ledger, "LEDGER_PATH", str(tmp_path / "l.json"))
+    monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
+
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon()},
+    ])
+    monkeypatch.setattr(mw, "collect_fair_values", lambda: {
+        ("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
+    })
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+
+    report = mw.run_stake(dry_run=True)
+    dist = report.details["edge_distribution"]
+    assert dist["n"] >= 1
+    assert "max" in dist and "median" in dist and "count_over" in dist
+
+
+def test_stake_edge_distribution_costs_no_extra_odds_call(monkeypatch, tmp_path):
+    """It must reuse the fair values already built, not fetch them again."""
+    from src.market import ledger as _ledger
+    from src.pipeline import matchweek as mw
+    monkeypatch.setattr(_ledger, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(_ledger, "LEDGER_PATH", str(tmp_path / "l.json"))
+    monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
+
+    calls = []
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon()},
+    ])
+
+    def _fair():
+        calls.append(1)
+        return {("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}}}
+
+    monkeypatch.setattr(mw, "collect_fair_values", _fair)
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+
+    mw.run_stake(dry_run=True)
+    assert len(calls) == 1, f"collect_fair_values called {len(calls)}x; must be reused"

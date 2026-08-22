@@ -9,7 +9,9 @@ to read a failure, and what to do about it.
 | Day | Time (UTC) | Job | Writes | Workflow |
 |---|---|---|---|---|
 | Friday | 09:00 | `stake` | places the matchweek's bets | `stake.yml` |
+| Friday | 18:00 | `snapshot` | stamps closing prices for Friday-night fixtures | `snapshot.yml` |
 | Sat & Sun | 11:00, 14:00 | `snapshot` | stamps closing prices for CLV | `snapshot.yml` |
+| Monday | 20:00 | `snapshot` | stamps closing prices before Monday-night football | `snapshot.yml` |
 | Tuesday | 09:00 | `settle` | grades results, voids postponements | `settle.yml` |
 
 All three call the shared body in `_matchweek.yml`, so checkout, credentials,
@@ -20,11 +22,25 @@ the ledger commit and the alerting logic exist in exactly one place.
 * **Friday 09:00** sits ahead of the earliest kickoff. Both leagues schedule
   Friday-night fixtures (20:00 UK / 21:00 CET), so a Friday-evening run would
   price part of the matchweek after it had already started.
-* **Saturday and Sunday snapshots** exist solely for Closing Line Value. CLV is
-  the season's primary metric — at roughly 150 bets per arm, P&L is mostly
-  variance while CLV converges far faster — but it only exists if the closing
-  price is captured before the market resolves. Two runs per day: one near the
-  main kickoff blocks, one as insurance.
+* **The snapshots** exist solely for Closing Line Value. CLV is the season's
+  primary metric — at roughly 150 bets per arm, P&L is mostly variance while CLV
+  converges far faster — but it only exists if the closing price is captured
+  before the market resolves. Two weekend runs per day: one near the main
+  kickoff blocks, one as insurance.
+
+  The Friday 18:00 and Monday 20:00 runs were added after the EPL's opening
+  weekend, where a weekend-only cadence left a third of that week's bets with a
+  missing or meaningless closing price. Real Betis v Real Sociedad kicked off
+  Friday 22:00 UTC, thirteen hours before the first snapshot, so it was never
+  stamped at all; Monday-night fixtures were stamped from the Sunday 14:00 run
+  and settled Tuesday, recording a price ~32 hours early as the close. Both
+  leagues schedule Friday-night fixtures every week — which is the very reason
+  `stake` runs Friday morning — so neither was a one-off.
+
+  A price observed after kickoff is refused outright. Kalshi can leave a market
+  open into the match, and stamping an in-play price would not merely lose CLV
+  for that bet, it would overwrite a good earlier stamp with a worse number and
+  report it as the close.
 * **Tuesday 09:00, not Monday.** A Monday-morning settle runs *before* Monday
   Night Football, so every MNF bet would sit pending for another full week. One
   day of reporting latency buys a complete matchweek.
