@@ -670,12 +670,12 @@ def test_snapshot_edge_distribution_excludes_in_play_markets(monkeypatch, tmp_pa
     monkeypatch.setattr(mw, "collect_kalshi", lambda: [
         {"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
          "ask": 0.90, "league": "epl", "kickoff": _soon(days=-1)},   # already started
-        {"home": "wolves", "away": "everton", "market": "1x2", "selection": "home",
+        {"home": "liverpool", "away": "everton", "market": "1x2", "selection": "home",
          "ask": 0.40, "league": "epl", "kickoff": _soon(days=2)},
     ])
     monkeypatch.setattr(mw, "collect_fair_values", lambda: {
         ("arsenal", "chelsea"): {"1x2": {"home": 0.20, "draw": 0.30, "away": 0.50}},
-        ("wolves", "everton"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
+        ("liverpool", "everton"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
     })
 
     report = mw.run_snapshot()
