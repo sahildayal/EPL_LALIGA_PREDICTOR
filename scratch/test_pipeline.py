@@ -392,6 +392,25 @@ def test_undated_market_is_never_bet():
     assert len(keep) == 1 and len(undated) == 1
 
 
+def test_pre_kickoff_drops_in_play_markets():
+    """
+    Kalshi leaves a market listed after kickoff, but an in-play ask reflects
+    the live score, not the pre-match line the model priced against. Snapshot
+    telemetry must not let that masquerade as a real divergence.
+    """
+    started = _mk(-1)
+    upcoming = _mk(1)
+    far_out = _mk(30)
+    kept = matchweek._pre_kickoff([started, upcoming, far_out], now=NOW)
+    assert kept == [upcoming, far_out]
+
+
+def test_pre_kickoff_drops_undated_markets():
+    kept = matchweek._pre_kickoff(
+        [{"home": "a", "away": "b", "market": MARKET_1X2, "ask": 0.4}], now=NOW)
+    assert kept == []
+
+
 def test_quiet_week_is_a_warning_not_a_failure(monkeypatch):
     """
     Markets listed but all kicking off later is a normal week during an
@@ -633,3 +652,32 @@ def test_stake_edge_distribution_costs_no_extra_odds_call(monkeypatch, tmp_path)
 
     mw.run_stake(dry_run=True)
     assert len(calls) == 1, f"collect_fair_values called {len(calls)}x; must be reused"
+
+
+def test_snapshot_edge_distribution_excludes_in_play_markets(monkeypatch, tmp_path):
+    """
+    A goal scored after kickoff can blow a live Kalshi ask miles from the
+    static pre-match fair value the model priced. That is not a missed edge,
+    and it must not appear in the telemetry the season's A/B/D conclusion
+    rests on.
+    """
+    from src.market import ledger as _ledger
+    from src.pipeline import matchweek as mw
+    monkeypatch.setattr(_ledger, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(_ledger, "LEDGER_PATH", str(tmp_path / "l.json"))
+    monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
+
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
+         "ask": 0.90, "league": "epl", "kickoff": _soon(days=-1)},   # already started
+        {"home": "wolves", "away": "everton", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon(days=2)},
+    ])
+    monkeypatch.setattr(mw, "collect_fair_values", lambda: {
+        ("arsenal", "chelsea"): {"1x2": {"home": 0.20, "draw": 0.30, "away": 0.50}},
+        ("wolves", "everton"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
+    })
+
+    report = mw.run_snapshot()
+    dist = report.details["edge_distribution"]
+    assert dist["n"] == 1

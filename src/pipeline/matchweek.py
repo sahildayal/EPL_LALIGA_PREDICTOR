@@ -132,6 +132,36 @@ def within_bet_window(markets: list, now=None, days: int = BET_WINDOW_DAYS) -> t
     return keep, outside, undated
 
 
+def _pre_kickoff(markets: list, now=None) -> list:
+    """
+    Markets whose fixture hasn't started, keeping only those with a parseable
+    kickoff.
+
+    Kalshi leaves a market listed after kickoff, and an in-play ask reflects
+    the live score rather than the pre-match line the model priced. Mixed into
+    telemetry, one goal can produce a double-digit "edge" against a stale fair
+    value that has nothing to do with a real pre-kickoff mispricing.
+    `_edge_distribution` on the snapshot job must only see markets this filter
+    keeps, or the season's evidence on whether Kalshi ever offers 2%+
+    divergence gets contaminated by in-play noise.
+    """
+    now = now or datetime.now(timezone.utc)
+    keep = []
+    for m in markets:
+        raw = m.get("kickoff")
+        if not raw:
+            continue
+        try:
+            ko = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            continue
+        if ko.tzinfo is None:
+            ko = ko.replace(tzinfo=timezone.utc)
+        if now <= ko:
+            keep.append(m)
+    return keep
+
+
 def fetch_orderbook(client, ticker: str) -> dict:
     """Raw order book for one market. Raises so the caller can fail that bet closed."""
     resp = client._request("GET", f"/trade-api/v2/markets/{ticker}/orderbook",
@@ -547,7 +577,7 @@ def run_snapshot() -> RunReport:
                   for m in markets}
         stamped = ledger.record_closing_prices(prices)
         report.details = {"markets": len(markets), "stamped": stamped}
-        report.details["edge_distribution"] = _edge_distribution(markets)
+        report.details["edge_distribution"] = _edge_distribution(_pre_kickoff(markets))
         report.ok = True
     except Exception as exc:
         report.errors.append(f"{type(exc).__name__}: {exc}")
