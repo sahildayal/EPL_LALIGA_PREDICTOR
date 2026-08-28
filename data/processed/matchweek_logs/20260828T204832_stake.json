@@ -1,0 +1,151 @@
+{
+  "job": "stake",
+  "started_utc": "2026-08-28T20:48:32.401667+00:00",
+  "ok": true,
+  "errors": [
+    "1 fixture(s) priced but with no score matrix, so BTTS and same-game parlays were skipped: [['crystal palace', 'manchester city']]. Usually a missing totals line, or a solve that did not reproduce the sharp 1X2."
+  ],
+  "details": {
+    "markets_listed": 54,
+    "markets": 54,
+    "bet_window_days": 7,
+    "skipped_outside_window": 0,
+    "skipped_undated": 0,
+    "fixtures": 18,
+    "fair_fixtures": 29,
+    "score_matrices": 28,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [
+      [
+        "crystal palace",
+        "manchester city"
+      ]
+    ],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 7,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Alaves vs Villarreal \u2014 Moneyline: Villarreal Win",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.1200 -> fill 0.1663, net edge 0.0354 -> -0.0132"
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Alaves vs Villarreal \u2014 Moneyline: Villarreal Win",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.1200 -> fill 0.1661, net edge 0.0354 -> -0.0130"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Alaves vs Villarreal \u2014 Moneyline: Villarreal Win",
+        "action": "repriced",
+        "quoted": 0.12,
+        "fill": 0.184061,
+        "contracts": 1470.602
+      }
+    ],
+    "edge_distribution": {
+      "n": 51,
+      "max": 0.0354,
+      "median": -0.0196,
+      "min": -0.0623,
+      "count_over": {
+        "0.005": 1,
+        "0.010": 1,
+        "0.015": 1,
+        "0.020": 1,
+        "0.030": 1,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Coventry vs Hull \u2014 Moneyline: Hull Win",
+          "stake": 279.05,
+          "ask": 0.21,
+          "quoted_ask": 0.21,
+          "fill_contracts": 1328.8095,
+          "fair": 0.9179706063766291,
+          "net_edge": 0.6963,
+          "fair_source": "model"
+        },
+        {
+          "label": "Alaves vs Villarreal \u2014 Moneyline: Villarreal Win",
+          "stake": 270.68,
+          "ask": 0.184061,
+          "quoted_ask": 0.12,
+          "fill_contracts": 1470.602,
+          "fair": 0.4499043061824293,
+          "net_edge": 0.2552,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Valencia \u2014 Moneyline: Valencia Win",
+          "stake": 262.56,
+          "ask": 0.31,
+          "quoted_ask": 0.31,
+          "fill_contracts": 846.9677,
+          "fair": 0.4186265459801275,
+          "net_edge": 0.0936,
+          "fair_source": "model"
+        },
+        {
+          "label": "Chelsea vs Brighton \u2014 Moneyline: Brighton Win",
+          "stake": 147.22,
+          "ask": 0.23,
+          "quoted_ask": 0.23,
+          "fill_contracts": 640.087,
+          "fair": 0.2958104239972782,
+          "net_edge": 0.0534,
+          "fair_source": "model"
+        },
+        {
+          "label": "Aston Villa vs Arsenal \u2014 Moneyline: Aston Villa Win",
+          "stake": 126.37,
+          "ask": 0.15,
+          "quoted_ask": 0.15,
+          "fill_contracts": 842.4667,
+          "fair": 0.21050286352017666,
+          "net_edge": 0.0515,
+          "fair_source": "model"
+        },
+        {
+          "label": "Tottenham vs Newcastle \u2014 Moneyline: Newcastle Win",
+          "stake": 150.1,
+          "ask": 0.33,
+          "quoted_ask": 0.33,
+          "fill_contracts": 454.8485,
+          "fair": 0.39446174545066803,
+          "net_edge": 0.049,
+          "fair_source": "model"
+        },
+        {
+          "label": "Celta Vigo vs Athletic Bilbao \u2014 Moneyline: Celta Vigo Win",
+          "stake": 153.49,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 383.725,
+          "fair": 0.46247152873132913,
+          "net_edge": 0.0457,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 7,
+      "D_parlay": 0
+    }
+  }
+}
