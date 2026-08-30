@@ -1,0 +1,93 @@
+{
+  "job": "stake",
+  "started_utc": "2026-08-30T16:08:45.016094+00:00",
+  "ok": true,
+  "errors": [
+    "2 fixture(s) priced but with no score matrix, so BTTS and same-game parlays were skipped: [['manchester united', 'ipswich'], ['real madrid', 'malaga']]. Usually a missing totals line, or a solve that did not reproduce the sharp 1X2."
+  ],
+  "details": {
+    "markets_listed": 21,
+    "markets": 21,
+    "bet_window_days": 7,
+    "skipped_outside_window": 0,
+    "skipped_undated": 0,
+    "fixtures": 7,
+    "fair_fixtures": 38,
+    "score_matrices": 32,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [
+      [
+        "manchester united",
+        "ipswich"
+      ],
+      [
+        "real madrid",
+        "malaga"
+      ]
+    ],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 2,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Manchester United vs Ipswich \u2014 Moneyline: Manchester United Win",
+        "action": "repriced",
+        "quoted": 0.43,
+        "fill": 0.4,
+        "contracts": 593.425
+      }
+    ],
+    "edge_distribution": {
+      "n": 18,
+      "max": 0.0027,
+      "median": -0.017,
+      "min": -0.0383,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Manchester United vs Ipswich \u2014 Moneyline: Manchester United Win",
+          "stake": 237.37,
+          "ask": 0.4,
+          "quoted_ask": 0.43,
+          "fill_contracts": 593.425,
+          "fair": 0.7375565926129365,
+          "net_edge": 0.3208,
+          "fair_source": "model"
+        },
+        {
+          "label": "Barcelona vs Rayo Vallecano \u2014 Moneyline: Draw",
+          "stake": 85.69,
+          "ask": 0.1,
+          "quoted_ask": 0.1,
+          "fill_contracts": 856.9,
+          "fair": 0.14649257552061862,
+          "net_edge": 0.0402,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 2,
+      "D_parlay": 0
+    }
+  }
+}

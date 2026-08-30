@@ -23,7 +23,7 @@
     },
     "C_model_kelly": {
       "label": "Model-only + quarter-Kelly",
-      "bankroll": 7912.34,
+      "bankroll": 7589.28,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -171,6 +171,46 @@
           "fill_contracts": 383.725,
           "placed_utc": "2026-08-28T20:48:55.890500+00:00",
           "closing_seen_utc": "2026-08-30T15:07:34.154437+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "home",
+          "home": "manchester united",
+          "away": "ipswich",
+          "stake": 237.37,
+          "price": 0.4,
+          "line": null,
+          "prop": null,
+          "label": "Manchester United vs Ipswich \u2014 Moneyline: Manchester United Win",
+          "league": "epl",
+          "kickoff": "2026-08-30T18:30:00Z",
+          "model_prob": 0.7375565926129365,
+          "fair_prob": 0.7375565926129365,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.43,
+          "fill_contracts": 593.425,
+          "placed_utc": "2026-08-30T16:09:55.183030+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "draw",
+          "home": "barcelona",
+          "away": "rayo vallecano",
+          "stake": 85.69,
+          "price": 0.1,
+          "line": null,
+          "prop": null,
+          "label": "Barcelona vs Rayo Vallecano \u2014 Moneyline: Draw",
+          "league": "laliga",
+          "kickoff": "2026-08-31T22:30:00Z",
+          "model_prob": 0.14649257552061862,
+          "fair_prob": 0.14649257552061862,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.1,
+          "fill_contracts": 856.9,
+          "placed_utc": "2026-08-30T16:09:55.183052+00:00"
         }
       ],
       "history": [
