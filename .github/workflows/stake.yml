@@ -1,17 +1,30 @@
-# Friday: price the matchweek and place this week's bets.
+# Friday: price the matchweek and place this week's bets. Sunday: re-price
+# the same 7-day window and stake anything that has since crossed a threshold.
 #
-# 09:00 UTC is chosen to sit ahead of the earliest kickoff of the weekend. EPL
-# and La Liga both schedule Friday-night fixtures (20:00 UK / 21:00 CET), so a
-# Friday-evening run would price part of the matchweek after it had started.
+# 09:00 UTC on Friday is chosen to sit ahead of the earliest kickoff of the
+# weekend. EPL and La Liga both schedule Friday-night fixtures (20:00 UK /
+# 21:00 CET), so a Friday-evening run would price part of the matchweek after
+# it had started.
+#
+# The Sunday run exists because Kalshi asks drift between Friday morning and
+# kickoff, and a single weekly stake pass means any edge that opens up after
+# Friday goes uncaptured until the following Friday — by which point the
+# fixture has usually already been played. Sunday 12:00 UTC sits ahead of
+# Sunday-evening kickoffs and after the Saturday slate, giving a second look
+# at whatever's left in the window without changing any arm's threshold.
+# `place_arm` already guards against staking a fixture+market an arm holds
+# from Friday (see the `held` filter in src/market/arms.py), so this cannot
+# double-bet a market Friday already took.
 #
 # Note the schedule is UTC year-round while the leagues run on local time, so
-# these fire an hour "later" in local terms once the clocks go back. 09:00 UTC
-# leaves enough margin that this never matters.
+# these fire an hour "later" in local terms once the clocks go back. That
+# margin is generous enough that this never matters for either run.
 name: Matchweek — stake
 
 on:
   schedule:
     - cron: "0 9 * * 5"        # Fridays 09:00 UTC
+    - cron: "0 12 * * 0"       # Sundays 12:00 UTC — catches post-Friday drift
   workflow_dispatch:
     inputs:
       dry_run:
