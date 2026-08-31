@@ -1,0 +1,13 @@
+{
+  "job": "snapshot",
+  "started_utc": "2026-08-31T23:29:25.408486+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets": 0,
+    "stamped": 0,
+    "edge_distribution": {
+      "n": 0
+    }
+  }
+}
