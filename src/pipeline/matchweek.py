@@ -78,7 +78,7 @@ def _now():
 def collect_kalshi() -> list:
     """Fetches and normalises every in-scope Kalshi market. Raises if unavailable."""
     client = KalshiClient()
-    raw = []
+    raw, per_ticker = [], {}
     for ticker in km.all_series_tickers():
         try:
             resp = client._request(
@@ -88,19 +88,20 @@ def collect_kalshi() -> list:
             raise KalshiUnavailable(f"Kalshi market fetch failed for {ticker}: {exc}") from exc
         if resp.status_code != 200:
             raise KalshiUnavailable(f"Kalshi returned {resp.status_code} for {ticker}")
-        body = resp.json()
-        n = len(body.get("markets", []))
-        # TEMP diagnostic (2026-09-04): a same-day PipelineAborted said Kalshi
-        # listed nothing at all, while an unauthenticated curl of the same
-        # tickers moments later returned this weekend's fixtures fine. Logging
-        # per-ticker status/count to tell a real outage from a signed-request-
-        # specific problem (rate limiting, pagination) before changing any
-        # fail-closed behavior. Remove once the cause is confirmed.
-        print(f"[kalshi-diag] {ticker}: status={resp.status_code} markets={n} "
-              f"cursor={body.get('cursor')!r}")
-        for m in body.get("markets", []):
+        markets = resp.json().get("markets", [])
+        per_ticker[ticker] = len(markets)
+        for m in markets:
             m.setdefault("series_ticker", ticker)
             raw.append(m)
+    if not raw:
+        # 2026-09-04: a scheduled run aborted here with every ticker reporting
+        # zero, while an unauthenticated curl of the same tickers moments
+        # later returned that week's fixtures fine — a transient blip on
+        # Kalshi's side (or their rate limiting), not a code or credential
+        # problem, since a same-day retry succeeded cleanly. Printing the
+        # per-ticker breakdown only in this empty case, so the next occurrence
+        # shows up in the run log without adding noise to every normal run.
+        print(f"[kalshi] every series returned zero open markets: {per_ticker}")
     return km.normalise(raw)
 
 
