@@ -1,0 +1,516 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-04T14:38:51.103775+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 421,
+    "markets": 328,
+    "bet_window_days": 7,
+    "skipped_outside_window": 93,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "planned": {
+      "A_divergence_kelly": 9,
+      "B_divergence_flat": 9,
+      "C_model_kelly": 7,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Brentford vs Sunderland \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.069816,
+        "contracts": 4296.9975
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.07,
+        "fill": 0.076612,
+        "contracts": 3798.375
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Newcastle vs Bournemouth \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0500 -> fill 0.9600, net edge 0.4492 -> -0.4601"
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Getafe vs Celta Vigo \u2014 Over 4.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.123221,
+        "contracts": 2222.0308
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Brighton vs Leeds \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.062004,
+        "contracts": 4283.4286
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Fulham vs Crystal Palace \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.061328,
+        "contracts": 4200.7143
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Nottingham Forest vs Tottenham \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.06225,
+        "contracts": 4014.2857
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Hull vs Aston Villa \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.064488,
+        "contracts": 3758.6625
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Athletic Bilbao vs Atletico Madrid \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.06485,
+        "contracts": 3625.5714
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Everton vs Manchester United \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.08,
+        "fill": 0.089443,
+        "contracts": 2549.9
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Elche vs Real Sociedad \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0800 -> fill 0.9500, net edge 0.4315 -> -0.4367"
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Villarreal vs Deportivo La Coruna \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0600 -> fill 0.9600, net edge 0.4283 -> -0.4704"
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Brentford vs Sunderland \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.062792,
+        "contracts": 1592.5714
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.07,
+        "fill": 0.070878,
+        "contracts": 1410.875
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Newcastle vs Bournemouth \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0500 -> fill 0.9600, net edge 0.4492 -> -0.4601"
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Getafe vs Celta Vigo \u2014 Over 4.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.071049,
+        "contracts": 1407.4762
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Everton vs Manchester United \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.08,
+        "fill": 0.086141,
+        "contracts": 1160.8889
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Elche vs Real Sociedad \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0800 -> fill 0.9500, net edge 0.4315 -> -0.4367"
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Villarreal vs Deportivo La Coruna \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0600 -> fill 0.9600, net edge 0.4283 -> -0.4704"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Hull vs Aston Villa \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0800 -> fill 0.9400, net edge 0.7122 -> -0.1466"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Villarreal vs Deportivo La Coruna \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.08,
+        "fill": 0.086295,
+        "contracts": 3360.8
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Ipswich vs Liverpool \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.14,
+        "fill": 0.143898,
+        "contracts": 1955.0
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Levante \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.1100 -> fill 0.9334, net edge 0.5621 -> -0.2589"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Getafe vs Celta Vigo \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.1800 -> fill 0.8700, net edge 0.5175 -> -0.1701"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.07,
+        "fill": 0.076181,
+        "contracts": 3370.25
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Nottingham Forest vs Tottenham \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.062227,
+        "contracts": 4002.2857
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Brighton vs Leeds \u2014 Over 5.5 Goals",
+        "action": "repriced",
+        "quoted": 0.06,
+        "fill": 0.061308,
+        "contracts": 3940.4286
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Brentford vs Sunderland \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0700 -> fill 0.9400, net edge 0.4802 -> -0.3892"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Fulham vs Crystal Palace \u2014 Under 0.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0700 -> fill 0.9400, net edge 0.4726 -> -0.3968"
+      }
+    ],
+    "edge_distribution": {
+      "n": 328,
+      "max": 0.4915,
+      "median": -0.0228,
+      "min": -0.5036,
+      "count_over": {
+        "0.005": 109,
+        "0.010": 109,
+        "0.015": 109,
+        "0.020": 109,
+        "0.030": 106,
+        "0.040": 102
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [
+        {
+          "label": "Brentford vs Sunderland \u2014 Over 5.5 Goals",
+          "stake": 300.0,
+          "ask": 0.069816,
+          "quoted_ask": 0.06,
+          "fill_contracts": 4296.9975,
+          "fair": 0.5282051282051282,
+          "net_edge": 0.4538,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+          "stake": 291.0,
+          "ask": 0.076612,
+          "quoted_ask": 0.07,
+          "fill_contracts": 3798.375,
+          "fair": 0.5282051282051282,
+          "net_edge": 0.4466,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Getafe vs Celta Vigo \u2014 Over 4.5 Goals",
+          "stake": 273.8,
+          "ask": 0.123221,
+          "quoted_ask": 0.06,
+          "fill_contracts": 2222.0308,
+          "fair": 0.5128865979381443,
+          "net_edge": 0.3821,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Brighton vs Leeds \u2014 Over 5.5 Goals",
+          "stake": 265.59,
+          "ask": 0.062004,
+          "quoted_ask": 0.06,
+          "fill_contracts": 4283.4286,
+          "fair": 0.5115681233933163,
+          "net_edge": 0.4455,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Fulham vs Crystal Palace \u2014 Over 5.5 Goals",
+          "stake": 257.62,
+          "ask": 0.061328,
+          "quoted_ask": 0.06,
+          "fill_contracts": 4200.7143,
+          "fair": 0.5089974293059126,
+          "net_edge": 0.4436,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Nottingham Forest vs Tottenham \u2014 Over 5.5 Goals",
+          "stake": 249.89,
+          "ask": 0.06225,
+          "quoted_ask": 0.06,
+          "fill_contracts": 4014.2857,
+          "fair": 0.5064267352185091,
+          "net_edge": 0.4401,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Hull vs Aston Villa \u2014 Over 5.5 Goals",
+          "stake": 242.39,
+          "ask": 0.064488,
+          "quoted_ask": 0.06,
+          "fill_contracts": 3758.6625,
+          "fair": 0.502577319587629,
+          "net_edge": 0.4338,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Athletic Bilbao vs Atletico Madrid \u2014 Over 5.5 Goals",
+          "stake": 235.12,
+          "ask": 0.06485,
+          "quoted_ask": 0.06,
+          "fill_contracts": 3625.5714,
+          "fair": 0.502577319587629,
+          "net_edge": 0.4334,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Everton vs Manchester United \u2014 Over 5.5 Goals",
+          "stake": 228.07,
+          "ask": 0.089443,
+          "quoted_ask": 0.08,
+          "fill_contracts": 2549.9,
+          "fair": 0.5218508997429305,
+          "net_edge": 0.4266,
+          "fair_source": "sharp_consensus"
+        }
+      ],
+      "B_divergence_flat": [
+        {
+          "label": "Brentford vs Sunderland \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.062792,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1592.5714,
+          "fair": 0.5282051282051282,
+          "net_edge": 0.4612,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.070878,
+          "quoted_ask": 0.07,
+          "fill_contracts": 1410.875,
+          "fair": 0.5282051282051282,
+          "net_edge": 0.4526,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Getafe vs Celta Vigo \u2014 Over 4.5 Goals",
+          "stake": 100.0,
+          "ask": 0.071049,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1407.4762,
+          "fair": 0.5128865979381443,
+          "net_edge": 0.4371,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Brighton vs Leeds \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.06,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1666.6667,
+          "fair": 0.5115681233933163,
+          "net_edge": 0.4476,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Fulham vs Crystal Palace \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.06,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1666.6667,
+          "fair": 0.5089974293059126,
+          "net_edge": 0.445,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Nottingham Forest vs Tottenham \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.06,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1666.6667,
+          "fair": 0.5064267352185091,
+          "net_edge": 0.4424,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Hull vs Aston Villa \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.06,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1666.6667,
+          "fair": 0.502577319587629,
+          "net_edge": 0.4386,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Athletic Bilbao vs Atletico Madrid \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.06,
+          "quoted_ask": 0.06,
+          "fill_contracts": 1666.6667,
+          "fair": 0.502577319587629,
+          "net_edge": 0.4386,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Everton vs Manchester United \u2014 Over 5.5 Goals",
+          "stake": 100.0,
+          "ask": 0.086141,
+          "quoted_ask": 0.08,
+          "fill_contracts": 1160.8889,
+          "fair": 0.5218508997429305,
+          "net_edge": 0.4301,
+          "fair_source": "sharp_consensus"
+        }
+      ],
+      "C_model_kelly": [
+        {
+          "label": "Villarreal vs Deportivo La Coruna \u2014 Over 5.5 Goals",
+          "stake": 290.02,
+          "ask": 0.086295,
+          "quoted_ask": 0.08,
+          "fill_contracts": 3360.8,
+          "fair": 0.7189579653293818,
+          "net_edge": 0.6271,
+          "fair_source": "model"
+        },
+        {
+          "label": "Ipswich vs Liverpool \u2014 Over 5.5 Goals",
+          "stake": 281.32,
+          "ask": 0.143898,
+          "quoted_ask": 0.14,
+          "fill_contracts": 1955.0,
+          "fair": 0.7481447792626964,
+          "net_edge": 0.5955,
+          "fair_source": "model"
+        },
+        {
+          "label": "Rayo Vallecano vs Racing Santander \u2014 Over 5.5 Goals",
+          "stake": 256.75,
+          "ask": 0.076181,
+          "quoted_ask": 0.07,
+          "fill_contracts": 3370.25,
+          "fair": 0.5728673221823481,
+          "net_edge": 0.4917,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Tottenham \u2014 Over 5.5 Goals",
+          "stake": 249.05,
+          "ask": 0.062227,
+          "quoted_ask": 0.06,
+          "fill_contracts": 4002.2857,
+          "fair": 0.5482682505502081,
+          "net_edge": 0.4819,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brighton vs Leeds \u2014 Over 5.5 Goals",
+          "stake": 241.58,
+          "ask": 0.061308,
+          "quoted_ask": 0.06,
+          "fill_contracts": 3940.4286,
+          "fair": 0.5459545840926737,
+          "net_edge": 0.4805,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Bournemouth \u2014 Over 5.5 Goals",
+          "stake": 227.3,
+          "ask": 0.1,
+          "quoted_ask": 0.1,
+          "fill_contracts": 2273.0,
+          "fair": 0.5847734821604155,
+          "net_edge": 0.4785,
+          "fair_source": "model"
+        },
+        {
+          "label": "Hull vs Aston Villa \u2014 Moneyline: Hull Win",
+          "stake": 220.48,
+          "ask": 0.24,
+          "quoted_ask": 0.24,
+          "fill_contracts": 918.6667,
+          "fair": 0.7254283363623066,
+          "net_edge": 0.4726,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 9,
+      "B_divergence_flat": 9,
+      "C_model_kelly": 7,
+      "D_parlay": 0
+    }
+  }
+}
