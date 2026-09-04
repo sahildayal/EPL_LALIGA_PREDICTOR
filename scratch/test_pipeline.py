@@ -229,6 +229,41 @@ def test_unresolvable_trailing_text_returns_none():
     assert km._resolve_trailing("Definitely Not A Club") is None
 
 
+def test_resolves_a_name_with_junk_on_both_sides():
+    """
+    Regression, 2026-09-04. Kalshi's rules_primary sentence changed template
+    with no warning: "If Tie is the result of the Brentford vs Chelsea
+    professional EPL soccer game originally scheduled for Sep 18, 2026...".
+    The home capture ("If Tie is the result of the Brentford") has the club
+    at the END behind five junk words; the old trailing-only trim only ever
+    dropped words off the end, so it could isolate "Chelsea" (junk trails it)
+    but never "Brentford" (junk leads it) — every 1X2 market's home side
+    resolved to None and the whole exchange looked empty.
+    """
+    assert km._resolve_trailing("If Tie is the result of the Brentford") == "brentford"
+    assert (km._resolve_trailing(
+        "Chelsea professional EPL soccer game originally scheduled for Sep")
+        == "chelsea")
+
+
+def test_parse_teams_survives_the_rules_primary_only_template():
+    """
+    Same regression as above, exercised through parse_teams end to end: a
+    market whose title carries no "vs" at all (Kalshi's current per-outcome
+    title, e.g. "Chelsea wins") must still resolve via rules_primary.
+    """
+    market = {
+        "title": "Chelsea wins",
+        "rules_primary": (
+            "If Chelsea wins the Brentford vs Chelsea professional EPL "
+            "soccer game originally scheduled for Sep 18, 2026 after 90 "
+            "minutes plus stoppage time (does not include extra time or "
+            "penalties), then the market resolves to Yes."
+        ),
+    }
+    assert km.parse_teams(market) == ("brentford", "chelsea")
+
+
 # --- Fill realism ------------------------------------------------------------
 #
 # Levels below are the real KXLALIGAGAME-26AUG17DEPELC-ELC book on 2026-08-07.

@@ -58,20 +58,30 @@ def _price(market: dict, side: str = "yes"):
 
 def _resolve_trailing(text: str):
     """
-    Resolves a team name that may carry trailing title words, or None.
+    Resolves a team name buried in surrounding junk words, or None.
 
     Kalshi titles read "Arsenal vs Coventry Winner?", so a regex capturing the
-    away side also swallows "Winner". Candidates are tried LONGEST FIRST and the
-    first hit wins, which is what makes this safe: "Manchester United Winner"
-    resolves at "Manchester United" and never reaches the bare "Manchester",
-    where it could match a different club.
+    away side also swallows "Winner" (junk on the right). rules_primary sentences
+    read "If Tie is the result of the Brentford vs Chelsea professional EPL
+    soccer game...", so the SAME regex captures "If Tie is the result of the
+    Brentford" for the home side (junk on the left, 2026-09-04) — Kalshi
+    changed this sentence template between weeks with no warning, and every
+    home side started resolving to None, which silently dropped every 1X2
+    market on the exchange (same failure shape as the trailing-junk
+    regression this function already exists to prevent). Windows are tried
+    LONGEST FIRST, then leftmost, so "Manchester United Winner" resolves at
+    "Manchester United" and never reaches the bare "Manchester", where it
+    could match a different club — and a leading "If Tie is the result of
+    the" no longer blocks reaching "Brentford" at the end.
     """
     parts = text.split()
-    for k in range(len(parts), 0, -1):
-        try:
-            return canonical(" ".join(parts[:k]))
-        except UnknownTeam:
-            continue
+    n = len(parts)
+    for length in range(n, 0, -1):
+        for start in range(0, n - length + 1):
+            try:
+                return canonical(" ".join(parts[start:start + length]))
+            except UnknownTeam:
+                continue
     return None
 
 
