@@ -37,7 +37,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run script
-        run: python "scripts/${{ inputs.script }}"
+        run: PYTHONPATH="$PWD" python "scripts/${{ inputs.script }}"
 
       - name: Commit ledger changes
         run: |
