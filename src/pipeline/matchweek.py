@@ -88,7 +88,17 @@ def collect_kalshi() -> list:
             raise KalshiUnavailable(f"Kalshi market fetch failed for {ticker}: {exc}") from exc
         if resp.status_code != 200:
             raise KalshiUnavailable(f"Kalshi returned {resp.status_code} for {ticker}")
-        for m in resp.json().get("markets", []):
+        body = resp.json()
+        n = len(body.get("markets", []))
+        # TEMP diagnostic (2026-09-04): a same-day PipelineAborted said Kalshi
+        # listed nothing at all, while an unauthenticated curl of the same
+        # tickers moments later returned this weekend's fixtures fine. Logging
+        # per-ticker status/count to tell a real outage from a signed-request-
+        # specific problem (rate limiting, pagination) before changing any
+        # fail-closed behavior. Remove once the cause is confirmed.
+        print(f"[kalshi-diag] {ticker}: status={resp.status_code} markets={n} "
+              f"cursor={body.get('cursor')!r}")
+        for m in body.get("markets", []):
             m.setdefault("series_ticker", ticker)
             raw.append(m)
     return km.normalise(raw)
