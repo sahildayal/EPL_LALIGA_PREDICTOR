@@ -1,0 +1,206 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-04T15:05:29.031534+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 421,
+    "markets": 328,
+    "bet_window_days": 7,
+    "skipped_outside_window": 93,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 8,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Hull vs Aston Villa \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.47,
+        "fill": 0.54,
+        "contracts": 541.4444
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Manchester City vs Coventry \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.53,
+        "fill": 0.489912,
+        "contracts": 578.8796
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Hull vs Aston Villa \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.51,
+        "fill": 0.506191,
+        "contracts": 543.4706
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Levante \u2014 Moneyline: Levante Win",
+        "action": "repriced",
+        "quoted": 0.31,
+        "fill": 0.319514,
+        "contracts": 835.1444
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Levante \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.46,
+        "fill": 0.56,
+        "contracts": 462.2143
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Manchester City vs Coventry \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.2800 -> fill 0.7378, net edge 0.1694 -> -0.2878"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Levante \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.53,
+        "fill": 0.499801,
+        "contracts": 472.668
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Real Betis vs Real Madrid \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.3100 -> fill 0.7000, net edge 0.1152 -> -0.2745"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Valencia vs Barcelona \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.3000 -> fill 0.7134, net edge 0.0838 -> -0.3293"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Everton vs Manchester United \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.4400 -> fill 0.5800, net edge 0.0770 -> -0.0628"
+      }
+    ],
+    "edge_distribution": {
+      "n": 110,
+      "max": -0.0031,
+      "median": -0.0228,
+      "min": -0.053,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Hull vs Aston Villa \u2014 Both Teams To Score: NO",
+          "stake": 292.38,
+          "ask": 0.54,
+          "quoted_ask": 0.47,
+          "fill_contracts": 541.4444,
+          "fair": 0.9214889040339502,
+          "net_edge": 0.3641,
+          "fair_source": "model"
+        },
+        {
+          "label": "Manchester City vs Coventry \u2014 Both Teams To Score: NO",
+          "stake": 283.6,
+          "ask": 0.489912,
+          "quoted_ask": 0.53,
+          "fill_contracts": 578.8796,
+          "fair": 0.9676785031302954,
+          "net_edge": 0.4603,
+          "fair_source": "model"
+        },
+        {
+          "label": "Hull vs Aston Villa \u2014 Under 2.5 Goals",
+          "stake": 275.1,
+          "ask": 0.506191,
+          "quoted_ask": 0.51,
+          "fill_contracts": 543.4706,
+          "fair": 0.7973889199985653,
+          "net_edge": 0.2737,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Levante \u2014 Moneyline: Levante Win",
+          "stake": 266.84,
+          "ask": 0.319514,
+          "quoted_ask": 0.31,
+          "fill_contracts": 835.1444,
+          "fair": 0.5843678863768049,
+          "net_edge": 0.2496,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Levante \u2014 Both Teams To Score: NO",
+          "stake": 258.84,
+          "ask": 0.56,
+          "quoted_ask": 0.46,
+          "fill_contracts": 462.2143,
+          "fair": 0.6730458768758408,
+          "net_edge": 0.0957,
+          "fair_source": "model"
+        },
+        {
+          "label": "Villarreal vs Deportivo La Coruna \u2014 Over 2.5 Goals",
+          "stake": 243.54,
+          "ask": 0.57,
+          "quoted_ask": 0.57,
+          "fill_contracts": 427.2632,
+          "fair": 0.7189579653293818,
+          "net_edge": 0.1318,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Levante \u2014 Under 2.5 Goals",
+          "stake": 236.24,
+          "ask": 0.499801,
+          "quoted_ask": 0.53,
+          "fill_contracts": 472.668,
+          "fair": 0.6789921924703795,
+          "net_edge": 0.1617,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Betis vs Real Madrid \u2014 Moneyline: Real Betis Win",
+          "stake": 222.27,
+          "ask": 0.15,
+          "quoted_ask": 0.15,
+          "fill_contracts": 1481.8,
+          "fair": 0.26730131458025963,
+          "net_edge": 0.1083,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 8,
+      "D_parlay": 0
+    }
+  }
+}
