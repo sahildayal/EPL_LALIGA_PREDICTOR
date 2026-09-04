@@ -13,6 +13,7 @@ the whole season exists to run. There is no "bet the half we could price" path.
 import json
 import os
 import re
+import time
 import traceback
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -75,9 +76,8 @@ def _now():
 
 # --- Data collection ---------------------------------------------------------
 
-def collect_kalshi() -> list:
-    """Fetches and normalises every in-scope Kalshi market. Raises if unavailable."""
-    client = KalshiClient()
+def _fetch_kalshi_once(client) -> tuple:
+    """One pass over every series ticker. Returns (raw_markets, per_ticker_counts)."""
     raw, per_ticker = [], {}
     for ticker in km.all_series_tickers():
         try:
@@ -93,15 +93,28 @@ def collect_kalshi() -> list:
         for m in markets:
             m.setdefault("series_ticker", ticker)
             raw.append(m)
+    return raw, per_ticker
+
+
+def collect_kalshi() -> list:
+    """Fetches and normalises every in-scope Kalshi market. Raises if unavailable."""
+    client = KalshiClient()
+    raw, per_ticker = _fetch_kalshi_once(client)
     if not raw:
         # 2026-09-04: a scheduled run aborted here with every ticker reporting
         # zero, while an unauthenticated curl of the same tickers moments
         # later returned that week's fixtures fine — a transient blip on
         # Kalshi's side (or their rate limiting), not a code or credential
-        # problem, since a same-day retry succeeded cleanly. Printing the
-        # per-ticker breakdown only in this empty case, so the next occurrence
-        # shows up in the run log without adding noise to every normal run.
-        print(f"[kalshi] every series returned zero open markets: {per_ticker}")
+        # problem, since a same-day retry succeeded cleanly. One retry after a
+        # short backoff absorbs that without weakening the fail-closed
+        # guarantee: a real outage or broken parser still empties the retry
+        # too, and still aborts the matchweek.
+        print(f"[kalshi] every series returned zero open markets on first try: "
+              f"{per_ticker}. Retrying once after a short backoff.")
+        time.sleep(5)
+        raw, per_ticker = _fetch_kalshi_once(client)
+        if not raw:
+            print(f"[kalshi] still zero on retry: {per_ticker}")
     return km.normalise(raw)
 
 
