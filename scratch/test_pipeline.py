@@ -246,22 +246,34 @@ def test_resolves_a_name_with_junk_on_both_sides():
         == "chelsea")
 
 
-def test_parse_teams_survives_the_rules_primary_only_template():
-    """
-    Same regression as above, exercised through parse_teams end to end: a
-    market whose title carries no "vs" at all (Kalshi's current per-outcome
-    title, e.g. "Chelsea wins") must still resolve via rules_primary.
-    """
-    market = {
-        "title": "Chelsea wins",
+def _rules_primary(outcome_clause: str) -> dict:
+    return {
+        "title": "irrelevant, no vs here",
         "rules_primary": (
-            "If Chelsea wins the Brentford vs Chelsea professional EPL "
+            f"If {outcome_clause} the Brentford vs Chelsea professional EPL "
             "soccer game originally scheduled for Sep 18, 2026 after 90 "
             "minutes plus stoppage time (does not include extra time or "
             "penalties), then the market resolves to Yes."
         ),
     }
-    assert km.parse_teams(market) == ("brentford", "chelsea")
+
+
+def test_parse_teams_survives_the_rules_primary_only_template():
+    """
+    Kalshi's current per-outcome title carries no "vs" at all ("Chelsea
+    wins", "Tie is the result"), so parse_teams must resolve every one of a
+    fixture's three contracts via rules_primary alone. The away-team-wins
+    contract is the sharp case: its own outcome clause ("Chelsea wins")
+    repeats the AWAY club's name as one of the junk words ahead of the real
+    home club, which a plain word-window search over the whole loose capture
+    would resolve to "chelsea" before ever reaching "brentford" — a real
+    club, just the wrong one. The anchored "the X vs Y professional" pattern
+    sidesteps that by capturing the fixture itself, not the sentence around
+    it.
+    """
+    assert km.parse_teams(_rules_primary("Tie is the result of")) == ("brentford", "chelsea")
+    assert km.parse_teams(_rules_primary("Brentford wins")) == ("brentford", "chelsea")
+    assert km.parse_teams(_rules_primary("Chelsea wins")) == ("brentford", "chelsea")
 
 
 # --- Fill realism ------------------------------------------------------------

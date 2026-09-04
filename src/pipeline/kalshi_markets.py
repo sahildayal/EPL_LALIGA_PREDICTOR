@@ -85,6 +85,21 @@ def _resolve_trailing(text: str):
     return None
 
 
+# rules_primary reads "...the Brentford vs Chelsea professional EPL soccer
+# game...". Anchoring on "the ... vs ... professional/soccer" captures the
+# fixture itself, not the surrounding sentence, which matters because the
+# sentence's OWN junk words can be a real club name: "If Chelsea wins the
+# Brentford vs Chelsea professional..." has "Chelsea" sitting in the junk
+# before "the Brentford", and a word-window search over the whole loose
+# capture would find that "Chelsea" before ever reaching "Brentford" — sound
+# resolution, wrong team. Tried first; falls back to the loose pattern below
+# for text this doesn't match (e.g. "Arsenal vs Coventry Winner?", which has
+# no "the"/"professional" to anchor on).
+_ANCHORED_FIXTURE = re.compile(
+    r"\bthe\s+([A-Za-z .'&-]+?)\s+vs\.?\s+([A-Za-z .'&-]+?)\s+(?:professional|soccer)\b")
+_LOOSE_FIXTURE = re.compile(r"([A-Za-z .'&-]+?)\s+(?:vs\.?|at|@)\s+([A-Za-z .'&-]+)")
+
+
 def parse_teams(market: dict) -> tuple:
     """
     Extracts (home, away) canonical names, or (None, None) if unresolvable.
@@ -98,13 +113,14 @@ def parse_teams(market: dict) -> tuple:
     """
     for field in ("title", "event_title", "rules_primary"):
         text = market.get(field) or ""
-        m = re.search(r"([A-Za-z .'&-]+?)\s+(?:vs\.?|at|@)\s+([A-Za-z .'&-]+)", text)
-        if not m:
-            continue
-        home = _resolve_trailing(m.group(1).strip())
-        away = _resolve_trailing(m.group(2).strip())
-        if home and away and home != away:
-            return home, away
+        for pattern in (_ANCHORED_FIXTURE, _LOOSE_FIXTURE):
+            m = pattern.search(text)
+            if not m:
+                continue
+            home = _resolve_trailing(m.group(1).strip())
+            away = _resolve_trailing(m.group(2).strip())
+            if home and away and home != away:
+                return home, away
     return None, None
 
 
