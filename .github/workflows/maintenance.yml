@@ -1,0 +1,48 @@
+# Manual, one-off maintenance tasks against the ledger. Not scheduled.
+#
+# Runs a named script under scripts/ and commits whatever it changed. Each
+# script is single-use and gets deleted (along with its entry here) once it
+# has run in production -- this workflow is infrastructure for running it
+# safely (same credentials-free, versioned-code path as every other job),
+# not a permanent admin console.
+name: Maintenance
+
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: Path under scripts/ to run, e.g. void_totals_line_bug.py
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run script
+        run: python "scripts/${{ inputs.script }}"
+
+      - name: Commit ledger changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/processed/season_ledger.json
+          git diff --cached --quiet || git commit -m "chore(maintenance): run ${{ inputs.script }} [skip ci]"
+          git push

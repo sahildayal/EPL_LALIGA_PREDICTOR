@@ -22,6 +22,7 @@ from typing import Optional
 
 from src.data.canonical_teams import canonical
 from src.market.fees import fee_as_fraction_of_payout, total_fee
+from src.market.grading import MARKET_TOTALS
 
 SOURCE_SHARP = "sharp_consensus"
 SOURCE_DERIVED = "sharp_derived"
@@ -95,6 +96,25 @@ def _valid_price(p) -> bool:
         return False
 
 
+def _line_matches(market: str, fair_entry: dict, kalshi_line) -> bool:
+    """
+    True unless this is a totals market priced for a DIFFERENT goals line.
+
+    Only one line is ever quoted as fair value (the odds feed gives one, the
+    model is only asked for 2.5), tagged onto the fair dict as "_line". Kalshi
+    lists several lines per fixture as separate markets. 2026-09-04: nothing
+    checked this, so a Kalshi Over-5.5 market got priced against the Over-2.5
+    fair probability and the ~45-point gap between two different bets was
+    booked as an edge. Non-totals markets have no line to mismatch.
+    """
+    if market != MARKET_TOTALS:
+        return True
+    fair_line = fair_entry.get("_line")
+    if fair_line is None or kalshi_line is None:
+        return False
+    return abs(float(fair_line) - float(kalshi_line)) < 0.01
+
+
 def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
                         model_probs: dict = None,
                         allow_model_priced: bool = False) -> list:
@@ -122,7 +142,7 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
         fair, source, book = None, None, None
         entry = fair_by_fixture.get(key, {})
         sharp = entry.get(market, {})
-        if selection in sharp:
+        if selection in sharp and _line_matches(market, sharp, mkt.get("line")):
             fair = float(sharp[selection])
             # BTTS is not quoted by the odds feed; it is solved from the sharp
             # 1X2 and totals. Flagging it lets the edge carry the derivation
@@ -132,7 +152,7 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
             book = entry.get("_book")
         elif allow_model_priced:
             mp = model_probs.get(key, {}).get(market, {})
-            if selection in mp:
+            if selection in mp and _line_matches(market, mp, mkt.get("line")):
                 fair, source = float(mp[selection]), SOURCE_MODEL
 
         if fair is None:

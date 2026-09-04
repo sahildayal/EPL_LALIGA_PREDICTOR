@@ -63,6 +63,47 @@ def test_missing_fair_value_is_skipped():
     assert build_opportunities([mkt(home="everton", away="fulham")], FAIR) == []
 
 
+# --- Totals line matching -----------------------------------------------
+#
+# Regression, 2026-09-04. The odds feed quotes one goals line (almost always
+# 2.5); Kalshi lists several as separate markets. Nothing checked the two
+# matched, so a Kalshi Over-5.5 market got priced against the Over-2.5 fair
+# probability -- two different bets, ~45 points apart, booked as an "edge".
+
+TOTALS_FAIR = {("arsenal", "chelsea"):
+               {"totals": {"over": 0.55, "under": 0.45, "_line": 2.5}}}
+
+
+def test_totals_opportunity_requires_matching_line():
+    matching = mkt(sel="over", market="totals", ask=0.40, line=2.5)
+    mismatched = mkt(sel="over", market="totals", ask=0.10, line=5.5)
+    assert len(build_opportunities([matching], TOTALS_FAIR)) == 1
+    assert build_opportunities([mismatched], TOTALS_FAIR) == []
+
+
+def test_totals_opportunity_with_no_line_on_either_side_is_skipped():
+    unlined_kalshi = mkt(sel="over", market="totals", ask=0.40)
+    assert build_opportunities([unlined_kalshi], TOTALS_FAIR) == []
+
+    unlined_fair = {("arsenal", "chelsea"): {"totals": {"over": 0.55, "under": 0.45}}}
+    assert build_opportunities([mkt(sel="over", market="totals", ask=0.40, line=2.5)],
+                               unlined_fair) == []
+
+
+def test_totals_line_matching_also_applies_to_model_priced_arm():
+    model = {("arsenal", "chelsea"):
+             {"totals": {"over": 0.55, "under": 0.45, "_line": 2.5}}}
+    matching = mkt(sel="over", market="totals", ask=0.40, line=2.5)
+    mismatched = mkt(sel="over", market="totals", ask=0.10, line=5.5)
+    assert len(build_opportunities([matching], {}, model, allow_model_priced=True)) == 1
+    assert build_opportunities([mismatched], {}, model, allow_model_priced=True) == []
+
+
+def test_1x2_and_btts_are_unaffected_by_line_matching():
+    """Only totals markets have a line to mismatch."""
+    assert len(build_opportunities([mkt()], FAIR)) == 1
+
+
 def test_filter_applies_min_edge_after_fees():
     # 2c gross at 40c does not survive fees
     assert filter_bettable(build_opportunities([mkt(ask=0.53)], FAIR)) == []

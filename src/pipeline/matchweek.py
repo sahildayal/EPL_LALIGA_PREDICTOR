@@ -310,6 +310,14 @@ def collect_fair_values() -> dict:
                     if m:
                         totals_line = float(m.group(1))
                         break
+                # The odds feed quotes exactly one goals line (almost always
+                # 2.5). Kalshi lists several as separate markets (Over 4.5,
+                # Over 5.5, ...), so build_opportunities must know which line
+                # this probability is FOR — without it, a 2026-09-04 bug
+                # compared Kalshi's real Over-5.5 price against the Over-2.5
+                # fair probability and saw a fake 40+ point "edge".
+                if totals_line is not None:
+                    entry[MARKET_TOTALS]["_line"] = totals_line
 
             # BTTS is not served by the bulk odds endpoint, so derive it from the
             # sharp 1X2 and totals rather than falling back on our own model.
@@ -413,7 +421,11 @@ def collect_model_probs(fixture_leagues) -> dict:
                 continue
             out[(home, away)] = {
                 MARKET_1X2: {"home": mk["home"], "draw": mk["draw"], "away": mk["away"]},
-                MARKET_TOTALS: {"over": mk["over_2.5"], "under": 1 - mk["over_2.5"]},
+                # "_line": the model is only asked for the 2.5 line (see
+                # DixonColes.market_probs); build_opportunities needs this to
+                # refuse matching it against a Kalshi market for any other line.
+                MARKET_TOTALS: {"over": mk["over_2.5"], "under": 1 - mk["over_2.5"],
+                                "_line": 2.5},
                 MARKET_BTTS: {"yes": mk["btts_yes"], "no": mk["btts_no"]},
             }
     return out
