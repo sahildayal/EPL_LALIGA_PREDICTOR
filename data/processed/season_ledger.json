@@ -563,7 +563,7 @@
           "quoted_ask": 0.31,
           "fill_contracts": 835.1444,
           "placed_utc": "2026-09-04T15:06:42.458174+00:00",
-          "closing_seen_utc": "2026-09-05T16:25:58.762659+00:00"
+          "closing_seen_utc": "2026-09-06T13:51:31.994718+00:00"
         },
         {
           "market": "btts",
@@ -584,7 +584,7 @@
           "quoted_ask": 0.46,
           "fill_contracts": 462.2143,
           "placed_utc": "2026-09-04T15:06:42.458183+00:00",
-          "closing_seen_utc": "2026-09-05T16:25:58.762663+00:00"
+          "closing_seen_utc": "2026-09-06T13:51:31.994732+00:00"
         },
         {
           "market": "totals",
@@ -626,7 +626,7 @@
           "quoted_ask": 0.53,
           "fill_contracts": 472.668,
           "placed_utc": "2026-09-04T15:06:42.458201+00:00",
-          "closing_seen_utc": "2026-09-05T16:25:58.762669+00:00"
+          "closing_seen_utc": "2026-09-06T13:51:31.994739+00:00"
         },
         {
           "market": "1x2",
