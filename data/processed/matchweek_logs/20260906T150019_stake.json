@@ -1,0 +1,199 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-06T15:00:19.214139+00:00",
+  "ok": true,
+  "errors": [
+    "1 fixture(s) priced but with no score matrix, so BTTS and same-game parlays were skipped: [['everton', 'manchester united']]. Usually a missing totals line, or a solve that did not reproduce the sharp 1X2."
+  ],
+  "details": {
+    "markets_listed": 466,
+    "markets": 312,
+    "bet_window_days": 7,
+    "skipped_outside_window": 154,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 47,
+    "score_matrices": 46,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [
+      [
+        "everton",
+        "manchester united"
+      ]
+    ],
+    "planned": {
+      "A_divergence_kelly": 1,
+      "B_divergence_flat": 1,
+      "C_model_kelly": 6,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Valencia vs Barcelona \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.59,
+        "fill": 0.41,
+        "contracts": 731.7073
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Valencia vs Barcelona \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.59,
+        "fill": 0.41,
+        "contracts": 243.9024
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Valencia vs Barcelona \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.0800 -> fill 0.9100, net edge 0.3137 -> -0.5169"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Real Madrid vs Rayo Vallecano \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.2800 -> fill 0.7399, net edge 0.1970 -> -0.2622"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Crystal Palace vs Ipswich \u2014 Moneyline: Crystal Palace Win",
+        "action": "repriced",
+        "quoted": 0.51,
+        "fill": 0.510277,
+        "contracts": 411.4038
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Sunderland vs Arsenal \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.55,
+        "fill": 0.481979,
+        "contracts": 311.6939
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Liverpool vs Fulham \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.3500 -> fill 0.6700, net edge 0.0408 -> -0.2787"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Arsenal vs Chelsea \u2014 Both Teams To Score: NO",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.4500 -> fill 0.5600, net edge 0.0403 -> -0.0696"
+      }
+    ],
+    "edge_distribution": {
+      "n": 86,
+      "max": 0.0904,
+      "median": -0.0256,
+      "min": -0.1565,
+      "count_over": {
+        "0.005": 2,
+        "0.010": 1,
+        "0.015": 1,
+        "0.020": 1,
+        "0.030": 1,
+        "0.040": 1
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [
+        {
+          "label": "Valencia vs Barcelona \u2014 Both Teams To Score: NO",
+          "stake": 300.0,
+          "ask": 0.41,
+          "quoted_ask": 0.59,
+          "fill_contracts": 731.7073,
+          "fair": 0.7084196178825231,
+          "net_edge": 0.2704,
+          "fair_source": "sharp_derived"
+        }
+      ],
+      "B_divergence_flat": [
+        {
+          "label": "Valencia vs Barcelona \u2014 Both Teams To Score: NO",
+          "stake": 100.0,
+          "ask": 0.41,
+          "quoted_ask": 0.59,
+          "fill_contracts": 243.9024,
+          "fair": 0.7084196178825231,
+          "net_edge": 0.2704,
+          "fair_source": "sharp_derived"
+        }
+      ],
+      "C_model_kelly": [
+        {
+          "label": "Valencia vs Barcelona \u2014 Both Teams To Score: YES",
+          "stake": 216.42,
+          "ask": 0.42,
+          "quoted_ask": 0.42,
+          "fill_contracts": 515.2857,
+          "fair": 0.5643563007816803,
+          "net_edge": 0.1273,
+          "fair_source": "model"
+        },
+        {
+          "label": "Crystal Palace vs Ipswich \u2014 Moneyline: Crystal Palace Win",
+          "stake": 209.93,
+          "ask": 0.510277,
+          "quoted_ask": 0.51,
+          "fill_contracts": 411.4038,
+          "fair": 0.6469330500166823,
+          "net_edge": 0.1192,
+          "fair_source": "model"
+        },
+        {
+          "label": "Elche vs Real Sociedad \u2014 Moneyline: Elche Win",
+          "stake": 189.12,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 591.0,
+          "fair": 0.4110881364317607,
+          "net_edge": 0.0758,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sevilla vs Valencia \u2014 Over 2.5 Goals",
+          "stake": 134.8,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 337.0,
+          "fair": 0.465829469099072,
+          "net_edge": 0.049,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sunderland vs Arsenal \u2014 Moneyline: Draw",
+          "stake": 94.74,
+          "ask": 0.22,
+          "quoted_ask": 0.22,
+          "fill_contracts": 430.6364,
+          "fair": 0.27783155450789343,
+          "net_edge": 0.0457,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sunderland vs Arsenal \u2014 Under 2.5 Goals",
+          "stake": 150.23,
+          "ask": 0.481979,
+          "quoted_ask": 0.55,
+          "fill_contracts": 311.6939,
+          "fair": 0.6098587501459061,
+          "net_edge": 0.1104,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 1,
+      "B_divergence_flat": 1,
+      "C_model_kelly": 6,
+      "D_parlay": 0
+    }
+  }
+}
