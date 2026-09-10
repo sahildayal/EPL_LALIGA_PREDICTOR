@@ -108,12 +108,20 @@ jobs:
           # outcome is carried in the status output and re-raised at the end.
           exit 0
 
+      # The dashboard is a pure function of the committed ledger + logs, so it is
+      # regenerated on every run that produced data and committed alongside it.
+      # Never fails the run: a broken renderer must not block a real settlement.
+      - name: Build dashboard
+        if: ${{ steps.job.outputs.status != 'failed' }}
+        continue-on-error: true
+        run: python scripts/build_site.py
+
       - name: Commit ledger
         if: ${{ inputs.commit && steps.job.outputs.status != 'failed' }}
         run: |
           git config user.name  "matchweek-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/processed/season_ledger.json data/processed/matchweek_logs
+          git add -- data/processed/season_ledger.json data/processed/matchweek_logs docs
           if git diff --cached --quiet; then
             echo "No ledger change to commit."
             exit 0
@@ -168,6 +176,7 @@ jobs:
           path: |
             run_output.json
             data/processed/matchweek_logs/
+            docs/
           retention-days: 30
           if-no-files-found: warn
 

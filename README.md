@@ -218,9 +218,10 @@ src/
 │   └── canonical_teams.py  one name per club across six sources
 └── eval/                   log loss, Brier, ECE, CLV, walk-forward backtest
 
-scratch/            live test suite (321 tests, ~11s, fully offline)
+scratch/            live test suite (fully offline)
 scratch/legacy/     archived World Cup-era tests and scripts — never run
-docs/AUTOMATION.md  operator manual: secrets, schedules, failure handling
+notes/AUTOMATION.md operator manual: secrets, schedules, failure handling
+docs/               generated dashboard (GitHub Pages) — see src/report/
 ```
 
 ---
