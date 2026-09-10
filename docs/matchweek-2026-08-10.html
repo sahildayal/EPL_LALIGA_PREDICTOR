@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matchweek 1 — 2026-08-10 – Aug 16, 2026</title>
+<meta name="description" content="EPL + La Liga divergence lab, matchweek 1 (2026-08-10 – Aug 16, 2026).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f5f6f4; --panel:#ffffff; --panel-2:#eceef0;
+  --ink:#15201b; --ink-soft:#495851; --ink-faint:#7c8a83;
+  --line:#dde1dd;
+  --accent:#177245; --accent-soft:#dcefe4;
+  --up:#1f8a5c; --down:#c0405c; --flat:#7c8a83;
+  --arm-a:#177245; --arm-b:#2f7f9e; --arm-c:#b9791b; --arm-d:#7a54c4;
+  --shadow:0 1px 2px rgba(21,32,27,.06),0 8px 24px rgba(21,32,27,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0b110d; --panel:#131b16; --panel-2:#1b2620;
+    --ink:#e7ece8; --ink-soft:#a5b3ab; --ink-faint:#748078;
+    --line:#26332b;
+    --accent:#3ddc84; --accent-soft:#12301f;
+    --up:#3fc98a; --down:#f0708a; --flat:#748078;
+    --arm-a:#3ddc84; --arm-b:#5cc2e0; --arm-c:#e0a94a; --arm-d:#b18be8;
+    --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0b110d; --panel:#131b16; --panel-2:#1b2620;
+  --ink:#e7ece8; --ink-soft:#a5b3ab; --ink-faint:#748078;
+  --line:#26332b;
+  --accent:#3ddc84; --accent-soft:#12301f;
+  --up:#3fc98a; --down:#f0708a; --flat:#748078;
+  --arm-a:#3ddc84; --arm-b:#5cc2e0; --arm-c:#e0a94a; --arm-d:#b18be8;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Source Sans 3",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:34px 20px 68px}
+.masthead{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;
+  justify-content:space-between;border-bottom:2px solid var(--ink);
+  padding-bottom:13px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;
+  color:var(--ink-faint);font-weight:600}
+h1{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:700;
+  font-size:clamp(25px,4.2vw,38px);letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
+h2{font-family:"Bricolage Grotesque",Georgia,serif;font-size:20px;margin:0;letter-spacing:-.01em}
+.masthead__sub{color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
+.lede{color:var(--ink-soft);max-width:64ch;font-size:15px;margin:16px 0 0}
+section{margin-top:38px}
+.section__head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.section__note{color:var(--ink-faint);font-size:12.5px;max-width:60ch}
+.backlink{display:inline-block;margin:18px 0 0;font-size:13.5px;text-decoration:none}
+.backlink:hover{text-decoration:underline}
+
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.stat__k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);font-weight:600}
+.stat__v{font-family:"Bricolage Grotesque",Georgia,serif;font-size:25px;font-weight:700;
+  font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.15}
+.stat__n{font-size:12px;color:var(--ink-faint);margin-top:3px}
+
+.scroller{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-faint);font-weight:600;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+.arm{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.dotmark{width:9px;height:9px;border-radius:50%;flex:none}
+.dm--a{background:var(--arm-a)} .dm--b{background:var(--arm-b)}
+.dm--c{background:var(--arm-c)} .dm--d{background:var(--arm-d)}
+.tag{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-faint)}
+
+.chart{width:100%;height:auto;display:block;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:8px}
+.chart__base{stroke:var(--ink-faint);stroke-width:1;stroke-dasharray:2 3}
+.chart__ref{stroke:var(--line);stroke-width:1}
+.chart__ylab{fill:var(--ink-faint);font:400 10px "JetBrains Mono",monospace}
+.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ln--a{stroke:var(--arm-a)} .ln--b{stroke:var(--arm-b)}
+.ln--c{stroke:var(--arm-c)} .ln--d{stroke:var(--arm-d)}
+.ln--median{stroke:var(--accent);stroke-width:1.6}
+.dot{fill:var(--ink-faint)} .dot--hot{fill:var(--down)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--ink-soft)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+
+.notes{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:6px 4px}
+.notes__row{padding:11px 14px;border-bottom:1px solid var(--line)}
+.notes__row:last-child{border-bottom:none}
+.notes__h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.notes__d{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-faint)}
+.notes__t{font-weight:600;font-size:13.5px}
+.notes__b{color:var(--ink-soft);font-size:13px;margin-top:4px}
+
+.wk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px}
+.wk__head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.wk__arm{font-family:"Bricolage Grotesque",Georgia,serif;font-size:16px;font-weight:700}
+.wk__none{color:var(--ink-faint);font-style:italic;font-size:13px;margin-top:8px}
+.bet{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.bet:last-child{border-bottom:none}
+.bet__name{font-size:13.5px}
+.bet__meta{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-faint);
+  display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px}
+.bet__res{font-family:"JetBrains Mono",monospace;font-size:12.5px;text-align:right;font-weight:600}
+.pill{font-family:"JetBrains Mono",monospace;font-size:10.5px;padding:2px 7px;border-radius:5px;
+  background:var(--panel-2);color:var(--ink-soft)}
+.pill--void{background:var(--panel-2);color:var(--flat)}
+.archive{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.archive a{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:12px 15px;
+  text-decoration:none;color:inherit;border-bottom:1px solid var(--line)}
+.archive a:last-child{border-bottom:none}
+.archive a:hover{background:var(--panel-2)}
+.archive__md{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:700;font-size:15px;min-width:46px}
+.archive__date{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-faint)}
+.archive__n{font-size:12.5px;color:var(--ink-soft);margin-left:auto}
+.empty{color:var(--ink-faint);font-style:italic;font-size:13px}
+.disclaimer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-faint)}
+@media (max-width:560px){
+  .bet{grid-template-columns:1fr}
+  .bet__res{text-align:left}
+}
+</style>
+</head><body><div class="wrap"><header class="masthead"><div><div class="eyebrow">2026/27 · Matchweek brief</div><h1>Matchweek 1</h1></div><div class="masthead__sub">2026-08-10 – Aug 16, 2026</div></header><a class="backlink" href="index.html">&larr; Season dashboard</a><section><div class="grid"><div class="stat"><div class="stat__k">Markets priced</div><div class="stat__v">21</div></div><div class="stat"><div class="stat__k">Fixtures in window</div><div class="stat__v">7</div></div><div class="stat"><div class="stat__k">Score matrices</div><div class="stat__v">30</div></div><div class="stat"><div class="stat__k">Max divergence</div><div class="stat__v">—</div></div></div></section><section><div class="section__head"><h2>Bets</h2><span class="section__note">Fair value vs the price actually filled, the eventual result, and where the closing line moved.</span></div><div class="wk"><div class="wk__head"><span class="wk__arm"><span class="dotmark dm--a"></span> A — Divergence + quarter-Kelly</span></div><div class="wk__none">No bets this week.</div></div><div class="wk"><div class="wk__head"><span class="wk__arm"><span class="dotmark dm--b"></span> B — Divergence + flat 1%</span></div><div class="wk__none">No bets this week.</div></div><div class="wk"><div class="wk__head"><span class="wk__arm"><span class="dotmark dm--c"></span> C — Model-only + quarter-Kelly</span><span class="tag">2 bet(s)</span></div><div class="bet"><div><div class="bet__name">Racing Santander vs Villarreal — Moneyline: Villarreal Win</div><div class="bet__meta"><span>fair 0.55</span> <span>fill 0.44</span> <span>quote 0.44</span> <span>edge +11.0%</span> <span>close 0.48</span> <span>Δ +0.04</span> <span>stake 291</span></div></div><div class="bet__res"><span class="down">LOST -291</span></div></div><div class="bet"><div><div class="bet__name">Deportivo La Coruna vs Elche — Moneyline: Elche Win</div><div class="bet__meta"><span>fair 0.40</span> <span>fill 0.28</span> <span>quote 0.28</span> <span>edge +11.7%</span> <span>close 0.27</span> <span>Δ -0.01</span> <span>stake 300</span></div></div><div class="bet__res"><span class="down">LOST -300</span></div></div></div><div class="wk"><div class="wk__head"><span class="wk__arm"><span class="dotmark dm--d"></span> D — Parlay / SGP</span></div><div class="wk__none">No bets this week.</div></div></section><p class="disclaimer">
+No real money and no order-placement path exists in this system — it was
+deleted, not disabled. Kalshi prices are read-only. Fair value is the de-vigged
+sharp consensus; the model only prices where no sharp line exists. Source:
+<a href="https://github.com/sahildayal/EPL_LALIGA_PREDICTOR">github.com/sahildayal/EPL_LALIGA_PREDICTOR</a>
+</p></div></body></html>
