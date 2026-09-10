@@ -80,7 +80,9 @@ INTEGRITY_NOTES = [
 # --- small helpers -----------------------------------------------------------
 
 def _esc(v) -> str:
-    return html.escape(str(v), quote=True)
+    # quote=False keeps apostrophes readable in prose; nothing rendered here
+    # goes into a single-quoted attribute or carries a literal double quote.
+    return html.escape(str(v), quote=False)
 
 
 def _money(v) -> str:
@@ -485,15 +487,19 @@ def _kpis(weeks, scoreboard, all_bets):
     placed = sum(1 for _, b in all_bets if b.get("result") != "VOID")
     voided = sum(1 for _, b in all_bets if b.get("result") == "VOID")
     clv_vals = [(r["tag"], r["clv"]) for r in scoreboard if r["clv"] is not None]
+    positive = [t for t in clv_vals if t[1] > 0]
     if not clv_vals:
         clv_lead, clv_note = "—", "no arm has settled enough to score"
+    elif positive:
+        best = max(positive, key=lambda t: t[1])
+        clv_lead, clv_note = f"{best[0]} {best[1]:+.1f}%", "closing-line value, best arm"
     else:
-        best = max(clv_vals, key=lambda t: t[1])
-        clv_lead = f"{best[0]} {best[1]:+.1f}%"
-        clv_note = "closing-line value" if best[1] > 0 else "least negative — nobody is beating the line"
-    beating = "Not yet" if not any(v > 0 for _, v in clv_vals) else "Maybe"
+        worst = max(clv_vals, key=lambda t: t[1])
+        clv_lead = "None yet"
+        clv_note = f"no arm beats the line — best is {worst[0]} at {worst[1]:+.1f}%"
+    beating = "Not yet" if not positive else "Maybe"
     beat_note = (
-        "only C has enough settled bets and its CLV is negative"
+        "no arm has beaten its closing line"
         if clv_vals else "waiting on settled bets with captured closing prices"
     )
     cards = [
