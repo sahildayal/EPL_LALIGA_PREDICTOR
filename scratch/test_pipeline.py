@@ -300,6 +300,27 @@ def test_ask_ladder_reads_the_no_side():
     assert [p for p, _ in ladder] == sorted(p for p, _ in ladder)
 
 
+# A lopsided two-sided book: YES ~0.42 ask, NO ~0.62 ask. Resting orders are
+# BIDS, so buying YES matches a resting NO bid at (1 - price) and buying NO
+# matches a resting YES bid at (1 - price).
+TWO_SIDED_BOOK = {"orderbook_fp": {
+    "no_dollars": [["0.5800", "500.00"], ["0.5700", "9000.00"]],   # -> YES asks 0.42, 0.43
+    "yes_dollars": [["0.3800", "500.00"], ["0.3700", "9000.00"]],  # -> NO asks 0.62, 0.63
+}}
+
+
+def test_ask_ladder_prices_the_side_actually_being_bought():
+    """
+    reprice_at_fill walks this for every bet, including BTTS NO and totals
+    UNDER. Defaulting to the YES ladder for a NO bet reads the opposite
+    contract — on a lopsided market that is the full width of the two sides,
+    not slippage.
+    """
+    assert km.ask_ladder(TWO_SIDED_BOOK)[0] == (0.42, 500.0)            # default: yes
+    assert km.ask_ladder(TWO_SIDED_BOOK, side="yes")[0] == (0.42, 500.0)
+    assert km.ask_ladder(TWO_SIDED_BOOK, side="no")[0] == (0.62, 500.0)
+
+
 def test_small_order_fills_at_the_quote():
     fill = km.vwap_fill(km.ask_ladder(ELC_BOOK), 100.0)
     assert fill["vwap"] == pytest.approx(0.30)
@@ -374,6 +395,32 @@ def test_reprice_records_the_fill_price_on_the_bet(monkeypatch):
     assert kept.price > 0.40                    # true fill, worse than the quote
     assert kept.quoted_ask == 0.40              # and the quote is preserved
     assert kept.fill_contracts > 0
+
+
+def test_reprice_walks_the_no_side_for_a_no_bet(monkeypatch):
+    """
+    Regression, 2026-09-09. A BTTS NO bet was priced off the YES ask ladder,
+    booking a lopsided market's opposite side (Valencia–Barcelona BTTS NO
+    quoted 0.59, booked 0.41). The fill for a NO bet must come from yes_dollars.
+    """
+    from src.market.arms import ARM_A
+    from src.market.edge import Opportunity
+    from src.market.grading import Bet
+
+    opp = Opportunity(home="a", away="b", market=MARKET_BTTS, selection="no",
+                      fair_prob=0.70, ask=0.59, fair_source="sharp_derived",
+                      ticker="TKR")
+    bet = Bet(market=MARKET_BTTS, selection="no", home="valencia", away="barcelona",
+              stake=100.0, price=0.59)
+    monkeypatch.setattr(matchweek, "fetch_orderbook",
+                        lambda c, t: {"orderbook_fp": {
+                            "no_dollars": [["0.5800", "1.00"]],           # YES ask 0.42 — must be ignored
+                            "yes_dollars": [["0.4000", "100000.00"]]}})   # NO ask 0.60
+    plans, notes = matchweek.reprice_at_fill(
+        {ARM_A: [{"bet": bet, "opportunity": opp, "stake_plan": None}]}, client=object())
+    kept = plans[ARM_A][0]["bet"]
+    assert kept.price == pytest.approx(0.60)          # NO ask, not the 0.42 YES ask
+    assert kept.quoted_ask == 0.59
 
 
 def test_unreadable_book_drops_the_bet_rather_than_booking_the_quote(monkeypatch):

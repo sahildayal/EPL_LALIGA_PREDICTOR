@@ -229,8 +229,11 @@ def reprice_at_fill(plans: dict, client=None) -> tuple:
                 notes.append({"arm": arm, "bet": bet.label, "action": "dropped",
                               "reason": "no ticker, cannot verify fill price"})
                 continue
+            # BTTS NO and totals UNDER are NO contracts; their fill has to be
+            # walked from the NO side of the book, not the YES side.
+            side = "no" if opp.selection in ("no", "under") else "yes"
             try:
-                ladder = km.ask_ladder(fetch_orderbook(client, opp.ticker))
+                ladder = km.ask_ladder(fetch_orderbook(client, opp.ticker), side=side)
                 fill = km.vwap_fill(ladder, bet.stake)
             except Exception as exc:
                 notes.append({"arm": arm, "bet": bet.label, "action": "dropped",

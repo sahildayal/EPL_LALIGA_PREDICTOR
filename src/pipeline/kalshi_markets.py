@@ -169,19 +169,29 @@ def _line(market: dict):
     return None
 
 
-def ask_ladder(orderbook: dict) -> list:
+def ask_ladder(orderbook: dict, side: str = "yes") -> list:
     """
-    What it costs to BUY YES, cheapest first, as [(price, contracts)].
+    What it costs to BUY `side` (yes|no), cheapest first, as [(price, contracts)].
 
     Kalshi's book is quoted from both sides: buying YES at price p means matching
-    a resting NO order at (1 - p). So the YES ask ladder is derived from the NO
-    side, not the YES side — reading `yes_dollars` here would give the resting
-    BIDS, i.e. what someone would pay us, which is the wrong side of the spread
-    and would make every bet look cheaper than it is.
+    a resting NO order at (1 - p), and buying NO at price q means matching a
+    resting YES order at (1 - q). So the YES ask ladder comes from `no_dollars`
+    and the NO ask ladder from `yes_dollars` — reading the same-named side would
+    give the resting BIDS, i.e. what someone would pay us, the wrong side of the
+    spread.
+
+    `side` is load-bearing because `reprice_at_fill` prices every bet through
+    here, and BTTS NO and totals UNDER are NO contracts. Walking the YES ladder
+    for a NO bet reads the opposite contract's price: on a lopsided market
+    (which is where those bets live) that is off by the full width of the two
+    sides, not by slippage. Booked a 2026-09-06 Valencia–Barcelona BTTS NO at
+    0.41 whose real NO ask was 0.59, and silently flipped drop/keep on every
+    NO-side bet all season.
     """
     book = orderbook.get("orderbook_fp") or orderbook.get("orderbook") or orderbook
+    resting = "yes_dollars" if side == "no" else "no_dollars"
     levels = []
-    for px, size in (book.get("no_dollars") or []):
+    for px, size in (book.get(resting) or []):
         try:
             levels.append((round(1.0 - float(px), 4), float(size)))
         except (TypeError, ValueError):
