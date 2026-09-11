@@ -1,0 +1,190 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-11T13:26:52.537989+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 545,
+    "markets": 485,
+    "bet_window_days": 7,
+    "skipped_outside_window": 60,
+    "skipped_undated": 0,
+    "fixtures": 29,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Villarreal \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.41,
+        "fill": 0.410912,
+        "contracts": 744.9286
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Villarreal \u2014 Moneyline: Villarreal Win",
+        "action": "repriced",
+        "quoted": 0.49,
+        "fill": 0.499996,
+        "contracts": 479.8036
+      }
+    ],
+    "edge_distribution": {
+      "n": 153,
+      "max": 0.0076,
+      "median": -0.0233,
+      "min": -0.0713,
+      "count_over": {
+        "0.005": 2,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Chelsea vs Hull \u2014 Under 2.5 Goals",
+          "stake": 335.39,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 1048.0938,
+          "fair": 0.9240056429316033,
+          "net_edge": 0.5887,
+          "fair_source": "model"
+        },
+        {
+          "label": "Coventry vs Brighton \u2014 Both Teams To Score: NO",
+          "stake": 325.33,
+          "ask": 0.45,
+          "quoted_ask": 0.45,
+          "fill_contracts": 722.9556,
+          "fair": 0.9588942077132272,
+          "net_edge": 0.4915,
+          "fair_source": "model"
+        },
+        {
+          "label": "Chelsea vs Hull \u2014 Moneyline: Hull Win",
+          "stake": 315.57,
+          "ask": 0.07,
+          "quoted_ask": 0.07,
+          "fill_contracts": 4508.1429,
+          "fair": 0.550822262092839,
+          "net_edge": 0.4762,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Villarreal \u2014 Both Teams To Score: NO",
+          "stake": 306.1,
+          "ask": 0.410912,
+          "quoted_ask": 0.41,
+          "fill_contracts": 744.9286,
+          "fair": 0.783237338393749,
+          "net_edge": 0.3553,
+          "fair_source": "model"
+        },
+        {
+          "label": "Coventry vs Brighton \u2014 Under 2.5 Goals",
+          "stake": 296.92,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 631.7447,
+          "fair": 0.8353415488940124,
+          "net_edge": 0.3478,
+          "fair_source": "model"
+        },
+        {
+          "label": "Celta Vigo vs Malaga \u2014 Both Teams To Score: NO",
+          "stake": 288.01,
+          "ask": 0.53,
+          "quoted_ask": 0.53,
+          "fill_contracts": 543.4151,
+          "fair": 0.8345571392429663,
+          "net_edge": 0.2871,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Villarreal \u2014 Under 2.5 Goals",
+          "stake": 279.37,
+          "ask": 0.44,
+          "quoted_ask": 0.44,
+          "fill_contracts": 634.9318,
+          "fair": 0.71276933198503,
+          "net_edge": 0.2555,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Sevilla \u2014 Over 2.5 Goals",
+          "stake": 270.99,
+          "ask": 0.43,
+          "quoted_ask": 0.43,
+          "fill_contracts": 630.2093,
+          "fair": 0.6853300584188475,
+          "net_edge": 0.2381,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Sevilla \u2014 Moneyline: Deportivo La Coruna Win",
+          "stake": 262.86,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 657.15,
+          "fair": 0.6193158509181567,
+          "net_edge": 0.2025,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Madrid vs Rayo Vallecano \u2014 Under 2.5 Goals",
+          "stake": 254.97,
+          "ask": 0.25,
+          "quoted_ask": 0.25,
+          "fill_contracts": 1019.88,
+          "fair": 0.448673835426566,
+          "net_edge": 0.1855,
+          "fair_source": "model"
+        },
+        {
+          "label": "Coventry vs Brighton \u2014 Moneyline: Brighton Win",
+          "stake": 247.32,
+          "ask": 0.52,
+          "quoted_ask": 0.52,
+          "fill_contracts": 475.6154,
+          "fair": 0.7166916633535977,
+          "net_edge": 0.1792,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Villarreal \u2014 Moneyline: Villarreal Win",
+          "stake": 239.9,
+          "ask": 0.499996,
+          "quoted_ask": 0.49,
+          "fill_contracts": 479.8036,
+          "fair": 0.6843302739569701,
+          "net_edge": 0.1668,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    }
+  }
+}
