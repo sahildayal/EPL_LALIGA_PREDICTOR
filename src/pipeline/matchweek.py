@@ -409,7 +409,14 @@ def _shrink_to_prior(model, sub, days, fallback, k: float = SHRINK_K) -> dict:
     return eff
 
 
-def collect_model_probs(fixture_leagues) -> dict:
+#: A top-flight fixture's expected total goals sits near 2.7. This band is a
+#: backstop for a DEGENERATE fit, not a calibration check — it only has to be
+#: tight enough to catch a model that has stopped describing football at all.
+#: The 2026-09-11 fit put Chelsea v Hull at 0.97 expected goals between them.
+PLAUSIBLE_TOTAL_GOALS = (1.2, 5.5)
+
+
+def collect_model_probs(fixture_leagues, implausible: list = None) -> dict:
     """
     Dixon-Coles probabilities for arm C, keyed (home, away).
 
@@ -465,8 +472,16 @@ def collect_model_probs(fixture_leagues) -> dict:
         for home, away in wanted:
             priors = {t: fallback for t in (home, away) if t not in model.index}
             try:
+                lam, mu = model.lambdas(home, away, priors=priors)
                 mk = model.market_probs(home, away, priors=priors)
             except Exception:
+                continue
+            # Refuse to price a fixture the model no longer describes. Shrinkage
+            # above is the real defence; this catches whatever it does not.
+            lo, hi = PLAUSIBLE_TOTAL_GOALS
+            if not lo <= lam + mu <= hi:
+                if implausible is not None:
+                    implausible.append([home, away, round(float(lam + mu), 3)])
                 continue
             out[(home, away)] = {
                 MARKET_1X2: {"home": mk["home"], "draw": mk["draw"], "away": mk["away"]},
@@ -534,7 +549,8 @@ def run_stake(dry_run: bool = False) -> RunReport:
         # only ever priced by the model that has ratings for its clubs.
         fixture_leagues = {(m["home"], m["away"]): m["league"] for m in markets}
         fixtures = set(fixture_leagues)
-        model = collect_model_probs(fixture_leagues)
+        implausible_model = []
+        model = collect_model_probs(fixture_leagues, implausible=implausible_model)
         matrices = build_score_matrices(fair)
 
         # Kalshi listed a fixture we could not attach a sharp price to.
@@ -565,6 +581,7 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "score_matrices": len(matrices),
             "unpriced_fixtures": [list(f) for f in unpriced],
             "fixtures_without_score_matrix": [list(f) for f in no_matrix],
+            "implausible_model_fixtures": implausible_model,
             "planned": {a: len(p) for a, p in plans.items()},
             "fill_adjustments": fill_notes,
             # Reuses the fair values already built above — no extra Odds API call.
@@ -581,6 +598,13 @@ def run_stake(dry_run: bool = False) -> RunReport:
                 f"{len(undated)} market(s) had no parseable kickoff and were NOT bet. "
                 "Without a kickoff we cannot show a fixture falls in exactly one "
                 "weekly window, so betting it risks double exposure.")
+        if implausible_model:
+            report.errors.append(
+                f"{len(implausible_model)} fixture(s) were NOT model-priced because the "
+                f"model implied an implausible scoring rate: {implausible_model}. "
+                f"A top-flight fixture sits near 2.7 expected goals; outside "
+                f"{PLAUSIBLE_TOTAL_GOALS} the fit has stopped describing football — "
+                "usually a club identified by too few matches. Arm C skipped them.")
         if unpriced:
             report.errors.append(
                 f"{len(unpriced)} Kalshi fixture(s) had no sharp price and were "

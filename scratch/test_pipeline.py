@@ -120,9 +120,10 @@ def test_model_probs_skips_leagues_with_no_fixtures(monkeypatch, tmp_path):
 
 def _just_promoted(proc):
     """
-    Three clubs with a long record plus one that has only just come up and has
-    played three matches, scoring in none of them — the shape that broke the
-    fit live on 2026-09-11.
+    A settled league plus one club that has only just come up and has played
+    three matches, winning each 1-0 — so it has conceded nothing at all. That
+    is the exact shape that broke the fit live on 2026-09-11: the MLE for the
+    club's defence is minus infinity, so the optimiser pins it at its bound.
     """
     import pandas as pd
     base = datetime(2026, 9, 1, tzinfo=timezone.utc)
@@ -142,57 +143,70 @@ def _just_promoted(proc):
     for i, opp in enumerate(("emid", "elow", "emid")):
         rows.append({"league": "epl", "date": base - timedelta(days=3 + i * 7),
                      "home": "newclub", "away": opp,
-                     "home_goals": 0, "away_goals": 1})
+                     "home_goals": 1, "away_goals": 0})
     proc.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(proc / "matches.csv", index=False)
 
 
-def test_a_just_promoted_club_cannot_pin_the_fit_to_its_bounds(monkeypatch, tmp_path):
+def _fit_promoted(tmp_path):
+    import numpy as np
+    import pandas as pd
+    from src.models.dixon_coles import DixonColes
+
+    _just_promoted(tmp_path / "data" / "processed")
+    df = pd.read_csv(tmp_path / "data" / "processed" / "matches.csv",
+                     parse_dates=["date"])
+    sub = df[df.league == "epl"]
+    days = (sub.date.max() - sub.date).dt.days.to_numpy()
+    model = DixonColes(halflife_days=365).fit(
+        sub.home.tolist(), sub.away.tolist(),
+        sub.home_goals.to_numpy(), sub.away_goals.to_numpy(), days)
+    fallback = (float(np.percentile(model.attack, 20)),
+                float(np.percentile(model.defence, 80)))
+    return model, sub, days, fallback
+
+
+def test_a_just_promoted_club_cannot_pin_the_fit_to_its_bounds(tmp_path):
     """
     Regression, 2026-09-11. The 365-day decay leaves a promoted club identified
     by its current season alone. With three matches the likelihood is flat and
-    L-BFGS-B walks the parameter to the edge of its box: Hull came out with
-    defence EXACTLY -3.000 and Coventry with attack EXACTLY -3.000, which
-    priced Chelsea to score 0.088 goals at home — Under 2.5 at 92%, and Hull to
-    WIN at Stamford Bridge at 55% against a 7% market ask. Arm C staked $3,168
-    on eleven bets built from those numbers.
+    L-BFGS-B walks the parameter to the edge of its box: Hull came out of the
+    live fit with defence EXACTLY -3.000 and Coventry with attack EXACTLY
+    -3.000. That priced Chelsea to score 0.088 goals at home — Under 2.5 at 92%
+    and Hull to WIN at Stamford Bridge at 55% against a 7% market ask. Arm C
+    staked $3,168 across eleven bets built on those numbers.
 
     The old promoted-club fallback only covered clubs missing from the index, so
     it protected a club for exactly as long as it had played zero matches.
     """
     from src.pipeline import matchweek as mw
 
-    _just_promoted(tmp_path / "data" / "processed")
-    monkeypatch.chdir(tmp_path)
+    model, sub, days, fallback = _fit_promoted(tmp_path)
+    i = model.index["newclub"]
 
-    mk = mw.collect_model_probs({("ehigh", "newclub"): "epl"})[("ehigh", "newclub")]
+    # The raw fit pins the promoted club's defence at the bound and, with it,
+    # prices the established home side almost out of scoring.
+    assert abs(float(model.defence[i])) > 2.99, float(model.defence[i])
+    raw = model.market_probs("ehigh", "newclub")
+    assert raw["away"] > raw["home"], raw        # the signature: promoted side favoured
 
-    # Under the bug: over2.5 0.075, btts_yes 0.052, away win 0.554.
-    assert mk[MARKET_TOTALS]["over"] > 0.20, mk[MARKET_TOTALS]
-    assert mk[MARKET_BTTS]["yes"] > 0.10, mk[MARKET_BTTS]
-    assert mk[MARKET_1X2]["home"] > mk[MARKET_1X2]["away"], mk[MARKET_1X2]
+    mw._shrink_to_prior(model, sub, days, fallback)
+
+    assert abs(float(model.defence[i])) < 2.99, float(model.defence[i])
+    fixed = model.market_probs("ehigh", "newclub")
+    assert fixed["home"] > fixed["away"], fixed
+    assert fixed["over_2.5"] > raw["over_2.5"] * 2, (raw, fixed)
+    assert fixed["btts_yes"] > raw["btts_yes"] * 2, (raw, fixed)
 
 
-def test_shrinkage_spares_established_clubs(monkeypatch, tmp_path):
+def test_shrinkage_spares_established_clubs(tmp_path):
     """
-    The prior must rescue the three-match club without repricing the league.
-    A club with a full record keeps essentially its own fitted parameters.
+    The prior must rescue the three-match club without repricing the league:
+    a club with a full record keeps essentially its own fitted parameters.
     """
-    import numpy as np
-    import pandas as pd
-    from src.models.dixon_coles import DixonColes
     from src.pipeline import matchweek as mw
 
-    _just_promoted(tmp_path / "data" / "processed")
-    df = pd.read_csv(tmp_path / "data" / "processed" / "matches.csv", parse_dates=["date"])
-    sub = df[df.league == "epl"]
-    days = (sub.date.max() - sub.date).dt.days.to_numpy()
-    model = DixonColes(halflife_days=365).fit(
-        sub.home.tolist(), sub.away.tolist(),
-        sub.home_goals.to_numpy(), sub.away_goals.to_numpy(), days)
-
-    fallback = (float(np.percentile(model.attack, 20)),
-                float(np.percentile(model.defence, 80)))
+    model, sub, days, fallback = _fit_promoted(tmp_path)
     before = {t: (float(model.attack[i]), float(model.defence[i]))
               for t, i in model.index.items()}
     eff = mw._shrink_to_prior(model, sub, days, fallback)
@@ -200,12 +214,35 @@ def test_shrinkage_spares_established_clubs(monkeypatch, tmp_path):
              for t, i in model.index.items()}
 
     assert eff["newclub"] < 5 and eff["ehigh"] > 40, eff
-    # The three-match club is pulled a long way; the established one barely moves.
-    moved_new = abs(after["newclub"][0] - before["newclub"][0])
-    moved_old = abs(after["ehigh"][0] - before["ehigh"][0])
-    assert moved_new > moved_old * 3, (moved_new, moved_old)
-    # And nothing is left sitting on the optimiser's box bound.
+
+    def moved(team):
+        return max(abs(after[team][j] - before[team][j]) for j in (0, 1))
+
+    assert moved("newclub") > moved("ehigh") * 3, (moved("newclub"), moved("ehigh"))
+    # Nothing is left sitting on the optimiser's box bound.
     assert all(abs(v) < 2.99 for pair in after.values() for v in pair), after
+
+
+def test_a_degenerate_fit_is_skipped_not_bet(monkeypatch, tmp_path):
+    """
+    Backstop independent of the shrinkage. If the model ever again implies a
+    scoring rate that is not football, the fixture is skipped and the run is
+    flagged rather than staked — the 2026-09-11 fit had Chelsea v Hull at 0.97
+    expected goals between them and arm C bet it twice.
+    """
+    from src.pipeline import matchweek as mw
+
+    _synthetic_matches(tmp_path / "data" / "processed")
+    monkeypatch.chdir(tmp_path)
+
+    monkeypatch.setattr(mw, "PLAUSIBLE_TOTAL_GOALS", (99.0, 100.0))
+    flagged = []
+    probs = mw.collect_model_probs({("ehigh", "elow"): "epl"}, implausible=flagged)
+
+    assert probs == {}
+    assert len(flagged) == 1
+    home, away, total = flagged[0]
+    assert (home, away) == ("ehigh", "elow") and total > 0
 
 
 @pytest.fixture(autouse=True)
