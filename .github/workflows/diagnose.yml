@@ -1,0 +1,32 @@
+# Throwaway manual diagnostic. Builds the dataset and runs a named script under
+# scripts/. Commits nothing. Delete once the question it was added for is
+# answered.
+name: Diagnose
+
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: Path under scripts/ to run
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - uses: actions/cache@v6
+        with:
+          path: data/raw/football_data
+          key: football-data-${{ hashFiles('src/data/dataset.py') }}
+          restore-keys: football-data-
+      - run: python -m src.data.dataset
+      - run: PYTHONPATH="$PWD" python "scripts/${{ inputs.script }}"
