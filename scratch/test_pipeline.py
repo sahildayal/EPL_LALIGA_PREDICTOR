@@ -37,7 +37,7 @@ def test_unpriced_kalshi_fixture_is_warned_not_silently_dropped(monkeypatch, tmp
     monkeypatch.setattr(mw, "collect_fair_values", lambda: {
         ("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
     })
-    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx, **kw: {})
 
     report = mw.run_stake(dry_run=True)
     assert report.ok                                   # the priced fixture still runs
@@ -788,7 +788,7 @@ def test_dry_run_plans_without_placing(monkeypatch):
                                   "ask": 0.40, "kickoff": _soon(), "ticker": "TKR"}])
     monkeypatch.setattr(matchweek, "collect_fair_values",
                         lambda: {("arsenal", "chelsea"): {MARKET_1X2: {"home": 0.55}}})
-    monkeypatch.setattr(matchweek, "collect_model_probs", lambda fx: {})
+    monkeypatch.setattr(matchweek, "collect_model_probs", lambda fx, **kw: {})
     rep = matchweek.run_stake(dry_run=True)
     assert rep.ok and rep.details["planned"]["A_divergence_kelly"] == 1
     assert all(a["bankroll"] == 10_000.0 for a in ledger.load_state()["arms"].values())
@@ -842,7 +842,7 @@ def test_stake_records_edge_distribution_at_decision_time(monkeypatch, tmp_path)
     monkeypatch.setattr(mw, "collect_fair_values", lambda: {
         ("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}},
     })
-    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx, **kw: {})
 
     report = mw.run_stake(dry_run=True)
     dist = report.details["edge_distribution"]
@@ -869,7 +869,7 @@ def test_stake_edge_distribution_costs_no_extra_odds_call(monkeypatch, tmp_path)
         return {("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}}}
 
     monkeypatch.setattr(mw, "collect_fair_values", _fair)
-    monkeypatch.setattr(mw, "collect_model_probs", lambda fx: {})
+    monkeypatch.setattr(mw, "collect_model_probs", lambda fx, **kw: {})
 
     mw.run_stake(dry_run=True)
     assert len(calls) == 1, f"collect_fair_values called {len(calls)}x; must be reused"
