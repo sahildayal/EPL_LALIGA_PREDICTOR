@@ -364,6 +364,51 @@ def build_score_matrices(fair: dict) -> dict:
     return out
 
 
+#: Effective weighted matches at which a club's own record carries half the
+#: weight against the promoted-club prior. Roughly a third of a season.
+SHRINK_K = 12.0
+
+
+def _shrink_to_prior(model, sub, days, fallback, k: float = SHRINK_K) -> dict:
+    """
+    Pulls every club's fitted attack/defence toward the promoted-club prior in
+    proportion to how much evidence actually stands behind it. Returns the
+    effective weighted sample per club (for logging).
+
+    Without this the fit is unusable for a club that has just come up. The decay
+    is a 365-day halflife, so a promoted side's last top-flight season — often
+    years old — carries essentially no weight, and its parameters are identified
+    by that season's handful of matches alone. With three matches the likelihood
+    is flat and L-BFGS-B walks the parameter to the edge of its own box: on
+    2026-09-11 Hull came out of the fit with defence EXACTLY -3.000 and Coventry
+    with attack EXACTLY -3.000, the bounds in DixonColes.fit. That is not an
+    estimate, it is the optimiser hitting a wall, and it priced Chelsea to score
+    0.088 goals at home (Under 2.5 at 92%, Hull to win at 55% against a 7% ask).
+
+    The existing `fallback` only guarded clubs ABSENT from the index, so it
+    protected a promoted club for exactly as long as it had played zero matches
+    and abandoned it from the first whistle — precisely when the estimate is
+    least identified. Shrinking on effective sample closes that gap with no
+    cliff: at ~3 weighted matches a club sits ~80% on the prior, by ~50 (a full
+    season) ~80% on its own record, so established clubs are barely touched.
+    """
+    import numpy as np
+
+    w = np.exp(-model.xi * days)
+    eff = {}
+    for col in ("home", "away"):
+        for team, weight in zip(sub[col].tolist(), w):
+            eff[team] = eff.get(team, 0.0) + float(weight)
+
+    fair_attack, fair_defence = fallback
+    for team, i in model.index.items():
+        n = eff.get(team, 0.0)
+        lam = n / (n + k)
+        model.attack[i] = lam * float(model.attack[i]) + (1.0 - lam) * fair_attack
+        model.defence[i] = lam * float(model.defence[i]) + (1.0 - lam) * fair_defence
+    return eff
+
+
 def collect_model_probs(fixture_leagues) -> dict:
     """
     Dixon-Coles probabilities for arm C, keyed (home, away).
@@ -406,16 +451,17 @@ def collect_model_probs(fixture_leagues) -> dict:
         if sub.empty:
             continue
         ref = sub.date.max()
+        days = (ref - sub.date).dt.days.to_numpy()
         model = DixonColes(halflife_days=365).fit(
             sub.home.tolist(), sub.away.tolist(),
-            sub.home_goals.to_numpy(), sub.away_goals.to_numpy(),
-            (ref - sub.date).dt.days.to_numpy())
+            sub.home_goals.to_numpy(), sub.away_goals.to_numpy(), days)
 
         # A promoted club with no top-flight history is priced as a weak side —
         # bottom-quintile attack, bottom-quintile defence — rather than as an
         # average one. Applied per missing team, never to a whole fixture.
         fallback = (float(np.percentile(model.attack, 20)),
                     float(np.percentile(model.defence, 80)))
+        _shrink_to_prior(model, sub, days, fallback)
         for home, away in wanted:
             priors = {t: fallback for t in (home, away) if t not in model.index}
             try:

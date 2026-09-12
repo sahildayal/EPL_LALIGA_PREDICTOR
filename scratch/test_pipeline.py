@@ -118,6 +118,96 @@ def test_model_probs_skips_leagues_with_no_fixtures(monkeypatch, tmp_path):
     assert set(probs) == {("ehigh", "elow")}
 
 
+def _just_promoted(proc):
+    """
+    Three clubs with a long record plus one that has only just come up and has
+    played three matches, scoring in none of them — the shape that broke the
+    fit live on 2026-09-11.
+    """
+    import pandas as pd
+    base = datetime(2026, 9, 1, tzinfo=timezone.utc)
+    rows = []
+    for week in range(60):
+        day = base - timedelta(days=week * 7)
+        rows += [
+            {"league": "epl", "date": day, "home": "ehigh", "away": "elow",
+             "home_goals": 3, "away_goals": 1},
+            {"league": "epl", "date": day, "home": "elow", "away": "ehigh",
+             "home_goals": 1, "away_goals": 2},
+            {"league": "epl", "date": day, "home": "emid", "away": "elow",
+             "home_goals": 2, "away_goals": 1},
+            {"league": "epl", "date": day, "home": "ehigh", "away": "emid",
+             "home_goals": 2, "away_goals": 1},
+        ]
+    for i, opp in enumerate(("emid", "elow", "emid")):
+        rows.append({"league": "epl", "date": base - timedelta(days=3 + i * 7),
+                     "home": "newclub", "away": opp,
+                     "home_goals": 0, "away_goals": 1})
+    proc.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(proc / "matches.csv", index=False)
+
+
+def test_a_just_promoted_club_cannot_pin_the_fit_to_its_bounds(monkeypatch, tmp_path):
+    """
+    Regression, 2026-09-11. The 365-day decay leaves a promoted club identified
+    by its current season alone. With three matches the likelihood is flat and
+    L-BFGS-B walks the parameter to the edge of its box: Hull came out with
+    defence EXACTLY -3.000 and Coventry with attack EXACTLY -3.000, which
+    priced Chelsea to score 0.088 goals at home — Under 2.5 at 92%, and Hull to
+    WIN at Stamford Bridge at 55% against a 7% market ask. Arm C staked $3,168
+    on eleven bets built from those numbers.
+
+    The old promoted-club fallback only covered clubs missing from the index, so
+    it protected a club for exactly as long as it had played zero matches.
+    """
+    from src.pipeline import matchweek as mw
+
+    _just_promoted(tmp_path / "data" / "processed")
+    monkeypatch.chdir(tmp_path)
+
+    mk = mw.collect_model_probs({("ehigh", "newclub"): "epl"})[("ehigh", "newclub")]
+
+    # Under the bug: over2.5 0.075, btts_yes 0.052, away win 0.554.
+    assert mk[MARKET_TOTALS]["over"] > 0.20, mk[MARKET_TOTALS]
+    assert mk[MARKET_BTTS]["yes"] > 0.10, mk[MARKET_BTTS]
+    assert mk[MARKET_1X2]["home"] > mk[MARKET_1X2]["away"], mk[MARKET_1X2]
+
+
+def test_shrinkage_spares_established_clubs(monkeypatch, tmp_path):
+    """
+    The prior must rescue the three-match club without repricing the league.
+    A club with a full record keeps essentially its own fitted parameters.
+    """
+    import numpy as np
+    import pandas as pd
+    from src.models.dixon_coles import DixonColes
+    from src.pipeline import matchweek as mw
+
+    _just_promoted(tmp_path / "data" / "processed")
+    df = pd.read_csv(tmp_path / "data" / "processed" / "matches.csv", parse_dates=["date"])
+    sub = df[df.league == "epl"]
+    days = (sub.date.max() - sub.date).dt.days.to_numpy()
+    model = DixonColes(halflife_days=365).fit(
+        sub.home.tolist(), sub.away.tolist(),
+        sub.home_goals.to_numpy(), sub.away_goals.to_numpy(), days)
+
+    fallback = (float(np.percentile(model.attack, 20)),
+                float(np.percentile(model.defence, 80)))
+    before = {t: (float(model.attack[i]), float(model.defence[i]))
+              for t, i in model.index.items()}
+    eff = mw._shrink_to_prior(model, sub, days, fallback)
+    after = {t: (float(model.attack[i]), float(model.defence[i]))
+             for t, i in model.index.items()}
+
+    assert eff["newclub"] < 5 and eff["ehigh"] > 40, eff
+    # The three-match club is pulled a long way; the established one barely moves.
+    moved_new = abs(after["newclub"][0] - before["newclub"][0])
+    moved_old = abs(after["ehigh"][0] - before["ehigh"][0])
+    assert moved_new > moved_old * 3, (moved_new, moved_old)
+    # And nothing is left sitting on the optimiser's box bound.
+    assert all(abs(v) < 2.99 for pair in after.values() for v in pair), after
+
+
 @pytest.fixture(autouse=True)
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(ledger, "DATA_DIR", str(tmp_path))
