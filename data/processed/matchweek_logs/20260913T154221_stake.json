@@ -1,0 +1,323 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-13T15:42:21.225381+00:00",
+  "ok": true,
+  "errors": [
+    "5 Kalshi fixture(s) had no sharp price and were NOT bet: [['athletic bilbao', 'alaves'], ['celta vigo', 'racing santander'], ['getafe', 'malaga'], ['osasuna', 'rayo vallecano'], ['sevilla', 'barcelona']]. Usually a team-name mapping gap in canonical_teams, or an odds feed missing the fixture."
+  ],
+  "details": {
+    "markets_listed": 529,
+    "markets": 437,
+    "bet_window_days": 7,
+    "skipped_outside_window": 92,
+    "skipped_undated": 0,
+    "fixtures": 27,
+    "fair_fixtures": 36,
+    "score_matrices": 32,
+    "unpriced_fixtures": [
+      [
+        "athletic bilbao",
+        "alaves"
+      ],
+      [
+        "celta vigo",
+        "racing santander"
+      ],
+      [
+        "getafe",
+        "malaga"
+      ],
+      [
+        "osasuna",
+        "rayo vallecano"
+      ],
+      [
+        "sevilla",
+        "barcelona"
+      ]
+    ],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "planned": {
+      "A_divergence_kelly": 2,
+      "B_divergence_flat": 2,
+      "C_model_kelly": 11,
+      "D_parlay": 1
+    },
+    "fill_adjustments": [
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Espanyol vs Elche \u2014 Both Teams To Score: YES",
+        "action": "repriced",
+        "quoted": 0.51,
+        "fill": 0.510845,
+        "contracts": 594.2308
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Levante vs Barcelona \u2014 Both Teams To Score: NO",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.6100 -> fill 0.6300, net edge 0.0205 -> 0.0008"
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Levante vs Barcelona \u2014 Both Teams To Score: NO",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.6100 -> fill 0.6300, net edge 0.0205 -> 0.0008"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Newcastle vs Hull \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.43,
+        "fill": 0.431581,
+        "contracts": 759.3939
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Levante vs Barcelona \u2014 Both Teams To Score: YES",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.4400 -> fill 0.6250, net edge 0.1470 -> -0.0372"
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Elche vs Real Madrid \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.3,
+        "fill": 0.300127,
+        "contracts": 996.6452
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Nottingham Forest vs Coventry \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.48,
+        "fill": 0.484624,
+        "contracts": 580.8831
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Nottingham Forest vs Coventry \u2014 Moneyline: Nottingham Forest Win",
+        "action": "repriced",
+        "quoted": 0.57,
+        "fill": 0.575632,
+        "contracts": 460.1379
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Deportivo La Coruna vs Sevilla \u2014 Over 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.43,
+        "fill": 0.433451,
+        "contracts": 592.7311
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Villarreal \u2014 Moneyline: Villarreal Win",
+        "action": "repriced",
+        "quoted": 0.49,
+        "fill": 0.497365,
+        "contracts": 486.0412
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Villarreal \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.41,
+        "fill": 0.419785,
+        "contracts": 558.5952
+      }
+    ],
+    "edge_distribution": {
+      "n": 109,
+      "max": 0.142,
+      "median": -0.0224,
+      "min": -0.1967,
+      "count_over": {
+        "0.005": 6,
+        "0.010": 5,
+        "0.015": 4,
+        "0.020": 3,
+        "0.030": 2,
+        "0.040": 2
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [
+        {
+          "label": "Espanyol vs Elche \u2014 Over 2.5 Goals",
+          "stake": 312.95,
+          "ask": 0.46,
+          "quoted_ask": 0.46,
+          "fill_contracts": 680.3261,
+          "fair": 0.6193771626297578,
+          "net_edge": 0.142,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Espanyol vs Elche \u2014 Both Teams To Score: YES",
+          "stake": 303.56,
+          "ask": 0.510845,
+          "quoted_ask": 0.51,
+          "fill_contracts": 594.2308,
+          "fair": 0.6392070132137476,
+          "net_edge": 0.0999,
+          "fair_source": "sharp_derived"
+        }
+      ],
+      "B_divergence_flat": [
+        {
+          "label": "Espanyol vs Elche \u2014 Over 2.5 Goals",
+          "stake": 100.0,
+          "ask": 0.46,
+          "quoted_ask": 0.46,
+          "fill_contracts": 217.3913,
+          "fair": 0.6193771626297578,
+          "net_edge": 0.142,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Espanyol vs Elche \u2014 Both Teams To Score: YES",
+          "stake": 100.0,
+          "ask": 0.51,
+          "quoted_ask": 0.51,
+          "fill_contracts": 196.0784,
+          "fair": 0.6392070132137476,
+          "net_edge": 0.1007,
+          "fair_source": "sharp_derived"
+        }
+      ],
+      "C_model_kelly": [
+        {
+          "label": "Newcastle vs Hull \u2014 Under 2.5 Goals",
+          "stake": 327.74,
+          "ask": 0.431581,
+          "quoted_ask": 0.43,
+          "fill_contracts": 759.3939,
+          "fair": 0.6549880247890044,
+          "net_edge": 0.2062,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Coventry \u2014 Both Teams To Score: NO",
+          "stake": 317.91,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 676.4043,
+          "fair": 0.6773533693390208,
+          "net_edge": 0.1899,
+          "fair_source": "model"
+        },
+        {
+          "label": "Elche vs Real Madrid \u2014 Under 2.5 Goals",
+          "stake": 299.12,
+          "ask": 0.300127,
+          "quoted_ask": 0.3,
+          "fill_contracts": 996.6452,
+          "fair": 0.42649626175320654,
+          "net_edge": 0.1116,
+          "fair_source": "model"
+        },
+        {
+          "label": "Elche vs Real Madrid \u2014 Moneyline: Elche Win",
+          "stake": 287.85,
+          "ask": 0.09,
+          "quoted_ask": 0.09,
+          "fill_contracts": 3198.3333,
+          "fair": 0.2041366788733051,
+          "net_edge": 0.1083,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Coventry \u2014 Under 2.5 Goals",
+          "stake": 281.51,
+          "ask": 0.484624,
+          "quoted_ask": 0.48,
+          "fill_contracts": 580.8831,
+          "fair": 0.6039046912322474,
+          "net_edge": 0.1018,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Deportivo La Coruna \u2014 Moneyline: Getafe Win",
+          "stake": 273.06,
+          "ask": 0.37,
+          "quoted_ask": 0.37,
+          "fill_contracts": 738.0,
+          "fair": 0.4901983838511257,
+          "net_edge": 0.1038,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Coventry \u2014 Moneyline: Nottingham Forest Win",
+          "stake": 264.87,
+          "ask": 0.575632,
+          "quoted_ask": 0.57,
+          "fill_contracts": 460.1379,
+          "fair": 0.6896458377146321,
+          "net_edge": 0.0969,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Sevilla \u2014 Over 2.5 Goals",
+          "stake": 256.92,
+          "ask": 0.433451,
+          "quoted_ask": 0.43,
+          "fill_contracts": 592.7311,
+          "fair": 0.5458682637663126,
+          "net_edge": 0.0952,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Hull \u2014 Moneyline: Draw",
+          "stake": 249.22,
+          "ask": 0.21,
+          "quoted_ask": 0.21,
+          "fill_contracts": 1186.7619,
+          "fair": 0.3187932015900343,
+          "net_edge": 0.0971,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Villarreal \u2014 Moneyline: Villarreal Win",
+          "stake": 241.74,
+          "ask": 0.497365,
+          "quoted_ask": 0.49,
+          "fill_contracts": 486.0412,
+          "fair": 0.6028370998939954,
+          "net_edge": 0.088,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Villarreal \u2014 Both Teams To Score: NO",
+          "stake": 234.49,
+          "ask": 0.419785,
+          "quoted_ask": 0.41,
+          "fill_contracts": 558.5952,
+          "fair": 0.5205691553066283,
+          "net_edge": 0.0837,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": [
+        {
+          "label": "SGP \u2014 Espanyol/Elche: Over 2.5 + Espanyol/Elche: BTTS YES",
+          "stake": 100.0,
+          "ask": 0.3043,
+          "fair": 0.4822,
+          "net_edge": 0.113,
+          "legs": 2,
+          "is_sgp": true,
+          "joint_method": "score_matrix"
+        }
+      ]
+    },
+    "placed": {
+      "A_divergence_kelly": 2,
+      "B_divergence_flat": 2,
+      "C_model_kelly": 11,
+      "D_parlay": 1
+    }
+  }
+}
