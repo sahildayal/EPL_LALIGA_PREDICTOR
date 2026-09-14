@@ -22,12 +22,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.5103609897950665,
           "fair_prob": 0.6193771626297578,
-          "closing_price": 0.92,
+          "closing_price": 0.93,
           "result": null,
           "quoted_ask": 0.46,
           "fill_contracts": 680.3261,
           "placed_utc": "2026-09-13T15:42:58.474746+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979860+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057581+00:00"
         },
         {
           "market": "btts",
@@ -48,7 +48,7 @@
           "quoted_ask": 0.51,
           "fill_contracts": 594.2308,
           "placed_utc": "2026-09-13T15:42:58.474768+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979879+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057599+00:00"
         }
       ],
       "history": [
@@ -314,12 +314,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.5103609897950665,
           "fair_prob": 0.6193771626297578,
-          "closing_price": 0.92,
+          "closing_price": 0.93,
           "result": null,
           "quoted_ask": 0.46,
           "fill_contracts": 217.3913,
           "placed_utc": "2026-09-13T15:42:58.474781+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979886+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057606+00:00"
         },
         {
           "market": "btts",
@@ -340,7 +340,7 @@
           "quoted_ask": 0.51,
           "fill_contracts": 196.0784,
           "placed_utc": "2026-09-13T15:42:58.474789+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979890+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057610+00:00"
         }
       ],
       "history": [
@@ -711,12 +711,12 @@
           "kickoff": "2026-09-19T18:00:00Z",
           "model_prob": 0.6549880247890044,
           "fair_prob": 0.6549880247890044,
-          "closing_price": 0.07,
+          "closing_price": 0.06,
           "result": null,
           "quoted_ask": 0.43,
           "fill_contracts": 759.3939,
           "placed_utc": "2026-09-13T15:42:58.474797+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979899+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057619+00:00"
         },
         {
           "market": "btts",
@@ -732,12 +732,12 @@
           "kickoff": "2026-09-19T20:30:00Z",
           "model_prob": 0.6773533693390208,
           "fair_prob": 0.6773533693390208,
-          "closing_price": 0.46,
+          "closing_price": 0.48,
           "result": null,
           "quoted_ask": 0.47,
           "fill_contracts": 676.4043,
           "placed_utc": "2026-09-13T15:42:58.474804+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979903+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057623+00:00"
         },
         {
           "market": "totals",
@@ -753,12 +753,12 @@
           "kickoff": "2026-09-15T23:30:00Z",
           "model_prob": 0.42649626175320654,
           "fair_prob": 0.42649626175320654,
-          "closing_price": 0.04,
+          "closing_price": 0.02,
           "result": null,
           "quoted_ask": 0.3,
           "fill_contracts": 996.6452,
           "placed_utc": "2026-09-13T15:42:58.474812+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979907+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057627+00:00"
         },
         {
           "market": "1x2",
@@ -774,12 +774,12 @@
           "kickoff": "2026-09-15T22:30:00Z",
           "model_prob": 0.2041366788733051,
           "fair_prob": 0.2041366788733051,
-          "closing_price": 0.09,
+          "closing_price": 0.08,
           "result": null,
           "quoted_ask": 0.09,
           "fill_contracts": 3198.3333,
           "placed_utc": "2026-09-13T15:42:58.474819+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979910+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057630+00:00"
         },
         {
           "market": "totals",
@@ -800,7 +800,7 @@
           "quoted_ask": 0.48,
           "fill_contracts": 580.8831,
           "placed_utc": "2026-09-13T15:42:58.474825+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979914+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057634+00:00"
         },
         {
           "market": "1x2",
@@ -837,12 +837,12 @@
           "kickoff": "2026-09-19T19:30:00Z",
           "model_prob": 0.6896458377146321,
           "fair_prob": 0.6896458377146321,
-          "closing_price": 0.57,
+          "closing_price": 0.59,
           "result": null,
           "quoted_ask": 0.57,
           "fill_contracts": 460.1379,
           "placed_utc": "2026-09-13T15:42:58.474837+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979921+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057638+00:00"
         },
         {
           "market": "totals",
@@ -863,7 +863,7 @@
           "quoted_ask": 0.43,
           "fill_contracts": 592.7311,
           "placed_utc": "2026-09-13T15:42:58.474844+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979924+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057642+00:00"
         },
         {
           "market": "1x2",
@@ -879,12 +879,12 @@
           "kickoff": "2026-09-19T17:00:00Z",
           "model_prob": 0.3187932015900343,
           "fair_prob": 0.3187932015900343,
-          "closing_price": 0.21,
+          "closing_price": 0.22,
           "result": null,
           "quoted_ask": 0.21,
           "fill_contracts": 1186.7619,
           "placed_utc": "2026-09-13T15:42:58.474850+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979928+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057645+00:00"
         },
         {
           "market": "1x2",
@@ -905,7 +905,7 @@
           "quoted_ask": 0.49,
           "fill_contracts": 486.0412,
           "placed_utc": "2026-09-13T15:42:58.474856+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979932+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057649+00:00"
         },
         {
           "market": "btts",
@@ -921,12 +921,12 @@
           "kickoff": "2026-09-17T23:30:00Z",
           "model_prob": 0.5205691553066283,
           "fair_prob": 0.5205691553066283,
-          "closing_price": 0.42,
+          "closing_price": 0.4,
           "result": null,
           "quoted_ask": 0.41,
           "fill_contracts": 558.5952,
           "placed_utc": "2026-09-13T15:42:58.474866+00:00",
-          "closing_seen_utc": "2026-09-13T17:09:56.979935+00:00"
+          "closing_seen_utc": "2026-09-14T22:50:30.057652+00:00"
         }
       ],
       "history": [
@@ -2114,7 +2114,7 @@
               "kickoff": "2026-09-18T23:00:00Z",
               "ticker": "KXLALIGATOTAL-26SEP18ESPELC-3",
               "result": null,
-              "closing_price": 0.92
+              "closing_price": 0.93
             },
             {
               "home": "espanyol",
@@ -2148,8 +2148,8 @@
             "fee 0.0349 of payout across 2 legs",
             "penalty 0.0300 (synthetic ask + SGP correlation)"
           ],
-          "closing_price": 0.4968000000000001,
-          "closing_seen_utc": "2026-09-13T17:09:56.979948+00:00"
+          "closing_price": 0.5022000000000001,
+          "closing_seen_utc": "2026-09-14T22:50:30.057665+00:00"
         }
       ],
       "parlay_history": []
