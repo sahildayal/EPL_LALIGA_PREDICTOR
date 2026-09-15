@@ -196,7 +196,7 @@ def test_void_bad_index_raises():
 def test_record_closing_prices_stamps_active_bets():
     ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.50))
     n = ledger.record_closing_prices(
-        {("liverpool", "arsenal", MARKET_1X2, "home"): 0.58})
+        {ledger.closing_price_key("liverpool", "arsenal", MARKET_1X2, "home"): 0.58})
     assert n == 1
     bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
     assert bet["closing_price"] == 0.58
@@ -204,7 +204,7 @@ def test_record_closing_prices_stamps_active_bets():
 
 def test_later_snapshot_overwrites_earlier():
     ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.50))
-    key = ("liverpool", "arsenal", MARKET_1X2, "home")
+    key = ledger.closing_price_key("liverpool", "arsenal", MARKET_1X2, "home")
     ledger.record_closing_prices({key: 0.55})
     ledger.record_closing_prices({key: 0.61})
     assert ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]["closing_price"] == 0.61
@@ -212,9 +212,42 @@ def test_later_snapshot_overwrites_earlier():
 
 def test_closing_price_flows_into_clv_after_settlement():
     ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.50))
-    ledger.record_closing_prices({("liverpool", "arsenal", MARKET_1X2, "home"): 0.60})
+    ledger.record_closing_prices({ledger.closing_price_key("liverpool", "arsenal", MARKET_1X2, "home"): 0.60})
     ledger.settle_match(MatchResult("liverpool", "arsenal", 2, 1))
     assert ledger.arm_summary("A_divergence_kelly")["clv_pct"] == pytest.approx(20.0)
+
+
+def test_totals_closing_price_matches_its_own_goals_line():
+    """
+    Regression, 2026-09-15. Kalshi lists six totals contracts per fixture
+    (Over 0.5 through Over 5.5). The snapshot keyed its price map on
+    (home, away, market, selection) with no line, so all six collapsed onto
+    one key and whichever came last won. Every totals bet on the board was
+    stamped with a different line's price: an Espanyol v Elche Over 2.5 bet
+    recorded 0.93, the Over 0.5 quote, and another recorded exactly 1.0 —
+    impossible before kickoff. CLV is the season's primary metric.
+    """
+    ledger.place_bet("A_divergence_kelly",
+                     mk(sel="over", market=MARKET_TOTALS, price=0.46, line=2.5))
+    prices = {
+        ledger.closing_price_key("liverpool", "arsenal", MARKET_TOTALS, "over", 0.5): 0.93,
+        ledger.closing_price_key("liverpool", "arsenal", MARKET_TOTALS, "over", 2.5): 0.51,
+        ledger.closing_price_key("liverpool", "arsenal", MARKET_TOTALS, "over", 5.5): 0.05,
+    }
+    assert ledger.record_closing_prices(prices) == 1
+    bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
+    assert bet["closing_price"] == 0.51        # its own line, not 0.93 or 0.05
+
+
+def test_a_line_with_no_quote_is_left_unstamped():
+    """A totals bet whose own line was not quoted must keep a null close
+    rather than borrow a neighbouring line's price."""
+    ledger.place_bet("A_divergence_kelly",
+                     mk(sel="over", market=MARKET_TOTALS, price=0.46, line=3.5))
+    n = ledger.record_closing_prices(
+        {ledger.closing_price_key("liverpool", "arsenal", MARKET_TOTALS, "over", 2.5): 0.51})
+    assert n == 0
+    assert ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]["closing_price"] is None
 
 
 def test_closing_price_not_stamped_after_kickoff():
@@ -228,7 +261,7 @@ def test_closing_price_not_stamped_after_kickoff():
     from datetime import datetime, timedelta, timezone
     past = (datetime.now(timezone.utc) - timedelta(hours=3)).isoformat()
     ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.50, kickoff=past))
-    key = ("liverpool", "arsenal", MARKET_1X2, "home")
+    key = ledger.closing_price_key("liverpool", "arsenal", MARKET_1X2, "home")
     assert ledger.record_closing_prices({key: 0.58}) == 0
     bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
     assert bet["closing_price"] is None
@@ -241,7 +274,7 @@ def test_final_pre_kickoff_price_survives_a_later_snapshot():
     ledger.place_bet("A_divergence_kelly",
                      mk(stake=100.0, price=0.50,
                         kickoff=(now + timedelta(hours=2)).isoformat()))
-    key = ("liverpool", "arsenal", MARKET_1X2, "home")
+    key = ledger.closing_price_key("liverpool", "arsenal", MARKET_1X2, "home")
     ledger.record_closing_prices({key: 0.58})                          # pre-kickoff
     ledger.record_closing_prices({key: 0.99}, now=now + timedelta(hours=5))  # in-play
     bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]

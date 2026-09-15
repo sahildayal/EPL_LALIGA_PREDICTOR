@@ -397,6 +397,26 @@ def _kicked_off(entry, now=None) -> bool:
     return (now or datetime.now(timezone.utc)) >= ko
 
 
+def closing_price_key(home, away, market, selection, line=None) -> tuple:
+    """
+    The key a closing price is filed under.
+
+    The snapshot job building the price map and `record_closing_prices` looking
+    a bet up in it MUST agree, so they share this instead of each assembling a
+    tuple of their own. They did not until 2026-09-15, and neither included the
+    goals line: Kalshi lists six totals contracts per fixture (Over 0.5 through
+    Over 5.5), so every one of them collapsed onto a single key and whichever
+    happened to be last in the market list won. An Espanyol v Elche Over 2.5
+    bet was stamped 0.93 — the Over 0.5 quote — and one bet recorded a closing
+    price of exactly 1.0, which cannot happen before kickoff. CLV is the
+    season's primary metric and it was computed off those numbers.
+
+    1X2 and BTTS carry no line and key on None, so they were never affected.
+    """
+    return (home, away, market, selection,
+            None if line is None else round(float(line), 1))
+
+
 def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
     """
     Stamps the latest observed PRE-KICKOFF Kalshi price onto every active bet.
@@ -420,7 +440,8 @@ def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
         for bet in book["active_bets"]:
             if _kicked_off(bet, now):
                 continue
-            key = (bet.get("home"), bet.get("away"), bet.get("market"), bet.get("selection"))
+            key = closing_price_key(bet.get("home"), bet.get("away"), bet.get("market"),
+                                    bet.get("selection"), bet.get("line"))
             if key in prices:
                 bet["closing_price"] = float(prices[key])
                 bet["closing_seen_utc"] = datetime.now(timezone.utc).isoformat()
@@ -432,7 +453,8 @@ def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
             for leg in parlay.get("legs", []):
                 if _kicked_off(leg, now):
                     continue
-                key = (leg.get("home"), leg.get("away"), leg.get("market"), leg.get("selection"))
+                key = closing_price_key(leg.get("home"), leg.get("away"), leg.get("market"),
+                                        leg.get("selection"), leg.get("line"))
                 if key in prices:
                     leg["closing_price"] = float(prices[key])
             closes = [l.get("closing_price") for l in parlay.get("legs", [])]

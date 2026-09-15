@@ -682,7 +682,11 @@ def run_snapshot() -> RunReport:
     report = RunReport(job="snapshot", started_utc=_now())
     try:
         markets = collect_kalshi()
-        prices = {(m["home"], m["away"], m["market"], m["selection"]): m["ask"]
+        # Keyed through ledger.closing_price_key so the map the snapshot builds
+        # and the lookup record_closing_prices does cannot drift apart — they
+        # did, and every totals bet got another goals line's closing price.
+        prices = {ledger.closing_price_key(m["home"], m["away"], m["market"],
+                                           m["selection"], m.get("line")): m["ask"]
                   for m in markets}
         stamped = ledger.record_closing_prices(prices)
         report.details = {"markets": len(markets), "stamped": stamped}
