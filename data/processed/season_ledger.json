@@ -1511,15 +1511,15 @@
           "kickoff": "2026-09-05T20:30:00Z",
           "model_prob": 0.7973889199985653,
           "fair_prob": 0.7973889199985653,
-          "closing_price": 0.08,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.51,
           "fill_contracts": 543.4706,
           "placed_utc": "2026-09-04T15:06:42.458164+00:00",
-          "closing_seen_utc": "2026-09-05T16:25:58.762654+00:00",
           "payout": 543.47,
           "pnl": 268.37,
-          "settled_utc": "2026-09-08T13:22:29.890189+00:00"
+          "settled_utc": "2026-09-08T13:22:29.890189+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1559,15 +1559,15 @@
           "kickoff": "2026-09-05T23:00:00Z",
           "model_prob": 0.7189579653293818,
           "fair_prob": 0.7189579653293818,
-          "closing_price": 0.96,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.57,
           "fill_contracts": 427.2632,
           "placed_utc": "2026-09-04T15:06:42.458192+00:00",
-          "closing_seen_utc": "2026-09-05T16:25:58.762666+00:00",
           "payout": 427.26,
           "pnl": 183.72,
-          "settled_utc": "2026-09-08T13:22:29.891691+00:00"
+          "settled_utc": "2026-09-08T13:22:29.891691+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "btts",
@@ -1654,15 +1654,15 @@
           "kickoff": "2026-09-06T20:30:00Z",
           "model_prob": 0.6789921924703795,
           "fair_prob": 0.6789921924703795,
-          "closing_price": 0.07,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.53,
           "fill_contracts": 472.668,
           "placed_utc": "2026-09-04T15:06:42.458201+00:00",
-          "closing_seen_utc": "2026-09-06T16:37:11.928228+00:00",
           "payout": 472.67,
           "pnl": 236.43,
-          "settled_utc": "2026-09-08T13:22:29.891961+00:00"
+          "settled_utc": "2026-09-08T13:22:29.891961+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -2025,15 +2025,15 @@
           "kickoff": "2026-09-12T23:00:00Z",
           "model_prob": 0.6098587501459061,
           "fair_prob": 0.6098587501459061,
-          "closing_price": 0.09,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.55,
           "fill_contracts": 311.6939,
           "placed_utc": "2026-09-06T15:00:52.273538+00:00",
-          "closing_seen_utc": "2026-09-12T16:40:18.392175+00:00",
           "payout": 311.69,
           "pnl": 161.46,
-          "settled_utc": "2026-09-15T14:12:39.589385+00:00"
+          "settled_utc": "2026-09-15T14:12:39.589385+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -2049,15 +2049,15 @@
           "kickoff": "2026-09-11T23:00:00Z",
           "model_prob": 0.465829469099072,
           "fair_prob": 0.465829469099072,
-          "closing_price": 1.0,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.4,
           "fill_contracts": 337.0,
           "placed_utc": "2026-09-06T15:00:52.273525+00:00",
-          "closing_seen_utc": "2026-09-11T20:52:34.083833+00:00",
           "payout": 0.0,
           "pnl": -134.8,
-          "settled_utc": "2026-09-15T14:12:39.591769+00:00"
+          "settled_utc": "2026-09-15T14:12:39.591769+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -2073,15 +2073,15 @@
           "kickoff": "2026-09-12T23:00:00Z",
           "model_prob": 0.448673835426566,
           "fair_prob": 0.448673835426566,
-          "closing_price": 0.02,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.25,
           "fill_contracts": 1019.88,
           "placed_utc": "2026-09-11T13:27:29.600588+00:00",
-          "closing_seen_utc": "2026-09-12T16:40:18.392181+00:00",
           "payout": 0.0,
           "pnl": -254.97,
-          "settled_utc": "2026-09-15T14:12:39.592485+00:00"
+          "settled_utc": "2026-09-15T14:12:39.592485+00:00",
+          "closing_price_note": "Cleared 2026-09-15: this was another goals line's price, copied in by a closing-price key that omitted the line. Excluded from CLV."
         },
         {
           "market": "1x2",
