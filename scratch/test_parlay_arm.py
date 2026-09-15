@@ -353,11 +353,12 @@ def test_open_parlay_counts_as_exposure():
 def test_parlay_clv_needs_every_leg_priced():
     """A half-stamped parlay would compare entry legs against closing legs."""
     _place(100.0)
-    ledger.record_closing_prices({("arsenal", "chelsea", "1x2", "home"): 0.40})
+    leg_a = ledger.closing_price_key("arsenal", "chelsea", "1x2", "home")
+    leg_b = ledger.closing_price_key("liverpool", "everton", "1x2", "home")
+    ledger.record_closing_prices({leg_a: 0.40})
     assert "closing_price" not in ledger.load_state()["arms"][ARM_D]["active_parlays"][0]
 
-    ledger.record_closing_prices({("arsenal", "chelsea", "1x2", "home"): 0.40,
-                                  ("liverpool", "everton", "1x2", "home"): 0.45})
+    ledger.record_closing_prices({leg_a: 0.40, leg_b: 0.45})
     rec = ledger.load_state()["arms"][ARM_D]["active_parlays"][0]
     assert rec["closing_price"] == pytest.approx(0.40 * 0.45)
 
