@@ -83,6 +83,87 @@ def test_one_broken_season_does_not_crash_the_whole_build(tmp_path, monkeypatch)
     assert len(df) == 1 and set(df["league"]) == {"laliga"}
 
 
+# --- the 2026-09-17 incident ------------------------------------------------
+#
+# A GitHub runner resolved www.football-data.co.uk to 127.0.0.1 and every fetch
+# failed. Preflight caches nothing, so all 52 league-seasons failed and it
+# aborted loudly -- correct. But the stake job caches history, so `frames`
+# would have stayed full of cached seasons, the build would have reported
+# success, and the model would have refit as if 2026/27 had not started.
+
+def _unreachable(url, timeout=40):
+    raise ConnectionError("Failed to establish a new connection: [Errno 111]")
+
+
+def test_unreachable_source_is_distinct_from_a_missing_file(tmp_path, monkeypatch):
+    """"Not published yet" is an answer; a dead connection is not."""
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get", _unreachable)
+    with pytest.raises(D.SourceUnreachable):
+        download_season("epl", "2627")
+    # and it is still a DatasetUnavailable, so existing handlers keep working
+    assert issubclass(D.SourceUnreachable, DatasetUnavailable)
+
+
+def test_unreachable_current_season_falls_back_to_cache_not_silence(tmp_path, monkeypatch):
+    """
+    With history cached, dropping the current season leaves a build that looks
+    healthy and a model that has never seen this season. Use the cached copy
+    and say so, rather than pretending the season does not exist.
+    """
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    current = season_codes(D.LAST_SEASON, D.LAST_SEASON)[0]
+    (tmp_path / f"E0_{current}.csv").write_text(
+        "Date,HomeTeam,AwayTeam,FTHG,FTAG\n15/08/2026,Arsenal,Chelsea,2,0\n",
+        encoding="latin-1")
+    monkeypatch.setattr(D.requests, "get", _unreachable)
+
+    df = load_matches(leagues=("epl",), first=D.LAST_SEASON, last=D.LAST_SEASON)
+    assert len(df) == 1                       # the season is present, not dropped
+    assert df.iloc[0]["home"] == "arsenal"
+
+
+def test_unreachable_current_season_with_no_cache_refuses_to_build(tmp_path, monkeypatch):
+    """
+    Nothing to fall back on means the model genuinely has no current-season
+    results. Fail closed rather than hand back a dataset that reads as a
+    season which never happened.
+    """
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get", _unreachable)
+    with pytest.raises(DatasetUnavailable, match="season that never happened"):
+        load_matches(leagues=("epl",), first=D.LAST_SEASON, last=D.LAST_SEASON)
+
+
+def test_a_not_yet_published_current_season_is_still_skipped(tmp_path, monkeypatch):
+    """
+    The pre-season case must keep working: in early August the file genuinely
+    is not published, the source says so, and skipping it is correct. Only an
+    unreachable source gets the fallback treatment.
+    """
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(D.requests, "get",
+                        lambda url, timeout=40: _FakeResponse(300, b"<!DOCTYPE HTML><html>nope</html>"))
+    with pytest.raises(DatasetUnavailable, match="No seasons could be loaded"):
+        load_matches(leagues=("epl",), first=D.LAST_SEASON, last=D.LAST_SEASON)
+
+
+def test_unreachable_historical_season_is_skipped_quietly(tmp_path, monkeypatch):
+    """One missing finished season out of many is not worth failing a build."""
+    monkeypatch.setattr(D, "RAW_DIR", tmp_path)
+    current = season_codes(D.LAST_SEASON, D.LAST_SEASON)[0]
+    good = b"Date,HomeTeam,AwayTeam,FTHG,FTAG\n15/08/2026,Arsenal,Chelsea,2,0\n"
+
+    def get(url, timeout=40):
+        if current in url:
+            return _FakeResponse(200, good)
+        raise ConnectionError("dead")
+
+    monkeypatch.setattr(D.requests, "get", get)
+    df = load_matches(leagues=("epl",), first=D.LAST_SEASON - 1, last=D.LAST_SEASON)
+    assert len(df) == 1                       # the reachable current season survived
+
+
 def match(date, home, away, hg, ag, season="2425", league="epl"):
     return {"date": pd.Timestamp(date), "league": league, "season": season,
             "home": home, "away": away, "home_goals": hg, "away_goals": ag,

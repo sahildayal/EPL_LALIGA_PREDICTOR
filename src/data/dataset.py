@@ -71,6 +71,26 @@ class DatasetUnavailable(RuntimeError):
     """Raised when source data cannot be obtained. Never substitute invented matches."""
 
 
+class SourceUnreachable(DatasetUnavailable):
+    """
+    The source could not be reached at all — as distinct from it answering that
+    a file is not there.
+
+    The difference only matters for the CURRENT season, and it matters a lot.
+    "Not published yet" is a real answer: in early August the season genuinely
+    has no results and skipping it is correct. A connection that never
+    completed tells us nothing about the season, so treating the two alike
+    silently drops the one season the model has not already learned.
+
+    Live on 2026-09-17: a GitHub runner resolved www.football-data.co.uk to
+    127.0.0.1 and every fetch failed. Preflight caches nothing, so all 52
+    league-seasons failed and it aborted loudly, which is what it is for. The
+    stake job caches history, so `frames` would have stayed full of cached
+    seasons, the build would have reported success, and the model would have
+    refit as if 2026/27 had not started.
+    """
+
+
 # --- Download ---------------------------------------------------------------
 
 def _read_csv_tolerant(text: str) -> pd.DataFrame:
@@ -122,6 +142,17 @@ def _numeric_if_possible(series: pd.Series) -> pd.Series:
         return series
 
 
+def cached_season(league: str, season: str):
+    """The on-disk copy of one league-season, or None. Never fetches."""
+    path = RAW_DIR / f"{LEAGUE_CODES[league]}_{season}.csv"
+    if not path.exists():
+        return None
+    try:
+        return _read_csv_tolerant(path.read_text(encoding="latin-1"))
+    except Exception:                                    # noqa: BLE001
+        return None
+
+
 def download_season(league: str, season: str, refresh: bool = False) -> pd.DataFrame:
     """Downloads one league-season, caching the raw CSV on disk."""
     if league not in LEAGUE_CODES:
@@ -136,7 +167,7 @@ def download_season(league: str, season: str, refresh: bool = False) -> pd.DataF
     try:
         resp = requests.get(url, timeout=40)
     except Exception as exc:
-        raise DatasetUnavailable(f"Could not download {url}: {exc}") from exc
+        raise SourceUnreachable(f"Could not download {url}: {exc}") from exc
 
     # `raise_for_status()` only raises on 4xx/5xx — it waves a 3xx straight
     # through. Found live: a not-yet-published current-season file returns
@@ -191,7 +222,30 @@ def load_matches(leagues=("epl", "laliga"), first: int = FIRST_SEASON,
                 is_current = season == season_codes(LAST_SEASON, LAST_SEASON)[0]
                 raw = download_season(league, season, refresh=refresh or is_current)
                 raw = raw[raw["HomeTeam"].notna() & raw["AwayTeam"].notna()].copy()
+            except SourceUnreachable as exc:
+                # Every other season loads from cache, so `frames` stays
+                # non-empty and the build would report success with the current
+                # season simply absent — refitting the model as if this season
+                # had not started. A finished season missing is one of
+                # twenty-seven; the current one is the only season carrying
+                # results the model has not already learned.
+                if not is_current:
+                    print(f"Warning: skipping {league} {season} ({exc})")
+                    continue
+                stale = cached_season(league, season)
+                if stale is None:
+                    raise DatasetUnavailable(
+                        f"Could not reach the source for the current season "
+                        f"({league} {season}) and no cached copy exists: {exc}. "
+                        "Refusing to build a dataset the model would read as a "
+                        "season that never happened.") from exc
+                print(f"Warning: {league} {season} could not be refreshed ({exc}); "
+                      "using the cached copy, which may be missing recent results.")
+                raw = stale[stale["HomeTeam"].notna() & stale["AwayTeam"].notna()].copy()
             except DatasetUnavailable as exc:
+                # The source answered that the file is not there. For the
+                # current season in early August that is the true state of the
+                # world, so skipping is right.
                 print(f"Warning: skipping {league} {season} ({exc})")
                 continue
             except Exception as exc:
