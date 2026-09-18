@@ -1,0 +1,191 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-18T13:31:43.914314+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 328,
+    "markets": 328,
+    "bet_window_days": 7,
+    "skipped_outside_window": 0,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Leeds vs Crystal Palace \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.45,
+        "fill": 0.45841,
+        "contracts": 505.028
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Sevilla vs Barcelona \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.22,
+        "fill": 0.226245,
+        "contracts": 878.7391
+      }
+    ],
+    "edge_distribution": {
+      "n": 98,
+      "max": 0.0006,
+      "median": -0.0216,
+      "min": -0.0623,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Manchester City vs Sunderland \u2014 Under 2.5 Goals",
+          "stake": 246.06,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 615.15,
+          "fair": 0.6300178837370787,
+          "net_edge": 0.2132,
+          "fair_source": "model"
+        },
+        {
+          "label": "Fulham vs Manchester United \u2014 Under 2.5 Goals",
+          "stake": 238.67,
+          "ask": 0.39,
+          "quoted_ask": 0.39,
+          "fill_contracts": 611.9744,
+          "fair": 0.5987068655928166,
+          "net_edge": 0.192,
+          "fair_source": "model"
+        },
+        {
+          "label": "Leeds vs Crystal Palace \u2014 Under 2.5 Goals",
+          "stake": 231.51,
+          "ask": 0.45841,
+          "quoted_ask": 0.45,
+          "fill_contracts": 505.028,
+          "fair": 0.6391812454986847,
+          "net_edge": 0.1634,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brentford vs Chelsea \u2014 Under 2.5 Goals",
+          "stake": 224.57,
+          "ask": 0.35,
+          "quoted_ask": 0.35,
+          "fill_contracts": 641.6286,
+          "fair": 0.533621633390267,
+          "net_edge": 0.1676,
+          "fair_source": "model"
+        },
+        {
+          "label": "Bournemouth vs Liverpool \u2014 Under 2.5 Goals",
+          "stake": 217.83,
+          "ask": 0.36,
+          "quoted_ask": 0.36,
+          "fill_contracts": 605.0833,
+          "fair": 0.5395302330186179,
+          "net_edge": 0.1633,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brighton vs Arsenal \u2014 Under 2.5 Goals",
+          "stake": 211.3,
+          "ask": 0.45,
+          "quoted_ask": 0.45,
+          "fill_contracts": 469.5556,
+          "fair": 0.6305443852714208,
+          "net_edge": 0.1631,
+          "fair_source": "model"
+        },
+        {
+          "label": "Everton vs Ipswich \u2014 Under 2.5 Goals",
+          "stake": 204.96,
+          "ask": 0.46,
+          "quoted_ask": 0.46,
+          "fill_contracts": 445.5652,
+          "fair": 0.6341579409329703,
+          "net_edge": 0.1568,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sevilla vs Barcelona \u2014 Under 2.5 Goals",
+          "stake": 198.81,
+          "ask": 0.226245,
+          "quoted_ask": 0.22,
+          "fill_contracts": 878.7391,
+          "fair": 0.37894263392298144,
+          "net_edge": 0.1404,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brentford vs Chelsea \u2014 Both Teams To Score: NO",
+          "stake": 192.84,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 602.625,
+          "fair": 0.4713779401220588,
+          "net_edge": 0.1361,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sevilla vs Barcelona \u2014 Moneyline: Sevilla Win",
+          "stake": 187.06,
+          "ask": 0.07,
+          "quoted_ask": 0.07,
+          "fill_contracts": 2672.2857,
+          "fair": 0.20827728900119186,
+          "net_edge": 0.1337,
+          "fair_source": "model"
+        },
+        {
+          "label": "Bournemouth vs Liverpool \u2014 Both Teams To Score: NO",
+          "stake": 181.45,
+          "ask": 0.34,
+          "quoted_ask": 0.34,
+          "fill_contracts": 533.6765,
+          "fair": 0.47735064048735676,
+          "net_edge": 0.1216,
+          "fair_source": "model"
+        },
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Atletico Madrid Win",
+          "stake": 176.0,
+          "ask": 0.27,
+          "quoted_ask": 0.27,
+          "fill_contracts": 651.8519,
+          "fair": 0.3927985503541251,
+          "net_edge": 0.109,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    }
+  }
+}
