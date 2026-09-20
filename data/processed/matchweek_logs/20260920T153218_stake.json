@@ -1,0 +1,188 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-20T15:32:18.270401+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 81,
+    "markets": 81,
+    "bet_window_days": 7,
+    "skipped_outside_window": 0,
+    "skipped_undated": 0,
+    "fixtures": 5,
+    "fair_fixtures": 35,
+    "score_matrices": 34,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "planned": {
+      "A_divergence_kelly": 2,
+      "B_divergence_flat": 2,
+      "C_model_kelly": 4,
+      "D_parlay": 1
+    },
+    "fill_adjustments": [
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+        "action": "repriced",
+        "quoted": 0.1,
+        "fill": 0.09,
+        "contracts": 3271.7778
+      },
+      {
+        "arm": "A_divergence_kelly",
+        "bet": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+        "action": "repriced",
+        "quoted": 0.26,
+        "fill": 0.373039,
+        "contracts": 765.6562
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+        "action": "repriced",
+        "quoted": 0.1,
+        "fill": 0.09,
+        "contracts": 1111.1111
+      },
+      {
+        "arm": "B_divergence_flat",
+        "bet": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+        "action": "repriced",
+        "quoted": 0.26,
+        "fill": 0.302123,
+        "contracts": 330.9908
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Atletico Madrid vs Real Madrid \u2014 Over 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.36,
+        "fill": 0.437052,
+        "contracts": 390.6173
+      }
+    ],
+    "edge_distribution": {
+      "n": 23,
+      "max": 0.2921,
+      "median": -0.0197,
+      "min": -0.4839,
+      "count_over": {
+        "0.005": 3,
+        "0.010": 3,
+        "0.015": 3,
+        "0.020": 3,
+        "0.030": 3,
+        "0.040": 3
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "stake": 294.46,
+          "ask": 0.09,
+          "quoted_ask": 0.1,
+          "fill_contracts": 3271.7778,
+          "fair": 0.3983687671876847,
+          "net_edge": 0.3026,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "stake": 285.62,
+          "ask": 0.373039,
+          "quoted_ask": 0.26,
+          "fill_contracts": 765.6562,
+          "fair": 0.4922680412371133,
+          "net_edge": 0.1028,
+          "fair_source": "sharp_consensus"
+        }
+      ],
+      "B_divergence_flat": [
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "stake": 100.0,
+          "ask": 0.09,
+          "quoted_ask": 0.1,
+          "fill_contracts": 1111.1111,
+          "fair": 0.3983687671876847,
+          "net_edge": 0.3026,
+          "fair_source": "sharp_consensus"
+        },
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "stake": 100.0,
+          "ask": 0.302123,
+          "quoted_ask": 0.26,
+          "fill_contracts": 330.9908,
+          "fair": 0.4922680412371133,
+          "net_edge": 0.1753,
+          "fair_source": "sharp_consensus"
+        }
+      ],
+      "C_model_kelly": [
+        {
+          "label": "Atletico Madrid vs Real Madrid \u2014 Over 2.5 Goals",
+          "stake": 170.72,
+          "ask": 0.437052,
+          "quoted_ask": 0.36,
+          "fill_contracts": 390.6173,
+          "fair": 0.5493773498610347,
+          "net_edge": 0.095,
+          "fair_source": "model"
+        },
+        {
+          "label": "Valencia vs Real Sociedad \u2014 Moneyline: Valencia Win",
+          "stake": 132.19,
+          "ask": 0.34,
+          "quoted_ask": 0.34,
+          "fill_contracts": 388.7941,
+          "fair": 0.4190181237277499,
+          "net_edge": 0.0632,
+          "fair_source": "model"
+        },
+        {
+          "label": "Fulham vs Manchester United \u2014 Moneyline: Draw",
+          "stake": 92.65,
+          "ask": 0.26,
+          "quoted_ask": 0.26,
+          "fill_contracts": 356.3462,
+          "fair": 0.3243998052428839,
+          "net_edge": 0.0509,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Real Betis \u2014 Moneyline: Deportivo La Coruna Win",
+          "stake": 73.49,
+          "ask": 0.26,
+          "quoted_ask": 0.26,
+          "fill_contracts": 282.6538,
+          "fair": 0.31457969844401046,
+          "net_edge": 0.0411,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": [
+        {
+          "label": "SGP \u2014 Atletico Madrid/Real Madrid: Under 1.5 + Atletico Madrid/Real Madrid: Draw",
+          "stake": 100.0,
+          "ask": 0.0637,
+          "fair": 0.1732,
+          "net_edge": 0.0539,
+          "legs": 2,
+          "is_sgp": true,
+          "joint_method": "score_matrix"
+        }
+      ]
+    },
+    "placed": {
+      "A_divergence_kelly": 2,
+      "B_divergence_flat": 2,
+      "C_model_kelly": 4,
+      "D_parlay": 1
+    }
+  }
+}

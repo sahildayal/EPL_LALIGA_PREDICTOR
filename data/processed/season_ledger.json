@@ -5,7 +5,7 @@
   "arms": {
     "A_divergence_kelly": {
       "label": "Divergence + quarter-Kelly",
-      "bankroll": 9815.2,
+      "bankroll": 9235.12,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -49,6 +49,46 @@
           "fill_contracts": 594.2308,
           "placed_utc": "2026-09-13T15:42:58.474768+00:00",
           "closing_seen_utc": "2026-09-18T20:48:44.290564+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "away",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 294.46,
+          "price": 0.09,
+          "line": null,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T17:15:00Z",
+          "model_prob": 0.35865805477058554,
+          "fair_prob": 0.3983687671876847,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.1,
+          "fill_contracts": 3271.7778,
+          "placed_utc": "2026-09-20T15:32:58.045007+00:00"
+        },
+        {
+          "market": "totals",
+          "selection": "under",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 285.62,
+          "price": 0.373039,
+          "line": 1.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.4506226501389653,
+          "fair_prob": 0.4922680412371133,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.26,
+          "fill_contracts": 765.6562,
+          "placed_utc": "2026-09-20T15:32:58.045042+00:00"
         }
       ],
       "history": [
@@ -297,7 +337,7 @@
     },
     "B_divergence_flat": {
       "label": "Divergence + flat 1%",
-      "bankroll": 9943.9,
+      "bankroll": 9743.9,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -341,6 +381,46 @@
           "fill_contracts": 196.0784,
           "placed_utc": "2026-09-13T15:42:58.474789+00:00",
           "closing_seen_utc": "2026-09-18T20:48:44.290573+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "away",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 100.0,
+          "price": 0.09,
+          "line": null,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T17:15:00Z",
+          "model_prob": 0.35865805477058554,
+          "fair_prob": 0.3983687671876847,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.1,
+          "fill_contracts": 1111.1111,
+          "placed_utc": "2026-09-20T15:32:58.045054+00:00"
+        },
+        {
+          "market": "totals",
+          "selection": "under",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 100.0,
+          "price": 0.302123,
+          "line": 1.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.4506226501389653,
+          "fair_prob": 0.4922680412371133,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.26,
+          "fill_contracts": 330.9908,
+          "placed_utc": "2026-09-20T15:32:58.045062+00:00"
         }
       ],
       "history": [
@@ -589,7 +669,7 @@
     },
     "C_model_kelly": {
       "label": "Model-only + quarter-Kelly",
-      "bankroll": 5690.79,
+      "bankroll": 5221.74,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -1053,6 +1133,86 @@
           "fill_contracts": 651.8519,
           "placed_utc": "2026-09-18T13:33:13.714601+00:00",
           "closing_seen_utc": "2026-09-20T14:24:04.192745+00:00"
+        },
+        {
+          "market": "totals",
+          "selection": "over",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 170.72,
+          "price": 0.437052,
+          "line": 2.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Over 2.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.5493773498610347,
+          "fair_prob": 0.5493773498610347,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.36,
+          "fill_contracts": 390.6173,
+          "placed_utc": "2026-09-20T15:32:58.045071+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "home",
+          "home": "valencia",
+          "away": "real sociedad",
+          "stake": 132.19,
+          "price": 0.34,
+          "line": null,
+          "prop": null,
+          "label": "Valencia vs Real Sociedad \u2014 Moneyline: Valencia Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T22:00:00Z",
+          "model_prob": 0.4190181237277499,
+          "fair_prob": 0.4190181237277499,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.34,
+          "fill_contracts": 388.7941,
+          "placed_utc": "2026-09-20T15:32:58.045079+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "draw",
+          "home": "fulham",
+          "away": "manchester united",
+          "stake": 92.65,
+          "price": 0.26,
+          "line": null,
+          "prop": null,
+          "label": "Fulham vs Manchester United \u2014 Moneyline: Draw",
+          "league": "epl",
+          "kickoff": "2026-09-20T18:30:00Z",
+          "model_prob": 0.3243998052428839,
+          "fair_prob": 0.3243998052428839,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.26,
+          "fill_contracts": 356.3462,
+          "placed_utc": "2026-09-20T15:32:58.045085+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "home",
+          "home": "deportivo la coruna",
+          "away": "real betis",
+          "stake": 73.49,
+          "price": 0.26,
+          "line": null,
+          "prop": null,
+          "label": "Deportivo La Coruna vs Real Betis \u2014 Moneyline: Deportivo La Coruna Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T19:30:00Z",
+          "model_prob": 0.31457969844401046,
+          "fair_prob": 0.31457969844401046,
+          "closing_price": null,
+          "result": null,
+          "quoted_ask": 0.26,
+          "fill_contracts": 282.6538,
+          "placed_utc": "2026-09-20T15:32:58.045092+00:00"
         }
       ],
       "history": [
@@ -2365,7 +2525,7 @@
     },
     "D_parlay": {
       "label": "Parlay / SGP",
-      "bankroll": 9900.0,
+      "bankroll": 9800.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
       "history": [],
@@ -2420,6 +2580,53 @@
           ],
           "closing_price": 1.0,
           "closing_seen_utc": "2026-09-20T14:24:04.192756+00:00"
+        },
+        {
+          "legs": [
+            {
+              "home": "atletico madrid",
+              "away": "real madrid",
+              "market": "totals",
+              "selection": "under",
+              "fair_prob": 0.4922680412371133,
+              "ask": 0.26,
+              "line": 1.5,
+              "league": "laliga",
+              "kickoff": "2026-09-20T18:15:00Z",
+              "ticker": "KXLALIGATOTAL-26SEP20ATMRMA-2",
+              "result": null
+            },
+            {
+              "home": "atletico madrid",
+              "away": "real madrid",
+              "market": "1x2",
+              "selection": "draw",
+              "fair_prob": 0.35131404417057116,
+              "ask": 0.22,
+              "line": null,
+              "league": "laliga",
+              "kickoff": "2026-09-20T17:15:00Z",
+              "ticker": "KXLALIGAGAME-26SEP20ATMRMA-TIE",
+              "result": null
+            }
+          ],
+          "stake": 100.0,
+          "fair_prob": 0.17322294858840995,
+          "ask": 0.06368671892825263,
+          "net_edge": 0.05393622966015732,
+          "is_sgp": true,
+          "ask_is_synthetic": true,
+          "joint_method": "score_matrix",
+          "label": "SGP \u2014 Atletico Madrid/Real Madrid: Under 1.5 + Atletico Madrid/Real Madrid: Draw",
+          "placed_utc": "2026-09-20T15:32:58.045133+00:00",
+          "result": null,
+          "payout": null,
+          "pnl": null,
+          "settled_utc": null,
+          "notes": [
+            "fee 0.0256 of payout across 2 legs",
+            "penalty 0.0300 (synthetic ask + SGP correlation)"
+          ]
         }
       ],
       "parlay_history": []
