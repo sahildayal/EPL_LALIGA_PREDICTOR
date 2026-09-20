@@ -917,12 +917,12 @@
           "kickoff": "2026-09-20T19:30:00Z",
           "model_prob": 0.5987068655928166,
           "fair_prob": 0.5987068655928166,
-          "closing_price": 0.39,
+          "closing_price": 0.92,
           "result": null,
           "quoted_ask": 0.39,
           "fill_contracts": 611.9744,
           "placed_utc": "2026-09-18T13:33:13.714514+00:00",
-          "closing_seen_utc": "2026-09-20T14:24:04.192713+00:00"
+          "closing_seen_utc": "2026-09-20T17:11:40.239816+00:00"
         },
         {
           "market": "totals",
@@ -1168,11 +1168,12 @@
           "kickoff": "2026-09-20T22:00:00Z",
           "model_prob": 0.4190181237277499,
           "fair_prob": 0.4190181237277499,
-          "closing_price": null,
+          "closing_price": 0.34,
           "result": null,
           "quoted_ask": 0.34,
           "fill_contracts": 388.7941,
-          "placed_utc": "2026-09-20T15:32:58.045079+00:00"
+          "placed_utc": "2026-09-20T15:32:58.045079+00:00",
+          "closing_seen_utc": "2026-09-20T17:11:40.239840+00:00"
         },
         {
           "market": "1x2",
@@ -1188,11 +1189,12 @@
           "kickoff": "2026-09-20T18:30:00Z",
           "model_prob": 0.3243998052428839,
           "fair_prob": 0.3243998052428839,
-          "closing_price": null,
+          "closing_price": 0.25,
           "result": null,
           "quoted_ask": 0.26,
           "fill_contracts": 356.3462,
-          "placed_utc": "2026-09-20T15:32:58.045085+00:00"
+          "placed_utc": "2026-09-20T15:32:58.045085+00:00",
+          "closing_seen_utc": "2026-09-20T17:11:40.239845+00:00"
         },
         {
           "market": "1x2",
@@ -1208,11 +1210,12 @@
           "kickoff": "2026-09-20T19:30:00Z",
           "model_prob": 0.31457969844401046,
           "fair_prob": 0.31457969844401046,
-          "closing_price": null,
+          "closing_price": 0.2,
           "result": null,
           "quoted_ask": 0.26,
           "fill_contracts": 282.6538,
-          "placed_utc": "2026-09-20T15:32:58.045092+00:00"
+          "placed_utc": "2026-09-20T15:32:58.045092+00:00",
+          "closing_seen_utc": "2026-09-20T17:11:40.239849+00:00"
         }
       ],
       "history": [
@@ -2579,7 +2582,7 @@
             "penalty 0.0300 (synthetic ask + SGP correlation)"
           ],
           "closing_price": 1.0,
-          "closing_seen_utc": "2026-09-20T14:24:04.192756+00:00"
+          "closing_seen_utc": "2026-09-20T17:11:40.239860+00:00"
         },
         {
           "legs": [
