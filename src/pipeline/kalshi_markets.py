@@ -7,6 +7,7 @@ fixtures we have neither ratings nor sharp lines for, and we would price them
 against La Liga fair values. Verified live against /trade-api/v2/series.
 """
 import re
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from src.data.canonical_teams import canonical, UnknownTeam
@@ -238,6 +239,38 @@ def vwap_fill(ladder: list, budget: float) -> Optional[dict]:
             "spent": round(spent, 4)}
 
 
+#: Kalshi's `occurrence_datetime` is when a market is expected to RESOLVE, not
+#: when the match starts: kickoff +3h on moneyline (GAME) series and +4h on
+#: totals and BTTS. Verified to the minute against football-data kickoff times
+#: on 13 fixtures, 2026-09-22.
+RESOLUTION_LAG_H = {MARKET_1X2: 3, MARKET_TOTALS: 4, MARKET_BTTS: 4}
+
+
+def kickoff_from(market: dict, market_type: str):
+    """
+    Kickoff as an ISO string, or None — never a later timestamp standing in.
+
+    Until 2026-09-22 the raw `occurrence_datetime` was used as kickoff, which
+    put every guard 3-4 hours late. The Sunday stake run drifts to ~15:30 UTC,
+    so it bet on matches already underway — Atletico v Real Madrid 78 minutes
+    in, Valencia v Barcelona 46 minutes in — priced against PRE-match fair
+    values, and snapshots stamped mid-match prices as closing prices. The old
+    fallback to `close_time` was worse still (days late) and is gone: a market
+    with no occurrence time is left undated, and undated markets are never bet.
+    """
+    raw = market.get("occurrence_datetime")
+    if not raw:
+        return None
+    try:
+        resolves = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if resolves.tzinfo is None:
+        resolves = resolves.replace(tzinfo=timezone.utc)
+    kickoff = resolves - timedelta(hours=RESOLUTION_LAG_H.get(market_type, 4))
+    return kickoff.isoformat().replace("+00:00", "Z")
+
+
 def normalise(raw_markets: list) -> list:
     """
     Converts raw Kalshi market dicts into edge-engine rows.
@@ -269,8 +302,7 @@ def normalise(raw_markets: list) -> list:
             continue
 
         row = {"home": home, "away": away, "league": league, "market": market_type,
-               "ticker": ticker, "ask": ask,
-               "kickoff": m.get("occurrence_datetime") or m.get("close_time")}
+               "ticker": ticker, "ask": ask, "kickoff": kickoff_from(m, market_type)}
 
         if market_type == MARKET_1X2:
             sel = _selection_1x2(m, home, away)

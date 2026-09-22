@@ -115,7 +115,18 @@ def collect_kalshi() -> list:
         raw, per_ticker = _fetch_kalshi_once(client)
         if not raw:
             print(f"[kalshi] still zero on retry: {per_ticker}")
-    return km.normalise(raw)
+    listed = km.normalise(raw)
+    # Markets arrived and every one failed to parse: the signature of the
+    # 2026-09-04 rules-text template change, which looked exactly like "Kalshi
+    # listed no in-scope markets". Nothing arriving at all is different — that
+    # is an international break or the gap between seasons — and is handled by
+    # the caller as a quiet week.
+    if raw and not listed:
+        raise PipelineAborted(
+            f"Kalshi returned {len(raw)} open market(s) ({per_ticker}) but none "
+            "parsed. That is a parsing failure, not a quiet week — check the "
+            "market titles/rules_primary against kalshi_markets.parse_teams.")
+    return listed
 
 
 def within_bet_window(markets: list, now=None, days: int = BET_WINDOW_DAYS) -> tuple:
@@ -154,6 +165,51 @@ def within_bet_window(markets: list, now=None, days: int = BET_WINDOW_DAYS) -> t
         (keep if now <= ko < horizon else outside).append(m)
 
     return keep, outside, undated
+
+
+def _ts(raw):
+    if not raw:
+        return None
+    try:
+        t = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+    return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+#: Minutes by which Kalshi-derived and bookmaker kickoffs may differ before the
+#: run is flagged. Real drift should be zero; this only absorbs rounding.
+KICKOFF_TOLERANCE_MIN = 30
+
+
+def reconcile_kickoffs(markets: list, fair: dict) -> tuple:
+    """
+    Cross-checks each market's kickoff against the sharp feed's commence_time.
+
+    Kalshi publishes a resolution time, and kickoff is derived from it by a
+    fixed per-series lag (kalshi_markets.RESOLUTION_LAG_H). That lag is a
+    Kalshi convention nobody promised to keep. Reading the raw resolution time
+    as kickoff is how the pipeline bet on matches 46-78 minutes in, so if the
+    convention ever shifts, the stake run must say so rather than quietly go
+    back to betting in-play. Where the bookmakers give an earlier kickoff it
+    wins — erring early only ever costs a market, erring late costs a live bet.
+
+    Returns (markets, disagreements) where disagreements lists
+    [home, away, minutes Kalshi-minus-bookmakers] for fixtures past tolerance.
+    """
+    out, flagged = [], {}
+    for m in markets:
+        key = (canonical(m["home"], strict=False), canonical(m["away"], strict=False))
+        sharp = _ts((fair.get(key) or {}).get("_commence"))
+        derived = _ts(m.get("kickoff"))
+        if sharp and derived:
+            gap = round((derived - sharp).total_seconds() / 60)
+            if abs(gap) > KICKOFF_TOLERANCE_MIN:
+                flagged[key] = gap
+            if sharp < derived:
+                m = {**m, "kickoff": sharp.isoformat().replace("+00:00", "Z")}
+        out.append(m)
+    return out, [[h, a, g] for (h, a), g in sorted(flagged.items())]
 
 
 def _pre_kickoff(markets: list, now=None) -> list:
@@ -289,6 +345,10 @@ def collect_fair_values() -> dict:
         for fx in data["fixtures"]:
             key = (canonical(fx["home"], strict=False), canonical(fx["away"], strict=False))
             entry = fair.setdefault(key, {})
+            # The bookmakers' own kickoff — used to cross-check the one derived
+            # from Kalshi's resolution time (see reconcile_kickoffs).
+            if fx.get("commence_time"):
+                entry["_commence"] = fx["commence_time"]
             h2h = fx["fair"].get("h2h", {})
             if h2h:
                 mapped = {}
@@ -517,18 +577,21 @@ def run_stake(dry_run: bool = False) -> RunReport:
     report = RunReport(job="stake", started_utc=_now())
     try:
         listed = collect_kalshi()
-        if not listed:
-            raise PipelineAborted("Kalshi listed no in-scope markets.")
         markets, outside, undated = within_bet_window(listed)
         if not markets:
-            # Not a failure. Markets ARE listed, they simply kick off later —
-            # an international break looks exactly like this, and there are
-            # about five a season. Treating a legitimately quiet week as a
-            # failure would fire an alert each time and train us to ignore them.
+            # Not a failure. Either markets are listed but kick off later, or
+            # Kalshi lists nothing at all yet — an international break looks
+            # like one or the other, and there are about five a season.
+            # Treating a legitimately quiet week as a failure fires an alert
+            # each time and trains us to ignore them. It is still raised as a
+            # warning so a human confirms there really are no games this week.
             #
-            # Zero markets listed at all is different, and is still an abort
-            # above: that is the signature of the parsing bug that silently
-            # dropped every market on the exchange.
+            # The parsing failure that once looked identical — markets arriving
+            # and every one being dropped — is caught in collect_kalshi and
+            # still aborts. That is what "Kalshi listed no in-scope markets"
+            # used to guard against, and it no longer needs zero-listed to fail
+            # to do it: on 2026-09-22 that rule would have hard-failed all four
+            # stake runs of the international break.
             report.details = {
                 "markets_listed": len(listed),
                 "markets": 0,
@@ -538,13 +601,18 @@ def run_stake(dry_run: bool = False) -> RunReport:
                 "dry_run": dry_run,
             }
             report.errors.append(
-                f"No bets: Kalshi listed {len(listed)} market(s) but none kick off "
+                f"No bets: Kalshi listed {len(listed)} market(s) and none kick off "
                 f"within {BET_WINDOW_DAYS} days. Normal during an international "
-                "break or out of season.")
+                "break or out of season; if fixtures ARE scheduled this week, "
+                "something upstream is wrong.")
             report.ok = True
             report.write()
             return report
         fair = collect_fair_values()
+        # Re-window on the bookmakers' kickoff where it is earlier, so nothing
+        # the sharp feed says has already started can be bet.
+        markets, kickoff_drift = reconcile_kickoffs(markets, fair)
+        markets, started, _ = within_bet_window(markets)
         # Carry each fixture's league through to the model step, so a fixture is
         # only ever priced by the model that has ratings for its clubs.
         fixture_leagues = {(m["home"], m["away"]): m["league"] for m in markets}
@@ -582,6 +650,8 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "unpriced_fixtures": [list(f) for f in unpriced],
             "fixtures_without_score_matrix": [list(f) for f in no_matrix],
             "implausible_model_fixtures": implausible_model,
+            "kickoff_disagreements": kickoff_drift,
+            "dropped_as_started": len(started),
             "planned": {a: len(p) for a, p in plans.items()},
             "fill_adjustments": fill_notes,
             # Reuses the fair values already built above — no extra Odds API call.
@@ -598,6 +668,14 @@ def run_stake(dry_run: bool = False) -> RunReport:
                 f"{len(undated)} market(s) had no parseable kickoff and were NOT bet. "
                 "Without a kickoff we cannot show a fixture falls in exactly one "
                 "weekly window, so betting it risks double exposure.")
+        if kickoff_drift:
+            report.errors.append(
+                f"{len(kickoff_drift)} fixture(s) where the kickoff derived from "
+                f"Kalshi's resolution time disagrees with the bookmakers' by more "
+                f"than {KICKOFF_TOLERANCE_MIN} min: {kickoff_drift} "
+                "([home, away, minutes Kalshi minus bookmakers]). The earlier "
+                "time was used, but kalshi_markets.RESOLUTION_LAG_H may no "
+                "longer match Kalshi's convention — check before the next run.")
         if implausible_model:
             report.errors.append(
                 f"{len(implausible_model)} fixture(s) were NOT model-priced because the "

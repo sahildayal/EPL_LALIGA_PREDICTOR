@@ -648,11 +648,29 @@ def test_quiet_week_is_a_warning_not_a_failure(monkeypatch):
     assert rep.details["markets_listed"] == 1 and rep.details["markets"] == 0
 
 
-def test_no_markets_at_all_is_still_a_failure(monkeypatch):
+def test_nothing_listed_anywhere_is_a_quiet_week_not_a_failure(monkeypatch):
+    """
+    During an international break Kalshi lists nothing at all. That used to
+    hard-fail the stake run, because empty looked identical to the parser
+    dropping every market; the two are now told apart in collect_kalshi.
+    """
     monkeypatch.setattr(matchweek, "collect_kalshi", lambda: [])
     rep = matchweek.run_stake(dry_run=True)
-    assert not rep.ok
-    assert any("no in-scope markets" in e for e in rep.errors)
+    assert rep.ok                                              # not a failure
+    assert any("Normal during an international break" in e for e in rep.errors)
+    assert rep.details["markets_listed"] == 0
+
+
+def test_markets_arriving_but_none_parsing_still_aborts(monkeypatch):
+    """The 2026-09-04 signature: Kalshi returned markets and every one was
+    dropped by the parser. That must stay a hard failure."""
+    monkeypatch.setattr(matchweek, "KalshiClient", lambda: object())
+    monkeypatch.setattr(matchweek, "_fetch_kalshi_once",
+                        lambda c: ([{"ticker": "KXEPLGAME-X-Y", "series_ticker": "KXEPLGAME",
+                                     "title": "gibberish", "status": "active",
+                                     "yes_ask_dollars": "0.40"}], {"KXEPLGAME": 1}))
+    with pytest.raises(matchweek.PipelineAborted, match="none parsed"):
+        matchweek.collect_kalshi()
 
 
 def test_unparseable_kickoff_is_undated_not_kept():
@@ -771,10 +789,60 @@ def test_stake_places_nothing_when_odds_unavailable(monkeypatch):
     assert all(a["bankroll"] == 10_000.0 for a in ledger.load_state()["arms"].values())
 
 
-def test_stake_aborts_when_no_markets_listed(monkeypatch):
+def test_stake_with_nothing_listed_places_nothing(monkeypatch):
     monkeypatch.setattr(matchweek, "collect_kalshi", lambda: [])
     rep = matchweek.run_stake()
-    assert not rep.ok and "no in-scope markets" in rep.errors[0]
+    assert rep.ok and rep.details["markets"] == 0
+    assert all(a["bankroll"] == 10_000.0 for a in ledger.load_state()["arms"].values())
+
+
+# --- Kickoff: Kalshi publishes a resolution time, not a kickoff ---------------
+#
+# Regression, 2026-09-22. occurrence_datetime is kickoff +3h on GAME series and
+# +4h on TOTAL/BTTS, verified against football-data on 13 fixtures. Read as
+# kickoff, it let the Sunday stake run (drifting to ~15:30 UTC) bet Atletico v
+# Real Madrid 78 minutes in and Valencia v Barcelona 46 minutes in, and let
+# snapshots stamp mid-match prices as closing prices.
+
+def test_kickoff_is_derived_from_the_resolution_time_per_series():
+    game = {"occurrence_datetime": "2026-09-20T17:15:00Z"}
+    total = {"occurrence_datetime": "2026-09-20T18:15:00Z"}
+    assert km.kickoff_from(game, MARKET_1X2) == "2026-09-20T14:15:00Z"
+    assert km.kickoff_from(total, MARKET_TOTALS) == "2026-09-20T14:15:00Z"
+    assert km.kickoff_from(total, MARKET_BTTS) == "2026-09-20T14:15:00Z"
+
+
+def test_a_market_with_no_occurrence_time_is_undated_not_close_time():
+    """close_time is days after the match; standing it in for kickoff would
+    reopen the in-play hole far wider than before."""
+    m = {"close_time": "2026-09-23T01:00:00Z"}
+    assert km.kickoff_from(m, MARKET_1X2) is None
+
+
+def test_a_match_already_underway_is_outside_the_window():
+    """The Atletico v Real Madrid case: resolution 17:15, stake at 15:32."""
+    ko = km.kickoff_from({"occurrence_datetime": "2026-09-20T17:15:00Z"}, MARKET_1X2)
+    stake_run = datetime(2026, 9, 20, 15, 32, tzinfo=timezone.utc)
+    keep, started, _ = matchweek.within_bet_window(
+        [{"home": "atletico madrid", "away": "real madrid", "kickoff": ko}], now=stake_run)
+    assert keep == [] and len(started) == 1
+
+
+def test_bookmaker_kickoff_wins_when_earlier_and_drift_is_flagged():
+    fair = {("atletico madrid", "real madrid"): {"_commence": "2026-09-20T14:15:00Z"}}
+    late = [{"home": "atletico madrid", "away": "real madrid",
+             "kickoff": "2026-09-20T17:15:00Z"}]          # the old, raw reading
+    fixed, drift = matchweek.reconcile_kickoffs(late, fair)
+    assert fixed[0]["kickoff"] == "2026-09-20T14:15:00Z"
+    assert drift == [["atletico madrid", "real madrid", 180]]
+
+
+def test_agreeing_kickoffs_raise_no_flag():
+    fair = {("atletico madrid", "real madrid"): {"_commence": "2026-09-20T14:15:00Z"}}
+    ok = [{"home": "atletico madrid", "away": "real madrid",
+           "kickoff": "2026-09-20T14:15:00Z"}]
+    fixed, drift = matchweek.reconcile_kickoffs(ok, fair)
+    assert drift == [] and fixed[0]["kickoff"] == "2026-09-20T14:15:00Z"
 
 
 def test_dry_run_plans_without_placing(monkeypatch):
