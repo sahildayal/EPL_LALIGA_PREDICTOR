@@ -5,7 +5,7 @@
   "arms": {
     "A_divergence_kelly": {
       "label": "Divergence + quarter-Kelly",
-      "bankroll": 9235.12,
+      "bankroll": 9383.49,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -22,12 +22,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.5103609897950665,
           "fair_prob": 0.6193771626297578,
-          "closing_price": 1.0,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.46,
           "fill_contracts": 680.3261,
           "placed_utc": "2026-09-13T15:42:58.474746+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290550+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "btts",
@@ -43,52 +43,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.535261735110602,
           "fair_prob": 0.6392070132137476,
-          "closing_price": 1.0,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.51,
           "fill_contracts": 594.2308,
           "placed_utc": "2026-09-13T15:42:58.474768+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290564+00:00"
-        },
-        {
-          "market": "1x2",
-          "selection": "away",
-          "home": "atletico madrid",
-          "away": "real madrid",
-          "stake": 294.46,
-          "price": 0.09,
-          "line": null,
-          "prop": null,
-          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
-          "league": "laliga",
-          "kickoff": "2026-09-20T17:15:00Z",
-          "model_prob": 0.35865805477058554,
-          "fair_prob": 0.3983687671876847,
-          "closing_price": null,
-          "result": null,
-          "quoted_ask": 0.1,
-          "fill_contracts": 3271.7778,
-          "placed_utc": "2026-09-20T15:32:58.045007+00:00"
-        },
-        {
-          "market": "totals",
-          "selection": "under",
-          "home": "atletico madrid",
-          "away": "real madrid",
-          "stake": 285.62,
-          "price": 0.373039,
-          "line": 1.5,
-          "prop": null,
-          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
-          "league": "laliga",
-          "kickoff": "2026-09-20T18:15:00Z",
-          "model_prob": 0.4506226501389653,
-          "fair_prob": 0.4922680412371133,
-          "closing_price": null,
-          "result": null,
-          "quoted_ask": 0.26,
-          "fill_contracts": 765.6562,
-          "placed_utc": "2026-09-20T15:32:58.045042+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         }
       ],
       "history": [
@@ -323,13 +283,64 @@
           "model_prob": 0.4356436992183197,
           "fair_prob": 0.7084196178825231,
           "closing_price": null,
-          "result": "WIN",
+          "result": "VOID",
           "quoted_ask": 0.59,
           "fill_contracts": 731.7073,
           "placed_utc": "2026-09-06T15:00:52.273467+00:00",
-          "payout": 731.71,
-          "pnl": 431.71,
-          "settled_utc": "2026-09-08T13:22:29.891756+00:00"
+          "payout": 300.0,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-08T13:22:29.891756+00:00",
+          "original_result": "WIN",
+          "original_pnl": 431.71,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
+        },
+        {
+          "market": "totals",
+          "selection": "under",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 285.62,
+          "price": 0.373039,
+          "line": 1.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.4506226501389653,
+          "fair_prob": 0.4922680412371133,
+          "closing_price": null,
+          "result": "VOID",
+          "quoted_ask": 0.26,
+          "fill_contracts": 765.6562,
+          "placed_utc": "2026-09-20T15:32:58.045042+00:00",
+          "pnl": 0.0,
+          "payout": 285.62,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142009+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "away",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 294.46,
+          "price": 0.09,
+          "line": null,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T17:15:00Z",
+          "model_prob": 0.35865805477058554,
+          "fair_prob": 0.3983687671876847,
+          "closing_price": null,
+          "result": "VOID",
+          "quoted_ask": 0.1,
+          "fill_contracts": 3271.7778,
+          "placed_utc": "2026-09-20T15:32:58.045007+00:00",
+          "pnl": 0.0,
+          "payout": 294.46,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142030+00:00"
         }
       ],
       "active_parlays": [],
@@ -337,7 +348,7 @@
     },
     "B_divergence_flat": {
       "label": "Divergence + flat 1%",
-      "bankroll": 9743.9,
+      "bankroll": 9800.0,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -354,12 +365,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.5103609897950665,
           "fair_prob": 0.6193771626297578,
-          "closing_price": 1.0,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.46,
           "fill_contracts": 217.3913,
           "placed_utc": "2026-09-13T15:42:58.474781+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290570+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "btts",
@@ -375,52 +386,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.535261735110602,
           "fair_prob": 0.6392070132137476,
-          "closing_price": 1.0,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.51,
           "fill_contracts": 196.0784,
           "placed_utc": "2026-09-13T15:42:58.474789+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290573+00:00"
-        },
-        {
-          "market": "1x2",
-          "selection": "away",
-          "home": "atletico madrid",
-          "away": "real madrid",
-          "stake": 100.0,
-          "price": 0.09,
-          "line": null,
-          "prop": null,
-          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
-          "league": "laliga",
-          "kickoff": "2026-09-20T17:15:00Z",
-          "model_prob": 0.35865805477058554,
-          "fair_prob": 0.3983687671876847,
-          "closing_price": null,
-          "result": null,
-          "quoted_ask": 0.1,
-          "fill_contracts": 1111.1111,
-          "placed_utc": "2026-09-20T15:32:58.045054+00:00"
-        },
-        {
-          "market": "totals",
-          "selection": "under",
-          "home": "atletico madrid",
-          "away": "real madrid",
-          "stake": 100.0,
-          "price": 0.302123,
-          "line": 1.5,
-          "prop": null,
-          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
-          "league": "laliga",
-          "kickoff": "2026-09-20T18:15:00Z",
-          "model_prob": 0.4506226501389653,
-          "fair_prob": 0.4922680412371133,
-          "closing_price": null,
-          "result": null,
-          "quoted_ask": 0.26,
-          "fill_contracts": 330.9908,
-          "placed_utc": "2026-09-20T15:32:58.045062+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         }
       ],
       "history": [
@@ -655,13 +626,64 @@
           "model_prob": 0.4356436992183197,
           "fair_prob": 0.7084196178825231,
           "closing_price": null,
-          "result": "WIN",
+          "result": "VOID",
           "quoted_ask": 0.59,
           "fill_contracts": 243.9024,
           "placed_utc": "2026-09-06T15:00:52.273492+00:00",
-          "payout": 243.9,
-          "pnl": 143.9,
-          "settled_utc": "2026-09-08T13:22:29.891768+00:00"
+          "payout": 100.0,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-08T13:22:29.891768+00:00",
+          "original_result": "WIN",
+          "original_pnl": 143.9,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
+        },
+        {
+          "market": "totals",
+          "selection": "under",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 100.0,
+          "price": 0.302123,
+          "line": 1.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Under 1.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.4506226501389653,
+          "fair_prob": 0.4922680412371133,
+          "closing_price": null,
+          "result": "VOID",
+          "quoted_ask": 0.26,
+          "fill_contracts": 330.9908,
+          "placed_utc": "2026-09-20T15:32:58.045062+00:00",
+          "pnl": 0.0,
+          "payout": 100.0,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142066+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "away",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 100.0,
+          "price": 0.09,
+          "line": null,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Moneyline: Real Madrid Win",
+          "league": "laliga",
+          "kickoff": "2026-09-20T17:15:00Z",
+          "model_prob": 0.35865805477058554,
+          "fair_prob": 0.3983687671876847,
+          "closing_price": null,
+          "result": "VOID",
+          "quoted_ask": 0.1,
+          "fill_contracts": 1111.1111,
+          "placed_utc": "2026-09-20T15:32:58.045054+00:00",
+          "pnl": 0.0,
+          "payout": 100.0,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142072+00:00"
         }
       ],
       "active_parlays": [],
@@ -669,7 +691,7 @@
     },
     "C_model_kelly": {
       "label": "Model-only + quarter-Kelly",
-      "bankroll": 5221.74,
+      "bankroll": 5616.16,
       "starting_bankroll": 10000.0,
       "active_bets": [
         {
@@ -686,12 +708,12 @@
           "kickoff": "2026-09-19T18:00:00Z",
           "model_prob": 0.6549880247890044,
           "fair_prob": 0.6549880247890044,
-          "closing_price": 0.25,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.43,
           "fill_contracts": 759.3939,
           "placed_utc": "2026-09-13T15:42:58.474797+00:00",
-          "closing_seen_utc": "2026-09-19T14:03:28.119576+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "btts",
@@ -707,12 +729,12 @@
           "kickoff": "2026-09-19T20:30:00Z",
           "model_prob": 0.6773533693390208,
           "fair_prob": 0.6773533693390208,
-          "closing_price": 0.6,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.47,
           "fill_contracts": 676.4043,
           "placed_utc": "2026-09-13T15:42:58.474804+00:00",
-          "closing_seen_utc": "2026-09-19T16:57:20.373322+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -770,12 +792,12 @@
           "kickoff": "2026-09-19T20:30:00Z",
           "model_prob": 0.6039046912322474,
           "fair_prob": 0.6039046912322474,
-          "closing_price": 0.66,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.48,
           "fill_contracts": 580.8831,
           "placed_utc": "2026-09-13T15:42:58.474825+00:00",
-          "closing_seen_utc": "2026-09-19T16:57:20.373334+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -791,12 +813,12 @@
           "kickoff": "2026-09-19T19:30:00Z",
           "model_prob": 0.6896458377146321,
           "fair_prob": 0.6896458377146321,
-          "closing_price": 0.53,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.57,
           "fill_contracts": 460.1379,
           "placed_utc": "2026-09-13T15:42:58.474837+00:00",
-          "closing_seen_utc": "2026-09-19T16:57:20.373338+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -833,12 +855,12 @@
           "kickoff": "2026-09-19T17:00:00Z",
           "model_prob": 0.3187932015900343,
           "fair_prob": 0.3187932015900343,
-          "closing_price": 0.16,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.21,
           "fill_contracts": 1186.7619,
           "placed_utc": "2026-09-13T15:42:58.474850+00:00",
-          "closing_seen_utc": "2026-09-19T14:03:28.119598+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -917,12 +939,12 @@
           "kickoff": "2026-09-20T19:30:00Z",
           "model_prob": 0.5987068655928166,
           "fair_prob": 0.5987068655928166,
-          "closing_price": 0.92,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.39,
           "fill_contracts": 611.9744,
           "placed_utc": "2026-09-18T13:33:13.714514+00:00",
-          "closing_seen_utc": "2026-09-20T17:11:40.239816+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -938,12 +960,12 @@
           "kickoff": "2026-09-20T17:00:00Z",
           "model_prob": 0.6391812454986847,
           "fair_prob": 0.6391812454986847,
-          "closing_price": 0.94,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.45,
           "fill_contracts": 505.028,
           "placed_utc": "2026-09-18T13:33:13.714525+00:00",
-          "closing_seen_utc": "2026-09-20T14:24:04.192726+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -959,12 +981,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.533621633390267,
           "fair_prob": 0.533621633390267,
-          "closing_price": 0.78,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.35,
           "fill_contracts": 641.6286,
           "placed_utc": "2026-09-18T13:33:13.714535+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290606+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -980,12 +1002,12 @@
           "kickoff": "2026-09-20T17:00:00Z",
           "model_prob": 0.5395302330186179,
           "fair_prob": 0.5395302330186179,
-          "closing_price": 0.76,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.36,
           "fill_contracts": 605.0833,
           "placed_utc": "2026-09-18T13:33:13.714544+00:00",
-          "closing_seen_utc": "2026-09-20T14:24:04.192733+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -1001,12 +1023,12 @@
           "kickoff": "2026-09-19T18:00:00Z",
           "model_prob": 0.6305443852714208,
           "fair_prob": 0.6305443852714208,
-          "closing_price": 0.49,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.45,
           "fill_contracts": 469.5556,
           "placed_utc": "2026-09-18T13:33:13.714553+00:00",
-          "closing_seen_utc": "2026-09-19T14:03:28.119613+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -1022,12 +1044,12 @@
           "kickoff": "2026-09-19T18:00:00Z",
           "model_prob": 0.6341579409329703,
           "fair_prob": 0.6341579409329703,
-          "closing_price": 0.44,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.46,
           "fill_contracts": 445.5652,
           "placed_utc": "2026-09-18T13:33:13.714561+00:00",
-          "closing_seen_utc": "2026-09-19T14:03:28.119616+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -1064,12 +1086,12 @@
           "kickoff": "2026-09-18T23:00:00Z",
           "model_prob": 0.4713779401220588,
           "fair_prob": 0.4713779401220588,
-          "closing_price": 0.89,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.32,
           "fill_contracts": 602.625,
           "placed_utc": "2026-09-18T13:33:13.714577+00:00",
-          "closing_seen_utc": "2026-09-18T20:48:44.290621+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1106,12 +1128,12 @@
           "kickoff": "2026-09-20T17:00:00Z",
           "model_prob": 0.47735064048735676,
           "fair_prob": 0.47735064048735676,
-          "closing_price": 0.64,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.34,
           "fill_contracts": 533.6765,
           "placed_utc": "2026-09-18T13:33:13.714593+00:00",
-          "closing_seen_utc": "2026-09-20T14:24:04.192741+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1127,32 +1149,12 @@
           "kickoff": "2026-09-20T17:15:00Z",
           "model_prob": 0.3927985503541251,
           "fair_prob": 0.3927985503541251,
-          "closing_price": 0.25,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.27,
           "fill_contracts": 651.8519,
           "placed_utc": "2026-09-18T13:33:13.714601+00:00",
-          "closing_seen_utc": "2026-09-20T14:24:04.192745+00:00"
-        },
-        {
-          "market": "totals",
-          "selection": "over",
-          "home": "atletico madrid",
-          "away": "real madrid",
-          "stake": 170.72,
-          "price": 0.437052,
-          "line": 2.5,
-          "prop": null,
-          "label": "Atletico Madrid vs Real Madrid \u2014 Over 2.5 Goals",
-          "league": "laliga",
-          "kickoff": "2026-09-20T18:15:00Z",
-          "model_prob": 0.5493773498610347,
-          "fair_prob": 0.5493773498610347,
-          "closing_price": null,
-          "result": null,
-          "quoted_ask": 0.36,
-          "fill_contracts": 390.6173,
-          "placed_utc": "2026-09-20T15:32:58.045071+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1177,27 +1179,6 @@
         },
         {
           "market": "1x2",
-          "selection": "draw",
-          "home": "fulham",
-          "away": "manchester united",
-          "stake": 92.65,
-          "price": 0.26,
-          "line": null,
-          "prop": null,
-          "label": "Fulham vs Manchester United \u2014 Moneyline: Draw",
-          "league": "epl",
-          "kickoff": "2026-09-20T18:30:00Z",
-          "model_prob": 0.3243998052428839,
-          "fair_prob": 0.3243998052428839,
-          "closing_price": 0.25,
-          "result": null,
-          "quoted_ask": 0.26,
-          "fill_contracts": 356.3462,
-          "placed_utc": "2026-09-20T15:32:58.045085+00:00",
-          "closing_seen_utc": "2026-09-20T17:11:40.239845+00:00"
-        },
-        {
-          "market": "1x2",
           "selection": "home",
           "home": "deportivo la coruna",
           "away": "real betis",
@@ -1210,12 +1191,12 @@
           "kickoff": "2026-09-20T19:30:00Z",
           "model_prob": 0.31457969844401046,
           "fair_prob": 0.31457969844401046,
-          "closing_price": 0.2,
+          "closing_price": null,
           "result": null,
           "quoted_ask": 0.26,
           "fill_contracts": 282.6538,
           "placed_utc": "2026-09-20T15:32:58.045092+00:00",
-          "closing_seen_utc": "2026-09-20T17:11:40.239849+00:00"
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         }
       ],
       "history": [
@@ -1281,15 +1262,15 @@
           "kickoff": "2026-08-22T17:00:00Z",
           "model_prob": 0.5264293724864078,
           "fair_prob": 0.5264293724864078,
-          "closing_price": 0.41,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.37,
           "fill_contracts": 762.8919,
           "placed_utc": "2026-08-21T09:43:24.020433+00:00",
-          "closing_seen_utc": "2026-08-22T14:13:51.315289+00:00",
           "payout": 0.0,
           "pnl": -282.27,
-          "settled_utc": "2026-08-25T09:35:54.424950+00:00"
+          "settled_utc": "2026-08-25T09:35:54.424950+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1353,15 +1334,15 @@
           "kickoff": "2026-08-24T22:00:00Z",
           "model_prob": 0.3463265728521452,
           "fair_prob": 0.3463265728521452,
-          "closing_price": 0.06,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.25,
           "fill_contracts": 951.8,
           "placed_utc": "2026-08-21T09:43:24.020478+00:00",
-          "closing_seen_utc": "2026-08-24T20:17:30.549588+00:00",
           "payout": 0.0,
           "pnl": -237.95,
-          "settled_utc": "2026-08-25T09:35:54.425345+00:00"
+          "settled_utc": "2026-08-25T09:35:54.425345+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1472,15 +1453,15 @@
           "kickoff": "2026-08-24T22:30:00Z",
           "model_prob": 0.4583155208003956,
           "fair_prob": 0.4583155208003956,
-          "closing_price": 0.42,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.32,
           "fill_contracts": 855.625,
           "placed_utc": "2026-08-21T09:43:24.020456+00:00",
-          "closing_seen_utc": "2026-08-24T20:17:30.549565+00:00",
           "payout": 855.62,
           "pnl": 581.83,
-          "settled_utc": "2026-08-25T09:35:54.425897+00:00"
+          "settled_utc": "2026-08-25T09:35:54.425897+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1496,15 +1477,15 @@
           "kickoff": "2026-08-29T17:00:00Z",
           "model_prob": 0.9179706063766291,
           "fair_prob": 0.9179706063766291,
-          "closing_price": 0.16,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.21,
           "fill_contracts": 1328.8095,
           "placed_utc": "2026-08-28T20:48:55.890441+00:00",
-          "closing_seen_utc": "2026-08-29T15:23:29.090475+00:00",
           "payout": 1328.81,
           "pnl": 1049.76,
-          "settled_utc": "2026-09-01T13:58:31.101635+00:00"
+          "settled_utc": "2026-09-01T13:58:31.101635+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1520,15 +1501,15 @@
           "kickoff": "2026-08-29T19:30:00Z",
           "model_prob": 0.39446174545066803,
           "fair_prob": 0.39446174545066803,
-          "closing_price": 0.27,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.33,
           "fill_contracts": 454.8485,
           "placed_utc": "2026-08-28T20:48:55.890493+00:00",
-          "closing_seen_utc": "2026-08-29T17:27:57.615173+00:00",
           "payout": 454.85,
           "pnl": 304.75,
-          "settled_utc": "2026-09-01T13:58:31.101845+00:00"
+          "settled_utc": "2026-09-01T13:58:31.101845+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1569,13 +1550,16 @@
           "model_prob": 0.7375565926129365,
           "fair_prob": 0.7375565926129365,
           "closing_price": null,
-          "result": "WIN",
+          "result": "VOID",
           "quoted_ask": 0.43,
           "fill_contracts": 593.425,
           "placed_utc": "2026-08-30T16:09:55.183030+00:00",
-          "payout": 593.42,
-          "pnl": 356.05,
-          "settled_utc": "2026-09-01T13:58:31.102152+00:00"
+          "payout": 237.37,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-01T13:58:31.102152+00:00",
+          "original_result": "WIN",
+          "original_pnl": 356.05,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
         },
         {
           "market": "1x2",
@@ -1616,13 +1600,16 @@
           "model_prob": 0.4499043061824293,
           "fair_prob": 0.4499043061824293,
           "closing_price": null,
-          "result": "LOSS",
+          "result": "VOID",
           "quoted_ask": 0.12,
           "fill_contracts": 1470.602,
           "placed_utc": "2026-08-28T20:48:55.890462+00:00",
-          "payout": 0.0,
-          "pnl": -270.68,
-          "settled_utc": "2026-09-01T13:58:31.102810+00:00"
+          "payout": 270.68,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-01T13:58:31.102810+00:00",
+          "original_result": "LOSS",
+          "original_pnl": -270.68,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
         },
         {
           "market": "1x2",
@@ -1638,15 +1625,15 @@
           "kickoff": "2026-08-30T20:30:00Z",
           "model_prob": 0.4186265459801275,
           "fair_prob": 0.4186265459801275,
-          "closing_price": 0.05,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.31,
           "fill_contracts": 846.9677,
           "placed_utc": "2026-08-28T20:48:55.890472+00:00",
-          "closing_seen_utc": "2026-08-30T17:51:50.534857+00:00",
           "payout": 0.0,
           "pnl": -262.56,
-          "settled_utc": "2026-09-01T13:58:31.102993+00:00"
+          "settled_utc": "2026-09-01T13:58:31.102993+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "1x2",
@@ -1950,15 +1937,15 @@
           "kickoff": "2026-09-04T22:00:00Z",
           "model_prob": 0.26730131458025963,
           "fair_prob": 0.26730131458025963,
-          "closing_price": 0.09,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.15,
           "fill_contracts": 1481.8,
           "placed_utc": "2026-09-04T15:06:42.458210+00:00",
-          "closing_seen_utc": "2026-09-04T20:41:22.331190+00:00",
           "payout": 1481.8,
           "pnl": 1259.53,
-          "settled_utc": "2026-09-08T13:22:29.891418+00:00"
+          "settled_utc": "2026-09-08T13:22:29.891418+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -1999,13 +1986,16 @@
           "model_prob": 0.5643563007816803,
           "fair_prob": 0.5643563007816803,
           "closing_price": null,
-          "result": "LOSS",
+          "result": "VOID",
           "quoted_ask": 0.42,
           "fill_contracts": 515.2857,
           "placed_utc": "2026-09-06T15:00:52.273503+00:00",
-          "payout": 0.0,
-          "pnl": -216.42,
-          "settled_utc": "2026-09-08T13:22:29.891801+00:00"
+          "payout": 216.42,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-08T13:22:29.891801+00:00",
+          "original_result": "LOSS",
+          "original_pnl": -216.42,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
         },
         {
           "market": "1x2",
@@ -2021,15 +2011,15 @@
           "kickoff": "2026-09-06T19:30:00Z",
           "model_prob": 0.5843678863768049,
           "fair_prob": 0.5843678863768049,
-          "closing_price": 0.25,
+          "closing_price": null,
           "result": "LOSS",
           "quoted_ask": 0.31,
           "fill_contracts": 835.1444,
           "placed_utc": "2026-09-04T15:06:42.458174+00:00",
-          "closing_seen_utc": "2026-09-06T16:37:11.928207+00:00",
           "payout": 0.0,
           "pnl": -266.84,
-          "settled_utc": "2026-09-08T13:22:29.891935+00:00"
+          "settled_utc": "2026-09-08T13:22:29.891935+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "btts",
@@ -2045,15 +2035,15 @@
           "kickoff": "2026-09-06T20:30:00Z",
           "model_prob": 0.6730458768758408,
           "fair_prob": 0.6730458768758408,
-          "closing_price": 0.48,
+          "closing_price": null,
           "result": "WIN",
           "quoted_ask": 0.46,
           "fill_contracts": 462.2143,
           "placed_utc": "2026-09-04T15:06:42.458183+00:00",
-          "closing_seen_utc": "2026-09-06T16:37:11.928222+00:00",
           "payout": 462.21,
           "pnl": 203.37,
-          "settled_utc": "2026-09-08T13:22:29.891948+00:00"
+          "settled_utc": "2026-09-08T13:22:29.891948+00:00",
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         },
         {
           "market": "totals",
@@ -2521,6 +2511,55 @@
           "payout": 0.0,
           "pnl": -273.06,
           "settled_utc": "2026-09-15T14:12:39.593049+00:00"
+        },
+        {
+          "market": "1x2",
+          "selection": "draw",
+          "home": "fulham",
+          "away": "manchester united",
+          "stake": 92.65,
+          "price": 0.26,
+          "line": null,
+          "prop": null,
+          "label": "Fulham vs Manchester United \u2014 Moneyline: Draw",
+          "league": "epl",
+          "kickoff": "2026-09-20T18:30:00Z",
+          "model_prob": 0.3243998052428839,
+          "fair_prob": 0.3243998052428839,
+          "closing_price": 0.25,
+          "result": "VOID",
+          "quoted_ask": 0.26,
+          "fill_contracts": 356.3462,
+          "placed_utc": "2026-09-20T15:32:58.045085+00:00",
+          "closing_seen_utc": "2026-09-20T17:11:40.239845+00:00",
+          "pnl": 0.0,
+          "payout": 92.65,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142100+00:00"
+        },
+        {
+          "market": "totals",
+          "selection": "over",
+          "home": "atletico madrid",
+          "away": "real madrid",
+          "stake": 170.72,
+          "price": 0.437052,
+          "line": 2.5,
+          "prop": null,
+          "label": "Atletico Madrid vs Real Madrid \u2014 Over 2.5 Goals",
+          "league": "laliga",
+          "kickoff": "2026-09-20T18:15:00Z",
+          "model_prob": 0.5493773498610347,
+          "fair_prob": 0.5493773498610347,
+          "closing_price": null,
+          "result": "VOID",
+          "quoted_ask": 0.36,
+          "fill_contracts": 390.6173,
+          "placed_utc": "2026-09-20T15:32:58.045071+00:00",
+          "pnl": 0.0,
+          "payout": 170.72,
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value.",
+          "settled_utc": "2026-09-22T04:11:36.142108+00:00"
         }
       ],
       "active_parlays": [],
@@ -2528,7 +2567,7 @@
     },
     "D_parlay": {
       "label": "Parlay / SGP",
-      "bankroll": 9800.0,
+      "bankroll": 9900.0,
       "starting_bankroll": 10000.0,
       "active_bets": [],
       "history": [],
@@ -2547,7 +2586,7 @@
               "kickoff": "2026-09-18T23:00:00Z",
               "ticker": "KXLALIGATOTAL-26SEP18ESPELC-3",
               "result": null,
-              "closing_price": 1.0
+              "closing_price": null
             },
             {
               "home": "espanyol",
@@ -2561,7 +2600,7 @@
               "kickoff": "2026-09-18T23:00:00Z",
               "ticker": "KXLALIGABTTS-26SEP18ESPELC-BTTS",
               "result": null,
-              "closing_price": 1.0
+              "closing_price": null
             }
           ],
           "stake": 100.0,
@@ -2581,9 +2620,10 @@
             "fee 0.0349 of payout across 2 legs",
             "penalty 0.0300 (synthetic ask + SGP correlation)"
           ],
-          "closing_price": 1.0,
-          "closing_seen_utc": "2026-09-21T22:55:23.022114+00:00"
-        },
+          "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
+        }
+      ],
+      "parlay_history": [
         {
           "legs": [
             {
@@ -2622,17 +2662,17 @@
           "joint_method": "score_matrix",
           "label": "SGP \u2014 Atletico Madrid/Real Madrid: Under 1.5 + Atletico Madrid/Real Madrid: Draw",
           "placed_utc": "2026-09-20T15:32:58.045133+00:00",
-          "result": null,
-          "payout": null,
-          "pnl": null,
-          "settled_utc": null,
+          "result": "VOID",
+          "payout": 100.0,
+          "pnl": 0.0,
+          "settled_utc": "2026-09-22T04:11:36.142334+00:00",
           "notes": [
             "fee 0.0256 of payout across 2 legs",
             "penalty 0.0300 (synthetic ask + SGP correlation)"
-          ]
+          ],
+          "void_reason": "Voided 2026-09-22: placed after the real kickoff. Kalshi's occurrence_datetime (read as kickoff) is 3-4h after the actual start, so the bet window let this through while the match was already in play, priced against a pre-match fair value."
         }
-      ],
-      "parlay_history": []
+      ]
     }
   },
   "migrations": [
