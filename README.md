@@ -8,6 +8,12 @@ $10,000 of fake money each, and commits the result back to this repo.
 At the end of the season one of those four strategies will have won, and the git
 history will show it wasn't decided after the fact.
 
+**Live dashboard: [sahildayal.me/EPL_LALIGA_PREDICTOR](https://sahildayal.me/EPL_LALIGA_PREDICTOR/)**
+— the season scoreboard ranked by closing-line value, every bet each arm has
+placed, open positions, equity and divergence charts, and a record of every bug
+found and every bet voided because of one. It rebuilds itself after each
+scheduled run. See [Dashboard](#dashboard).
+
 > **No real money, and no order placement.** Kalshi credentials are read-only,
 > and there is no `POST /orders` code path anywhere in this repository — it was
 > deleted rather than guarded, so no configuration mistake can make this real.
@@ -78,9 +84,22 @@ Thursday 09:00 UTC   preflight  check credentials before it matters
 Friday   09:00 UTC   stake      price the matchweek, place bets
 Friday   18:00 UTC   snapshot   closing prices for Friday-night fixtures
 Sat/Sun  11:00,14:00 snapshot   capture closing prices (read-only)
+Sunday   12:00 UTC   stake      second pass: catch prices that moved since Friday
 Monday   20:00 UTC   snapshot   closing prices before Monday-night football
 Tuesday  09:00 UTC   settle     grade results, void postponements, score
 ```
+
+GitHub's scheduler runs late, sometimes by hours — settle has landed as late as
+14:11 UTC and the Sunday stake around 15:30. Nothing depends on the exact time,
+because every guard is keyed on each fixture's kickoff rather than on the clock.
+Every run that produces data also rebuilds the [dashboard](#dashboard) and
+commits it with the ledger.
+
+**Kickoff is derived, not read.** Kalshi's `occurrence_datetime` is when a
+market is expected to *resolve* — kickoff +3h on moneyline markets, +4h on
+totals and BTTS. Reading it as kickoff let the Sunday stake bet matches already
+underway until 2026-09-22. The stake run now also cross-checks against the
+bookmakers' kickoff and warns if the two ever disagree.
 
 Run any of them by hand:
 
@@ -114,13 +133,18 @@ last genuine pre-kickoff price is what CLV is measured against.
 | Code | Meaning |
 |---|---|
 | 0 | clean run |
-| 2 | completed, but a human should look (score dispute, unrecognised team) |
+| 2 | completed, but a human should look (score dispute, unrecognised team, a week with no fixtures) |
 | 1 | failed — **no bets placed** |
 
 Code 2 is the one that matters: a bet graded on a score ESPN and
 football-data.co.uk disagree about must not look identical to a clean week.
 Anything non-zero opens a GitHub issue labelled `matchweek-alert`, closed
 automatically by the next clean run of that job.
+
+**A week with no fixtures is not a failure.** During an international break
+Kalshi lists nothing, and the stake run exits 2 with a note rather than 1. What
+still fails hard is markets *arriving* and none of them parsing — the signature
+of a broken parser, which once looked identical to an empty week.
 
 **The pipeline fails closed.** If any required source is unavailable it places
 zero bets and exits non-zero. There is no "bet the half we could price" path — a
@@ -259,10 +283,43 @@ reinterpret an existing record raises instead.
 
 ---
 
+## Dashboard
+
+**[sahildayal.me/EPL_LALIGA_PREDICTOR](https://sahildayal.me/EPL_LALIGA_PREDICTOR/)**
+
+A static site generated from the committed ledger and run logs, served by
+GitHub Pages from `docs/` on `main`.
+
+- **Season scoreboard**, ranked by closing-line value, because at this sample
+  size P&L is mostly noise and CLV is the real signal. Bankroll, equity, P&L,
+  ROI, record and exposure alongside.
+- **This week** — the latest stake run, the freshest divergence reading, and
+  every open position.
+- **Equity per arm** and **does an edge ever appear?** — inline charts of
+  bankroll over the season and of how far Kalshi strays from fair value.
+- **Data integrity** — every bug found and every bet voided because of one.
+  Every number on the site is post-fix and post-void.
+- **Archive** — one page per matchweek: each bet with fair value versus the price
+  actually filled, the result, where the closing line moved, and the fill
+  adjustments the order book forced.
+
+`src/report/site.py` builds it with nothing but the standard library, and the
+output is a pure function of committed history — "data through" tracks the
+newest log, not the build time — so the same commit always renders the same
+site. The matchweek workflow runs `scripts/build_site.py` after every stake,
+snapshot and settle, as a non-blocking step: a broken renderer must never stop a
+real settlement.
+
+```bash
+python scripts/build_site.py      # regenerate docs/ locally
+```
+
+---
+
 ## Testing
 
 ```bash
-pytest              # 321 tests, ~11s, no network, no credentials
+pytest              # 400+ tests, ~12s, no network, no credentials
 ```
 
 Scope lives in `pytest.ini`, so a bare `pytest` means the same thing locally as
@@ -294,6 +351,15 @@ no number it prints is an edge. The board at the top of this README is why.
 
 ## Status
 
-Rebuilt and automated ahead of the 2026/27 season. La Liga opens 2026-08-15 and
-the Premier League 2026-08-21, so the first live `stake` run is Friday
-2026-08-14. Champions League is deferred until the draw is known.
+Live and running unattended since La Liga opened on 2026-08-15 and the Premier
+League on 2026-08-21. Current standings, every bet and every open position are
+on the **[dashboard](https://sahildayal.me/EPL_LALIGA_PREDICTOR/)**, which is
+always more current than this file.
+
+Eight bugs have been found and fixed in-season, each one producing plausible
+wrong numbers rather than an error. Bets priced by a bug are voided rather than
+left in the record; the full list, with dates and what was voided, is in the
+dashboard's Data integrity section.
+
+Champions League runs as a separate experiment:
+[UCL_PREDICTOR](https://github.com/sahildayal/UCL_PREDICTOR).

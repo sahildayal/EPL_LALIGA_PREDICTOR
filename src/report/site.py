@@ -75,6 +75,43 @@ INTEGRITY_NOTES = [
         "and P&L. The decision to bet still cleared the threshold at the true "
         "price.",
     ),
+    (
+        "2026-09-11",
+        "Promoted clubs pinned at the model's bounds — 11 bets voided",
+        "With the 2026/27 file published, just-promoted clubs were fitted on "
+        "about three matches and the optimiser ran their parameters to its "
+        "±3 box (Hull defence −3.000, Coventry attack −3.000), pricing Chelsea "
+        "to score 0.09 goals at home. Fixed by shrinking thin-sample clubs "
+        "toward a promoted-club prior; arm C's 11 bets on it were voided.",
+    ),
+    (
+        "2026-09-15",
+        "Closing prices mixed across goals lines",
+        "Closing prices were keyed without the goals line, so each fixture's "
+        "six totals contracts collided and every totals bet took another "
+        "line's close. Fixed at the source; six unrecoverable closes on arm C "
+        "were cleared rather than left to distort CLV.",
+    ),
+    (
+        "2026-09-17",
+        "Current season could silently drop out",
+        "A runner DNS failure showed that an unreachable data source could "
+        "leave the model refitting as if 2026/27 had not started while the run "
+        "reported success. It now falls back to the cached season or refuses "
+        "to build.",
+    ),
+    (
+        "2026-09-22",
+        "In-play bets — 12 voided",
+        "Kalshi's occurrence time is when a market resolves (kickoff +3h, or "
+        "+4h on totals and BTTS), and it had been read as kickoff. The Sunday "
+        "stake run bet matches already underway: 12 bets, including arms A "
+        "and B's only settled win (Valencia–Barcelona, 46 minutes in). All 12 "
+        "were voided and 29 mid-match closing prices cleared. The fix derives "
+        "kickoff correctly and cross-checks it against the bookmakers'. "
+        "Maximum-divergence readings before this date include live markets "
+        "and overstate how often an edge appeared.",
+    ),
 ]
 
 # --- small helpers -----------------------------------------------------------
@@ -610,9 +647,9 @@ def _integrity_section() -> str:
     )
     return (
         '<section><div class="section__head"><h2>Data integrity</h2>'
-        '<span class="section__note">Four bugs found and fixed so far. Each produced '
-        'plausible wrong numbers rather than an error. Every figure on this site is '
-        'post-fix and post-void.</span></div>'
+        f'<span class="section__note">{len(INTEGRITY_NOTES)} bugs found and fixed so '
+        'far. Each produced plausible wrong numbers rather than an error. Every figure '
+        'on this site is post-fix and post-void.</span></div>'
         f'<div class="notes">{rows}</div></section>'
     )
 
@@ -682,7 +719,8 @@ def render_index(ledger, stake_logs, settle_logs, snapshot_logs) -> str:
                '<span class="section__note">Max (dots) and median (line) Kalshi '
                'divergence from de-vigged fair on every stake and snapshot run. Dots '
                'turn red when at least one market cleared the 2% bar. Two contaminated '
-               'readings are excluded — see Data integrity.</span></div>'
+               'readings are excluded, and maxima before 22 Sep include live, '
+               'in-play markets — see Data integrity.</span></div>'
                + _svg_edge(_edge_series(stake_logs, snapshot_logs))
                + '<div class="legend"><span><i style="background:var(--accent)"></i>median</span>'
                '<span><i style="background:var(--ink-faint)"></i>max</span>'
