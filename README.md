@@ -80,20 +80,30 @@ can't override a CI secret.
 ## How a matchweek works
 
 ```
-Thursday 09:00 UTC   preflight  check credentials before it matters
-Friday   09:00 UTC   stake      price the matchweek, place bets
-Friday   18:00 UTC   snapshot   closing prices for Friday-night fixtures
-Sat/Sun  11:00,14:00 snapshot   capture closing prices (read-only)
-Sunday   12:00 UTC   stake      second pass: catch prices that moved since Friday
-Monday   20:00 UTC   snapshot   closing prices before Monday-night football
+Tuesday  06:00 UTC   stake      midweek fixtures, and a first look at the weekend
 Tuesday  09:00 UTC   settle     grade results, void postponements, score
+Thursday 09:00 UTC   preflight  check credentials before it matters
+Friday   09:00 UTC   stake      price the weekend, place bets
+Sunday   06:00 UTC   stake      price the week ahead while markets are newly listed
+Fri–Mon  fixed times snapshot   divergence telemetry (read-only)
+always   every 2h    closer     snapshot ~20 min before each held bet's kickoff
 ```
 
-GitHub's scheduler runs late, sometimes by hours — settle has landed as late as
-14:11 UTC and the Sunday stake around 15:30. Nothing depends on the exact time,
-because every guard is keyed on each fixture's kickoff rather than on the clock.
-Every run that produces data also rebuilds the [dashboard](#dashboard) and
-commits it with the ledger.
+GitHub's scheduler starts jobs hours late — measured this season, a median of
+~3h for snapshots and ~4–5h for everything else — so the cron times above are
+set early on purpose. Correctness never depends on them: every guard is keyed
+on each fixture's real kickoff rather than on the clock.
+
+**Closing prices are captured by kickoff, not by clock.** A fixed "Friday 18:00"
+snapshot that actually runs at 20:40 misses every Friday-night fixture, and by
+late September arms A and B had a valid closing price on none of their settled
+bets. The closer (`src/pipeline/closer.py`) reads the committed ledger every few
+minutes and, ~20 minutes before each held bet's kickoff, dispatches a snapshot,
+whose start latency is seconds rather than hours. Each stake run also starts a
+closer directly, so a new bet is watched from the moment it is placed.
+
+Every run that produces data rebuilds the [dashboard](#dashboard) and commits it
+with the ledger.
 
 **Kickoff is derived, not read.** Kalshi's `occurrence_datetime` is when a
 market is expected to *resolve* — kickoff +3h on moneyline markets, +4h on

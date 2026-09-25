@@ -1,30 +1,27 @@
-# Friday: price the matchweek and place this week's bets. Sunday: re-price
-# the same 7-day window and stake anything that has since crossed a threshold.
+# Price the fixtures in the next 7 days and place bets. Three passes a week.
 #
-# 09:00 UTC on Friday is chosen to sit ahead of the earliest kickoff of the
-# weekend. EPL and La Liga both schedule Friday-night fixtures (20:00 UK /
-# 21:00 CET), so a Friday-evening run would price part of the matchweek after
-# it had started.
+# Friday prices the weekend. Sunday prices the week ahead while those markets
+# are newly listed and thin — the one genuine far-out edge so far (Espanyol v
+# Elche, placed five days before kickoff) came from a Sunday pass. Tuesday
+# prices midweek rounds and gives the coming weekend a mid-week look. None of
+# this changes any arm's threshold, and `place_arm`'s `held` filter
+# (src/market/arms.py) means a later pass can never re-bet a market an arm
+# already holds.
 #
-# The Sunday run exists because Kalshi asks drift between Friday morning and
-# kickoff, and a single weekly stake pass means any edge that opens up after
-# Friday goes uncaptured until the following Friday — by which point the
-# fixture has usually already been played. Sunday 12:00 UTC sits ahead of
-# Sunday-evening kickoffs and after the Saturday slate, giving a second look
-# at whatever's left in the window without changing any arm's threshold.
-# `place_arm` already guards against staking a fixture+market an arm holds
-# from Friday (see the `held` filter in src/market/arms.py), so this cannot
-# double-bet a market Friday already took.
-#
-# Note the schedule is UTC year-round while the leagues run on local time, so
-# these fire an hour "later" in local terms once the clocks go back. That
-# margin is generous enough that this never matters for either run.
+# GitHub starts scheduled jobs ~4h late (median 4.1h this season), so these
+# cron times are set early on purpose: Friday lands around midday, Sunday and
+# Tuesday around 10:00, all ahead of that day's kickoffs. Until 2026-09-25 the
+# Sunday pass was scheduled for 12:00 and landed ~15:30, mid-matchday; combined
+# with a kickoff read 3-4h late, that is how it bet matches already in play.
+# The drift no longer matters for correctness — every guard is keyed on each
+# fixture's real kickoff — only for how many fixtures are still bettable.
 name: Matchweek — stake
 
 on:
   schedule:
-    - cron: "0 9 * * 5"        # Fridays 09:00 UTC
-    - cron: "0 12 * * 0"       # Sundays 12:00 UTC — catches post-Friday drift
+    - cron: "0 9 * * 5"        # Friday — lands ~13:00
+    - cron: "0 6 * * 0"        # Sunday — lands ~10:00, before Sunday kickoffs
+    - cron: "0 6 * * 2"        # Tuesday — lands ~10:00, before midweek kickoffs
   workflow_dispatch:
     inputs:
       dry_run:
@@ -50,3 +47,17 @@ jobs:
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
       KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}
+
+  # New bets need a closing price. Start a closer now rather than wait for its
+  # cron, so a bet on a fixture a few hours out is watched from the moment it
+  # is placed. Skipped when the stake run failed or was a dry run.
+  wake-closer:
+    needs: stake
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run closer.yml --repo "${{ github.repository }}"

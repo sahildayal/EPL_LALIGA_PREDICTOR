@@ -1,0 +1,44 @@
+# Captures closing prices by kickoff, not by clock.
+#
+# GitHub starts scheduled jobs hours late, so fixed-time snapshots missed
+# Friday- and Monday-night kickoffs and CLV went unmeasured. This job wakes
+# every few minutes, reads the committed ledger, and dispatches the snapshot
+# workflow ~20 minutes before each held bet's kickoff. See src/pipeline/closer.py.
+#
+# The cron is deliberately frequent and loose: each run covers up to ~5.75h and
+# the concurrency group keeps only the newest alive, so however late any single
+# start is, one closer is almost always watching. A run with nothing to close
+# inside its budget exits in seconds. Stake runs also dispatch this workflow
+# directly after placing bets, so a fresh bet never waits on the cron.
+name: Matchweek — closer
+
+on:
+  schedule:
+    - cron: "15 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write          # dispatch snapshot.yml
+
+concurrency:
+  # Not the ledger group: this job only reads, and holding that lock for hours
+  # would block the stake and settle runs it exists to support.
+  group: matchweek-closer
+  cancel-in-progress: true
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Watch for kickoffs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m src.pipeline.closer --budget-min 345
