@@ -1,0 +1,16 @@
+{
+  "job": "stake",
+  "started_utc": "2026-09-27T10:55:04.591843+00:00",
+  "ok": true,
+  "errors": [
+    "No bets: Kalshi listed 54 market(s) and none kick off within 7 days. Normal during an international break or out of season; if fixtures ARE scheduled this week, something upstream is wrong."
+  ],
+  "details": {
+    "markets_listed": 54,
+    "markets": 0,
+    "bet_window_days": 7,
+    "skipped_outside_window": 54,
+    "skipped_undated": 0,
+    "dry_run": false
+  }
+}
