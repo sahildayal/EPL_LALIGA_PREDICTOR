@@ -1,0 +1,209 @@
+{
+  "job": "stake",
+  "started_utc": "2026-10-04T11:23:58.366696+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 266,
+    "markets": 185,
+    "bet_window_days": 7,
+    "skipped_outside_window": 81,
+    "skipped_undated": 0,
+    "fixtures": 11,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Barcelona vs Getafe \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.21,
+        "fill": 0.217997,
+        "contracts": 1557.1765
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Espanyol \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.47,
+        "fill": 0.474131,
+        "contracts": 633.8333
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Alaves vs Atletico Madrid \u2014 Moneyline: Alaves Win",
+        "action": "repriced",
+        "quoted": 0.22,
+        "fill": 0.225322,
+        "contracts": 782.3913
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Malaga vs Espanyol \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.55,
+        "fill": 0.559857,
+        "contracts": 432.2179
+      }
+    ],
+    "edge_distribution": {
+      "n": 57,
+      "max": -0.0078,
+      "median": -0.0257,
+      "min": -0.0591,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Barcelona vs Getafe \u2014 Under 2.5 Goals",
+          "stake": 339.46,
+          "ask": 0.217997,
+          "quoted_ask": 0.21,
+          "fill_contracts": 1557.1765,
+          "fair": 0.47602923310979095,
+          "net_edge": 0.246,
+          "fair_source": "model"
+        },
+        {
+          "label": "Barcelona vs Getafe \u2014 Moneyline: Draw",
+          "stake": 329.27,
+          "ask": 0.05,
+          "quoted_ask": 0.05,
+          "fill_contracts": 6585.4,
+          "fair": 0.17933848371553837,
+          "net_edge": 0.1259,
+          "fair_source": "model"
+        },
+        {
+          "label": "Rayo Vallecano vs Athletic Bilbao \u2014 Both Teams To Score: NO",
+          "stake": 319.4,
+          "ask": 0.44,
+          "quoted_ask": 0.44,
+          "fill_contracts": 725.9091,
+          "fair": 0.5452964000207274,
+          "net_edge": 0.088,
+          "fair_source": "model"
+        },
+        {
+          "label": "Rayo Vallecano vs Athletic Bilbao \u2014 Under 2.5 Goals",
+          "stake": 309.81,
+          "ask": 0.51,
+          "quoted_ask": 0.51,
+          "fill_contracts": 607.4706,
+          "fair": 0.6112825506323509,
+          "net_edge": 0.0838,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Espanyol \u2014 Both Teams To Score: NO",
+          "stake": 300.52,
+          "ask": 0.474131,
+          "quoted_ask": 0.47,
+          "fill_contracts": 633.8333,
+          "fair": 0.557076279452443,
+          "net_edge": 0.0654,
+          "fair_source": "model"
+        },
+        {
+          "label": "Ipswich vs Fulham \u2014 Moneyline: Fulham Win",
+          "stake": 268.23,
+          "ask": 0.39,
+          "quoted_ask": 0.39,
+          "fill_contracts": 687.7692,
+          "fair": 0.4740542734961489,
+          "net_edge": 0.0674,
+          "fair_source": "model"
+        },
+        {
+          "label": "Chelsea vs Bournemouth \u2014 Moneyline: Bournemouth Win",
+          "stake": 192.49,
+          "ask": 0.21,
+          "quoted_ask": 0.21,
+          "fill_contracts": 916.619,
+          "fair": 0.2860767353286611,
+          "net_edge": 0.0644,
+          "fair_source": "model"
+        },
+        {
+          "label": "Alaves vs Atletico Madrid \u2014 Moneyline: Alaves Win",
+          "stake": 176.29,
+          "ask": 0.225322,
+          "quoted_ask": 0.22,
+          "fill_contracts": 782.3913,
+          "fair": 0.2915214317395627,
+          "net_edge": 0.0539,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Espanyol \u2014 Moneyline: Espanyol Win",
+          "stake": 201.72,
+          "ask": 0.36,
+          "quoted_ask": 0.36,
+          "fill_contracts": 560.3333,
+          "fair": 0.4330728805373291,
+          "net_edge": 0.0569,
+          "fair_source": "model"
+        },
+        {
+          "label": "Chelsea vs Bournemouth \u2014 Under 2.5 Goals",
+          "stake": 173.64,
+          "ask": 0.36,
+          "quoted_ask": 0.36,
+          "fill_contracts": 482.3333,
+          "fair": 0.4262682705206886,
+          "net_edge": 0.0501,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Espanyol \u2014 Under 2.5 Goals",
+          "stake": 241.98,
+          "ask": 0.559857,
+          "quoted_ask": 0.55,
+          "fill_contracts": 432.2179,
+          "fair": 0.6174390616143846,
+          "net_edge": 0.0403,
+          "fair_source": "model"
+        },
+        {
+          "label": "Rayo Vallecano vs Athletic Bilbao \u2014 Moneyline: Rayo Vallecano Win",
+          "stake": 154.63,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 483.2188,
+          "fair": 0.3850024694968346,
+          "net_edge": 0.0497,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    }
+  }
+}
