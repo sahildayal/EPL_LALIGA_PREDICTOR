@@ -1,0 +1,55 @@
+{
+  "job": "stake",
+  "started_utc": "2026-10-09T16:00:48.123896+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 398,
+    "markets": 332,
+    "bet_window_days": 7,
+    "skipped_outside_window": 66,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 0,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "edge_distribution": {
+      "n": 106,
+      "max": 0.0004,
+      "median": -0.0225,
+      "min": -0.0676,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 0,
+      "D_parlay": 0
+    }
+  }
+}
