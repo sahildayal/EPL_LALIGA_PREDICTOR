@@ -1,0 +1,173 @@
+{
+  "job": "stake",
+  "started_utc": "2026-10-13T13:33:23.123951+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 384,
+    "markets": 324,
+    "bet_window_days": 7,
+    "skipped_outside_window": 60,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 41,
+    "score_matrices": 41,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 10,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Nottingham Forest vs Arsenal \u2014 Moneyline: Nottingham Forest Win",
+        "action": "repriced",
+        "quoted": 0.15,
+        "fill": 0.151956,
+        "contracts": 447.1688
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Tottenham vs Coventry \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.4,
+        "fill": 0.409945,
+        "contracts": 220.42
+      }
+    ],
+    "edge_distribution": {
+      "n": 104,
+      "max": -0.0068,
+      "median": -0.026,
+      "min": -0.0666,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Osasuna vs Racing Santander \u2014 Moneyline: Osasuna Win",
+          "stake": 144.55,
+          "ask": 0.49,
+          "quoted_ask": 0.49,
+          "fill_contracts": 295.0,
+          "fair": 0.5980857392982792,
+          "net_edge": 0.0906,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Rayo Vallecano \u2014 Both Teams To Score: NO",
+          "stake": 140.21,
+          "ask": 0.55,
+          "quoted_ask": 0.55,
+          "fill_contracts": 254.9273,
+          "fair": 0.647145722889426,
+          "net_edge": 0.0797,
+          "fair_source": "model"
+        },
+        {
+          "label": "Malaga vs Real Sociedad \u2014 Under 2.5 Goals",
+          "stake": 136.0,
+          "ask": 0.48,
+          "quoted_ask": 0.48,
+          "fill_contracts": 283.3333,
+          "fair": 0.5661621954268814,
+          "net_edge": 0.0687,
+          "fair_source": "model"
+        },
+        {
+          "label": "Deportivo La Coruna vs Levante \u2014 Over 2.5 Goals",
+          "stake": 131.92,
+          "ask": 0.51,
+          "quoted_ask": 0.51,
+          "fill_contracts": 258.6667,
+          "fair": 0.5928178423511927,
+          "net_edge": 0.0653,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Arsenal \u2014 Moneyline: Nottingham Forest Win",
+          "stake": 67.95,
+          "ask": 0.151956,
+          "quoted_ask": 0.15,
+          "fill_contracts": 447.1688,
+          "fair": 0.21316081440423376,
+          "net_edge": 0.0521,
+          "fair_source": "model"
+        },
+        {
+          "label": "Tottenham vs Coventry \u2014 Under 2.5 Goals",
+          "stake": 90.36,
+          "ask": 0.409945,
+          "quoted_ask": 0.4,
+          "fill_contracts": 220.42,
+          "fair": 0.46846173788706436,
+          "net_edge": 0.0415,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brighton vs Crystal Palace \u2014 Moneyline: Crystal Palace Win",
+          "stake": 57.1,
+          "ask": 0.17,
+          "quoted_ask": 0.17,
+          "fill_contracts": 335.8824,
+          "fair": 0.2260532467361625,
+          "net_edge": 0.0462,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Madrid vs Sevilla \u2014 Under 2.5 Goals",
+          "stake": 65.25,
+          "ask": 0.33,
+          "quoted_ask": 0.33,
+          "fill_contracts": 197.7273,
+          "fair": 0.3886778809684729,
+          "net_edge": 0.0432,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Rayo Vallecano \u2014 Under 2.5 Goals",
+          "stake": 119.55,
+          "ask": 0.67,
+          "quoted_ask": 0.67,
+          "fill_contracts": 178.4328,
+          "fair": 0.7285053505809355,
+          "net_edge": 0.043,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Rayo Vallecano \u2014 Moneyline: Getafe Win",
+          "stake": 58.18,
+          "ask": 0.33,
+          "quoted_ask": 0.33,
+          "fill_contracts": 176.303,
+          "fair": 0.3858398273611346,
+          "net_edge": 0.0403,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 10,
+      "D_parlay": 0
+    }
+  }
+}
