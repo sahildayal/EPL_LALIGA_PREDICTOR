@@ -1,0 +1,93 @@
+{
+  "job": "stake",
+  "started_utc": "2026-10-16T13:52:20.069899+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 387,
+    "markets": 324,
+    "bet_window_days": 7,
+    "skipped_outside_window": 63,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 41,
+    "score_matrices": 41,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Osasuna vs Racing Santander \u2014 Over 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.5800 -> fill 0.6000, net edge 0.0501 -> 0.0304"
+      }
+    ],
+    "edge_distribution": {
+      "n": 102,
+      "max": 0.0014,
+      "median": -0.0247,
+      "min": -0.0597,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Brighton vs Crystal Palace \u2014 Under 2.5 Goals",
+          "stake": 140.09,
+          "ask": 0.39,
+          "quoted_ask": 0.39,
+          "fill_contracts": 359.2051,
+          "fair": 0.46492541676348564,
+          "net_edge": 0.0582,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Betis vs Barcelona \u2014 Both Teams To Score: NO",
+          "stake": 96.65,
+          "ask": 0.31,
+          "quoted_ask": 0.31,
+          "fill_contracts": 311.7742,
+          "fair": 0.3729788433059602,
+          "net_edge": 0.048,
+          "fair_source": "model"
+        },
+        {
+          "label": "Tottenham vs Coventry \u2014 Moneyline: Coventry Win",
+          "stake": 68.46,
+          "ask": 0.15,
+          "quoted_ask": 0.15,
+          "fill_contracts": 456.4,
+          "fair": 0.2016060518767349,
+          "net_edge": 0.0426,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    }
+  }
+}
