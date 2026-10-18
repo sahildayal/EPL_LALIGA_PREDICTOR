@@ -1,0 +1,145 @@
+{
+  "job": "stake",
+  "started_utc": "2026-10-18T10:00:26.135712+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 418,
+    "markets": 334,
+    "bet_window_days": 7,
+    "skipped_outside_window": 84,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 41,
+    "score_matrices": 38,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 8,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Alaves vs Malaga \u2014 Both Teams To Score: NO",
+        "action": "repriced",
+        "quoted": 0.52,
+        "fill": 0.521553,
+        "contracts": 294.0257
+      }
+    ],
+    "edge_distribution": {
+      "n": 104,
+      "max": 0.0016,
+      "median": -0.0231,
+      "min": -0.0695,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Coventry vs Fulham \u2014 Under 2.5 Goals",
+          "stake": 166.96,
+          "ask": 0.46,
+          "quoted_ask": 0.46,
+          "fill_contracts": 362.9565,
+          "fair": 0.5438518241161661,
+          "net_edge": 0.0665,
+          "fair_source": "model"
+        },
+        {
+          "label": "Arsenal vs Everton \u2014 Under 2.5 Goals",
+          "stake": 161.95,
+          "ask": 0.49,
+          "quoted_ask": 0.49,
+          "fill_contracts": 330.5102,
+          "fair": 0.5725725971818634,
+          "net_edge": 0.0651,
+          "fair_source": "model"
+        },
+        {
+          "label": "Celta Vigo vs Alaves \u2014 Over 2.5 Goals",
+          "stake": 124.88,
+          "ask": 0.38,
+          "quoted_ask": 0.38,
+          "fill_contracts": 328.6316,
+          "fair": 0.45564488684741505,
+          "net_edge": 0.0591,
+          "fair_source": "model"
+        },
+        {
+          "label": "Alaves vs Malaga \u2014 Both Teams To Score: NO",
+          "stake": 153.35,
+          "ask": 0.521553,
+          "quoted_ask": 0.52,
+          "fill_contracts": 294.0257,
+          "fair": 0.5954788636039774,
+          "net_edge": 0.0564,
+          "fair_source": "model"
+        },
+        {
+          "label": "Alaves vs Malaga \u2014 Moneyline: Alaves Win",
+          "stake": 147.76,
+          "ask": 0.53,
+          "quoted_ask": 0.53,
+          "fill_contracts": 278.7925,
+          "fair": 0.6035240908937594,
+          "net_edge": 0.056,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Arsenal \u2014 Under 2.5 Goals",
+          "stake": 106.9,
+          "ask": 0.5,
+          "quoted_ask": 0.5,
+          "fill_contracts": 213.8,
+          "fair": 0.5619460538420147,
+          "net_edge": 0.0444,
+          "fair_source": "model"
+        },
+        {
+          "label": "Celta Vigo vs Alaves \u2014 Moneyline: Celta Vigo Win",
+          "stake": 85.48,
+          "ask": 0.44,
+          "quoted_ask": 0.44,
+          "fill_contracts": 194.2727,
+          "fair": 0.4980096598214212,
+          "net_edge": 0.0407,
+          "fair_source": "model"
+        },
+        {
+          "label": "Osasuna vs Racing Santander \u2014 Over 2.5 Goals",
+          "stake": 113.24,
+          "ask": 0.59,
+          "quoted_ask": 0.59,
+          "fill_contracts": 191.9322,
+          "fair": 0.6472119038892775,
+          "net_edge": 0.0402,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 8,
+      "D_parlay": 0
+    }
+  }
+}
