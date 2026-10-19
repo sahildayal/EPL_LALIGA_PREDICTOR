@@ -1,0 +1,13 @@
+{
+  "job": "snapshot",
+  "started_utc": "2026-10-19T23:11:52.768752+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets": 394,
+    "stamped": 4,
+    "edge_distribution": {
+      "error": "OddsUnavailable: Odds API rejected the key (401). Check ODDS_API_KEY."
+    }
+  }
+}
