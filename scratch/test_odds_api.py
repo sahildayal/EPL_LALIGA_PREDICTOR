@@ -108,3 +108,39 @@ def test_totals_outcomes_are_labelled_with_their_line():
         {"name": "Under", "price": 1.95, "point": 2.5}]}]}]
     odds, _ = _consensus_odds(books, "totals")
     assert set(odds) == {"Over 2.5", "Under 2.5"}
+
+
+# --- Credit cost: the pool ran dry on 2026-10-18 -----------------------------
+
+class _Resp:
+    def __init__(self, status, body=None, text="", remaining="321"):
+        self.status_code, self._body, self.text = status, body or [], text
+        self.headers = {"x-requests-remaining": remaining}
+
+    def json(self):
+        return self._body
+
+
+def test_fetch_names_its_bookmakers_instead_of_regions(monkeypatch):
+    """Three regions cost three credits per market; ten named books cost one."""
+    from src.data import odds_api
+    seen = {}
+    monkeypatch.setattr(odds_api, "LAST_QUOTA", None)       # restored after the test
+    monkeypatch.setattr(odds_api, "_api_key", lambda: "k")
+    monkeypatch.setattr(odds_api.requests, "get",
+                        lambda url, params, timeout: seen.update(params) or _Resp(200))
+    odds_api.fetch_fair_prices("epl", markets="h2h,totals", force=True)
+    assert "regions" not in seen
+    books = seen["bookmakers"].split(",")
+    assert len(books) <= 10
+    assert set(odds_api.SHARP_BOOKS) <= set(books)
+    assert odds_api.LAST_QUOTA == 321
+
+
+def test_401_carries_the_reason_so_a_spent_quota_is_not_read_as_a_bad_key(monkeypatch):
+    from src.data import odds_api
+    monkeypatch.setattr(odds_api, "_api_key", lambda: "k")
+    monkeypatch.setattr(odds_api.requests, "get", lambda url, params, timeout: _Resp(
+        401, text='{"message":"Usage quota has been reached","error_code":"OUT_OF_USAGE_CREDITS"}'))
+    with pytest.raises(OddsUnavailable, match="OUT_OF_USAGE_CREDITS"):
+        odds_api.fetch_fair_prices("epl", force=True)

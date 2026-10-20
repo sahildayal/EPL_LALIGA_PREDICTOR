@@ -22,6 +22,11 @@ on:
         required: false
         default: false
         type: boolean
+      closing_only:
+        description: snapshot only — stamp closes without calling the Odds API
+        required: false
+        default: false
+        type: boolean
     secrets:
       ODDS_API_KEY:
         required: true
@@ -95,7 +100,7 @@ jobs:
         run: |
           set +e
           python -m src.pipeline.run "${{ inputs.job }}" \
-            ${{ inputs.dry_run && '--dry-run' || '' }} | tee run_output.json
+            ${{ inputs.dry_run && '--dry-run' || '' }}             ${{ inputs.closing_only && '--closing-only' || '' }} | tee run_output.json
           code=${PIPESTATUS[0]}
           set -e
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -206,7 +211,10 @@ jobs:
           fi
 
       - name: Close alert issue on success
-        if: ${{ steps.job.outputs.status == 'ok' }}
+        # A closing-only snapshot never calls the Odds API, so its clean exit
+        # says nothing about it and must not close an alert that a scheduled
+        # snapshot raised about the odds feed.
+        if: ${{ steps.job.outputs.status == 'ok' && !inputs.closing_only }}
         env:
           GH_TOKEN: ${{ github.token }}
           JOB: ${{ inputs.job }}

@@ -73,3 +73,14 @@ def test_dispatches_then_exits_when_the_last_close_is_done(monkeypatch):
     monkeypatch.setattr(closer, "_dispatch", lambda dry: calls.append(1) or True)
     assert closer.main(["--budget-min", "5"]) == 0
     assert calls == [1]
+
+
+def test_dispatch_asks_for_a_closing_only_snapshot(monkeypatch):
+    """Closer snapshots must not spend Odds API credits."""
+    seen = {}
+
+    class _R:
+        returncode, stderr = 0, ""
+    monkeypatch.setattr(closer.subprocess, "run", lambda cmd, **kw: seen.update(cmd=cmd) or _R())
+    assert closer._dispatch(dry_run=False)
+    assert seen["cmd"][-2:] == ["-f", "closing_only=true"]

@@ -7,9 +7,14 @@ vs 0.9564 for the best model), so we do not try to out-predict the market. We
 treat a de-vigged sharp consensus as fair value and bet only where Kalshi's
 price diverges from it by more than the fee.
 
-Free tier is 500 requests/month. A matchweek needs ~4 (two leagues x two market
-groups), so the budget is comfortable — but responses are cached hard anyway,
-and remaining quota is surfaced on every call so we notice before running dry.
+Free tier is 500 CREDITS a month, and a call is billed per market per region
+(or per group of ten named bookmakers), not per request. This read "~4 requests
+a matchweek" until October 2026, when h2h+totals over three regions cost 6
+credits per league call, the closer multiplied the snapshots, and the pool ran
+dry on 18 Oct with two weeks of the month left. Calls now name their bookmakers
+(2 credits per league call), only scheduled runs price at all, and the
+remaining quota is logged on every run and checked against the month by
+preflight.
 """
 import os
 from datetime import datetime, timezone
@@ -27,6 +32,19 @@ LEAGUES = {"epl": "soccer_epl", "laliga": "soccer_spain_la_liga"}
 # Pinnacle is the sharpest widely-available book and is the preferred reference.
 # The others form the consensus fallback when Pinnacle has not posted a line.
 SHARP_BOOKS = ["pinnacle", "betfair_sb_uk", "smarkets", "matchbook"]
+
+# Requested by name rather than by region. Ten books cost one credit per market,
+# the same as ONE region, where uk+eu+us cost three and the us region held none
+# of the books above. The six extra are liquid books kept so the median fallback
+# in _consensus_odds still has a consensus to take.
+FALLBACK_BOOKS = ["betfair_ex_uk", "betfair_ex_eu", "williamhill", "unibet_eu",
+                  "marathonbet", "betsson"]
+BOOKMAKERS = ",".join(SHARP_BOOKS + FALLBACK_BOOKS)
+assert len(SHARP_BOOKS + FALLBACK_BOOKS) <= 10, "an 11th book doubles the cost"
+
+#: The x-requests-remaining header from the most recent call, or None if no call
+#: has been made. Runs log it so a draining pool is visible week to week.
+LAST_QUOTA = None
 
 CACHE_TTL_SECONDS = 3600 * 2      # lines move; two hours is a sane pre-match window
 
@@ -58,9 +76,15 @@ def _request(path: str, params: dict) -> tuple:
     except Exception as exc:
         raise OddsUnavailable(f"Odds API request failed: {exc}") from exc
 
+    global LAST_QUOTA
     remaining = resp.headers.get("x-requests-remaining")
     if resp.status_code == 401:
-        raise OddsUnavailable("Odds API rejected the key (401). Check ODDS_API_KEY.")
+        # The API answers 401 for a spent quota as well as a bad key, and the
+        # body says which (e.g. OUT_OF_USAGE_CREDITS). Without it, a spent
+        # pool read as "check the key" for two days.
+        raise OddsUnavailable(
+            f"Odds API returned 401: {resp.text[:200]}. Either ODDS_API_KEY is "
+            "wrong or the month's credits are spent.")
     if resp.status_code == 429:
         raise OddsUnavailable(f"Odds API quota exhausted (429). Remaining: {remaining}")
     if resp.status_code != 200:
@@ -70,6 +94,7 @@ def _request(path: str, params: dict) -> tuple:
         remaining = int(remaining) if remaining is not None else None
     except ValueError:
         remaining = None
+    LAST_QUOTA = remaining
     return resp.json(), remaining
 
 
@@ -200,7 +225,7 @@ def fetch_fair_prices(league: str, markets: str = "h2h", force: bool = False) ->
 
     payload, remaining = _request(
         f"/sports/{LEAGUES[league]}/odds",
-        {"regions": "uk,eu,us", "markets": markets, "oddsFormat": "decimal"},
+        {"bookmakers": BOOKMAKERS, "markets": markets, "oddsFormat": "decimal"},
     )
 
     fixtures = []

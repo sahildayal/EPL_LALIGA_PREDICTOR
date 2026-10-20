@@ -95,7 +95,9 @@ def _dispatch(dry_run: bool) -> bool:
     if dry_run:
         print("[closer] dry run: would dispatch snapshot.yml")
         return True
-    r = subprocess.run(["gh", "workflow", "run", "snapshot.yml"],
+    # closing_only: these runs exist to stamp Kalshi closes, and pricing each one
+    # against the Odds API is what spent October's credits.
+    r = subprocess.run(["gh", "workflow", "run", "snapshot.yml", "-f", "closing_only=true"],
                        capture_output=True, text=True, timeout=60)
     if r.returncode != 0:
         print(f"[closer] dispatch failed: {r.stderr.strip()}")

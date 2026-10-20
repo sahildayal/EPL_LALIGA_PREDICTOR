@@ -22,6 +22,7 @@ would otherwise look identical to a clean week.
 import argparse
 import json
 import sys
+from datetime import datetime, timedelta, timezone
 
 from src.pipeline import matchweek
 
@@ -49,6 +50,20 @@ def _emit(report, verbose: bool) -> int:
     if not report.ok:
         return EXIT_FAILED
     return EXIT_WARN if report.errors else EXIT_OK
+
+
+#: Odds API credits a week of scheduled runs spends: 3 stakes + 6 scheduled
+#: snapshots, each pricing two leagues at h2h+totals for one bookmaker group.
+#: Closer-dispatched snapshots run --closing-only and cost nothing.
+ODDS_CREDITS_PER_WEEK = (3 + 6) * 2 * 2
+
+
+def _odds_credits_until_reset(now) -> int:
+    """Credits the scheduled runs will spend between now and the 1st of next month."""
+    first = (now.replace(day=1) + timedelta(days=32)).replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0)
+    days = (first - now).total_seconds() / 86400
+    return int(ODDS_CREDITS_PER_WEEK * days / 7 + 0.999)
 
 
 def preflight() -> dict:
@@ -96,9 +111,18 @@ def preflight() -> dict:
         from src.data.odds_api import quota_remaining
         remaining = quota_remaining()
         checks["odds_api"] = {"ok": True, "requests_remaining": remaining}
-        if remaining is not None and remaining < 50:
-            checks["odds_api"]["warning"] = (
-                f"only {remaining} requests left; stake uses ~2 per week")
+        # The pool resets at the start of each month (500 on 1 Oct after 60 on
+        # 24 Sep). Fail preflight, so it raises an alert, when what is left will
+        # not last until then. On 15 Oct it read 152, then ran dry three days later.
+        need = _odds_credits_until_reset(datetime.now(timezone.utc))
+        checks["odds_api"]["needed_until_reset"] = need
+        if remaining is not None and remaining < need:
+            ok = False
+            checks["odds_api"]["ok"] = False
+            checks["odds_api"]["error"] = (
+                f"{remaining} credits left but ~{need} needed before the monthly "
+                "reset. Find what is spending them (logs record "
+                "odds_quota_remaining) or swap ODDS_API_KEY.")
     except Exception as exc:
         ok = False
         checks["odds_api"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
@@ -160,6 +184,8 @@ def main(argv=None) -> int:
                                         "preflight", "review"))
     parser.add_argument("--dry-run", action="store_true",
                         help="stake only: price and log the plan, write nothing")
+    parser.add_argument("--closing-only", action="store_true",
+                        help="snapshot only: stamp closing prices, skip the Odds API")
     parser.add_argument("--verbose", action="store_true",
                         help="print full run details to stdout")
     args = parser.parse_args(argv)
@@ -185,7 +211,7 @@ def main(argv=None) -> int:
     if args.job == "stake":
         report = matchweek.run_stake(dry_run=args.dry_run)
     elif args.job == "snapshot":
-        report = matchweek.run_snapshot()
+        report = matchweek.run_snapshot(closing_only=args.closing_only)
     else:
         report = matchweek.run_settle()
 

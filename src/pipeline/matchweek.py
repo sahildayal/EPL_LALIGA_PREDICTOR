@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.data.canonical_teams import canonical
+from src.data import odds_api
 from src.data.odds_api import fetch_fair_prices, OddsUnavailable
 from src.market import arms as arms_mod
 from src.market import ledger
@@ -656,6 +657,7 @@ def run_stake(dry_run: bool = False) -> RunReport:
             "fill_adjustments": fill_notes,
             # Reuses the fair values already built above — no extra Odds API call.
             "edge_distribution": _edge_distribution(markets, fair),
+            "odds_quota_remaining": odds_api.LAST_QUOTA,
             "dry_run": dry_run,
             "bets": {a: [_describe_plan(p) for p in ps] for a, ps in plans.items()},
         }
@@ -663,6 +665,7 @@ def run_stake(dry_run: bool = False) -> RunReport:
         # Surfaced as warnings (exit 2), not failures: the bets we COULD price
         # are still good, and refusing the whole week over one unmappable club
         # would cost more than it saves. But it must never pass as a clean run.
+        _warn_low_quota(report)
         if undated:
             report.errors.append(
                 f"{len(undated)} market(s) had no parseable kickoff and were NOT bet. "
@@ -755,8 +758,28 @@ def _edge_distribution(markets: list, fair: dict = None) -> dict:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
-def run_snapshot() -> RunReport:
-    """Sat/Sun: read-only price capture for CLV. Never places or settles anything."""
+#: Below this many Odds API credits a stake or snapshot run warns (exit 2). A
+#: week of scheduled runs costs ~36, so this is roughly one week's notice.
+QUOTA_WARN = 40
+
+
+def _warn_low_quota(report: RunReport) -> None:
+    left = odds_api.LAST_QUOTA
+    if left is not None and left < QUOTA_WARN:
+        report.errors.append(
+            f"Odds API has {left} credits left this month (a week of scheduled "
+            "runs uses ~36). When it reaches zero, stake cannot price anything.")
+
+
+def run_snapshot(closing_only: bool = False) -> RunReport:
+    """
+    Read-only price capture for CLV. Never places or settles anything.
+
+    `closing_only` is how the closer dispatches it: stamp Kalshi closing prices
+    and skip the divergence telemetry, which is the run's only Odds API cost.
+    The closer fires one per kickoff slot, and pricing every one of them is
+    what spent October's credits. The scheduled snapshots still record it.
+    """
     report = RunReport(job="snapshot", started_utc=_now())
     try:
         markets = collect_kalshi()
@@ -767,8 +790,18 @@ def run_snapshot() -> RunReport:
                                            m["selection"], m.get("line")): m["ask"]
                   for m in markets}
         stamped = ledger.record_closing_prices(prices)
-        report.details = {"markets": len(markets), "stamped": stamped}
-        report.details["edge_distribution"] = _edge_distribution(_pre_kickoff(markets))
+        report.details = {"markets": len(markets), "stamped": stamped,
+                          "closing_only": closing_only}
+        if not closing_only:
+            dist = _edge_distribution(_pre_kickoff(markets))
+            report.details["edge_distribution"] = dist
+            report.details["odds_quota_remaining"] = odds_api.LAST_QUOTA
+            # Still never fatal (the closes above are already stamped), but a
+            # warning: tucked inside the details, a dead Odds API key went two
+            # days and nine snapshots without anyone hearing about it.
+            if "error" in dist:
+                report.errors.append(f"edge_distribution unavailable: {dist['error']}")
+            _warn_low_quota(report)
         report.ok = True
     except Exception as exc:
         report.errors.append(f"{type(exc).__name__}: {exc}")

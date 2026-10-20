@@ -970,3 +970,56 @@ def test_snapshot_edge_distribution_excludes_in_play_markets(monkeypatch, tmp_pa
     report = mw.run_snapshot()
     dist = report.details["edge_distribution"]
     assert dist["n"] == 1
+
+
+def _snapshot_env(monkeypatch, tmp_path):
+    from src.market import ledger as _ledger
+    from src.pipeline import matchweek as mw
+    monkeypatch.setattr(_ledger, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(_ledger, "LEDGER_PATH", str(tmp_path / "l.json"))
+    monkeypatch.setattr(mw, "LOG_DIR", tmp_path / "logs")
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "liverpool", "away": "everton", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon(days=2)},
+    ])
+    return mw
+
+
+def test_closing_only_snapshot_never_calls_the_odds_api(monkeypatch, tmp_path):
+    """The closer fires one of these per kickoff slot; pricing each spent October's credits."""
+    mw = _snapshot_env(monkeypatch, tmp_path)
+    monkeypatch.setattr(mw, "collect_fair_values",
+                        lambda: (_ for _ in ()).throw(AssertionError("Odds API called")))
+    report = mw.run_snapshot(closing_only=True)
+    assert report.ok and not report.errors
+    assert "edge_distribution" not in report.details
+
+
+def test_snapshot_warns_when_the_odds_api_is_down(monkeypatch, tmp_path):
+    """A dead key used to sit inside the details with ok=True and exit 0, for two days."""
+    from src.data.odds_api import OddsUnavailable
+    mw = _snapshot_env(monkeypatch, tmp_path)
+
+    def dead():
+        raise OddsUnavailable("Odds API returned 401: OUT_OF_USAGE_CREDITS")
+    monkeypatch.setattr(mw, "collect_fair_values", dead)
+    report = mw.run_snapshot()
+    assert report.ok                       # the closes were still stamped
+    assert any("OUT_OF_USAGE_CREDITS" in e for e in report.errors)   # -> exit 2
+
+
+def test_low_quota_is_a_warning(monkeypatch, tmp_path):
+    from src.data import odds_api
+    mw = _snapshot_env(monkeypatch, tmp_path)
+    monkeypatch.setattr(mw, "collect_fair_values", lambda: {})
+    monkeypatch.setattr(odds_api, "LAST_QUOTA", mw.QUOTA_WARN - 1)
+    report = mw.run_snapshot()
+    assert any("credits left" in e for e in report.errors)
+
+
+def test_preflight_projects_credits_to_the_monthly_reset():
+    from src.pipeline.run import _odds_credits_until_reset
+    # 15 Oct 2026 13:53, when preflight read 152: 16.42 days to 1 Nov at 36 a week.
+    assert _odds_credits_until_reset(datetime(2026, 10, 15, 13, 53, tzinfo=timezone.utc)) == 85
+    # December rolls over into January.
+    assert _odds_credits_until_reset(datetime(2026, 12, 31, tzinfo=timezone.utc)) <= 6

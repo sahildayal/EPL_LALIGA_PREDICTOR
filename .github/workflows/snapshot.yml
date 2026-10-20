@@ -39,6 +39,13 @@ on:
     - cron: "0 18 * * 5"       # Fri 18:00 UTC — ahead of Friday-night kickoffs
     - cron: "0 20 * * 1"       # Mon 20:00 UTC — ahead of Monday-night kickoffs
   workflow_dispatch:
+    inputs:
+      closing_only:
+        # The closer sets this. Its snapshots only need Kalshi; skipping the
+        # Odds API there is what keeps the month inside the free credits.
+        description: Stamp closing prices only, skip the Odds API telemetry
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -50,6 +57,7 @@ jobs:
     with:
       job: snapshot
       commit: true
+      closing_only: ${{ inputs.closing_only == true }}
     secrets:
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       KALSHI_API_KEY_ID: ${{ secrets.KALSHI_API_KEY_ID }}
