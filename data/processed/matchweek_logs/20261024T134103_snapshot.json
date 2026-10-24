@@ -1,0 +1,11 @@
+{
+  "job": "snapshot",
+  "started_utc": "2026-10-24T13:41:03.401140+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets": 417,
+    "stamped": 2,
+    "closing_only": true
+  }
+}
