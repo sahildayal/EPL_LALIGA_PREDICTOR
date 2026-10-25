@@ -1,0 +1,17 @@
+{
+  "job": "snapshot",
+  "started_utc": "2026-10-25T14:42:11.155641+00:00",
+  "ok": true,
+  "errors": [
+    "edge_distribution unavailable: OddsUnavailable: Odds API returned 401: {\"message\":\"Usage quota has been reached. See usage plans at https://the-odds-api.com\",\"error_code\":\"OUT_OF_USAGE_CREDITS\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.htm. Either ODDS_API_KEY is wrong or the month's credits are spent."
+  ],
+  "details": {
+    "markets": 478,
+    "stamped": 0,
+    "closing_only": false,
+    "edge_distribution": {
+      "error": "OddsUnavailable: Odds API returned 401: {\"message\":\"Usage quota has been reached. See usage plans at https://the-odds-api.com\",\"error_code\":\"OUT_OF_USAGE_CREDITS\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.htm. Either ODDS_API_KEY is wrong or the month's credits are spent."
+    },
+    "odds_quota_remaining": null
+  }
+}
