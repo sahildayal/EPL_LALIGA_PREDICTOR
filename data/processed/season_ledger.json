@@ -718,12 +718,12 @@
           "kickoff": "2026-10-31T20:00:00Z",
           "model_prob": 0.3204924597086699,
           "fair_prob": 0.3204924597086699,
-          "closing_price": 0.2,
+          "closing_price": 0.19,
           "result": null,
           "quoted_ask": 0.21,
           "fill_contracts": 1053.0952,
           "placed_utc": "2026-10-30T15:46:36.205192+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258491+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100123+00:00"
         },
         {
           "market": "totals",
@@ -786,7 +786,7 @@
           "quoted_ask": 0.18,
           "fill_contracts": 972.8333,
           "placed_utc": "2026-10-30T15:46:36.205241+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258499+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100132+00:00"
         },
         {
           "market": "1x2",
@@ -828,7 +828,7 @@
           "quoted_ask": 0.21,
           "fill_contracts": 713.3333,
           "placed_utc": "2026-10-30T15:46:36.205260+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258504+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100137+00:00"
         },
         {
           "market": "totals",
@@ -912,7 +912,7 @@
           "quoted_ask": 0.08,
           "fill_contracts": 1183.0,
           "placed_utc": "2026-10-30T15:46:36.205311+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258508+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100142+00:00"
         },
         {
           "market": "1x2",
@@ -928,12 +928,12 @@
           "kickoff": "2026-11-01T13:00:00Z",
           "model_prob": 0.3748555348125632,
           "fair_prob": 0.3748555348125632,
-          "closing_price": 0.29,
+          "closing_price": 0.3,
           "result": null,
           "quoted_ask": 0.3,
           "fill_contracts": 394.5929,
           "placed_utc": "2026-10-30T15:46:36.205320+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258511+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100144+00:00"
         },
         {
           "market": "totals",
@@ -954,7 +954,7 @@
           "quoted_ask": 0.44,
           "fill_contracts": 303.3864,
           "placed_utc": "2026-10-30T15:46:36.205329+00:00",
-          "closing_seen_utc": "2026-10-31T15:55:29.258513+00:00"
+          "closing_seen_utc": "2026-10-31T17:10:41.100147+00:00"
         }
       ],
       "history": [
