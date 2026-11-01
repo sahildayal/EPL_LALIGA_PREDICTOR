@@ -1,0 +1,202 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-01T12:08:43.705893+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 309,
+    "markets": 279,
+    "bet_window_days": 7,
+    "skipped_outside_window": 30,
+    "skipped_undated": 0,
+    "fixtures": 17,
+    "fair_fixtures": 28,
+    "score_matrices": 28,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Valencia vs Real Madrid \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.34,
+        "fill": 0.341675,
+        "contracts": 457.0426
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Fulham vs Newcastle \u2014 Moneyline: Newcastle Win",
+        "action": "repriced",
+        "quoted": 0.28,
+        "fill": 0.288314,
+        "contracts": 332.1034
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Fulham vs Newcastle \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.41,
+        "fill": 0.419959,
+        "contracts": 241.9286
+      }
+    ],
+    "edge_distribution": {
+      "n": 83,
+      "max": 0.0012,
+      "median": -0.0235,
+      "min": -0.0723,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 496,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Arsenal vs Hull \u2014 Under 2.5 Goals",
+          "stake": 160.99,
+          "ask": 0.38,
+          "quoted_ask": 0.38,
+          "fill_contracts": 423.6579,
+          "fair": 0.5397100968053774,
+          "net_edge": 0.1432,
+          "fair_source": "model"
+        },
+        {
+          "label": "Valencia vs Real Madrid \u2014 Under 2.5 Goals",
+          "stake": 156.16,
+          "ask": 0.341675,
+          "quoted_ask": 0.34,
+          "fill_contracts": 457.0426,
+          "fair": 0.4948012411145789,
+          "net_edge": 0.1373,
+          "fair_source": "model"
+        },
+        {
+          "label": "Everton vs Coventry \u2014 Under 2.5 Goals",
+          "stake": 151.48,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 322.2979,
+          "fair": 0.5857034829237561,
+          "net_edge": 0.0982,
+          "fair_source": "model"
+        },
+        {
+          "label": "Arsenal vs Hull \u2014 Moneyline: Draw",
+          "stake": 128.32,
+          "ask": 0.12,
+          "quoted_ask": 0.12,
+          "fill_contracts": 1069.3333,
+          "fair": 0.21961925705439386,
+          "net_edge": 0.0922,
+          "fair_source": "model"
+        },
+        {
+          "label": "Valencia vs Real Madrid \u2014 Moneyline: Valencia Win",
+          "stake": 110.92,
+          "ask": 0.12,
+          "quoted_ask": 0.12,
+          "fill_contracts": 924.3333,
+          "fair": 0.209261631491764,
+          "net_edge": 0.0819,
+          "fair_source": "model"
+        },
+        {
+          "label": "Everton vs Coventry \u2014 Both Teams To Score: NO",
+          "stake": 139.76,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 297.3617,
+          "fair": 0.5631847139434962,
+          "net_edge": 0.0757,
+          "fair_source": "model"
+        },
+        {
+          "label": "Fulham vs Newcastle \u2014 Moneyline: Newcastle Win",
+          "stake": 95.75,
+          "ask": 0.288314,
+          "quoted_ask": 0.28,
+          "fill_contracts": 332.1034,
+          "fair": 0.3552283116313401,
+          "net_edge": 0.0525,
+          "fair_source": "model"
+        },
+        {
+          "label": "Fulham vs Newcastle \u2014 Under 2.5 Goals",
+          "stake": 101.6,
+          "ask": 0.419959,
+          "quoted_ask": 0.41,
+          "fill_contracts": 241.9286,
+          "fair": 0.48121294908233603,
+          "net_edge": 0.0442,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Everton \u2014 Under 2.5 Goals",
+          "stake": 98.85,
+          "ask": 0.45,
+          "quoted_ask": 0.45,
+          "fill_contracts": 219.6667,
+          "fair": 0.5177219182962908,
+          "net_edge": 0.0503,
+          "fair_source": "model"
+        },
+        {
+          "label": "Racing Santander vs Real Madrid \u2014 Moneyline: Racing Santander Win",
+          "stake": 54.19,
+          "ask": 0.08,
+          "quoted_ask": 0.08,
+          "fill_contracts": 677.375,
+          "fair": 0.13242720831679167,
+          "net_edge": 0.0472,
+          "fair_source": "model"
+        },
+        {
+          "label": "Nottingham Forest vs Manchester City \u2014 Under 2.5 Goals",
+          "stake": 85.97,
+          "ask": 0.43,
+          "quoted_ask": 0.43,
+          "fill_contracts": 199.9302,
+          "fair": 0.49422412262344817,
+          "net_edge": 0.047,
+          "fair_source": "model"
+        },
+        {
+          "label": "Osasuna vs Athletic Bilbao \u2014 Moneyline: Osasuna Win",
+          "stake": 68.49,
+          "ask": 0.3,
+          "quoted_ask": 0.3,
+          "fill_contracts": 228.3,
+          "fair": 0.3616779820913567,
+          "net_edge": 0.047,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 12,
+      "D_parlay": 0
+    }
+  }
+}
