@@ -975,7 +975,7 @@
           "quoted_ask": 0.38,
           "fill_contracts": 423.6579,
           "placed_utc": "2026-11-01T12:09:09.020344+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745227+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260841+00:00"
         },
         {
           "market": "totals",
@@ -996,7 +996,7 @@
           "quoted_ask": 0.34,
           "fill_contracts": 457.0426,
           "placed_utc": "2026-11-01T12:09:09.020363+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745236+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260849+00:00"
         },
         {
           "market": "totals",
@@ -1017,7 +1017,7 @@
           "quoted_ask": 0.47,
           "fill_contracts": 322.2979,
           "placed_utc": "2026-11-01T12:09:09.020372+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745241+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260854+00:00"
         },
         {
           "market": "1x2",
@@ -1038,7 +1038,7 @@
           "quoted_ask": 0.12,
           "fill_contracts": 1069.3333,
           "placed_utc": "2026-11-01T12:09:09.020380+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745244+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260857+00:00"
         },
         {
           "market": "1x2",
@@ -1054,12 +1054,12 @@
           "kickoff": "2026-11-07T20:00:00Z",
           "model_prob": 0.209261631491764,
           "fair_prob": 0.209261631491764,
-          "closing_price": 0.11,
+          "closing_price": 0.12,
           "result": null,
           "quoted_ask": 0.12,
           "fill_contracts": 924.3333,
           "placed_utc": "2026-11-01T12:09:09.020387+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745247+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260860+00:00"
         },
         {
           "market": "btts",
@@ -1080,7 +1080,7 @@
           "quoted_ask": 0.47,
           "fill_contracts": 297.3617,
           "placed_utc": "2026-11-01T12:09:09.020393+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745250+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260863+00:00"
         },
         {
           "market": "1x2",
@@ -1101,7 +1101,7 @@
           "quoted_ask": 0.28,
           "fill_contracts": 332.1034,
           "placed_utc": "2026-11-01T12:09:09.020400+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745252+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260865+00:00"
         },
         {
           "market": "totals",
@@ -1122,7 +1122,7 @@
           "quoted_ask": 0.41,
           "fill_contracts": 241.9286,
           "placed_utc": "2026-11-01T12:09:09.020406+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745255+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260868+00:00"
         },
         {
           "market": "totals",
@@ -1138,12 +1138,12 @@
           "kickoff": "2026-11-02T20:00:00Z",
           "model_prob": 0.5177219182962908,
           "fair_prob": 0.5177219182962908,
-          "closing_price": 0.45,
+          "closing_price": 0.44,
           "result": null,
           "quoted_ask": 0.45,
           "fill_contracts": 219.6667,
           "placed_utc": "2026-11-01T12:09:09.020412+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745258+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260872+00:00"
         },
         {
           "market": "1x2",
@@ -1185,7 +1185,7 @@
           "quoted_ask": 0.43,
           "fill_contracts": 199.9302,
           "placed_utc": "2026-11-01T12:09:09.020424+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745262+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260875+00:00"
         },
         {
           "market": "1x2",
@@ -1206,7 +1206,7 @@
           "quoted_ask": 0.3,
           "fill_contracts": 228.3,
           "placed_utc": "2026-11-01T12:09:09.020430+00:00",
-          "closing_seen_utc": "2026-11-01T16:58:04.745265+00:00"
+          "closing_seen_utc": "2026-11-01T18:42:06.260878+00:00"
         }
       ],
       "history": [
