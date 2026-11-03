@@ -1,0 +1,147 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-03T13:37:42.814759+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 332,
+    "markets": 332,
+    "bet_window_days": 7,
+    "skipped_outside_window": 0,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 30,
+    "score_matrices": 30,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "edge_distribution": {
+      "n": 104,
+      "max": -0.0022,
+      "median": -0.0266,
+      "min": -0.0648,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 480,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Atletico Madrid vs Barcelona \u2014 Moneyline: Atletico Madrid Win",
+          "stake": 115.51,
+          "ask": 0.27,
+          "quoted_ask": 0.27,
+          "fill_contracts": 427.8148,
+          "fair": 0.3678304369599374,
+          "net_edge": 0.084,
+          "fair_source": "model"
+        },
+        {
+          "label": "Atletico Madrid vs Barcelona \u2014 Under 2.5 Goals",
+          "stake": 111.78,
+          "ask": 0.3,
+          "quoted_ask": 0.3,
+          "fill_contracts": 372.6,
+          "fair": 0.39498583763294437,
+          "net_edge": 0.0803,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Sociedad vs Rayo Vallecano \u2014 Under 2.5 Goals",
+          "stake": 113.6,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 284.0,
+          "fair": 0.4969920086201306,
+          "net_edge": 0.0802,
+          "fair_source": "model"
+        },
+        {
+          "label": "Villarreal vs Getafe \u2014 Under 2.5 Goals",
+          "stake": 110.19,
+          "ask": 0.48,
+          "quoted_ask": 0.48,
+          "fill_contracts": 229.5625,
+          "fair": 0.5691139849579263,
+          "net_edge": 0.0716,
+          "fair_source": "model"
+        },
+        {
+          "label": "Crystal Palace vs Liverpool \u2014 Moneyline: Crystal Palace Win",
+          "stake": 75.17,
+          "ask": 0.18,
+          "quoted_ask": 0.18,
+          "fill_contracts": 417.6111,
+          "fair": 0.2596007725451168,
+          "net_edge": 0.0692,
+          "fair_source": "model"
+        },
+        {
+          "label": "Atletico Madrid vs Barcelona \u2014 Both Teams To Score: NO",
+          "stake": 59.53,
+          "ask": 0.31,
+          "quoted_ask": 0.31,
+          "fill_contracts": 192.0323,
+          "fair": 0.37210747987280846,
+          "net_edge": 0.0471,
+          "fair_source": "model"
+        },
+        {
+          "label": "Espanyol vs Deportivo La Coruna \u2014 Moneyline: Espanyol Win",
+          "stake": 69.18,
+          "ask": 0.42,
+          "quoted_ask": 0.42,
+          "fill_contracts": 164.7143,
+          "fair": 0.4839182627884008,
+          "net_edge": 0.0468,
+          "fair_source": "model"
+        },
+        {
+          "label": "Crystal Palace vs Liverpool \u2014 Under 2.5 Goals",
+          "stake": 65.1,
+          "ask": 0.4,
+          "quoted_ask": 0.4,
+          "fill_contracts": 162.75,
+          "fair": 0.46331643198380834,
+          "net_edge": 0.0465,
+          "fair_source": "model"
+        },
+        {
+          "label": "Elche vs Real Betis \u2014 Moneyline: Elche Win",
+          "stake": 53.68,
+          "ask": 0.3,
+          "quoted_ask": 0.3,
+          "fill_contracts": 178.9333,
+          "fair": 0.3603317068049685,
+          "net_edge": 0.0456,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    }
+  }
+}
