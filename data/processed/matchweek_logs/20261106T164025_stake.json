@@ -1,0 +1,87 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-06T16:40:25.448775+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 335,
+    "markets": 332,
+    "bet_window_days": 7,
+    "skipped_outside_window": 3,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "edge_distribution": {
+      "n": 104,
+      "max": 0.002,
+      "median": -0.0235,
+      "min": -0.0655,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 476,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Sevilla vs Alaves \u2014 Over 2.5 Goals",
+          "stake": 159.54,
+          "ask": 0.41,
+          "quoted_ask": 0.41,
+          "fill_contracts": 389.122,
+          "fair": 0.4919109497806938,
+          "net_edge": 0.0649,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sevilla vs Alaves \u2014 Moneyline: Alaves Win",
+          "stake": 91.56,
+          "ask": 0.2,
+          "quoted_ask": 0.2,
+          "fill_contracts": 457.8,
+          "fair": 0.2631421530408919,
+          "net_edge": 0.0519,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Sociedad vs Rayo Vallecano \u2014 Both Teams To Score: NO",
+          "stake": 104.67,
+          "ask": 0.41,
+          "quoted_ask": 0.41,
+          "fill_contracts": 255.2927,
+          "fair": 0.4715144433925552,
+          "net_edge": 0.0445,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    }
+  }
+}
