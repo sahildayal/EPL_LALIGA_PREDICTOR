@@ -1,0 +1,96 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-08T12:18:16.110065+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 222,
+    "markets": 168,
+    "bet_window_days": 7,
+    "skipped_outside_window": 54,
+    "skipped_undated": 0,
+    "fixtures": 10,
+    "fair_fixtures": 30,
+    "score_matrices": 30,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Elche vs Real Betis \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.38,
+        "fill": 0.37,
+        "contracts": 415.5405
+      }
+    ],
+    "edge_distribution": {
+      "n": 56,
+      "max": -0.0056,
+      "median": -0.0247,
+      "min": -0.0522,
+      "count_over": {
+        "0.005": 0,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 460,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Elche vs Real Betis \u2014 Under 2.5 Goals",
+          "stake": 153.75,
+          "ask": 0.37,
+          "quoted_ask": 0.38,
+          "fill_contracts": 415.5405,
+          "fair": 0.4665349991604738,
+          "net_edge": 0.0801,
+          "fair_source": "model"
+        },
+        {
+          "label": "Manchester United vs Aston Villa \u2014 Under 2.5 Goals",
+          "stake": 146.98,
+          "ask": 0.37,
+          "quoted_ask": 0.37,
+          "fill_contracts": 397.2432,
+          "fair": 0.45640535175049946,
+          "net_edge": 0.07,
+          "fair_source": "model"
+        },
+        {
+          "label": "Manchester United vs Aston Villa \u2014 Both Teams To Score: NO",
+          "stake": 101.67,
+          "ask": 0.35,
+          "quoted_ask": 0.35,
+          "fill_contracts": 290.4857,
+          "fair": 0.41739233275140764,
+          "net_edge": 0.0514,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 3,
+      "D_parlay": 0
+    }
+  }
+}
