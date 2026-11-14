@@ -1,0 +1,26 @@
+{
+  "job": "snapshot",
+  "started_utc": "2026-11-14T16:48:04.217642+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets": 203,
+    "stamped": 0,
+    "closing_only": false,
+    "edge_distribution": {
+      "n": 99,
+      "max": 0.015,
+      "median": -0.0221,
+      "min": -0.0537,
+      "count_over": {
+        "0.005": 2,
+        "0.010": 2,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 440
+  }
+}
