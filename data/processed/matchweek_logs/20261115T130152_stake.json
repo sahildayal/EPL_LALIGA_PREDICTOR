@@ -1,0 +1,156 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-15T13:01:52.874149+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 273,
+    "markets": 195,
+    "bet_window_days": 7,
+    "skipped_outside_window": 78,
+    "skipped_undated": 0,
+    "fixtures": 13,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Newcastle vs Arsenal \u2014 Moneyline: Newcastle Win",
+        "action": "repriced",
+        "quoted": 0.16,
+        "fill": 0.161546,
+        "contracts": 741.2135
+      }
+    ],
+    "edge_distribution": {
+      "n": 57,
+      "max": 0.0125,
+      "median": -0.0212,
+      "min": -0.0537,
+      "count_over": {
+        "0.005": 1,
+        "0.010": 1,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 432,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Real Madrid vs Celta Vigo \u2014 Under 2.5 Goals",
+          "stake": 206.76,
+          "ask": 0.32,
+          "quoted_ask": 0.32,
+          "fill_contracts": 646.125,
+          "fair": 0.43324224113096155,
+          "net_edge": 0.0979,
+          "fair_source": "model"
+        },
+        {
+          "label": "Real Madrid vs Celta Vigo \u2014 Moneyline: Draw",
+          "stake": 145.65,
+          "ask": 0.11,
+          "quoted_ask": 0.11,
+          "fill_contracts": 1324.0909,
+          "fair": 0.1944572329806897,
+          "net_edge": 0.0776,
+          "fair_source": "model"
+        },
+        {
+          "label": "Athletic Bilbao vs Espanyol \u2014 Under 2.5 Goals",
+          "stake": 196.19,
+          "ask": 0.48,
+          "quoted_ask": 0.48,
+          "fill_contracts": 408.7292,
+          "fair": 0.5686216823663883,
+          "net_edge": 0.0711,
+          "fair_source": "model"
+        },
+        {
+          "label": "Manchester City vs Fulham \u2014 Under 2.5 Goals",
+          "stake": 178.3,
+          "ask": 0.37,
+          "quoted_ask": 0.37,
+          "fill_contracts": 481.8919,
+          "fair": 0.45723084279741333,
+          "net_edge": 0.0708,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Arsenal \u2014 Moneyline: Newcastle Win",
+          "stake": 119.74,
+          "ask": 0.161546,
+          "quoted_ask": 0.16,
+          "fill_contracts": 741.2135,
+          "fair": 0.23475492307717166,
+          "net_edge": 0.0637,
+          "fair_source": "model"
+        },
+        {
+          "label": "Athletic Bilbao vs Espanyol \u2014 Moneyline: Espanyol Win",
+          "stake": 113.5,
+          "ask": 0.14,
+          "quoted_ask": 0.14,
+          "fill_contracts": 810.7143,
+          "fair": 0.21308507327686624,
+          "net_edge": 0.0646,
+          "fair_source": "model"
+        },
+        {
+          "label": "Barcelona vs Villarreal \u2014 Moneyline: Villarreal Win",
+          "stake": 86.33,
+          "ask": 0.08,
+          "quoted_ask": 0.08,
+          "fill_contracts": 1079.125,
+          "fair": 0.13875829683793922,
+          "net_edge": 0.0536,
+          "fair_source": "model"
+        },
+        {
+          "label": "Sevilla vs Real Betis \u2014 Moneyline: Sevilla Win",
+          "stake": 91.2,
+          "ask": 0.31,
+          "quoted_ask": 0.31,
+          "fill_contracts": 294.1935,
+          "fair": 0.368058734515297,
+          "net_edge": 0.0431,
+          "fair_source": "model"
+        },
+        {
+          "label": "Newcastle vs Arsenal \u2014 Under 2.5 Goals",
+          "stake": 109.52,
+          "ask": 0.46,
+          "quoted_ask": 0.46,
+          "fill_contracts": 238.087,
+          "fair": 0.5185095438870551,
+          "net_edge": 0.0411,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 9,
+      "D_parlay": 0
+    }
+  }
+}
