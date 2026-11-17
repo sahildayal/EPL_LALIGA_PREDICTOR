@@ -1,0 +1,140 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-17T15:29:24.552874+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 387,
+    "markets": 324,
+    "bet_window_days": 7,
+    "skipped_outside_window": 63,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 6,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [
+      {
+        "arm": "C_model_kelly",
+        "bet": "Hull vs Brighton \u2014 Under 2.5 Goals",
+        "action": "repriced",
+        "quoted": 0.44,
+        "fill": 0.441018,
+        "contracts": 361.8222
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Getafe vs Atletico Madrid \u2014 Moneyline: Getafe Win",
+        "action": "repriced",
+        "quoted": 0.16,
+        "fill": 0.168094,
+        "contracts": 650.7059
+      },
+      {
+        "arm": "C_model_kelly",
+        "bet": "Barcelona vs Villarreal \u2014 Under 2.5 Goals",
+        "action": "dropped",
+        "reason": "edge did not survive slippage: quoted 0.2000 -> fill 0.2384, net edge 0.0527 -> 0.0127"
+      }
+    ],
+    "edge_distribution": {
+      "n": 94,
+      "max": 0.0114,
+      "median": -0.023,
+      "min": -0.0577,
+      "count_over": {
+        "0.005": 2,
+        "0.010": 2,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 416,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Hull vs Brighton \u2014 Moneyline: Hull Win",
+          "stake": 161.6,
+          "ask": 0.15,
+          "quoted_ask": 0.15,
+          "fill_contracts": 1077.3333,
+          "fair": 0.2563316835422329,
+          "net_edge": 0.0973,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Atletico Madrid \u2014 Under 2.5 Goals",
+          "stake": 164.5,
+          "ask": 0.55,
+          "quoted_ask": 0.55,
+          "fill_contracts": 299.0909,
+          "fair": 0.6559768265163635,
+          "net_edge": 0.0886,
+          "fair_source": "model"
+        },
+        {
+          "label": "Hull vs Brighton \u2014 Under 2.5 Goals",
+          "stake": 159.57,
+          "ask": 0.441018,
+          "quoted_ask": 0.44,
+          "fill_contracts": 361.8222,
+          "fair": 0.5417037919413351,
+          "net_edge": 0.0834,
+          "fair_source": "model"
+        },
+        {
+          "label": "Getafe vs Atletico Madrid \u2014 Moneyline: Getafe Win",
+          "stake": 109.38,
+          "ask": 0.168094,
+          "quoted_ask": 0.16,
+          "fill_contracts": 650.7059,
+          "fair": 0.24073226142440995,
+          "net_edge": 0.0628,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brentford vs Everton \u2014 Under 2.5 Goals",
+          "stake": 121.33,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 258.1489,
+          "fair": 0.539289934121612,
+          "net_edge": 0.0518,
+          "fair_source": "model"
+        },
+        {
+          "label": "Coventry vs Crystal Palace \u2014 Moneyline: Crystal Palace Win",
+          "stake": 73.46,
+          "ask": 0.34,
+          "quoted_ask": 0.34,
+          "fill_contracts": 216.0588,
+          "fair": 0.3958243458182821,
+          "net_edge": 0.04,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 6,
+      "D_parlay": 0
+    }
+  }
+}
