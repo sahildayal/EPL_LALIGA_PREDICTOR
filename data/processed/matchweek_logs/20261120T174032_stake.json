@@ -1,0 +1,107 @@
+{
+  "job": "stake",
+  "started_utc": "2026-11-20T17:40:32.596354+00:00",
+  "ok": true,
+  "errors": [],
+  "details": {
+    "markets_listed": 420,
+    "markets": 324,
+    "bet_window_days": 7,
+    "skipped_outside_window": 96,
+    "skipped_undated": 0,
+    "fixtures": 20,
+    "fair_fixtures": 40,
+    "score_matrices": 40,
+    "unpriced_fixtures": [],
+    "fixtures_without_score_matrix": [],
+    "implausible_model_fixtures": [],
+    "kickoff_disagreements": [],
+    "dropped_as_started": 0,
+    "planned": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 5,
+      "D_parlay": 0
+    },
+    "fill_adjustments": [],
+    "edge_distribution": {
+      "n": 94,
+      "max": 0.0057,
+      "median": -0.0214,
+      "min": -0.0727,
+      "count_over": {
+        "0.005": 1,
+        "0.010": 0,
+        "0.015": 0,
+        "0.020": 0,
+        "0.030": 0,
+        "0.040": 0
+      }
+    },
+    "odds_quota_remaining": 412,
+    "dry_run": false,
+    "bets": {
+      "A_divergence_kelly": [],
+      "B_divergence_flat": [],
+      "C_model_kelly": [
+        {
+          "label": "Barcelona vs Villarreal \u2014 Under 2.5 Goals",
+          "stake": 96.62,
+          "ask": 0.19,
+          "quoted_ask": 0.19,
+          "fill_contracts": 508.5263,
+          "fair": 0.2652766264340636,
+          "net_edge": 0.0645,
+          "fair_source": "model"
+        },
+        {
+          "label": "Brentford vs Everton \u2014 Both Teams To Score: NO",
+          "stake": 115.97,
+          "ask": 0.42,
+          "quoted_ask": 0.42,
+          "fill_contracts": 276.119,
+          "fair": 0.493639846962614,
+          "net_edge": 0.0565,
+          "fair_source": "model"
+        },
+        {
+          "label": "Athletic Bilbao vs Espanyol \u2014 Both Teams To Score: NO",
+          "stake": 110.82,
+          "ask": 0.47,
+          "quoted_ask": 0.47,
+          "fill_contracts": 235.7872,
+          "fair": 0.5381057717100372,
+          "net_edge": 0.0506,
+          "fair_source": "model"
+        },
+        {
+          "label": "Osasuna vs Malaga \u2014 Moneyline: Osasuna Win",
+          "stake": 116.91,
+          "ask": 0.53,
+          "quoted_ask": 0.53,
+          "fill_contracts": 220.5849,
+          "fair": 0.5960012718041181,
+          "net_edge": 0.0485,
+          "fair_source": "model"
+        },
+        {
+          "label": "Rayo Vallecano vs Valencia \u2014 Under 2.5 Goals",
+          "stake": 106.8,
+          "ask": 0.53,
+          "quoted_ask": 0.53,
+          "fill_contracts": 201.5094,
+          "fair": 0.5929817605734726,
+          "net_edge": 0.0455,
+          "fair_source": "model"
+        }
+      ],
+      "D_parlay": []
+    },
+    "placed": {
+      "A_divergence_kelly": 0,
+      "B_divergence_flat": 0,
+      "C_model_kelly": 5,
+      "D_parlay": 0
+    }
+  }
+}
