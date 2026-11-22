@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "season": "2026-27",
   "created_utc": "2026-08-02T02:15:06.573496+00:00",
   "arms": {
@@ -349,7 +349,9 @@
         }
       ],
       "active_parlays": [],
-      "parlay_history": []
+      "parlay_history": [],
+      "active_orders": [],
+      "order_history": []
     },
     "B_divergence_flat": {
       "label": "Divergence + flat 1%",
@@ -697,7 +699,9 @@
         }
       ],
       "active_parlays": [],
-      "parlay_history": []
+      "parlay_history": [],
+      "active_orders": [],
+      "order_history": []
     },
     "C_model_kelly": {
       "label": "Model-only + quarter-Kelly",
@@ -844,12 +848,13 @@
           "kickoff": "2026-11-22T13:00:00Z",
           "model_prob": 0.13875829683793922,
           "fair_prob": 0.13875829683793922,
-          "closing_price": 0.08,
+          "closing_price": 0.07,
           "result": null,
           "quoted_ask": 0.08,
           "fill_contracts": 1079.125,
           "placed_utc": "2026-11-15T13:02:18.331659+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331120+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765519+00:00",
+          "closing_bid": 0.06
         },
         {
           "market": "1x2",
@@ -907,12 +912,13 @@
           "kickoff": "2026-11-22T14:00:00Z",
           "model_prob": 0.2563316835422329,
           "fair_prob": 0.2563316835422329,
-          "closing_price": 0.15,
+          "closing_price": 0.14,
           "result": null,
           "quoted_ask": 0.15,
           "fill_contracts": 1077.3333,
           "placed_utc": "2026-11-17T15:29:52.920519+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331129+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765529+00:00",
+          "closing_bid": 0.13
         },
         {
           "market": "totals",
@@ -928,12 +934,13 @@
           "kickoff": "2026-11-22T20:00:00Z",
           "model_prob": 0.6559768265163635,
           "fair_prob": 0.6559768265163635,
-          "closing_price": 0.55,
+          "closing_price": 0.57,
           "result": null,
           "quoted_ask": 0.55,
           "fill_contracts": 299.0909,
           "placed_utc": "2026-11-17T15:29:52.920540+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331135+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765537+00:00",
+          "closing_bid": 0.56
         },
         {
           "market": "totals",
@@ -949,12 +956,13 @@
           "kickoff": "2026-11-22T14:00:00Z",
           "model_prob": 0.5417037919413351,
           "fair_prob": 0.5417037919413351,
-          "closing_price": 0.44,
+          "closing_price": 0.45,
           "result": null,
           "quoted_ask": 0.44,
           "fill_contracts": 361.8222,
           "placed_utc": "2026-11-17T15:29:52.920550+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331139+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765542+00:00",
+          "closing_bid": 0.43
         },
         {
           "market": "1x2",
@@ -970,12 +978,13 @@
           "kickoff": "2026-11-22T20:00:00Z",
           "model_prob": 0.24073226142440995,
           "fair_prob": 0.24073226142440995,
-          "closing_price": 0.14,
+          "closing_price": 0.13,
           "result": null,
           "quoted_ask": 0.16,
           "fill_contracts": 650.7059,
           "placed_utc": "2026-11-17T15:29:52.920558+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331142+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765547+00:00",
+          "closing_bid": 0.12
         },
         {
           "market": "totals",
@@ -996,7 +1005,8 @@
           "quoted_ask": 0.47,
           "fill_contracts": 258.1489,
           "placed_utc": "2026-11-17T15:29:52.920565+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331146+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765552+00:00",
+          "closing_bid": 0.47
         },
         {
           "market": "1x2",
@@ -1033,12 +1043,13 @@
           "kickoff": "2026-11-22T13:00:00Z",
           "model_prob": 0.2652766264340636,
           "fair_prob": 0.2652766264340636,
-          "closing_price": 0.17,
+          "closing_price": 0.16,
           "result": null,
           "quoted_ask": 0.19,
           "fill_contracts": 508.5263,
           "placed_utc": "2026-11-20T17:41:34.708690+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331149+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765557+00:00",
+          "closing_bid": 0.15
         },
         {
           "market": "btts",
@@ -1059,7 +1070,8 @@
           "quoted_ask": 0.42,
           "fill_contracts": 276.119,
           "placed_utc": "2026-11-20T17:41:34.708716+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331152+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765561+00:00",
+          "closing_bid": 0.42
         },
         {
           "market": "btts",
@@ -1096,12 +1108,13 @@
           "kickoff": "2026-11-22T17:30:00Z",
           "model_prob": 0.5960012718041181,
           "fair_prob": 0.5960012718041181,
-          "closing_price": 0.54,
+          "closing_price": 0.53,
           "result": null,
           "quoted_ask": 0.53,
           "fill_contracts": 220.5849,
           "placed_utc": "2026-11-20T17:41:34.708741+00:00",
-          "closing_seen_utc": "2026-11-21T20:19:27.331156+00:00"
+          "closing_seen_utc": "2026-11-22T07:21:04.765566+00:00",
+          "closing_bid": 0.52
         },
         {
           "market": "totals",
@@ -5324,7 +5337,9 @@
         }
       ],
       "active_parlays": [],
-      "parlay_history": []
+      "parlay_history": [],
+      "active_orders": [],
+      "order_history": []
     },
     "D_parlay": {
       "label": "Parlay / SGP",
@@ -5432,7 +5447,20 @@
           ],
           "closing_price_note": "Cleared 2026-09-22: captured after the real kickoff, so an in-play price rather than a closing price. Excluded from CLV."
         }
-      ]
+      ],
+      "active_orders": [],
+      "order_history": []
+    },
+    "E_maker_flat": {
+      "label": "Maker limit orders + flat 1%",
+      "bankroll": 10000.0,
+      "starting_bankroll": 10000.0,
+      "active_bets": [],
+      "history": [],
+      "active_parlays": [],
+      "parlay_history": [],
+      "active_orders": [],
+      "order_history": []
     }
   },
   "migrations": [
@@ -5441,6 +5469,12 @@
       "from": 2,
       "to": 3,
       "note": "added active_parlays/parlay_history for arm D"
+    },
+    {
+      "utc": "2026-11-22T07:21:04.765490+00:00",
+      "from": 3,
+      "to": 4,
+      "note": "added arm E (maker limit orders) and active_orders/order_history"
     }
   ]
 }
