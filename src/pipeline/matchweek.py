@@ -865,6 +865,16 @@ def run_settle(results: list = None, voids: list = None) -> RunReport:
                     f"{len(collected['unknown_teams'])} fixture(s) had unrecognised team "
                     f"names and were NOT settled: {collected['unknown_teams']}")
 
+        overdue = overdue_bets(state)
+        report.details["overdue"] = overdue
+        if overdue:
+            report.errors.append(
+                f"{len(overdue)} open bet(s)/parlay(s) kicked off more than "
+                f"{OVERDUE_DAYS} days ago and are still unsettled: {overdue}. Results are "
+                f"only looked up {results_lookback_days()} days back, so these will never "
+                "settle on their own. Usually a postponement the feed did not flag, or a "
+                "club name it spells differently. Settle or void them by hand.")
+
         # Errors here are advisory: settlement itself succeeded. The run is only
         # marked failed if it raised.
         report.ok = True
@@ -873,3 +883,46 @@ def run_settle(results: list = None, voids: list = None) -> RunReport:
         report.errors.append(traceback.format_exc())
     report.write()
     return report
+
+
+#: Days after kickoff that an open bet counts as stuck. Tuesday's settle sees
+#: Friday's fixtures four days on; anything older should have a result.
+OVERDUE_DAYS = 5
+
+
+def results_lookback_days() -> int:
+    from src.pipeline.results import LOOKBACK_DAYS
+    return LOOKBACK_DAYS
+
+
+def overdue_bets(state: dict, now=None) -> list:
+    """
+    Open wagers whose fixture kicked off more than OVERDUE_DAYS ago.
+
+    Nothing else notices them. A bet the results feed never returns stays
+    active indefinitely, holding its stake out of the bankroll, and once its
+    kickoff falls outside the lookback window it can never settle by itself.
+    """
+    now = now or datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=OVERDUE_DAYS)
+    out = []
+
+    def _ko(raw):
+        try:
+            ko = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except (TypeError, ValueError):
+            return None
+        return ko if ko.tzinfo else ko.replace(tzinfo=timezone.utc)
+
+    for arm, book in state["arms"].items():
+        for b in book.get("active_bets", []):
+            ko = _ko(b.get("kickoff"))
+            if ko and ko < cutoff:
+                out.append([arm, b.get("home"), b.get("away"), b.get("market"),
+                            b.get("selection"), str(b.get("kickoff"))])
+        for p in book.get("active_parlays", []):
+            kos = [_ko(l.get("kickoff")) for l in p.get("legs", [])]
+            if any(k and k < cutoff for k in kos):
+                out.append([arm, "parlay",
+                            [[l.get("home"), l.get("away")] for l in p.get("legs", [])]])
+    return out

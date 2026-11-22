@@ -79,11 +79,22 @@ def test_bet_on_another_fixture_is_untouched():
     assert len(ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"]) == 1
 
 
-def test_swapped_home_away_still_settles():
+def test_reverse_fixture_does_not_settle_the_bet():
+    """
+    In a league, Arsenal v Liverpool is a DIFFERENT match from Liverpool v
+    Arsenal. This used to settle on the pair alone (a World Cup-era rule, where
+    venues were neutral), which would grade a bet with the other meeting's score.
+    """
     ledger.place_bet("A_divergence_kelly", mk(sel="home", stake=100.0, price=0.5))
-    ledger.settle_match(MatchResult("arsenal", "liverpool", 0, 2))   # Liverpool won away
-    arm = ledger.load_state()["arms"]["A_divergence_kelly"]
-    assert arm["history"][0]["result"] == "WIN"
+    out = ledger.settle_match(MatchResult("arsenal", "liverpool", 0, 2))
+    assert out["settled"] == []
+    assert len(ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"]) == 1
+
+
+def test_reverse_fixture_is_not_voided():
+    ledger.place_bet("A_divergence_kelly", mk(sel="home", stake=100.0, price=0.5))
+    assert ledger.void_fixture("arsenal", "liverpool", "postponed") == []
+    assert len(ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"]) == 1
 
 
 # --- The rule that matters -------------------------------------------------

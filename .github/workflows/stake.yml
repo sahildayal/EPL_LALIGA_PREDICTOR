@@ -8,9 +8,12 @@
 # (src/market/arms.py) means a later pass can never re-bet a market an arm
 # already holds.
 #
-# GitHub starts scheduled jobs ~4h late (median 4.1h this season), so these
-# cron times are set early on purpose: Friday lands around midday, Sunday and
-# Tuesday around 10:00, all ahead of that day's kickoffs. Until 2026-09-25 the
+# GitHub starts scheduled jobs late, and the lag grows: ~4h in September, then
+# 6.7-8.7h by November (Fri 09:00 started 17:39 on 2026-11-20, Sun 06:00 at
+# 13:01 on 2026-11-15, after that day's first kickoffs). So all three passes now
+# fire at 01:37: off the hour, where GitHub's queue is shortest (the UCL lab
+# moved to :37 for the same reason), and early enough that even a 9h lag lands
+# before 11:00, ahead of every kickoff that day. Until 2026-09-25 the
 # Sunday pass was scheduled for 12:00 and landed ~15:30, mid-matchday; combined
 # with a kickoff read 3-4h late, that is how it bet matches already in play.
 # The drift no longer matters for correctness — every guard is keyed on each
@@ -19,9 +22,9 @@ name: Matchweek — stake
 
 on:
   schedule:
-    - cron: "0 9 * * 5"        # Friday — lands ~13:00
-    - cron: "0 6 * * 0"        # Sunday — lands ~10:00, before Sunday kickoffs
-    - cron: "0 6 * * 2"        # Tuesday — lands ~10:00, before midweek kickoffs
+    - cron: "37 1 * * 5"       # Friday  — lands by ~10:30 even at a 9h lag
+    - cron: "37 1 * * 0"       # Sunday  — ahead of the 12:00-13:00 UTC kickoffs
+    - cron: "37 1 * * 2"       # Tuesday — ahead of midweek kickoffs
   workflow_dispatch:
     inputs:
       dry_run:

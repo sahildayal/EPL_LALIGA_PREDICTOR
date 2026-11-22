@@ -186,9 +186,11 @@ def deduplicate_by_fixture(opportunities: list) -> list:
     """
     At most one bet per fixture per market, keeping the largest net edge.
 
-    Without this we would stake several correlated selections on the same match
-    (e.g. home win AND over 2.5), which quietly concentrates risk far beyond what
-    the per-bet cap implies.
+    Without this we would stake both sides of one market, or two goals lines of
+    the same totals market. It does NOT stop one bet in each of 1X2, totals and
+    BTTS on the same match (e.g. home win AND under 2.5), which are correlated.
+    That stacking was reviewed on 2026-10-19 and kept as is, so the arms stay
+    comparable across the season; a per-fixture cap would be a new arm version.
     """
     best = {}
     for o in sorted(opportunities, key=lambda o: o.net_edge, reverse=True):

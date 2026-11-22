@@ -209,6 +209,11 @@ def place_parlay(arm: str, parlay: Parlay, state: dict = None) -> dict:
 
 # --- Settling ----------------------------------------------------------------
 
+def _same_fixture(bet_home, bet_away, home, away) -> bool:
+    """Same fixture means same home club and same away club, not the same pair."""
+    return bet_home == home and bet_away == away
+
+
 def settle_match(result: MatchResult, state: dict = None) -> dict:
     """
     Grades every active bet touching this fixture across all four arms.
@@ -231,9 +236,12 @@ def settle_match(result: MatchResult, state: dict = None) -> dict:
                 still_active.append(record)
                 continue
 
-            # Does this bet concern this fixture at all?
-            teams_bet = {bet.home, bet.away}
-            if teams_bet != {result.home, result.away}:
+            # Does this bet concern this fixture at all? Home AND away, in order:
+            # in a league the reverse fixture is the same two clubs swapped, so
+            # matching on the pair alone would grade a bet on one meeting with
+            # the score of the other. Every settled bet through 2026-11-22 was
+            # stored in the feed's own orientation, so nothing loses by this.
+            if not _same_fixture(bet.home, bet.away, result.home, result.away):
                 still_active.append(record)
                 continue
 
@@ -300,7 +308,7 @@ def _settle_parlays(result: MatchResult, state: dict) -> dict:
             for leg_record, leg in zip(record["legs"], parlay.legs):
                 if leg_record.get("result"):
                     continue
-                if {leg.home, leg.away} != {result.home, result.away}:
+                if not _same_fixture(leg.home, leg.away, result.home, result.away):
                     continue
                 try:
                     won = grade(leg.to_bet(), result)
@@ -508,12 +516,13 @@ def void_fixture(home: str, away: str, reason: str, state: dict = None) -> list:
     for arm, book in state["arms"].items():
         for i in range(len(book["active_bets"]) - 1, -1, -1):
             bet = book["active_bets"][i]
-            if {bet.get("home"), bet.get("away")} == {h, a}:
+            if _same_fixture(bet.get("home"), bet.get("away"), h, a):
                 voided.append({"arm": arm, "bet": void_bet(arm, i, reason, state=state)})
         # A parlay with a leg on this fixture can never be settled, so it goes too.
         for i in range(len(book.get("active_parlays", [])) - 1, -1, -1):
             parlay = book["active_parlays"][i]
-            if any({l.get("home"), l.get("away")} == {h, a} for l in parlay.get("legs", [])):
+            if any(_same_fixture(l.get("home"), l.get("away"), h, a)
+                   for l in parlay.get("legs", [])):
                 voided.append({"arm": arm,
                                "parlay": void_parlay(arm, i, reason, state=state)})
     if owns:

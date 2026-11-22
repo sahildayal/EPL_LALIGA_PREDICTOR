@@ -1023,3 +1023,17 @@ def test_preflight_projects_credits_to_the_monthly_reset():
     assert _odds_credits_until_reset(datetime(2026, 10, 15, 13, 53, tzinfo=timezone.utc)) == 85
     # December rolls over into January.
     assert _odds_credits_until_reset(datetime(2026, 12, 31, tzinfo=timezone.utc)) <= 6
+
+
+def test_overdue_bets_are_flagged_and_fresh_ones_are_not():
+    """A bet the results feed never returns would otherwise sit open forever, silently."""
+    from src.pipeline import matchweek as mw
+    now = datetime(2026, 11, 24, 9, tzinfo=timezone.utc)
+    state = {"arms": {"C_model_kelly": {"active_bets": [
+        {"home": "getafe", "away": "rayo vallecano", "market": "1x2", "selection": "home",
+         "kickoff": "2026-11-10T19:00:00Z"},                       # 14 days ago
+        {"home": "arsenal", "away": "everton", "market": "1x2", "selection": "home",
+         "kickoff": "2026-11-22T14:00:00Z"},                       # two days ago
+    ], "active_parlays": []}}}
+    out = mw.overdue_bets(state, now=now)
+    assert [o[1] for o in out] == ["getafe"]
