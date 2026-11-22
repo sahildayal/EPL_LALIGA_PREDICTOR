@@ -50,3 +50,5 @@ data/raw/
 .idea/
 .project
 .pydevproject
+catboost_info/
+notes/c_v2_backtest_rows.jsonl
