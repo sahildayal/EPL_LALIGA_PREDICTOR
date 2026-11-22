@@ -194,7 +194,7 @@ jobs:
         if: ${{ always() && (steps.job.outputs.status != 'ok' || failure()) }}
         env:
           GH_TOKEN: ${{ github.token }}
-          STATUS: ${{ failure() && 'a workflow step failed (e.g. the ledger commit)' || steps.job.outputs.status }}
+          STATUS: ${{ job.status == 'failure' && 'a workflow step failed (e.g. the ledger commit)' || steps.job.outputs.status }}
           JOB: ${{ inputs.job }}
         run: |
           title="matchweek: ${JOB} needs attention"
