@@ -136,7 +136,7 @@ def test_scoreboard_sorts_by_clv_nulls_last(tmp_path):
     _write(tmp_path, _ledger(), {"20260825T093500_settle.json": SETTLE})
     rows = site._scoreboard(SETTLE, _ledger())
     assert rows[0]["key"] == "C_model_kelly"          # only arm with a CLV number
-    assert [r["clv"] for r in rows[1:]] == [None, None, None]
+    assert [r["clv"] for r in rows[1:]] == [None, None, None, None]
 
 
 def test_dry_runs_are_ignored(tmp_path):

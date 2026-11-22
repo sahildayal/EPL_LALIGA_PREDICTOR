@@ -23,6 +23,10 @@ contract is a 33% tax, versus 3.5% at even money.
 import math
 
 FEE_RATE = 0.07
+# Charged to a RESTING order when it fills, on series Kalshi lists with maker
+# fees (every *GAME series, per /trade-api/v2/series fee_type
+# "quadratic_with_maker_fees"). A quarter of the taker rate.
+MAKER_FEE_RATE = 0.0175
 MIN_FEE_DOLLARS = 0.01
 
 
@@ -72,6 +76,15 @@ def fee_as_fraction_of_payout(price: float, contracts: float = 100.0) -> float:
     if contracts <= 0:
         return 0.0
     return total_fee(price, contracts) / contracts
+
+
+def maker_fee_as_fraction_of_payout(price: float, contracts: float = 100.0) -> float:
+    """Maker fee per dollar of face value: same rounding as the taker fee, a quarter the rate."""
+    _validate(price)
+    if contracts <= 0:
+        return 0.0
+    raw = MAKER_FEE_RATE * contracts * price * (1.0 - price)
+    return max(_roundup_cent(raw), MIN_FEE_DOLLARS) / contracts
 
 
 def breakeven_edge(price: float, contracts: float = 100.0) -> float:

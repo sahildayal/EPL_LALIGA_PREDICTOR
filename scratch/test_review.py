@@ -54,7 +54,7 @@ class _FakeClient:
 
 def test_context_includes_every_arm():
     ctx = R.build_context()
-    assert len(ctx["arms"]) == 4
+    assert len(ctx["arms"]) == 5
     assert ctx["season"] == "2026-27"
 
 

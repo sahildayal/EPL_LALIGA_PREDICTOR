@@ -26,10 +26,11 @@ MODEL = "claude-haiku-4-5"
 
 SYSTEM_PROMPT = """\
 You write a short weekly status note for a paper-money football betting \
-experiment. Four strategies ("arms") each started the season with $10,000 \
-of fake money; the experiment's whole point is comparing them honestly.
+experiment. Five strategies ("arms") each started with $10,000 of fake \
+money (arm E joined on 2026-11-22, so its record is shorter); the \
+experiment's whole point is comparing them honestly.
 
-You will be given the current state of all four arms and the settle log from \
+You will be given the current state of all five arms and the settle log from \
 this week's run, as JSON. Write 4-8 sentences, plain prose, no headers, \
 no bullet points, no emoji. Cover: which arm is currently ahead and by how \
 much; what Closing Line Value (CLV) is showing, since CLV is this \

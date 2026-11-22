@@ -25,6 +25,7 @@ from src.data.odds_api import fetch_fair_prices, OddsUnavailable
 from src.market import arms as arms_mod
 from src.market import ledger
 from src.market import shadow
+from src.market.maker_arm import resolve_orders
 from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS, is_no_side
 from src.market.edge import Opportunity
 from src.market.kalshi_client import KalshiClient, KalshiUnavailable
@@ -244,6 +245,25 @@ def _pre_kickoff(markets: list, now=None) -> list:
     return keep
 
 
+def fetch_trades(client, ticker: str, min_ts, max_ts) -> list:
+    """Kalshi's public trade tape for one market between two datetimes (arm E fills)."""
+    trades, cursor = [], None
+    for _ in range(50):                       # 50 pages x 1000: far beyond any market
+        params = {"ticker": ticker, "limit": 1000,
+                  "min_ts": int(min_ts.timestamp()), "max_ts": int(max_ts.timestamp())}
+        if cursor:
+            params["cursor"] = cursor
+        resp = client._request("GET", "/trade-api/v2/markets/trades", params=params)
+        if resp.status_code != 200:
+            raise KalshiUnavailable(f"trades {ticker} returned {resp.status_code}")
+        body = resp.json()
+        trades.extend(body.get("trades", []))
+        cursor = body.get("cursor")
+        if not cursor:
+            return trades
+    raise KalshiUnavailable(f"trades {ticker}: more than 50 pages, refusing a partial tape")
+
+
 def fetch_orderbook(client, ticker: str) -> dict:
     """Raw order book for one market. Raises so the caller can fail that bet closed."""
     resp = client._request("GET", f"/trade-api/v2/markets/{ticker}/orderbook",
@@ -279,6 +299,10 @@ def reprice_at_fill(plans: dict, client=None) -> tuple:
             # books for one synthetic combined price is not meaningful, and the
             # combined ask is already flagged synthetic and penalised.
             if "parlay" in p:
+                kept.append(p)
+                continue
+            # Arm E rests at its own limit price; nothing fills at stake time.
+            if "order" in p:
                 kept.append(p)
                 continue
 
@@ -561,6 +585,11 @@ def collect_model_probs(fixture_leagues, implausible: list = None) -> dict:
 
 def _describe_plan(plan: dict) -> dict:
     """One planned wager, flattened for the run log. Singles and parlays differ."""
+    if "order" in plan:
+        o = plan["order"]
+        return {"label": o["label"], "stake": o["stake"], "limit": o["limit"],
+                "quoted_bid": o["quoted_bid"], "quoted_ask": o["quoted_ask"],
+                "fair": o["fair_prob"], "net_edge": o["net_edge"], "order": True}
     if "parlay" in plan:
         p = plan["parlay"]
         return {"label": p.label, "stake": p.stake, "ask": round(p.ask, 4),
@@ -849,6 +878,16 @@ def run_settle(results: list = None, voids: list = None) -> RunReport:
             results, voids = collected["results"], collected["voids"]
 
         state = ledger.load_state()
+        # Arm E's resting orders resolve first: a fill becomes an active bet,
+        # which the loop below then settles like any other.
+        orders = {"filled": [], "unfilled": [], "errors": []}
+        if any(b.get("active_orders") for b in state["arms"].values()):
+            client = KalshiClient()
+            for book in state["arms"].values():
+                if book.get("active_orders"):
+                    r = resolve_orders(book, lambda t, a, b: fetch_trades(client, t, a, b))
+                    for k in orders:
+                        orders[k].extend(r[k])
         settled_total, pending_total, parlays_settled = 0, 0, 0
         for r in results or []:
             out = ledger.settle_match(r, state=state)
@@ -868,7 +907,14 @@ def run_settle(results: list = None, voids: list = None) -> RunReport:
             "voided": len(voided),
             "void_fixtures": [list(v) for v in (voids or [])],
             "season": ledger.season_summary(state),
+            "orders": {"filled": len(orders["filled"]),
+                       "unfilled": len(orders["unfilled"]),
+                       "unresolved": orders["errors"]},
         }
+        if orders["errors"]:
+            report.errors.append(
+                f"{len(orders['errors'])} arm E order(s) could not be checked against "
+                f"the trade tape and stay open: {orders['errors']}")
         if collected:
             recon = collected["reconciliation"]
             report.details["reconciliation"] = recon

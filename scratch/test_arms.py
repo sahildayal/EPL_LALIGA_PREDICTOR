@@ -258,13 +258,14 @@ def test_the_guard_is_per_arm_and_per_market():
 
 def test_plan_all_covers_every_funded_arm():
     """
-    All four arms are funded, so all four must be planned. Arm D was omitted
-    here originally, which would have left $10,000 idle all season and produced
-    an empty column in the comparison the season exists to make.
+    Every funded arm must be planned. Arm D was omitted here originally, which
+    would have left $10,000 idle all season and produced an empty column in the
+    comparison the season exists to make. Arm E joined on 2026-11-22.
     """
-    from src.market.arms import ARM_D
+    from src.market.arms import ARM_D, ARM_E
+    from src.market.ledger import ARMS
     plans = plan_all([mkt(ask=0.40)], FAIR)
-    assert set(plans) == {ARM_A, ARM_B, ARM_C, ARM_D}
+    assert set(plans) == {ARM_A, ARM_B, ARM_C, ARM_D, ARM_E} == set(ARMS)
 
 
 def test_arms_a_and_b_pick_the_same_bet_but_size_differently():

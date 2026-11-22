@@ -62,6 +62,11 @@ def held_kickoffs(state: dict) -> set:
                 k = _ts(leg.get("kickoff"))
                 if k:
                     out.add(k)
+        # A resting order needs its close too: if it fills, it becomes a bet.
+        for order in book.get("active_orders", []):
+            k = _ts(order.get("kickoff"))
+            if k:
+                out.add(k)
     return out
 
 

@@ -34,6 +34,7 @@ ARM_A = "A_divergence_kelly"
 ARM_B = "B_divergence_flat"
 ARM_C = "C_model_kelly"
 ARM_D = "D_parlay"
+ARM_E = "E_maker_flat"
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,11 @@ ARM_CONFIGS = {
     # replace that finding with one about the threshold.
     ARM_D: ArmConfig(ARM_D, "Parlay / SGP",
                      fair_source="sharp", staking="kelly", min_edge=0.05),
+    # Arm E is B with one change: it rests a limit order instead of paying the
+    # ask. Same sharp fair value, same 2% net bar (at its limit price, after the
+    # maker fee), same flat 1%. See src/market/maker_arm.py.
+    ARM_E: ArmConfig(ARM_E, "Maker limit orders + flat 1%",
+                     fair_source="sharp", staking="flat", min_edge=0.02),
 }
 
 
@@ -106,6 +112,9 @@ def plan_arm(arm: str, kalshi_markets: list, fair_by_fixture: dict,
     if arm == ARM_D:
         return plan_parlay_arm(kalshi_markets, fair_by_fixture,
                                score_matrices=score_matrices, state=state)
+    if arm == ARM_E:
+        from src.market.maker_arm import plan_orders
+        return plan_orders(kalshi_markets, fair_by_fixture, state["arms"][ARM_E])
     book = state["arms"][arm]
     bankroll = book["bankroll"]
     starting = book["starting_bankroll"]
@@ -218,10 +227,13 @@ def place_arm(arm: str, plans: list, state: dict = None) -> dict:
         try:
             if "parlay" in p:
                 placed.append(ledger.place_parlay(arm, p["parlay"], state=state))
+            elif "order" in p:
+                placed.append(ledger.place_order(arm, p["order"], state=state))
             else:
                 placed.append(ledger.place_bet(arm, p["bet"], state=state))
         except ledger.InsufficientBankroll as exc:
-            skipped.append({"bet": p.get("bet") or p.get("parlay"), "reason": str(exc)})
+            skipped.append({"bet": p.get("bet") or p.get("parlay") or p.get("order"),
+                            "reason": str(exc)})
             break
     if owns:
         ledger.save_state(state)
@@ -236,5 +248,5 @@ def plan_all(kalshi_markets: list, fair_by_fixture: dict,
     return {
         arm: plan_arm(arm, kalshi_markets, fair_by_fixture, model_probs,
                       state=state, score_matrices=score_matrices)
-        for arm in (ARM_A, ARM_B, ARM_C, ARM_D)
+        for arm in (ARM_A, ARM_B, ARM_C, ARM_D, ARM_E)
     }

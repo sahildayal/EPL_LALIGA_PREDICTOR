@@ -1,5 +1,5 @@
 """
-Season ledger: four independent $10,000 books for the 2026/27 experiment.
+Season ledger: independent $10,000 books for the 2026/27 experiment.
 
 Replaces the previous 8-book magnus/athena x 4-portfolio structure, which mixed
 persona roleplay into bet sizing. Arms differ in exactly one variable each, so
@@ -9,6 +9,8 @@ the season's result is interpretable:
     B  divergence + flat 1%           A/B isolates the staking rule
     C  model-only  + quarter-Kelly    A/C isolates the edge source
     D  parlay / SGP                   does the parlay arm clear its own vig?
+    E  maker limit orders + flat 1%   E/B isolates taking vs posting the price
+                                      (joined 2026-11-22, schema v4)
 
 No reset and no reload. An arm that busts stays busted; that is a real result.
 
@@ -31,13 +33,15 @@ SEASON = "2026-27"
 STARTING_BANKROLL = 10_000.0
 # v3 adds parlay storage for arm D. A parlay spans several fixtures, so it
 # cannot live in `active_bets`, whose settlement matches a single fixture.
-SCHEMA_VERSION = 3
+# v4 adds arm E and resting-order storage (src/market/maker_arm.py).
+SCHEMA_VERSION = 4
 
 ARMS = {
     "A_divergence_kelly": "Divergence + quarter-Kelly",
     "B_divergence_flat": "Divergence + flat 1%",
     "C_model_kelly": "Model-only + quarter-Kelly",
     "D_parlay": "Parlay / SGP",
+    "E_maker_flat": "Maker limit orders + flat 1%",
 }
 
 
@@ -56,6 +60,9 @@ def _new_arm(label: str) -> dict:
         # reporting code never has to branch on which arm it is reading.
         "active_parlays": [],
         "parlay_history": [],
+        # Arm E only: resting limit orders, and orders resolved filled/unfilled.
+        "active_orders": [],
+        "order_history": [],
     }
 
 
@@ -86,11 +93,25 @@ def _migrate(state: dict) -> dict:
         for book in state.get("arms", {}).values():
             book.setdefault("active_parlays", [])
             book.setdefault("parlay_history", [])
-        state["schema_version"] = SCHEMA_VERSION
+        state["schema_version"] = 3
         state.setdefault("migrations", []).append({
             "utc": datetime.now(timezone.utc).isoformat(),
-            "from": 2, "to": SCHEMA_VERSION,
+            "from": 2, "to": 3,
             "note": "added active_parlays/parlay_history for arm D",
+        })
+        version = 3
+    if version == 3:
+        # v3 -> v4: arm E joins with a fresh $10,000 and every book gains empty
+        # order containers. Additive: A-D's records are untouched.
+        for book in state.get("arms", {}).values():
+            book.setdefault("active_orders", [])
+            book.setdefault("order_history", [])
+        state["arms"].setdefault("E_maker_flat", _new_arm(ARMS["E_maker_flat"]))
+        state["schema_version"] = 4
+        state.setdefault("migrations", []).append({
+            "utc": datetime.now(timezone.utc).isoformat(),
+            "from": 3, "to": 4,
+            "note": "added arm E (maker limit orders) and active_orders/order_history",
         })
         return state
     raise ValueError(
@@ -177,6 +198,28 @@ def place_bet(arm: str, bet: Bet, state: dict = None) -> dict:
     record["placed_utc"] = datetime.now(timezone.utc).isoformat()
     book["active_bets"].append(record)
 
+    if owns_state:
+        save_state(state)
+    return record
+
+
+def place_order(arm: str, order: dict, state: dict = None) -> dict:
+    """Rests a limit order: its stake is held as collateral until it fills or lapses."""
+    if arm not in ARMS:
+        raise ValueError(f"Unknown arm {arm!r}; expected one of {sorted(ARMS)}")
+    owns_state = state is None
+    state = state or load_state()
+    book = state["arms"][arm]
+    stake = float(order["stake"])
+    if stake <= 0:
+        raise ValueError(f"Stake must be positive, got {stake}")
+    if stake > book["bankroll"] + 1e-9:
+        raise InsufficientBankroll(
+            f"Arm {arm} has ${book['bankroll']:.2f}, cannot rest ${stake:.2f}. "
+            "Arms are never reloaded.")
+    book["bankroll"] = round(book["bankroll"] - stake, 2)
+    record = dict(order, posted_utc=datetime.now(timezone.utc).isoformat())
+    book.setdefault("active_orders", []).append(record)
     if owns_state:
         save_state(state)
     return record
@@ -458,6 +501,17 @@ def record_closing_prices(prices: dict, state: dict = None, now=None,
                 bet["closing_bid"] = None if bid is None else float(bid)
                 bet["closing_seen_utc"] = datetime.now(timezone.utc).isoformat()
                 stamped += 1
+        # A resting order is stamped like a bet, so a fill carries its close.
+        for order in book.get("active_orders", []):
+            if _kicked_off(order, now):
+                continue
+            key = closing_price_key(order.get("home"), order.get("away"), order.get("market"),
+                                    order.get("selection"), order.get("line"))
+            if key in prices:
+                order["closing_price"] = float(prices[key])
+                bid = (bids or {}).get(key)
+                order["closing_bid"] = None if bid is None else float(bid)
+                stamped += 1
         # Parlay CLV is measured on the combined price, so a parlay only counts
         # once EVERY leg has been seen. A partial stamp would compare an entry
         # price against a mixture of entry and closing legs, which is not CLV.
@@ -549,7 +603,8 @@ def arm_summary(arm: str, state: dict = None) -> dict:
 
     all_history = list(book["history"]) + [
         _as_wager(p) for p in book.get("parlay_history", [])]
-    all_active = list(book["active_bets"]) + list(book.get("active_parlays", []))
+    all_active = (list(book["active_bets"]) + list(book.get("active_parlays", []))
+                  + list(book.get("active_orders", [])))
 
     # Voided bets never happened; including them would dilute win rate and ROI
     # with rows that had no outcome.
@@ -602,6 +657,11 @@ def arm_summary(arm: str, state: dict = None) -> dict:
         "voided_bets": len(voided),
         "open_bets": len(all_active),
         "open_parlays": len(book.get("active_parlays", [])),
+        "open_orders": len(book.get("active_orders", [])),
+        "orders_filled": sum(1 for o in book.get("order_history", [])
+                             if o.get("status") == "FILLED"),
+        "orders_unfilled": sum(1 for o in book.get("order_history", [])
+                               if o.get("status") == "UNFILLED"),
         "settled_parlays": sum(1 for p in book.get("parlay_history", [])
                                if p.get("result") != "VOID"),
         "wins": wins,

@@ -19,11 +19,11 @@ def mk(sel="home", market=MARKET_1X2, stake=100.0, price=0.5, **kw):
                stake=stake, price=price, **kw)
 
 
-def test_fresh_ledger_has_four_arms_at_10k():
+def test_fresh_ledger_has_every_arm_at_10k():
     s = ledger.load_state()
     assert set(s["arms"]) == set(ledger.ARMS)
     assert all(a["bankroll"] == 10_000.0 for a in s["arms"].values())
-    assert sum(a["bankroll"] for a in s["arms"].values()) == 40_000.0
+    assert sum(a["bankroll"] for a in s["arms"].values()) == 10_000.0 * len(ledger.ARMS)
 
 
 def test_place_debits_bankroll():
@@ -62,14 +62,14 @@ def test_losing_bet_keeps_stake_debited_once():
 
 
 def test_no_double_counting_across_conservation():
-    """Total equity must equal 40k plus net P&L at all times."""
+    """Total equity must equal the arms' starting money plus net P&L at all times."""
     ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.5))
     ledger.place_bet("B_divergence_flat", mk(sel="away", stake=200.0, price=0.25))
     ledger.settle_match(MatchResult("liverpool", "arsenal", 3, 0))
     summaries = ledger.season_summary()
     net_pnl = sum(s["pnl"] for s in summaries)
     equity = sum(s["equity"] for s in summaries)
-    assert abs(equity - (40_000.0 + net_pnl)) < 1e-6
+    assert abs(equity - (10_000.0 * len(ledger.ARMS) + net_pnl)) < 1e-6
 
 
 def test_bet_on_another_fixture_is_untouched():

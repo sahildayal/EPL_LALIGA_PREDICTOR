@@ -53,6 +53,7 @@ class Opportunity:
     ticker: Optional[str] = None
     sharp_book: Optional[str] = None
     model_prob: Optional[float] = None
+    bid: Optional[float] = None    # best bid on this side; arm E rests just above it
     notes: list = field(default_factory=list)
 
     @property
@@ -180,6 +181,7 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
             league=mkt.get("league"), kickoff=mkt.get("kickoff"),
             line=mkt.get("line"), ticker=mkt.get("ticker"), sharp_book=book,
             model_prob=_prob_for(model_probs.get(key, {}).get(market, {}), market, selection),
+            bid=mkt.get("bid") if _valid_price(mkt.get("bid")) else None,
         ))
     return out
 
