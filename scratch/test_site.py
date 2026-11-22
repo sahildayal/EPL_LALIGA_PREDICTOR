@@ -99,17 +99,18 @@ def test_builds_index_and_one_matchweek(tmp_path):
     idx = (out / "index.html").read_text(encoding="utf-8")
     assert "<!doctype html>" in idx
     assert "Divergence Lab" in idx
-    assert "Season scoreboard" in idx
-    assert "Data integrity" in idx
-    assert "24 bets voided" in idx           # integrity note is always present
-    assert "data through 2026-08-25" in idx  # tracks the latest log, not wall clock
+    assert "Data through 2026-08-25" in idx  # tracks the latest log, not wall clock
+    assert "Season scoreboard" in (out / "performance.html").read_text(encoding="utf-8")
+    how = (out / "how-it-works.html").read_text(encoding="utf-8")
+    assert "Data integrity" in how
+    assert "24 bets voided" in how           # integrity note is always present
 
     pages = sorted(p.name for p in out.glob("matchweek-*.html"))
     assert pages == ["matchweek-2026-08-17.html"]     # ISO-week Monday of the Aug 21 run
     wk = (out / pages[0]).read_text(encoding="utf-8")
     assert "Matchweek 1" in wk
     assert "Elche Win" in wk
-    assert "LOST -300" in wk
+    assert "Lost −300" in wk
     assert "edge did not survive slippage" in wk      # fill adjustment surfaced
 
 
@@ -146,3 +147,60 @@ def test_dry_runs_are_ignored(tmp_path):
     out = site.build_site(tmp_path, tmp_path / "docs")
     assert list(out.glob("matchweek-*.html")) == []
     assert "No matchweeks staked yet." in (out / "index.html").read_text(encoding="utf-8")
+
+
+PAGES = ["index.html", "this-week.html", "arms.html", "performance.html", "edge.html",
+         "matchweeks.html", "how-it-works.html"]
+
+
+def test_every_page_has_the_nav_and_marks_itself_current(tmp_path):
+    _write(tmp_path, _ledger(), {"20260821T094232_stake.json": STAKE,
+                                 "20260825T093500_settle.json": SETTLE})
+    out = site.build_site(tmp_path, tmp_path / "docs")
+    for name in PAGES:
+        page = (out / name).read_text(encoding="utf-8")
+        assert all(f'href="{href}"' in page for href, _, _ in site.theme.NAV), name
+        assert page.count(' aria-current="page">') == 1, name
+        assert page.rstrip().endswith("</html>"), name
+
+
+def test_every_arm_has_a_profile_and_a_committed_avatar():
+    from pathlib import Path
+    assets = Path(__file__).resolve().parents[1] / "docs" / "assets"
+    for key, _, _, suffix in site.ARMS:
+        assert key in site.PROFILES
+        assert (assets / f"avatar-{suffix}.webp").exists(), suffix
+    for name in ("avatar-market.webp", "hero.webp", "share-card.jpg"):
+        assert (assets / name).exists(), name
+
+
+def test_parlays_appear_on_their_matchweek(tmp_path):
+    parlay = {"legs": [{"home": "espanyol", "away": "elche", "market": "totals"},
+                       {"home": "espanyol", "away": "elche", "market": "btts"}],
+              "stake": 100.0, "fair_prob": 0.48, "ask": 0.30, "result": "WIN", "pnl": 229.0,
+              "label": "SGP — Espanyol/Elche: Over 2.5 + BTTS YES",
+              "placed_utc": "2026-08-21T10:00:00+00:00"}
+    _write(tmp_path, _ledger(D_parlay={"parlay_history": [parlay]}),
+           {"20260821T094232_stake.json": STAKE})
+    out = site.build_site(tmp_path, tmp_path / "docs")
+    wk = (out / "matchweek-2026-08-17.html").read_text(encoding="utf-8")
+    assert "Over 2.5 + BTTS YES" in wk and "Won +229" in wk
+    rows = site._scoreboard(None, _ledger(D_parlay={"parlay_history": [parlay]}))
+    assert next(r for r in rows if r["key"] == "D_parlay")["wins"] == 1
+
+
+def test_edge_chart_clips_outliers_and_says_when_they_happened():
+    from datetime import datetime, timezone
+    series = [(datetime(2026, 9, 11, tzinfo=timezone.utc), 0.54, -0.02, 3),
+              (datetime(2026, 10, 11, tzinfo=timezone.utc), 0.38, -0.02, 2),
+              (datetime(2026, 11, 1, tzinfo=timezone.utc), 0.01, -0.03, 0)]
+    svg = site._svg_edge(series)
+    assert svg.count('class="clip"') == 2 and "2 above +15%" in svg
+    note = site._clip_note(series)
+    assert "1 came before 22 September" in note and "11 Oct" in note
+
+
+def test_verdict_names_the_closest_arm():
+    rows = site._scoreboard(SETTLE, _ledger())
+    answer, why = site._verdict(rows)
+    assert answer == "Not yet" and "The Stubborn Scout" in why

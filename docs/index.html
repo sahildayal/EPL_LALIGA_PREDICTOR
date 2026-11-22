@@ -2,138 +2,391 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EPL + La Liga Divergence Lab</title>
-<meta name="description" content="Four paper-betting arms hunting Kalshi's disagreement with the sharp line, across the 2026/27 Premier League and La Liga.">
+<title>Divergence Lab</title>
+<meta name="description" content="Five paper-betting arms hunting Kalshi&#x27;s disagreement with the sharp line across the 2026/27 Premier League and La Liga.">
+<meta name="theme-color" content="#F3ECE0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131A24" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23F3ECE0'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%2300895A' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='%23E2423B'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://sahildayal.me/EPL_LALIGA_PREDICTOR/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Divergence Lab">
+<meta property="og:title" content="Divergence Lab">
+<meta property="og:description" content="Five paper-betting arms hunting Kalshi&#x27;s disagreement with the sharp line across the 2026/27 Premier League and La Liga.">
+<meta property="og:url" content="https://sahildayal.me/EPL_LALIGA_PREDICTOR/">
+<meta property="og:image" content="https://sahildayal.me/EPL_LALIGA_PREDICTOR/assets/share-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('dl-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="preload" as="image" href="assets/hero.webp" fetchpriority="high">
 <style>
 :root{
-  --ground:#f5f6f4; --panel:#ffffff; --panel-2:#eceef0;
-  --ink:#15201b; --ink-soft:#495851; --ink-faint:#7c8a83;
-  --line:#dde1dd;
-  --accent:#177245; --accent-soft:#dcefe4;
-  --up:#1f8a5c; --down:#c0405c; --flat:#7c8a83;
-  --arm-a:#177245; --arm-b:#2f7f9e; --arm-c:#b9791b; --arm-d:#7a54c4; --arm-e:#b0456a;
-  --shadow:0 1px 2px rgba(21,32,27,.06),0 8px 24px rgba(21,32,27,.05);
+  color-scheme:light;
+  --ground:#FAFAF7; --ground-2:#F1F1EC;
+  --card:#FFFFFF; --line:rgba(22,35,58,.13); --line-strong:rgba(22,35,58,.32);
+  --ink:#16233A; --ink-2:#44506A; --ink-3:#5F6A80;
+  --green:#00895A; --red:#E2423B;
+  --up:#00774E; --down:#C3322B; --flat:#5F6A80;
+  --arm-a:#00895A; --arm-b:#1F6FD1; --arm-c:#C86F00; --arm-d:#7A4FC2; --arm-e:#D6336C; --arm-m:#16233A;
+  --focus:#1F6FD1;
+  /* print panels keep their own ink in both themes */
+  --print:#F3ECE0; --print-ink:#16233A; --print-ink-2:#4A4F5C; --print-line:rgba(22,35,58,.16);
+  --print-edge:rgba(22,35,58,.10);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --ground:#0b110d; --panel:#131b16; --panel-2:#1b2620;
-    --ink:#e7ece8; --ink-soft:#a5b3ab; --ink-faint:#748078;
-    --line:#26332b;
-    --accent:#3ddc84; --accent-soft:#12301f;
-    --up:#3fc98a; --down:#f0708a; --flat:#748078;
-    --arm-a:#3ddc84; --arm-b:#5cc2e0; --arm-c:#e0a94a; --arm-d:#b18be8; --arm-e:#ef7fa3;
-    --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.35);
+    color-scheme:dark;
+    --ground:#131A24; --ground-2:#19222E;
+    --card:#1B2532; --line:rgba(236,239,232,.12); --line-strong:rgba(236,239,232,.30);
+    --ink:#ECEFE8; --ink-2:#B9C1CC; --ink-3:#8F99A7;
+    --green:#3FCF8E; --red:#FF6A5F;
+    --up:#45D394; --down:#FF7A70; --flat:#8F99A7;
+    --arm-a:#3FCF8E; --arm-b:#6AA8FF; --arm-c:#F2A33A; --arm-d:#B590F2; --arm-e:#FF7FAE; --arm-m:#ECEFE8;
+    --focus:#6AA8FF;
+    --print-edge:rgba(0,0,0,.45);
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0b110d; --panel:#131b16; --panel-2:#1b2620;
-  --ink:#e7ece8; --ink-soft:#a5b3ab; --ink-faint:#748078;
-  --line:#26332b;
-  --accent:#3ddc84; --accent-soft:#12301f;
-  --up:#3fc98a; --down:#f0708a; --flat:#748078;
-  --arm-a:#3ddc84; --arm-b:#5cc2e0; --arm-c:#e0a94a; --arm-d:#b18be8; --arm-e:#ef7fa3;
-  --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.35);
+  color-scheme:dark;
+  --ground:#131A24; --ground-2:#19222E;
+  --card:#1B2532; --line:rgba(236,239,232,.12); --line-strong:rgba(236,239,232,.30);
+  --ink:#ECEFE8; --ink-2:#B9C1CC; --ink-3:#8F99A7;
+  --green:#3FCF8E; --red:#FF6A5F;
+  --up:#45D394; --down:#FF7A70; --flat:#8F99A7;
+  --arm-a:#3FCF8E; --arm-b:#6AA8FF; --arm-c:#F2A33A; --arm-d:#B590F2; --arm-e:#FF7FAE; --arm-m:#ECEFE8;
+  --focus:#6AA8FF;
+  --print-edge:rgba(0,0,0,.45);
 }
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--ground);color:var(--ink);
-  font-family:"Source Sans 3",ui-sans-serif,system-ui,-apple-system,sans-serif;
-  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-a{color:var(--accent)}
-.wrap{max-width:1080px;margin:0 auto;padding:34px 20px 68px}
-.masthead{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;
-  justify-content:space-between;border-bottom:2px solid var(--ink);
-  padding-bottom:13px}
-.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;
-  color:var(--ink-faint);font-weight:600}
-h1{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:700;
-  font-size:clamp(25px,4.2vw,38px);letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
-h2{font-family:"Bricolage Grotesque",Georgia,serif;font-size:20px;margin:0;letter-spacing:-.01em}
-.masthead__sub{color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
-.lede{color:var(--ink-soft);max-width:64ch;font-size:15px;margin:16px 0 0}
-section{margin-top:38px}
-.section__head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.section__note{color:var(--ink-faint);font-size:12.5px;max-width:60ch}
-.backlink{display:inline-block;margin:18px 0 0;font-size:13.5px;text-decoration:none}
-.backlink:hover{text-decoration:underline}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif; font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+img{max-width:100%; display:block}
+a{color:inherit; text-decoration-thickness:1px; text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+p{margin:0}
+:focus-visible{outline:2px solid var(--focus); outline-offset:3px; border-radius:3px}
+.skip{position:absolute; left:-999px; top:8px; z-index:60; background:var(--ink); color:var(--ground);
+  padding:8px 12px; border-radius:4px; font:600 15px "Archivo",sans-serif}
+.skip:focus{left:12px}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:clamp(16px,3vw,32px)}
 
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
-.stat__k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);font-weight:600}
-.stat__v{font-family:"Bricolage Grotesque",Georgia,serif;font-size:25px;font-weight:700;
-  font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.15}
-.stat__n{font-size:12px;color:var(--ink-faint);margin-top:3px}
+/* type */
+.sans,h1,h2,h3,.nav,.num,table,.stat,.chip,.btn{font-family:"Archivo",ui-sans-serif,system-ui,sans-serif}
+h1,h2,h3{margin:0; color:inherit; text-wrap:balance; font-weight:800}
+h1{font-size:clamp(40px,6.4vw,76px); line-height:.94; font-stretch:118%; letter-spacing:-.025em}
+h2{font-size:clamp(26px,3vw,34px); line-height:1.05; font-stretch:112%; letter-spacing:-.015em}
+h3{font-size:20px; line-height:1.15; font-stretch:105%; letter-spacing:-.005em}
+.lede{font-size:clamp(18px,1.6vw,20px); line-height:1.5; max-width:46ch}
+.prose{max-width:66ch}
+.prose p+p{margin-top:.9em}
+.muted{color:var(--ink-3)}
+.small{font-size:14.5px; line-height:1.5}
+.num{font-variant-numeric:tabular-nums}
 
-.scroller{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-table{border-collapse:collapse;width:100%;font-size:13.5px}
-th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--ink-faint);font-weight:600;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-tbody tr:last-child td{border-bottom:none}
-.num{text-align:right;font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
-.arm{display:inline-flex;align-items:center;gap:7px;font-weight:600}
-.dotmark{width:9px;height:9px;border-radius:50%;flex:none}
-.dm--a{background:var(--arm-a)} .dm--b{background:var(--arm-b)}
-.dm--c{background:var(--arm-c)} .dm--d{background:var(--arm-d)} .dm--e{background:var(--arm-e)}
-.tag{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-faint)}
-
-.chart{width:100%;height:auto;display:block;background:var(--panel);
-  border:1px solid var(--line);border-radius:10px;padding:8px}
-.chart__base{stroke:var(--ink-faint);stroke-width:1;stroke-dasharray:2 3}
-.chart__ref{stroke:var(--line);stroke-width:1}
-.chart__ylab{fill:var(--ink-faint);font:400 10px "JetBrains Mono",monospace}
-.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-.ln--a{stroke:var(--arm-a)} .ln--b{stroke:var(--arm-b)}
-.ln--c{stroke:var(--arm-c)} .ln--d{stroke:var(--arm-d)} .ln--e{stroke:var(--arm-e)}
-.ln--median{stroke:var(--accent);stroke-width:1.6}
-.dot{fill:var(--ink-faint)} .dot--hot{fill:var(--down)}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--ink-soft)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
-
-.notes{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
-  border-radius:8px;padding:6px 4px}
-.notes__row{padding:11px 14px;border-bottom:1px solid var(--line)}
-.notes__row:last-child{border-bottom:none}
-.notes__h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-.notes__d{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-faint)}
-.notes__t{font-weight:600;font-size:13.5px}
-.notes__b{color:var(--ink-soft);font-size:13px;margin-top:4px}
-
-.wk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px}
-.wk__head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
-.wk__arm{font-family:"Bricolage Grotesque",Georgia,serif;font-size:16px;font-weight:700}
-.wk__none{color:var(--ink-faint);font-style:italic;font-size:13px;margin-top:8px}
-.bet{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
-.bet:last-child{border-bottom:none}
-.bet__name{font-size:13.5px}
-.bet__meta{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-faint);
-  display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px}
-.bet__res{font-family:"JetBrains Mono",monospace;font-size:12.5px;text-align:right;font-weight:600}
-.pill{font-family:"JetBrains Mono",monospace;font-size:10.5px;padding:2px 7px;border-radius:5px;
-  background:var(--panel-2);color:var(--ink-soft)}
-.pill--void{background:var(--panel-2);color:var(--flat)}
-.archive{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
-.archive a{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:12px 15px;
-  text-decoration:none;color:inherit;border-bottom:1px solid var(--line)}
-.archive a:last-child{border-bottom:none}
-.archive a:hover{background:var(--panel-2)}
-.archive__md{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:700;font-size:15px;min-width:46px}
-.archive__date{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-faint)}
-.archive__n{font-size:12.5px;color:var(--ink-soft);margin-left:auto}
-.empty{color:var(--ink-faint);font-style:italic;font-size:13px}
-.disclaimer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-faint)}
-@media (max-width:560px){
-  .bet{grid-template-columns:1fr}
-  .bet__res{text-align:left}
+/* nav */
+.nav{position:sticky; top:0; z-index:40; background:color-mix(in srgb,var(--ground) 92%,transparent);
+  backdrop-filter:saturate(1.2) blur(8px); -webkit-backdrop-filter:saturate(1.2) blur(8px);
+  border-bottom:1px solid var(--line)}
+.nav__in{display:flex; align-items:center; gap:18px; min-height:60px}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:800;
+  font-stretch:115%; font-size:18px; letter-spacing:-.01em; white-space:nowrap; flex:none}
+.brand__mark{width:26px; height:26px; flex:none}
+.nav__links{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; margin-left:auto}
+.nav__links::-webkit-scrollbar{display:none}
+.nav__links a{position:relative; padding:8px 11px; border-radius:4px; text-decoration:none;
+  font-size:15px; font-weight:600; color:var(--ink-2); white-space:nowrap}
+.nav__links a:hover{color:var(--ink); background:var(--ground-2)}
+.nav__links a[aria-current="page"]{color:var(--ink)}
+.nav__links a[aria-current="page"]::after{content:""; position:absolute; left:11px; right:11px; bottom:2px;
+  height:3px; border-radius:2px; background:var(--green)}
+.theme-btn{flex:none; width:36px; height:36px; border-radius:50%; border:1px solid var(--line-strong);
+  background:transparent; color:var(--ink); display:grid; place-items:center; cursor:pointer}
+.theme-btn:hover{background:var(--ground-2)}
+.theme-btn svg{width:18px; height:18px}
+@media (max-width:900px){
+  .nav__in{flex-wrap:wrap; gap:0 12px; padding-top:8px}
+  .theme-btn{margin-left:auto}
+  .nav__links{order:3; width:100%; margin:0 -11px; padding-bottom:4px}
 }
+
+/* print panels (cover + page headers) */
+.print{background:var(--print); color:var(--print-ink); border-radius:6px; overflow:hidden;
+  box-shadow:0 0 0 1px var(--print-edge)}
+.print a{color:var(--print-ink)}
+.cover{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); margin-top:24px}
+.cover__text{padding:clamp(24px,3.6vw,48px); display:flex; flex-direction:column; gap:20px; justify-content:center}
+.cover h1{font-size:clamp(42px,5.4vw,68px); font-stretch:110%}
+.cover__kicker{font:600 15px "Archivo",sans-serif; color:var(--print-ink-2)}
+.cover__art{position:relative; min-height:100%}
+.cover__art img{width:100%; height:100%; object-fit:cover; object-position:right center}
+.roundel{position:absolute; right:clamp(14px,2.4vw,28px); top:clamp(14px,2.4vw,28px);
+  width:clamp(104px,11vw,132px); aspect-ratio:1; border-radius:50%; background:var(--print);
+  color:var(--print-ink); display:grid; place-content:center; text-align:center;
+  box-shadow:0 0 0 3px var(--print), 0 0 0 5px #E2423B; font-family:"Archivo",sans-serif;
+  transform:rotate(-6deg)}
+.roundel__n{font-size:clamp(38px,4.4vw,52px); font-weight:900; font-stretch:80%; line-height:.9}
+.roundel__l{font-size:12.5px; font-weight:700; line-height:1.15; margin-top:2px}
+@media (max-width:820px){
+  .cover{grid-template-columns:1fr}
+  .cover__art{aspect-ratio:16/10}
+}
+
+.pagehead{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); margin-top:24px}
+.pagehead__text{padding:clamp(20px,3vw,36px); display:flex; flex-direction:column; gap:12px; justify-content:center}
+.pagehead h1{font-size:clamp(34px,4.2vw,54px); font-stretch:104%; overflow-wrap:anywhere}
+.pagehead p{color:var(--print-ink-2); max-width:38ch}
+.pagehead__art img{width:100%; height:100%; object-fit:cover}
+@media (max-width:820px){
+  .pagehead{grid-template-columns:1fr}
+  .pagehead__art{order:-1; aspect-ratio:2.2/1}
+}
+
+/* sections */
+section{margin-top:clamp(44px,6vw,72px)}
+.sec-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 24px;
+  margin-bottom:18px; padding-top:14px; border-top:3px solid var(--ink)}
+.sec-head p{color:var(--ink-3); font-size:15.5px; max-width:60ch}
+.sec-head a{font:600 15px "Archivo",sans-serif}
+
+/* verdict */
+.verdict{display:grid; grid-template-columns:auto 1fr; gap:6px 28px; align-items:center;
+  padding:22px 0; border-bottom:1px solid var(--line)}
+.verdict__q{font:600 16px "Archivo",sans-serif; color:var(--ink-2); grid-column:1/-1}
+.verdict__a{font:900 clamp(48px,7vw,88px)/.9 "Archivo",sans-serif; font-stretch:72%; letter-spacing:-.01em}
+.verdict__why{max-width:58ch; color:var(--ink-2)}
+@media (max-width:640px){ .verdict{grid-template-columns:1fr} }
+
+/* stats */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+.stat{padding:16px 18px 16px 0}
+.stat+.stat{padding-left:18px; border-left:1px solid var(--line)}
+.stat__k{font-size:14px; font-weight:600; color:var(--ink-3)}
+.stat__v{font-size:clamp(28px,3vw,36px); font-weight:800; font-stretch:80%; line-height:1.1;
+  font-variant-numeric:tabular-nums; margin-top:2px}
+.stat__n{font-size:13.5px; color:var(--ink-3); margin-top:2px; line-height:1.4}
+@media (max-width:560px){
+  .stat+.stat{padding-left:0; border-left:0; border-top:1px solid var(--line)}
+}
+
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+
+/* team sheet: programme player cards */
+.sheet{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px}
+@media (max-width:1080px){ .sheet{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:600px){ .sheet{grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px} }
+.card{position:relative; background:var(--card); border:1px solid var(--line); border-radius:6px;
+  overflow:hidden; display:flex; flex-direction:column; text-decoration:none}
+.card__art{background:var(--print); aspect-ratio:1; border-bottom:4px solid var(--arm)}
+.card__art img{width:100%; height:100%; object-fit:cover}
+.card__tag{position:absolute; left:10px; top:10px; width:34px; height:34px; border-radius:50%;
+  background:var(--arm); color:#fff; display:grid; place-items:center;
+  font:800 17px "Archivo",sans-serif; box-shadow:0 0 0 3px var(--print)}
+.card__body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:2px; flex:1}
+.card__name{font:800 19px/1.15 "Archivo",sans-serif; font-stretch:108%}
+.card__rule{font:500 14px/1.35 "Archivo",sans-serif; color:var(--ink-3)}
+.card__nums{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:auto; padding-top:12px}
+.card__k{font:600 12.5px "Archivo",sans-serif; color:var(--ink-3)}
+.card__v{font:800 20px/1.1 "Archivo",sans-serif; font-stretch:82%; font-variant-numeric:tabular-nums}
+a.card:hover{border-color:var(--line-strong)}
+a.card:hover .card__name{text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:3px}
+.card--market{border-style:dashed}
+.arm-a{--arm:var(--arm-a)} .arm-b{--arm:var(--arm-b)} .arm-c{--arm:var(--arm-c)}
+.arm-d{--arm:var(--arm-d)} .arm-e{--arm:var(--arm-e)} .arm-m{--arm:var(--arm-m)}
+
+/* arm chip used in tables */
+.chip{display:inline-flex; align-items:center; gap:8px; font-weight:700}
+.chip i{width:22px; height:22px; border-radius:50%; background:var(--arm); color:#fff; font-style:normal;
+  display:grid; place-items:center; font-size:12px; font-weight:800; flex:none}
+:root[data-theme="dark"] .chip i, :root[data-theme="dark"] .card__tag{color:#131A24}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .chip i, :root:not([data-theme="light"]) .card__tag{color:#131A24}
+}
+
+/* tables */
+.scroller{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:15px; font-variant-numeric:tabular-nums}
+th{text-align:left; font-size:13.5px; font-weight:600; color:var(--ink-3); padding:10px 12px;
+  border-bottom:2px solid var(--ink); white-space:nowrap; vertical-align:bottom}
+td{padding:11px 12px; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child,td:first-child{padding-left:0}
+td.wrapcell{white-space:normal; min-width:240px}
+th.r,td.r{text-align:right}
+th button{all:unset; cursor:pointer; display:inline-flex; gap:4px; align-items:center}
+th button:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+th[aria-sort] button::after{content:""; border:4px solid transparent; margin-top:2px}
+th[aria-sort="descending"] button::after{border-top-color:currentColor; margin-top:6px}
+th[aria-sort="ascending"] button::after{border-bottom-color:currentColor; margin-top:-2px}
+.tnote{font-size:14px; color:var(--ink-3); margin-top:10px; max-width:72ch}
+
+/* charts */
+.chart{width:100%; height:auto; display:block; overflow:visible}
+.chart-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch}
+@media (max-width:700px){ .chart-wrap .chart{min-width:660px} }
+.chart text{font-family:"Archivo",sans-serif}
+.ax{fill:var(--ink-3); font-size:12px}
+.grid-l{stroke:var(--line); stroke-width:1}
+.base-l{stroke:var(--ink-3); stroke-width:1.2; stroke-dasharray:3 4}
+.ref-l{stroke:var(--red); stroke-width:1.2; stroke-dasharray:6 4}
+.ref-t{fill:var(--red); font-size:12.5px; font-weight:700}
+.ln{fill:none; stroke-width:2.4; stroke-linejoin:round; stroke-linecap:round; stroke:var(--arm)}
+.ln-lab{font-size:13px; font-weight:800; fill:var(--arm)}
+.med-l{fill:none; stroke:var(--green); stroke-width:2; stroke-linejoin:round}
+.dot{fill:var(--ink-3); opacity:.55} .dot--hot{fill:var(--red); opacity:1}
+.clip{fill:none; stroke:var(--red); stroke-width:1.6}
+.clip-t{fill:var(--ink-3); font-size:12px}
+.legend{display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:12px; font:500 14px "Archivo",sans-serif; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:7px}
+.legend i{width:16px; height:3px; border-radius:2px; background:var(--k)}
+.legend i.o{width:9px; height:9px; border-radius:50%}
+
+/* bet lists */
+.armblock{padding:18px 0; border-bottom:1px solid var(--line)}
+.armblock:first-of-type{padding-top:4px}
+.armblock__h{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:6px}
+.armblock__h img{width:44px; height:44px; border-radius:50%; background:var(--print);
+  box-shadow:0 0 0 2px var(--arm)}
+.armblock__h .sub{font:500 14px "Archivo",sans-serif; color:var(--ink-3)}
+.armblock__n{margin-left:auto; font:600 14px "Archivo",sans-serif; color:var(--ink-3)}
+.bet{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 16px; padding:10px 0;
+  border-top:1px solid var(--line)}
+.bet:first-of-type{border-top:0}
+.bet__name{font-size:16px}
+.bet__meta{font:500 13.5px "Archivo",sans-serif; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:2px 14px;
+  font-variant-numeric:tabular-nums}
+.bet__res{font:700 15px "Archivo",sans-serif; text-align:right; font-variant-numeric:tabular-nums; align-self:center}
+.pill{display:inline-block; font:600 12.5px "Archivo",sans-serif; padding:2px 8px; border-radius:3px;
+  background:var(--ground-2); color:var(--ink-3)}
+.empty{color:var(--ink-3); font-style:italic}
+@media (max-width:560px){ .bet{grid-template-columns:1fr} .bet__res{text-align:left} }
+
+/* arm profiles */
+.profile{display:grid; grid-template-columns:240px minmax(0,1fr); gap:28px; padding:32px 0;
+  border-bottom:1px solid var(--line); scroll-margin-top:80px}
+.profile:first-of-type{padding-top:8px}
+.profile__art{background:var(--print); border-radius:6px; overflow:hidden; aspect-ratio:1;
+  border-bottom:5px solid var(--arm); align-self:start}
+.profile__h{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.profile__rule{font:600 16px "Archivo",sans-serif; color:var(--arm); margin-top:4px}
+.profile .prose{margin-top:12px}
+.profile .stats{margin-top:18px}
+.form{display:flex; gap:4px; flex-wrap:wrap; margin-top:14px; align-items:center}
+.form__k{font:600 14px "Archivo",sans-serif; color:var(--ink-3); margin-right:6px}
+.form b{width:24px; height:24px; border-radius:3px; display:grid; place-items:center;
+  font:800 12px "Archivo",sans-serif; color:#fff}
+.form .w{background:var(--up)} .form .l{background:var(--down)}
+.extremes{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px}
+.extremes div{border-left:3px solid var(--line-strong); padding-left:12px}
+.extremes .k{font:600 13.5px "Archivo",sans-serif; color:var(--ink-3)}
+@media (max-width:720px){
+  .profile{grid-template-columns:1fr}
+  .profile__art{max-width:220px}
+  .extremes{grid-template-columns:1fr}
+}
+
+/* matchweek covers */
+.issues{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px}
+.issue{display:flex; flex-direction:column; gap:6px; text-decoration:none; background:var(--print);
+  color:var(--print-ink); border-radius:5px; padding:16px; min-height:190px; position:relative;
+  box-shadow:0 0 0 1px var(--print-edge); border-top:8px solid var(--issue,#00895A)}
+.issue:nth-child(even){--issue:#E2423B}
+.issue:hover{box-shadow:0 0 0 2px var(--print-ink)}
+.issue__n{font:900 64px/.85 "Archivo",sans-serif; font-stretch:72%; letter-spacing:-.02em}
+.issue__l{font:700 14px "Archivo",sans-serif}
+.issue__d{font:500 14px "Archivo",sans-serif; color:var(--print-ink-2)}
+.issue__s{margin-top:auto; font:600 14px "Archivo",sans-serif; color:var(--print-ink-2);
+  font-variant-numeric:tabular-nums}
+.issue--live{box-shadow:0 0 0 2px #E2423B}
+
+/* steps + log */
+.steps{list-style:none; padding:0; margin:0; display:grid; gap:0; counter-reset:s}
+.steps li{display:grid; grid-template-columns:56px minmax(0,1fr); gap:16px; padding:18px 0;
+  border-bottom:1px solid var(--line); counter-increment:s}
+.steps li::before{content:counter(s); font:900 40px/1 "Archivo",sans-serif; font-stretch:72%; color:var(--green)}
+.steps h3{margin-bottom:4px}
+.log{display:grid; gap:0}
+.log__row{display:grid; grid-template-columns:120px minmax(0,1fr); gap:16px; padding:16px 0;
+  border-bottom:1px solid var(--line)}
+.log__d{font:600 14px "Archivo",sans-serif; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.log__row h3{font-size:18px; margin-bottom:4px}
+.log__row p{color:var(--ink-2); font-size:16px; max-width:70ch}
+@media (max-width:560px){ .log__row{grid-template-columns:1fr; gap:4px} }
+.glossary{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px 28px}
+.glossary dt{font:800 17px "Archivo",sans-serif}
+.glossary dd{margin:2px 0 0; color:var(--ink-2); font-size:16px}
+
+.teasers{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+.teaser{display:block; text-decoration:none; padding:18px 20px; border:1px solid var(--line);
+  border-radius:6px; background:var(--card)}
+.teaser:hover{border-color:var(--line-strong)}
+.teaser h3{margin-bottom:6px}
+.teaser p{color:var(--ink-2); font-size:16px}
+.teaser .go{display:inline-block; margin-top:10px; font:700 15px "Archivo",sans-serif; color:var(--green)}
+
+.crumbs{margin-top:20px; font:600 15px "Archivo",sans-serif}
+.crumbs a{color:var(--ink-2)}
+
+/* footer */
+.foot{margin-top:clamp(56px,8vw,96px); border-top:3px solid var(--ink); padding-block:22px 40px}
+.foot__in{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px 40px}
+.foot p{font-size:15px; color:var(--ink-2); max-width:68ch}
+.foot nav{display:flex; flex-wrap:wrap; gap:6px 16px; font:600 14.5px "Archivo",sans-serif; align-content:start}
+.foot nav a{color:var(--ink-2)}
+@media (max-width:720px){ .foot__in{grid-template-columns:1fr} }
+
+@media (prefers-reduced-motion:no-preference){
+  .roundel{animation:stamp .5s cubic-bezier(.2,.9,.3,1.3) .15s both}
+  @keyframes stamp{from{opacity:0; transform:rotate(-18deg) scale(1.35)} to{opacity:1; transform:rotate(-6deg) scale(1)}}
+}
+@media print{ .nav,.theme-btn{display:none} }
 </style>
-</head><body><div class="wrap"><header class="masthead"><div><div class="eyebrow">2026/27 · Premier League + La Liga</div><h1>Divergence Lab</h1></div><div class="masthead__sub">data through 2026-11-22</div></header><p class="lede">Four arms of $10,000 fake money, no reloads. The sharp consensus is treated as truth; each arm bets only where Kalshi disagrees with it by more than a set margin. <strong>A</strong> sizes with quarter-Kelly, <strong>B</strong> flat, <strong>C</strong> prices off the model instead of the market (the control, expected to lose), <strong>D</strong> builds same-game parlays. Every bet is committed before kickoff. The question that matters is not the P&amp;L — it is whether any arm beats the closing line.</p><section><div class="grid"><div class="stat"><div class="stat__k">Matchweeks staked</div><div class="stat__v">14</div><div class="stat__n">173 bets placed · 49 voided</div></div><div class="stat"><div class="stat__k">Bets placed</div><div class="stat__v">173</div><div class="stat__n">excludes voided phantom-edge bets</div></div><div class="stat"><div class="stat__k">CLV leader</div><div class="stat__v">None yet</div><div class="stat__n">no arm beats the line — best is C at -0.7%</div></div><div class="stat"><div class="stat__k">Beating the market?</div><div class="stat__v">Not yet</div><div class="stat__n">no arm has beaten its closing line</div></div></div></section><section><div class="section__head"><h2>Season scoreboard</h2><span class="section__note">Sorted by closing-line value (CLV) — the real signal at this sample size. A dash means too few settled bets with a captured closing price to score.</span></div><div class="scroller"><table><thead><tr><th>Arm</th><th class='num'>Bankroll</th><th class='num'>Equity</th><th class='num'>P&amp;L</th><th class='num'>ROI</th><th class='num'>W&ndash;L</th><th class='num'>CLV</th><th class='num' title='Closing-line value in probability points, which longshots cannot dominate'>CLV pts</th><th class='num' title='CLV in points against the closing bid/ask midpoint: the one comparable across taker and maker arms'>CLV mid</th><th class='num'>Exposure</th></tr></thead><tbody><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span> <span class="tag">Model-only + quarter-Kelly</span></td><td class="num">4,855</td><td class="num">6,892</td><td class="num down">-3,108</td><td class="num down">-12.1%</td><td class="num">48–101–25v</td><td class="num down">-0.7%</td><td class="num flat">—</td><td class="num flat">—</td><td class="num">2,037</td></tr><tr><td><span class="arm"><span class="dotmark dm--a"></span>A</span> <span class="tag">Divergence + quarter-Kelly</span></td><td class="num">10,658</td><td class="num">10,658</td><td class="num up">+658</td><td class="num up">+106.7%</td><td class="num">2–0–12v</td><td class="num flat">—</td><td class="num flat">—</td><td class="num flat">—</td><td class="num">0</td></tr><tr><td><span class="arm"><span class="dotmark dm--b"></span>B</span> <span class="tag">Divergence + flat 1%</span></td><td class="num">10,213</td><td class="num">10,213</td><td class="num up">+213</td><td class="num up">+106.7%</td><td class="num">2–0–12v</td><td class="num flat">—</td><td class="num flat">—</td><td class="num flat">—</td><td class="num">0</td></tr><tr><td><span class="arm"><span class="dotmark dm--d"></span>D</span> <span class="tag">Parlay / SGP</span></td><td class="num">10,229</td><td class="num">10,229</td><td class="num up">+229</td><td class="num up">+228.6%</td><td class="num">1–0–1v</td><td class="num flat">—</td><td class="num flat">—</td><td class="num flat">—</td><td class="num">0</td></tr><tr><td><span class="arm"><span class="dotmark dm--e"></span>E</span> <span class="tag">Maker limit orders + flat 1%</span></td><td class="num">10,000</td><td class="num">10,000</td><td class="num flat">+0</td><td class="num flat">—</td><td class="num">0–0</td><td class="num flat">—</td><td class="num flat">—</td><td class="num flat">—</td><td class="num">0</td></tr></tbody></table></div><p class="section__note" style="margin-top:8px">No arm has positive CLV yet. C is ranked first only because it is the one arm with enough settled bets to score at all, and its number is negative.</p></section><section><div class="section__head"><h2>This week</h2><span class="section__note">What the bots did on the latest run, the freshest divergence reading, and every open position.</span></div><div class="grid"><div class="stat"><div class="stat__k">Last stake run</div><div class="stat__v">2026-11-20</div><div class="stat__n">324 markets · 20 fixtures in a 7-day window</div></div><div class="stat"><div class="stat__k">Placed this run</div><div class="stat__v">C×5</div><div class="stat__n">A/B fire only above a 2% net edge; D above 5%</div></div><div class="stat"><div class="stat__k">Latest divergence reading</div><div class="stat__v">+0.0%</div><div class="stat__n">max vs sharp · median +0.0% · 0 market(s) over the 2% bar</div></div></div><div class="scroller" style="margin-top:12px"><table><thead><tr><th>Arm</th><th>Open position</th><th class='num'>Stake</th><th class='num'>Fill</th><th class='num'>Fair</th><th class='num'>Kickoff</th></tr></thead><tbody><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Real Madrid vs Celta Vigo — Under 2.5 Goals</td><td class="num">207</td><td class="num">0.32</td><td class="num">0.43</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Real Madrid vs Celta Vigo — Moneyline: Draw</td><td class="num">146</td><td class="num">0.11</td><td class="num">0.19</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Athletic Bilbao vs Espanyol — Under 2.5 Goals</td><td class="num">196</td><td class="num">0.48</td><td class="num">0.57</td><td class="num">2026-11-20</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Manchester City vs Fulham — Under 2.5 Goals</td><td class="num">178</td><td class="num">0.37</td><td class="num">0.46</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Newcastle vs Arsenal — Moneyline: Newcastle Win</td><td class="num">120</td><td class="num">0.16</td><td class="num">0.23</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Athletic Bilbao vs Espanyol — Moneyline: Espanyol Win</td><td class="num">114</td><td class="num">0.14</td><td class="num">0.21</td><td class="num">2026-11-20</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Barcelona vs Villarreal — Moneyline: Villarreal Win</td><td class="num">86</td><td class="num">0.08</td><td class="num">0.14</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Sevilla vs Real Betis — Moneyline: Sevilla Win</td><td class="num">91</td><td class="num">0.31</td><td class="num">0.37</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Newcastle vs Arsenal — Under 2.5 Goals</td><td class="num">110</td><td class="num">0.46</td><td class="num">0.52</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Hull vs Brighton — Moneyline: Hull Win</td><td class="num">162</td><td class="num">0.15</td><td class="num">0.26</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Getafe vs Atletico Madrid — Under 2.5 Goals</td><td class="num">164</td><td class="num">0.55</td><td class="num">0.66</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Hull vs Brighton — Under 2.5 Goals</td><td class="num">160</td><td class="num">0.44</td><td class="num">0.54</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Getafe vs Atletico Madrid — Moneyline: Getafe Win</td><td class="num">109</td><td class="num">0.17</td><td class="num">0.24</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Brentford vs Everton — Under 2.5 Goals</td><td class="num">121</td><td class="num">0.47</td><td class="num">0.54</td><td class="num">2026-11-23</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Coventry vs Crystal Palace — Moneyline: Crystal Palace Win</td><td class="num">73</td><td class="num">0.34</td><td class="num">0.40</td><td class="num">2026-11-21</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Barcelona vs Villarreal — Under 2.5 Goals</td><td class="num">97</td><td class="num">0.19</td><td class="num">0.27</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Brentford vs Everton — Both Teams To Score: NO</td><td class="num">116</td><td class="num">0.42</td><td class="num">0.49</td><td class="num">2026-11-23</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Athletic Bilbao vs Espanyol — Both Teams To Score: NO</td><td class="num">111</td><td class="num">0.47</td><td class="num">0.54</td><td class="num">2026-11-20</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Osasuna vs Malaga — Moneyline: Osasuna Win</td><td class="num">117</td><td class="num">0.53</td><td class="num">0.60</td><td class="num">2026-11-22</td></tr><tr><td><span class="arm"><span class="dotmark dm--c"></span>C</span></td><td>Rayo Vallecano vs Valencia — Under 2.5 Goals</td><td class="num">107</td><td class="num">0.53</td><td class="num">0.59</td><td class="num">2026-11-21</td></tr></tbody></table></div></section><section><div class="section__head"><h2>Equity per arm</h2><span class="section__note">Fake bankroll after each settlement. The dashed line is the $10,000 start.</span></div><svg viewBox="0 0 720 220" class="chart" role="img" aria-label="Equity per arm over the season"><line x1="52" y1="82.2" x2="706" y2="82.2" class="chart__base"/><text x="46" y="85.2" class="chart__ylab" text-anchor="end">10k</text><text x="46" y="21.0" class="chart__ylab" text-anchor="end">12.2k</text><text x="46" y="196.0" class="chart__ylab" text-anchor="end">6.5k</text><polyline points="52.0,82.2 95.6,82.2 139.2,82.2 182.8,82.2 226.4,82.2 270.0,68.2 313.6,68.2 357.2,60.8 400.8,60.8 444.4,60.8 488.0,60.8 531.6,60.8 575.2,60.8 618.8,60.8 662.4,60.8 706.0,60.8" class="ln ln--a"/><polyline points="52.0,82.2 95.6,82.2 139.2,82.2 182.8,82.2 226.4,82.2 270.0,77.6 313.6,77.6 357.2,75.3 400.8,75.3 444.4,75.3 488.0,75.3 531.6,75.3 575.2,75.3 618.8,75.3 662.4,75.3 706.0,75.3" class="ln ln--b"/><polyline points="52.0,82.2 95.6,82.2 139.2,101.5 182.8,104.9 226.4,83.3 270.0,24.7 313.6,50.9 357.2,39.5 400.8,39.5 444.4,39.5 488.0,146.4 531.6,169.8 575.2,167.7 618.8,154.6 662.4,183.3 706.0,183.3" class="ln ln--c"/><polyline points="52.0,82.2 95.6,82.2 139.2,82.2 182.8,82.2 226.4,82.2 270.0,82.2 313.6,82.2 357.2,74.8 400.8,74.8 444.4,74.8 488.0,74.8 531.6,74.8 575.2,74.8 618.8,74.8 662.4,74.8 706.0,74.8" class="ln ln--d"/><polyline points="52.0,82.2 95.6,82.2 139.2,82.2 182.8,82.2 226.4,82.2 270.0,82.2 313.6,82.2 357.2,82.2 400.8,82.2 444.4,82.2 488.0,82.2 531.6,82.2 575.2,82.2 618.8,82.2 662.4,82.2 706.0,82.2" class="ln ln--e"/></svg><div class="legend"><span><i style="background:var(--arm-a)"></i>A</span><span><i style="background:var(--arm-b)"></i>B</span><span><i style="background:var(--arm-c)"></i>C</span><span><i style="background:var(--arm-d)"></i>D</span><span><i style="background:var(--arm-e)"></i>E</span></div></section><section><div class="section__head"><h2>Does an edge ever appear?</h2><span class="section__note">Max (dots) and median (line) Kalshi divergence from de-vigged fair on every stake and snapshot run. Dots turn red when at least one market cleared the 2% bar. Two contaminated readings are excluded, and maxima before 22 Sep include live, in-play markets — see Data integrity.</span></div><svg viewBox="0 0 720 220" class="chart" role="img" aria-label="Maximum and median Kalshi divergence per run"><line x1="46" y1="182.3" x2="706" y2="182.3" class="chart__base"/><text x="40" y="185.3" class="chart__ylab" text-anchor="end">0</text><line x1="46" y1="176.4" x2="706" y2="176.4" class="chart__ref"/><text x="40" y="179.4" class="chart__ylab" text-anchor="end">2%</text><line x1="46" y1="167.6" x2="706" y2="167.6" class="chart__ref"/><text x="40" y="170.6" class="chart__ylab" text-anchor="end">5%</text><polyline points="46.0,190.5 50.9,193.3 55.7,191.2 60.6,190.6 65.4,188.7 70.3,188.8 75.1,188.4 80.0,188.2 84.8,188.7 89.7,188.7 94.5,189.2 99.4,187.9 104.2,188.7 109.1,188.0 113.9,187.8 118.8,187.8 123.6,188.0 128.5,187.2 133.4,187.2 138.2,188.5 147.9,189.0 152.8,189.2 157.6,188.6 162.5,189.8 167.3,190.5 172.2,189.8 177.0,190.4 181.9,188.9 186.7,196.0 191.6,189.1 196.4,189.2 201.3,189.2 206.1,189.1 211.0,189.0 215.9,188.8 220.7,189.4 225.6,188.7 230.4,188.8 235.3,188.6 240.1,188.8 245.0,188.5 249.8,189.0 254.7,188.1 259.5,188.0 264.4,190.2 274.1,188.9 278.9,188.7 283.8,188.7 288.6,189.2 293.5,188.9 303.2,188.8 308.1,189.0 312.9,189.4 317.8,189.8 322.6,189.8 327.5,189.8 332.3,189.2 337.2,189.9 342.0,188.9 346.9,188.8 351.7,188.8 356.6,189.2 361.4,188.9 366.3,189.1 371.1,189.1 376.0,189.7 380.9,189.7 385.7,189.1 390.6,189.1 395.4,189.1 400.3,189.2 405.1,190.2 410.0,190.2 414.8,190.1 419.7,190.1 424.5,189.6 429.4,189.5 434.2,189.9 439.1,189.5 443.9,189.0 448.8,189.0 453.6,189.0 458.5,189.2 463.4,189.3 468.2,189.3 473.1,189.1 477.9,189.2 482.8,189.9 487.6,189.0 492.5,189.8 570.1,188.5 575.0,188.8 579.8,189.1 584.7,189.1 589.5,189.2 594.4,189.6 599.2,189.7 604.1,190.1 608.9,190.1 613.8,189.2 618.6,189.0 623.5,189.0 628.4,188.8 633.2,189.5 638.1,189.0 642.9,189.0 647.8,188.6 652.6,188.8 657.5,188.7 662.3,188.9 667.2,188.5 672.0,189.1 676.9,189.4 681.7,189.7 686.6,189.0 691.4,188.5 696.3,188.5 701.1,189.1 706.0,189.5" class="ln ln--median"/><circle cx="46.0" cy="180.3" r="2.6" class="dot"/><circle cx="50.9" cy="183.0" r="2.6" class="dot"/><circle cx="55.7" cy="180.1" r="2.6" class="dot"/><circle cx="60.6" cy="175.1" r="2.6" class="dot dot--hot"/><circle cx="65.4" cy="182.2" r="2.6" class="dot"/><circle cx="70.3" cy="182.2" r="2.6" class="dot"/><circle cx="75.1" cy="182.0" r="2.6" class="dot"/><circle cx="80.0" cy="182.0" r="2.6" class="dot"/><circle cx="84.8" cy="181.5" r="2.6" class="dot"/><circle cx="89.7" cy="181.7" r="2.6" class="dot"/><circle cx="94.5" cy="177.0" r="2.6" class="dot"/><circle cx="99.4" cy="181.8" r="2.6" class="dot"/><circle cx="104.2" cy="183.0" r="2.6" class="dot"/><circle cx="109.1" cy="171.9" r="2.6" class="dot dot--hot"/><circle cx="113.9" cy="181.5" r="2.6" class="dot"/><circle cx="118.8" cy="174.8" r="2.6" class="dot dot--hot"/><circle cx="123.6" cy="178.0" r="2.6" class="dot"/><circle cx="128.5" cy="182.3" r="2.6" class="dot"/><circle cx="133.4" cy="181.5" r="2.6" class="dot"/><circle cx="138.2" cy="182.4" r="2.6" class="dot"/><circle cx="147.9" cy="183.2" r="2.6" class="dot"/><circle cx="152.8" cy="169.9" r="2.6" class="dot dot--hot"/><circle cx="157.6" cy="178.5" r="2.6" class="dot"/><circle cx="162.5" cy="178.5" r="2.6" class="dot"/><circle cx="167.3" cy="175.5" r="2.6" class="dot dot--hot"/><circle cx="172.2" cy="155.7" r="2.6" class="dot dot--hot"/><circle cx="177.0" cy="165.0" r="2.6" class="dot dot--hot"/><circle cx="181.9" cy="180.5" r="2.6" class="dot"/><circle cx="186.7" cy="181.7" r="2.6" class="dot"/><circle cx="191.6" cy="180.0" r="2.6" class="dot"/><circle cx="196.4" cy="24.2" r="2.6" class="dot dot--hot"/><circle cx="201.3" cy="142.9" r="2.6" class="dot dot--hot"/><circle cx="206.1" cy="142.9" r="2.6" class="dot dot--hot"/><circle cx="211.0" cy="95.1" r="2.6" class="dot dot--hot"/><circle cx="215.9" cy="140.5" r="2.6" class="dot dot--hot"/><circle cx="220.7" cy="159.6" r="2.6" class="dot dot--hot"/><circle cx="225.6" cy="181.9" r="2.6" class="dot"/><circle cx="230.4" cy="181.5" r="2.6" class="dot"/><circle cx="235.3" cy="182.1" r="2.6" class="dot"/><circle cx="240.1" cy="12.0" r="2.6" class="dot dot--hot"/><circle cx="245.0" cy="141.3" r="2.6" class="dot dot--hot"/><circle cx="249.8" cy="171.3" r="2.6" class="dot dot--hot"/><circle cx="254.7" cy="145.8" r="2.6" class="dot dot--hot"/><circle cx="259.5" cy="96.5" r="2.6" class="dot dot--hot"/><circle cx="264.4" cy="151.2" r="2.6" class="dot dot--hot"/><circle cx="274.1" cy="187.6" r="2.6" class="dot"/><circle cx="278.9" cy="183.5" r="2.6" class="dot"/><circle cx="283.8" cy="183.5" r="2.6" class="dot"/><circle cx="288.6" cy="183.7" r="2.6" class="dot"/><circle cx="293.5" cy="180.7" r="2.6" class="dot"/><circle cx="303.2" cy="183.1" r="2.6" class="dot"/><circle cx="308.1" cy="183.4" r="2.6" class="dot"/><circle cx="312.9" cy="179.4" r="2.6" class="dot"/><circle cx="317.8" cy="184.5" r="2.6" class="dot"/><circle cx="322.6" cy="183.3" r="2.6" class="dot"/><circle cx="327.5" cy="183.3" r="2.6" class="dot"/><circle cx="332.3" cy="181.8" r="2.6" class="dot"/><circle cx="337.2" cy="184.2" r="2.6" class="dot"/><circle cx="342.0" cy="182.1" r="2.6" class="dot"/><circle cx="346.9" cy="181.8" r="2.6" class="dot"/><circle cx="351.7" cy="179.7" r="2.6" class="dot"/><circle cx="356.6" cy="181.9" r="2.6" class="dot"/><circle cx="361.4" cy="182.0" r="2.6" class="dot"/><circle cx="366.3" cy="183.2" r="2.6" class="dot"/><circle cx="371.1" cy="183.2" r="2.6" class="dot"/><circle cx="376.0" cy="183.2" r="2.6" class="dot"/><circle cx="380.9" cy="183.2" r="2.6" class="dot"/><circle cx="385.7" cy="183.0" r="2.6" class="dot"/><circle cx="390.6" cy="129.7" r="2.6" class="dot dot--hot"/><circle cx="395.4" cy="129.7" r="2.6" class="dot dot--hot"/><circle cx="400.3" cy="129.7" r="2.6" class="dot dot--hot"/><circle cx="405.1" cy="72.5" r="2.6" class="dot dot--hot"/><circle cx="410.0" cy="69.5" r="2.6" class="dot dot--hot"/><circle cx="414.8" cy="69.5" r="2.6" class="dot dot--hot"/><circle cx="419.7" cy="69.5" r="2.6" class="dot dot--hot"/><circle cx="424.5" cy="182.7" r="2.6" class="dot"/><circle cx="429.4" cy="181.1" r="2.6" class="dot"/><circle cx="434.2" cy="184.3" r="2.6" class="dot"/><circle cx="439.1" cy="181.8" r="2.6" class="dot"/><circle cx="443.9" cy="181.6" r="2.6" class="dot"/><circle cx="448.8" cy="181.6" r="2.6" class="dot"/><circle cx="453.6" cy="182.8" r="2.6" class="dot"/><circle cx="458.5" cy="183.0" r="2.6" class="dot"/><circle cx="463.4" cy="182.7" r="2.6" class="dot"/><circle cx="468.2" cy="183.9" r="2.6" class="dot"/><circle cx="473.1" cy="183.9" r="2.6" class="dot"/><circle cx="477.9" cy="183.9" r="2.6" class="dot"/><circle cx="482.8" cy="183.9" r="2.6" class="dot"/><circle cx="487.6" cy="181.8" r="2.6" class="dot"/><circle cx="492.5" cy="176.5" r="2.6" class="dot"/><circle cx="570.1" cy="184.1" r="2.6" class="dot"/><circle cx="575.0" cy="183.4" r="2.6" class="dot"/><circle cx="579.8" cy="183.5" r="2.6" class="dot"/><circle cx="584.7" cy="183.7" r="2.6" class="dot"/><circle cx="589.5" cy="181.9" r="2.6" class="dot"/><circle cx="594.4" cy="182.0" r="2.6" class="dot"/><circle cx="599.2" cy="182.0" r="2.6" class="dot"/><circle cx="604.1" cy="182.9" r="2.6" class="dot"/><circle cx="608.9" cy="182.9" r="2.6" class="dot"/><circle cx="613.8" cy="181.7" r="2.6" class="dot"/><circle cx="618.6" cy="183.7" r="2.6" class="dot"/><circle cx="623.5" cy="184.1" r="2.6" class="dot"/><circle cx="628.4" cy="184.0" r="2.6" class="dot"/><circle cx="633.2" cy="183.9" r="2.6" class="dot"/><circle cx="638.1" cy="184.3" r="2.6" class="dot"/><circle cx="642.9" cy="185.0" r="2.6" class="dot"/><circle cx="647.8" cy="180.3" r="2.6" class="dot"/><circle cx="652.6" cy="177.8" r="2.6" class="dot"/><circle cx="657.5" cy="177.8" r="2.6" class="dot"/><circle cx="662.3" cy="177.8" r="2.6" class="dot"/><circle cx="667.2" cy="178.6" r="2.6" class="dot"/><circle cx="672.0" cy="178.5" r="2.6" class="dot"/><circle cx="676.9" cy="178.5" r="2.6" class="dot"/><circle cx="681.7" cy="178.8" r="2.6" class="dot"/><circle cx="686.6" cy="178.9" r="2.6" class="dot"/><circle cx="691.4" cy="180.6" r="2.6" class="dot"/><circle cx="696.3" cy="179.6" r="2.6" class="dot"/><circle cx="701.1" cy="182.9" r="2.6" class="dot"/><circle cx="706.0" cy="182.5" r="2.6" class="dot"/></svg><div class="legend"><span><i style="background:var(--accent)"></i>median</span><span><i style="background:var(--ink-faint)"></i>max</span><span><i style="background:var(--down)"></i>max, cleared 2%</span></div></section><section><div class="section__head"><h2>Data integrity</h2><span class="section__note">8 bugs found and fixed so far. Each produced plausible wrong numbers rather than an error. Every figure on this site is post-fix and post-void.</span></div><div class="notes"><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-08-20</span><span class="notes__t">Cross-league model pricing</span></div><div class="notes__b">collect_model_probs priced every fixture with the last league's model, manufacturing a ~35-point fake edge (commit 50f4e16). Invisible while only one league had fixtures in the betting window.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-04</span><span class="notes__t">Kalshi rules-text template change</span></div><div class="notes__b">Kalshi changed its market-description wording with no notice, breaking team-name parsing for every market. The pipeline reported “no in-scope markets”, indistinguishable from an outage. Fixed by anchoring the fixture parse on “the X vs Y professional”.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-04</span><span class="notes__t">Totals line mismatch — 24 bets voided</span></div><div class="notes__b">Once parsing was fixed, totals markets flowed for the first time and exposed that opportunities were matched by market and selection only, never the goals line: a Kalshi Over-5.5 ask was compared against the Over-2.5 fair probability. The 24 bets placed on that phantom edge (9 for A, 9 for B, 6 for C) were voided and refunded, and are excluded from every figure here.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-10</span><span class="notes__t">NO-side fill pricing</span></div><div class="notes__b">ask_ladder only ever built the YES side of the order book, so every BTTS-NO and totals-UNDER bet had its fill walked from the opposite contract. Arm A and B's one settled bet (Valencia–Barcelona BTTS NO) and arm C's five NO-side settled bets keep the wrong booked price and P&amp;L. The decision to bet still cleared the threshold at the true price.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-11</span><span class="notes__t">Promoted clubs pinned at the model's bounds — 11 bets voided</span></div><div class="notes__b">With the 2026/27 file published, just-promoted clubs were fitted on about three matches and the optimiser ran their parameters to its ±3 box (Hull defence −3.000, Coventry attack −3.000), pricing Chelsea to score 0.09 goals at home. Fixed by shrinking thin-sample clubs toward a promoted-club prior; arm C's 11 bets on it were voided.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-15</span><span class="notes__t">Closing prices mixed across goals lines</span></div><div class="notes__b">Closing prices were keyed without the goals line, so each fixture's six totals contracts collided and every totals bet took another line's close. Fixed at the source; six unrecoverable closes on arm C were cleared rather than left to distort CLV.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-17</span><span class="notes__t">Current season could silently drop out</span></div><div class="notes__b">A runner DNS failure showed that an unreachable data source could leave the model refitting as if 2026/27 had not started while the run reported success. It now falls back to the cached season or refuses to build.</div></div><div class="notes__row"><div class="notes__h"><span class="notes__d">2026-09-22</span><span class="notes__t">In-play bets — 12 voided</span></div><div class="notes__b">Kalshi's occurrence time is when a market resolves (kickoff +3h, or +4h on totals and BTTS), and it had been read as kickoff. The Sunday stake run bet matches already underway: 12 bets, including arms A and B's only settled win (Valencia–Barcelona, 46 minutes in). All 12 were voided and 29 mid-match closing prices cleared. The fix derives kickoff correctly and cross-checks it against the bookmakers'. Maximum-divergence readings before this date include live markets and overstate how often an edge appeared.</div></div></div></section><section><div class="section__head"><h2>Archive</h2><span class="section__note">Every matchweek as it was staked.</span></div><div class="archive"><a href="matchweek-2026-11-16.html"><span class="archive__md">MW14</span><span class="archive__date">2026-11-16 – Nov 22</span><span class="archive__n">11 bet(s) · pending</span></a><a href="matchweek-2026-11-09.html"><span class="archive__md">MW13</span><span class="archive__date">2026-11-09 – Nov 15</span><span class="archive__n">9 bet(s) · pending</span></a><a href="matchweek-2026-11-02.html"><span class="archive__md">MW12</span><span class="archive__date">2026-11-02 – Nov 08</span><span class="archive__n">15 bet(s) · 15 settled</span></a><a href="matchweek-2026-10-26.html"><span class="archive__md">MW11</span><span class="archive__date">2026-10-26 – Nov 01</span><span class="archive__n">24 bet(s) · 24 settled</span></a><a href="matchweek-2026-10-12.html"><span class="archive__md">MW10</span><span class="archive__date">2026-10-12 – Oct 18</span><span class="archive__n">21 bet(s) · 21 settled</span></a><a href="matchweek-2026-10-05.html"><span class="archive__md">MW9</span><span class="archive__date">2026-10-05 – Oct 11</span><span class="archive__n">22 bet(s) · 22 settled</span></a><a href="matchweek-2026-09-28.html"><span class="archive__md">MW8</span><span class="archive__date">2026-09-28 – Oct 04</span><span class="archive__n">12 bet(s) · 9 settled · 3 voided</span></a><a href="matchweek-2026-09-21.html"><span class="archive__md">MW7</span><span class="archive__date">2026-09-21 – Sep 27</span><span class="archive__n">0 bet(s) · pending</span></a><a href="matchweek-2026-09-14.html"><span class="archive__md">MW6</span><span class="archive__date">2026-09-14 – Sep 20</span><span class="archive__n">20 bet(s) · 14 settled · 6 voided</span></a><a href="matchweek-2026-09-07.html"><span class="archive__md">MW5</span><span class="archive__date">2026-09-07 – Sep 13</span><span class="archive__n">27 bet(s) · 16 settled · 11 voided</span></a><a href="matchweek-2026-08-31.html"><span class="archive__md">MW4</span><span class="archive__date">2026-08-31 – Sep 06</span><span class="archive__n">41 bet(s) · 14 settled · 27 voided</span></a><a href="matchweek-2026-08-24.html"><span class="archive__md">MW3</span><span class="archive__date">2026-08-24 – Aug 30</span><span class="archive__n">9 bet(s) · 7 settled · 2 voided</span></a><a href="matchweek-2026-08-17.html"><span class="archive__md">MW2</span><span class="archive__date">2026-08-17 – Aug 23</span><span class="archive__n">9 bet(s) · 9 settled</span></a><a href="matchweek-2026-08-10.html"><span class="archive__md">MW1</span><span class="archive__date">2026-08-10 – Aug 16</span><span class="archive__n">2 bet(s) · 2 settled</span></a></div></section><p class="disclaimer">
-No real money and no order-placement path exists in this system — it was
-deleted, not disabled. Kalshi prices are read-only. Fair value is the de-vigged
-sharp consensus; the model only prices where no sharp line exists. Source:
-<a href="https://github.com/sahildayal/EPL_LALIGA_PREDICTOR">github.com/sahildayal/EPL_LALIGA_PREDICTOR</a>
-</p></div></body></html>
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap nav__in"><a class="brand" href="index.html"><svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="var(--print)" stroke="var(--green)" stroke-width="3.2"/><path d="M16 3v26" stroke="var(--green)" stroke-width="1.6"/><circle cx="16" cy="16" r="4.4" fill="var(--red)"/></svg><span>Divergence Lab</span></a><nav class="nav__links" aria-label="Site"><a href="index.html" aria-current="page">Overview</a><a href="this-week.html">This week</a><a href="arms.html">Arms</a><a href="performance.html">Performance</a><a href="edge.html">Edge watch</a><a href="matchweeks.html">Matchweeks</a><a href="how-it-works.html">How it works</a></nav><button class="theme-btn" type="button" aria-label="Switch theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button></div></header><main id="main" class="wrap"><div class="print cover"><div class="cover__text"><span class="cover__kicker">2026/27 Premier League and La Liga. Data through 2026-11-22.</span><h1>Divergence Lab</h1><p class="lede">Five paper bankrolls bet wherever Kalshi disagrees with the sharp bookmakers. The question is whether any of them can beat the closing line.</p></div><div class="cover__art"><img src="assets/hero.webp" srcset="assets/hero-720.webp 720w, assets/hero.webp 1360w" sizes="(max-width:820px) 100vw, 690px" width="1360" height="765" alt="A football ground split down the halfway line: an English terrace on one side, a Spanish stadium bowl on the other, a ball on the centre spot." fetchpriority="high"><div class="roundel" aria-label="Matchweek 14"><span class="roundel__n">14</span><span class="roundel__l">Matchweek</span></div></div></div><section aria-labelledby="verdict-q" style="margin-top:28px"><div class="verdict"><div class="verdict__q" id="verdict-q">Is any arm beating the market?</div><div class="verdict__a">Not yet.</div><p class="verdict__why">No arm has bought better than the closing line. The closest is The Stubborn Scout (arm C) at −0.7% CLV over 149 settled bets.</p></div></section><section><div class="sec-head"><h2>The team sheet</h2><a href="arms.html">Meet the arms</a></div><div class="sheet"><a class="card arm-a" href="arms.html#arm-a"><div class="card__art"><img src="assets/avatar-a.webp" alt="" width="400" height="400" loading="lazy"></div><span class="card__tag" aria-hidden="true">A</span><div class="card__body"><div class="card__name">The Sharp</div><div class="card__rule">Arm A: Divergence + quarter-Kelly</div><div class="card__nums"><div><div class="card__k">Equity</div><div class="card__v">10,658</div></div><div><div class="card__k">P&amp;L</div><div class="card__v up">+658</div></div><div><div class="card__k">Won–lost</div><div class="card__v">2–0</div></div><div><div class="card__k">CLV mid</div><div class="card__v flat">—</div></div></div></div></a><a class="card arm-b" href="arms.html#arm-b"><div class="card__art"><img src="assets/avatar-b.webp" alt="" width="400" height="400" loading="lazy"></div><span class="card__tag" aria-hidden="true">B</span><div class="card__body"><div class="card__name">The Metronome</div><div class="card__rule">Arm B: Divergence + flat 1%</div><div class="card__nums"><div><div class="card__k">Equity</div><div class="card__v">10,213</div></div><div><div class="card__k">P&amp;L</div><div class="card__v up">+213</div></div><div><div class="card__k">Won–lost</div><div class="card__v">2–0</div></div><div><div class="card__k">CLV mid</div><div class="card__v flat">—</div></div></div></div></a><a class="card arm-c" href="arms.html#arm-c"><div class="card__art"><img src="assets/avatar-c.webp" alt="" width="400" height="400" loading="lazy"></div><span class="card__tag" aria-hidden="true">C</span><div class="card__body"><div class="card__name">The Stubborn Scout</div><div class="card__rule">Arm C: Model-only + quarter-Kelly</div><div class="card__nums"><div><div class="card__k">Equity</div><div class="card__v">6,892</div></div><div><div class="card__k">P&amp;L</div><div class="card__v down">−3,108</div></div><div><div class="card__k">Won–lost</div><div class="card__v">48–101</div></div><div><div class="card__k">CLV</div><div class="card__v down">−0.7%</div></div></div></div></a><a class="card arm-d" href="arms.html#arm-d"><div class="card__art"><img src="assets/avatar-d.webp" alt="" width="400" height="400" loading="lazy"></div><span class="card__tag" aria-hidden="true">D</span><div class="card__body"><div class="card__name">The Dreamer</div><div class="card__rule">Arm D: Parlay / SGP</div><div class="card__nums"><div><div class="card__k">Equity</div><div class="card__v">10,229</div></div><div><div class="card__k">P&amp;L</div><div class="card__v up">+229</div></div><div><div class="card__k">Won–lost</div><div class="card__v">1–0</div></div><div><div class="card__k">CLV mid</div><div class="card__v flat">—</div></div></div></div></a><a class="card arm-e" href="arms.html#arm-e"><div class="card__art"><img src="assets/avatar-e.webp" alt="" width="400" height="400" loading="lazy"></div><span class="card__tag" aria-hidden="true">E</span><div class="card__body"><div class="card__name">The Stallholder</div><div class="card__rule">Arm E: Maker limit orders + flat 1%</div><div class="card__nums"><div><div class="card__k">Equity</div><div class="card__v">10,000</div></div><div><div class="card__k">P&amp;L</div><div class="card__v flat">+0</div></div><div><div class="card__k">Won–lost</div><div class="card__v">0–0</div></div><div><div class="card__k">CLV mid</div><div class="card__v flat">—</div></div></div></div></a><a class="card card--market arm-m" href="arms.html#closing-line"><div class="card__art"><img src="assets/avatar-market.webp" alt="" width="400" height="400" loading="lazy"></div><div class="card__body"><div class="card__name">The Closing Line</div><div class="card__rule">The benchmark every arm is scored against</div><p class="small muted" style="margin-top:10px">The last sharp price before kickoff. Beat it often enough and the edge is real.</p></div></a></div></section><section><div class="sec-head"><h2>Equity per arm</h2><a href="performance.html">Full scoreboard</a></div><p class="tnote" style="margin:-6px 0 14px">Paper bankroll plus open stakes after each settlement. The dashed line is the $10,000 start.</p><div class="chart-wrap"><svg viewBox="0 0 1100 360" class="chart" role="img" aria-label="Equity per arm over the season"><line x1="58" y1="243.9" x2="982" y2="243.9" class="grid-l"/><text x="50" y="247.9" class="ax" text-anchor="end">8.0k</text><line x1="58" y1="134.3" x2="982" y2="134.3" class="grid-l"/><text x="50" y="138.3" class="ax" text-anchor="end">10.0k</text><line x1="58" y1="24.7" x2="982" y2="24.7" class="grid-l"/><text x="50" y="28.7" class="ax" text-anchor="end">12.0k</text><line x1="58" y1="134.3" x2="982" y2="134.3" class="base-l"/><text x="314.7" y="350" class="ax" text-anchor="middle">Sep</text><text x="572.1" y="350" class="ax" text-anchor="middle">Oct</text><text x="838.2" y="350" class="ax" text-anchor="middle">Nov</text><polyline points="58.0,134.3 139.5,134.3 197.9,134.3 258.0,134.3 319.7,134.3 379.5,110.7 439.9,110.7 499.9,98.3 560.5,98.3 620.7,98.3 681.1,98.3 740.2,98.3 800.7,98.3 861.4,98.3 921.4,98.3 982.0,98.3" class="ln arm-a"/><polyline points="58.0,134.3 139.5,134.3 197.9,134.3 258.0,134.3 319.7,134.3 379.5,126.4 439.9,126.4 499.9,122.6 560.5,122.6 620.7,122.6 681.1,122.6 740.2,122.6 800.7,122.6 861.4,122.6 921.4,122.6 982.0,122.6" class="ln arm-b"/><polyline points="58.0,134.3 139.5,134.3 197.9,166.7 258.0,172.6 319.7,136.2 379.5,37.4 439.9,81.5 499.9,62.3 560.5,62.3 620.7,62.3 681.1,242.4 740.2,281.8 800.7,278.3 861.4,256.3 921.4,304.6 982.0,304.6" class="ln arm-c"/><polyline points="58.0,134.3 139.5,134.3 197.9,134.3 258.0,134.3 319.7,134.3 379.5,134.3 439.9,134.3 499.9,121.8 560.5,121.8 620.7,121.8 681.1,121.8 740.2,121.8 800.7,121.8 861.4,121.8 921.4,121.8 982.0,121.8" class="ln arm-d"/><polyline points="58.0,134.3 139.5,134.3 197.9,134.3 258.0,134.3 319.7,134.3 379.5,134.3 439.9,134.3 499.9,134.3 560.5,134.3 620.7,134.3 681.1,134.3 740.2,134.3 800.7,134.3 861.4,134.3 921.4,134.3 982.0,134.3" class="ln arm-e"/><text x="992" y="102.3" class="ln-lab arm-a">A  10,658</text><text x="992" y="142.8" class="ln-lab arm-b">B  10,213</text><text x="992" y="308.6" class="ln-lab arm-c">C  6,892</text><text x="992" y="125.8" class="ln-lab arm-d">D  10,229</text><text x="992" y="159.8" class="ln-lab arm-e">E  10,000</text></svg></div><div class="legend"><span class="arm-a"><i style="--k:var(--arm)"></i>A: The Sharp</span><span class="arm-b"><i style="--k:var(--arm)"></i>B: The Metronome</span><span class="arm-c"><i style="--k:var(--arm)"></i>C: The Stubborn Scout</span><span class="arm-d"><i style="--k:var(--arm)"></i>D: The Dreamer</span><span class="arm-e"><i style="--k:var(--arm)"></i>E: The Stallholder</span></div></section><section><div class="teasers"><a class="teaser" href="this-week.html"><h3>This week</h3><p>20 open bets waiting on results.</p><span class="go">See open bets</span></a><a class="teaser" href="edge.html"><h3>Edge watch</h3><p>On the latest run, even the best Kalshi price was 0.1 points worse than fair. No market cleared the 2% bar.</p><span class="go">See the readings</span></a><a class="teaser" href="matchweeks.html"><h3>Matchweeks</h3><p>14 matchweeks staked so far, each kept as it was on the day.</p><span class="go">Browse the archive</span></a></div></section></main>
+<footer class="wrap foot"><div class="foot__in">
+<div>
+<p>Paper money only. No order-placement path exists in this system: it was deleted,
+not disabled, and Kalshi prices are read-only. Fair value is the de-vigged sharp
+bookmaker consensus; the model prices only where no sharp line exists.</p>
+<p style="margin-top:10px">Data through 22 Nov 2026. Source on
+<a href="https://github.com/sahildayal/EPL_LALIGA_PREDICTOR">GitHub</a>.</p>
+</div>
+<nav aria-label="Footer"><a href="index.html">Overview</a><a href="this-week.html">This week</a><a href="arms.html">Arms</a><a href="performance.html">Performance</a><a href="edge.html">Edge watch</a><a href="matchweeks.html">Matchweeks</a><a href="how-it-works.html">How it works</a></nav>
+</div></footer>
+<script>
+(function(){
+  var root=document.documentElement, btn=document.querySelector('.theme-btn');
+  function dark(){var t=root.dataset.theme; return t? t==='dark' : matchMedia('(prefers-color-scheme: dark)').matches}
+  function label(){if(btn){btn.setAttribute('aria-label', dark()?'Switch to light theme':'Switch to dark theme');
+    btn.setAttribute('aria-pressed', dark()?'true':'false')}}
+  label();
+  if(btn)btn.addEventListener('click',function(){var t=dark()?'light':'dark'; root.dataset.theme=t;
+    try{localStorage.setItem('dl-theme',t)}catch(e){} label()});
+  document.querySelectorAll('table.sortable').forEach(function(tb){
+    var ths=tb.querySelectorAll('th[data-sort]');
+    ths.forEach(function(th){
+      var b=th.querySelector('button'); if(!b)return;
+      b.addEventListener('click',function(){
+        var idx=Array.prototype.indexOf.call(th.parentNode.children,th);
+        var dir=th.getAttribute('aria-sort')==='descending'?'ascending':'descending';
+        ths.forEach(function(o){o.removeAttribute('aria-sort')}); th.setAttribute('aria-sort',dir);
+        var body=tb.tBodies[0], rows=Array.prototype.slice.call(body.rows);
+        rows.sort(function(x,y){
+          var a=x.cells[idx].dataset.v, c=y.cells[idx].dataset.v;
+          var na=a===''||a===undefined, nc=c===''||c===undefined;
+          if(na||nc)return na-nc;
+          var d=parseFloat(a)-parseFloat(c); if(isNaN(d))d=a.localeCompare(c);
+          return dir==='ascending'?d:-d});
+        rows.forEach(function(r){body.appendChild(r)});
+      });
+    });
+  });
+})();
+</script>
+</body></html>

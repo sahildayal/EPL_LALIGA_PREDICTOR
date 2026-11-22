@@ -300,20 +300,32 @@ reinterpret an existing record raises instead.
 A static site generated from the committed ledger and run logs, served by
 GitHub Pages from `docs/` on `main`.
 
-- **Season scoreboard**, ranked by closing-line value, because at this sample
-  size P&L is mostly noise and CLV is the real signal. Bankroll, equity, P&L,
-  ROI, record and exposure alongside.
-- **This week** — the latest stake run, the freshest divergence reading, and
-  every open position.
-- **Equity per arm** and **does an edge ever appear?** — inline charts of
-  bankroll over the season and of how far Kalshi strays from fair value.
-- **Data integrity** — every bug found and every bet voided because of one.
-  Every number on the site is post-fix and post-void.
-- **Archive** — one page per matchweek: each bet with fair value versus the price
-  actually filled, the result, where the closing line moved, and the fill
-  adjustments the order book forced.
+The look is "Matchday Programme": the lab laid out like a printed football
+programme, with two-ink risograph art and each arm as a programme player card.
+Seven pages behind one nav bar:
 
-`src/report/site.py` builds it with nothing but the standard library, and the
+- **Overview**: the cover, the verdict ("is any arm beating the market?"), the
+  team sheet of arms and the equity chart.
+- **This week**: every open bet, resting order and parlay, by arm, with kickoffs.
+- **Arms**: one profile per arm (rule, record, form, best and worst result) plus
+  the closing line they are all scored against.
+- **Performance**: the season scoreboard ranked by closing-line value (sortable),
+  equity over the season, and profit by market.
+- **Edge watch**: how far Kalshi strays from fair value on every run, and the
+  shadow ledger's counts.
+- **Matchweeks**: the archive, one page per matchweek, each bet with fair value
+  against the price paid, the result, the close and any fill adjustments.
+- **How it works**: the weekly method, a glossary, and the data-integrity log of
+  every bug found and every bet voided because of one.
+
+The illustrations are AI-generated originals, compressed to WebP in
+`docs/assets/` and committed (the generator never writes them). Avatars are
+keyed by arm suffix (`avatar-<a..e>.webp`); a new arm needs an avatar and a
+`PROFILES` entry in `site.py`. The prompts that made them are in
+`notes/image_guide.md`.
+
+`src/report/site.py` (content) and `src/report/theme.py` (chrome and CSS) build it
+with nothing but the standard library, and the
 output is a pure function of committed history — "data through" tracks the
 newest log, not the build time — so the same commit always renders the same
 site. The matchweek workflow runs `scripts/build_site.py` after every stake,
