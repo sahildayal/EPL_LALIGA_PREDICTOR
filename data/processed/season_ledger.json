@@ -934,13 +934,13 @@
           "kickoff": "2026-11-22T20:00:00Z",
           "model_prob": 0.6559768265163635,
           "fair_prob": 0.6559768265163635,
-          "closing_price": 0.58,
+          "closing_price": 0.56,
           "result": null,
           "quoted_ask": 0.55,
           "fill_contracts": 299.0909,
           "placed_utc": "2026-11-17T15:29:52.920540+00:00",
-          "closing_seen_utc": "2026-11-22T18:09:08.498711+00:00",
-          "closing_bid": 0.57
+          "closing_seen_utc": "2026-11-22T19:40:43.431630+00:00",
+          "closing_bid": 0.55
         },
         {
           "market": "totals",
@@ -978,12 +978,12 @@
           "kickoff": "2026-11-22T20:00:00Z",
           "model_prob": 0.24073226142440995,
           "fair_prob": 0.24073226142440995,
-          "closing_price": 0.13,
+          "closing_price": 0.14,
           "result": null,
           "quoted_ask": 0.16,
           "fill_contracts": 650.7059,
           "placed_utc": "2026-11-17T15:29:52.920558+00:00",
-          "closing_seen_utc": "2026-11-22T18:09:08.498723+00:00",
+          "closing_seen_utc": "2026-11-22T19:40:43.431638+00:00",
           "closing_bid": 0.12
         },
         {
@@ -1005,7 +1005,7 @@
           "quoted_ask": 0.47,
           "fill_contracts": 258.1489,
           "placed_utc": "2026-11-17T15:29:52.920565+00:00",
-          "closing_seen_utc": "2026-11-22T18:09:08.498729+00:00",
+          "closing_seen_utc": "2026-11-22T19:40:43.431642+00:00",
           "closing_bid": 0.47
         },
         {
@@ -1070,7 +1070,7 @@
           "quoted_ask": 0.42,
           "fill_contracts": 276.119,
           "placed_utc": "2026-11-20T17:41:34.708716+00:00",
-          "closing_seen_utc": "2026-11-22T18:09:08.498735+00:00",
+          "closing_seen_utc": "2026-11-22T19:40:43.431646+00:00",
           "closing_bid": 0.42
         },
         {
