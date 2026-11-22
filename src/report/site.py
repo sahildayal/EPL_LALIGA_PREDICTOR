@@ -28,6 +28,9 @@ ARM_KEYS = [a[0] for a in ARMS]
 ARM_TAG = {a[0]: a[1] for a in ARMS}
 ARM_SUFFIX = {a[0]: a[3] for a in ARMS}
 
+#: Arms whose entry price is not the ask (see _scoreboard).
+ASK_CLV_NOT_COMPARABLE = {"E_maker_flat"}
+
 SEASON = "2026/27"
 REPO_URL = "https://github.com/sahildayal/EPL_LALIGA_PREDICTOR"
 STARTING_BANKROLL = 10_000.0
@@ -225,7 +228,7 @@ def _scoreboard(latest_settle: dict, ledger: dict):
                     wins=s.get("wins", 0), settled=s.get("settled_bets", 0),
                     voided=s.get("voided_bets", 0), open=s.get("open_bets", 0),
                     exposure=s.get("exposure", 0), clv=s.get("clv_pct"),
-                    clv_pts=s.get("clv_pts"),
+                    clv_pts=s.get("clv_pts"), clv_mid=s.get("clv_mid_pts"),
                 )
             )
         else:
@@ -237,7 +240,7 @@ def _scoreboard(latest_settle: dict, ledger: dict):
                     equity=arm.get("bankroll", STARTING_BANKROLL),
                     pnl=(arm.get("bankroll", STARTING_BANKROLL) - STARTING_BANKROLL),
                     roi=None, wins=0, settled=0, voided=0, open=len(arm.get("active_bets", [])),
-                    exposure=0, clv=None, clv_pts=None,
+                    exposure=0, clv=None, clv_pts=None, clv_mid=None,
                 )
             )
     losses = {key: 0 for key in ARM_KEYS}
@@ -246,6 +249,12 @@ def _scoreboard(latest_settle: dict, ledger: dict):
             losses[key] += 1
     for r in rows:
         r["losses"] = losses.get(r["key"], 0)
+        # Arm E buys at or below the bid; CLV against the closing ASK credits it
+        # with about half the spread for nothing, so its ask-based CLV is shown
+        # as not comparable and kept out of the ranking. Compare on CLV mid.
+        r["clv_nc"] = r["key"] in ASK_CLV_NOT_COMPARABLE and r.get("clv") is not None
+        if r["key"] in ASK_CLV_NOT_COMPARABLE:
+            r["clv"], r["clv_pts"] = None, None
     rows.sort(key=lambda r: (r["clv"] is None, -(r["clv"] if r["clv"] is not None else 0)))
     return rows
 
@@ -572,8 +581,12 @@ def _scoreboard_table(rows) -> str:
             f'<td class="num {_delta_class(r["pnl"])}">{_signed_money(r["pnl"])}</td>'
             f'<td class="num {_delta_class(r["roi"])}">{_pct(r["roi"], signed=True)}</td>'
             f'<td class="num">{_esc(rec)}</td>'
-            f'<td class="num {_delta_class(r["clv"])}">{_pct(r["clv"], signed=True)}</td>'
-            f'<td class="num {_delta_class(r.get("clv_pts"))}">{_pts(r.get("clv_pts"))}</td>'
+            + (f'<td class="num flat" title="E buys at the bid; compare on CLV mid">n/c</td>'
+               f'<td class="num flat" title="E buys at the bid; compare on CLV mid">n/c</td>'
+               if r.get("clv_nc") else
+               f'<td class="num {_delta_class(r["clv"])}">{_pct(r["clv"], signed=True)}</td>'
+               f'<td class="num {_delta_class(r.get("clv_pts"))}">{_pts(r.get("clv_pts"))}</td>')
+            + f'<td class="num {_delta_class(r.get("clv_mid"))}">{_pts(r.get("clv_mid"))}</td>'
             f'<td class="num">{_money(r["exposure"])}</td>'
             "</tr>"
         )
@@ -583,6 +596,8 @@ def _scoreboard_table(rows) -> str:
         "<th class='num'>P&amp;L</th><th class='num'>ROI</th><th class='num'>W&ndash;L</th>"
         "<th class='num'>CLV</th><th class='num' title='Closing-line value in "
         "probability points, which longshots cannot dominate'>CLV pts</th>"
+        "<th class='num' title='CLV in points against the closing bid/ask midpoint: "
+        "the one comparable across taker and maker arms'>CLV mid</th>"
         "<th class='num'>Exposure</th>"
         "</tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
     )

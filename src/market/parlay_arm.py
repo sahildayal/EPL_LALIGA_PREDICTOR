@@ -407,7 +407,9 @@ def select_parlays(priced: list, max_parlays: int = 3) -> list:
     """
     chosen, used = [], set()
     for p in priced:
-        keys = {(l.fixture, l.market, l.selection) for l in p["legs"]}
+        # Fixture and market, not selection: "home" and "not_away" across two
+        # parlays are nearly the same leg (see arms.plan_parlay_arm).
+        keys = {(l.fixture, l.market) for l in p["legs"]}
         if keys & used:
             continue
         chosen.append(p)

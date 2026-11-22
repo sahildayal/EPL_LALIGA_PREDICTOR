@@ -96,6 +96,33 @@ def _read_ledger() -> dict:
         return json.loads(Path(LEDGER).read_text(encoding="utf-8"))
 
 
+def observed_kickoffs(now: datetime) -> set:
+    """
+    Kickoffs of every market the shadow ledger observed, from origin/main.
+
+    The shadow ledger records closes only from snapshots in the 4h before a
+    kickoff, and scheduled snapshots start 6-7h late, so without this the only
+    slots that got a close were the ones an arm held: the selection effect the
+    shadow ledger exists to avoid. Closing-only snapshots cost no Odds API credit.
+    """
+    out = set()
+    for month in {now.strftime("%Y-%m"), (now - timedelta(days=8)).strftime("%Y-%m")}:
+        path = f"data/processed/shadow/observations_{month}.jsonl"
+        try:
+            raw = subprocess.run(["git", "show", f"origin/main:{path}"], check=True,
+                                 capture_output=True, timeout=30).stdout.decode("utf-8")
+        except Exception:                                         # noqa: BLE001
+            continue                    # no observations that month yet
+        for line in raw.splitlines():
+            try:
+                k = _ts(json.loads(line).get("kickoff"))
+            except ValueError:
+                continue
+            if k and k > now:
+                out.add(k)
+    return out
+
+
 def _dispatch(dry_run: bool) -> bool:
     if dry_run:
         print("[closer] dry run: would dispatch snapshot.yml")
@@ -123,7 +150,8 @@ def main(argv=None) -> int:
         if now >= deadline:
             print("[closer] budget spent; the next scheduled closer takes over")
             return 0
-        due, next_due = plan(held_kickoffs(_read_ledger()), now, done)
+        kickoffs = held_kickoffs(_read_ledger()) | observed_kickoffs(now)
+        due, next_due = plan(kickoffs, now, done)
         if due:
             names = ", ".join(k.strftime("%a %H:%M") for k in due)
             if _dispatch(args.dry_run):

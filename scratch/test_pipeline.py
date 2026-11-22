@@ -1037,3 +1037,81 @@ def test_overdue_bets_are_flagged_and_fresh_ones_are_not():
     ], "active_parlays": []}}}
     out = mw.overdue_bets(state, now=now)
     assert [o[1] for o in out] == ["getafe"]
+
+
+def test_bare_cent_fields_are_always_cents():
+    """Review: a 1-cent quote in a bare field was read as $1.00."""
+    assert km._price({"yes_ask": 1}) == pytest.approx(0.01)
+    assert km._bid({"yes_bid": 1}) == pytest.approx(0.01)
+    assert km._price({"yes_ask_dollars": "0.4500"}) == pytest.approx(0.45)
+
+
+def test_overdue_ignores_graded_parlay_legs_and_catches_stuck_orders():
+    from src.pipeline import matchweek as mw
+    now = datetime(2026, 11, 24, 9, tzinfo=timezone.utc)
+    state = {"arms": {
+        "D_parlay": {"active_bets": [], "active_parlays": [{"legs": [
+            {"home": "a", "away": "b", "kickoff": "2026-11-17T15:00:00Z", "result": "WIN"},
+            {"home": "c", "away": "d", "kickoff": "2026-11-25T15:00:00Z"}]}]},
+        "E_maker_flat": {"active_bets": [], "active_parlays": [], "active_orders": [
+            {"home": "e", "away": "f", "market": "1x2", "selection": "home",
+             "kickoff": "2026-11-10T15:00:00Z"}]},
+    }}
+    out = mw.overdue_bets(state, now=now)
+    assert [o[1] for o in out] == ["order"]
+
+
+def test_snapshot_with_nothing_pre_kickoff_spends_no_odds_credit(monkeypatch, tmp_path):
+    mw = _snapshot_env(monkeypatch, tmp_path)
+    monkeypatch.setattr(mw, "collect_kalshi", lambda: [
+        {"home": "liverpool", "away": "everton", "market": "1x2", "selection": "home",
+         "ask": 0.40, "league": "epl", "kickoff": _soon(days=-1)}])
+    monkeypatch.setattr(mw, "collect_fair_values",
+                        lambda: (_ for _ in ()).throw(AssertionError("Odds API called")))
+    report = mw.run_snapshot()
+    assert report.ok and report.details["edge_distribution"]["n"] == 0
+    assert "shadow" in report.details           # the close count is no longer overwritten
+
+
+def test_settle_resolves_an_arm_e_order_then_grades_the_fill(monkeypatch):
+    """The settle wiring for arm E: tape read, fill booked, then graded in one run."""
+    order = {"market": "1x2", "selection": "home", "home": "arsenal", "away": "chelsea",
+             "line": None, "league": "epl", "kickoff": "2026-11-21T15:00:00Z",
+             "ticker": "T", "stake": 100.0, "limit": 0.48, "contracts": 208.3333,
+             "fair_prob": 0.52, "label": "Arsenal vs Chelsea"}
+    ledger.place_order("E_maker_flat", order)
+    st = ledger.load_state()
+    st["arms"]["E_maker_flat"]["active_orders"][0]["posted_utc"] = "2026-11-20T10:00:00+00:00"
+    ledger.save_state(st)
+    monkeypatch.setattr(matchweek, "KalshiClient", lambda: object())
+    monkeypatch.setattr(matchweek, "fetch_trades", lambda c, t, a, b: [
+        {"created_time": "2026-11-20T12:00:00Z", "yes_price_dollars": "0.4600",
+         "no_price_dollars": "0.5400", "count_fp": "500"}])
+    rep = matchweek.run_settle(results=[MatchResult("arsenal", "chelsea", 2, 0)], voids=[])
+    assert rep.ok and rep.details["orders"]["filled"] == 1 and rep.details["settled"] == 1
+    book = ledger.load_state()["arms"]["E_maker_flat"]
+    assert book["history"][0]["result"] == "WIN"
+    assert book["bankroll"] == pytest.approx(9900.0 + 100.0 / 0.48, abs=0.01)
+
+
+def test_fetch_trades_follows_the_cursor_and_fails_on_errors():
+    class _Resp:
+        def __init__(self, code, body):
+            self.status_code, self._b = code, body
+
+        def json(self):
+            return self._b
+
+    class _Client:
+        def __init__(self, pages):
+            self.pages = pages
+
+        def _request(self, method, path, params=None):
+            return self.pages.pop(0)
+
+    t0 = datetime(2026, 11, 20, tzinfo=timezone.utc)
+    t1 = datetime(2026, 11, 21, tzinfo=timezone.utc)
+    pages = [_Resp(200, {"trades": [1, 2], "cursor": "c"}), _Resp(200, {"trades": [3], "cursor": ""})]
+    assert matchweek.fetch_trades(_Client(pages), "T", t0, t1) == [1, 2, 3]
+    with pytest.raises(Exception):
+        matchweek.fetch_trades(_Client([_Resp(429, {})]), "T", t0, t1)

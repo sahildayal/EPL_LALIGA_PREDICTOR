@@ -43,18 +43,24 @@ def is_excluded(ticker: str) -> bool:
     return any(ticker.startswith(p) for p in EXCLUDED_PREFIXES)
 
 
+def _dollars(v) -> float:
+    v = float(v)
+    return v / 100.0 if v > 1.0 else v
+
+
 def _price(market: dict, side: str = "yes"):
     """
     Ask price in dollars. We buy, so the ASK is what we pay — using the last
     trade or the midpoint would overstate every edge by half the spread.
     """
-    for key in (f"{side}_ask_dollars", f"{side}_ask"):
-        v = market.get(key)
-        if v is None:
-            continue
-        v = float(v)
-        return v / 100.0 if v > 1.0 else v      # some endpoints report cents
-    return None
+    # The bare fields are integer CENTS, always. Telling them apart by size
+    # ("> 1 means cents") misread a 1-cent quote as $1.00. A *_dollars field
+    # above 1 can only be cents too (a contract never costs more than $1).
+    v = market.get(f"{side}_ask_dollars")
+    if v is not None:
+        return _dollars(v)
+    v = market.get(f"{side}_ask")
+    return None if v is None else float(v) / 100.0
 
 
 def _bid(market: dict, side: str = "yes"):
@@ -63,14 +69,12 @@ def _bid(market: dict, side: str = "yes"):
     be read at the midpoint: the ask alone falls as the spread tightens before
     kickoff, which flatters every bet's CLV whether or not the line moved.
     """
-    for key in (f"{side}_bid_dollars", f"{side}_bid"):
-        v = market.get(key)
-        if v is None:
-            continue
-        v = float(v)
-        v = v / 100.0 if v > 1.0 else v
-        return v if v > 0 else None
-    return None
+    v = market.get(f"{side}_bid_dollars")
+    if v is not None:
+        v = _dollars(v)
+    elif market.get(f"{side}_bid") is not None:
+        v = float(market[f"{side}_bid"]) / 100.0       # bare field is cents
+    return v if v and v > 0 else None
 
 
 def _resolve_trailing(text: str):

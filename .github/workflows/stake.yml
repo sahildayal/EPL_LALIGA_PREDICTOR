@@ -10,8 +10,8 @@
 #
 # GitHub starts scheduled jobs late, and the lag grows: ~4h in September, then
 # 6.7-8.7h by November (Fri 09:00 started 17:39 on 2026-11-20, Sun 06:00 at
-# 13:01 on 2026-11-15, after that day's first kickoffs). So all three passes now
-# fire at 01:37: off the hour, where GitHub's queue is shortest (the UCL lab
+# 13:01 on 2026-11-15, after that day's first kickoffs). So the passes now fire
+# at :37 past an early hour (Fri and Tue 01:37, the Sunday pass Sat 23:37): off the hour, where GitHub's queue is shortest (the UCL lab
 # moved to :37 for the same reason), and early enough that even a 9h lag lands
 # before 11:00, ahead of every kickoff that day. Until 2026-09-25 the
 # Sunday pass was scheduled for 12:00 and landed ~15:30, mid-matchday; combined
@@ -23,7 +23,9 @@ name: Matchweek — stake
 on:
   schedule:
     - cron: "37 1 * * 5"       # Friday  — lands by ~10:30 even at a 9h lag
-    - cron: "37 1 * * 0"       # Sunday  — ahead of the 12:00-13:00 UTC kickoffs
+    # Saturday night, not Sunday 01:37: La Liga's Sunday 12:00 CET slot is 10:00
+    # UTC once summer time starts (28 Mar 2027), and 01:37 + a 9h lag is 10:37.
+    - cron: "37 23 * * 6"      # Sat 23:37 — the "Sunday" pass, lands by ~08:30 Sunday
     - cron: "37 1 * * 2"       # Tuesday — ahead of midweek kickoffs
   workflow_dispatch:
     inputs:

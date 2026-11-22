@@ -576,6 +576,19 @@ def void_fixture(home: str, away: str, reason: str, state: dict = None) -> list:
             bet = book["active_bets"][i]
             if _same_fixture(bet.get("home"), bet.get("away"), h, a):
                 voided.append({"arm": arm, "bet": void_bet(arm, i, reason, state=state)})
+        # A resting order on a postponed fixture is refunded like a void.
+        kept = []
+        for order in book.get("active_orders", []):
+            if _same_fixture(order.get("home"), order.get("away"), h, a):
+                book["bankroll"] = round(book["bankroll"] + float(order["stake"]), 2)
+                rec = dict(order, status="VOID", void_reason=reason,
+                           resolved_utc=datetime.now(timezone.utc).isoformat())
+                book.setdefault("order_history", []).append(rec)
+                voided.append({"arm": arm, "order": rec})
+            else:
+                kept.append(order)
+        if "active_orders" in book:
+            book["active_orders"] = kept
         # A parlay with a leg on this fixture can never be settled, so it goes too.
         for i in range(len(book.get("active_parlays", [])) - 1, -1, -1):
             parlay = book["active_parlays"][i]

@@ -221,6 +221,11 @@ def fetch_fair_prices(league: str, markets: str = "h2h", force: bool = False) ->
     if not force:
         cached = cache.get("odds_api_fair", cache_key)
         if cached:
+            # Keep the quota visible on a cached run too, or the low-quota
+            # warning goes quiet exactly when nothing is being fetched.
+            global LAST_QUOTA
+            if LAST_QUOTA is None:
+                LAST_QUOTA = cached.get("quota_remaining")
             return cached
 
     payload, remaining = _request(

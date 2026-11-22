@@ -84,3 +84,17 @@ def test_dispatch_asks_for_a_closing_only_snapshot(monkeypatch):
     monkeypatch.setattr(closer.subprocess, "run", lambda cmd, **kw: seen.update(cmd=cmd) or _R())
     assert closer._dispatch(dry_run=False)
     assert seen["cmd"][-2:] == ["-f", "closing_only=true"]
+
+
+def test_observed_kickoffs_reads_future_shadow_kickoffs(monkeypatch):
+    """Closes for every observed market, not only held ones (review)."""
+    import json as _json
+    now = datetime(2026, 11, 27, 10, tzinfo=timezone.utc)
+    rows = "\n".join(_json.dumps({"kickoff": k}) for k in
+                      ("2026-11-28T15:00:00Z", "2026-11-20T15:00:00Z", None))
+
+    class _R:
+        def __init__(self, out):
+            self.stdout = out.encode()
+    monkeypatch.setattr(closer.subprocess, "run", lambda cmd, **kw: _R(rows))
+    assert closer.observed_kickoffs(now) == {datetime(2026, 11, 28, 15, tzinfo=timezone.utc)}

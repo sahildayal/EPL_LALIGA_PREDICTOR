@@ -192,10 +192,12 @@ def plan_parlay_arm(kalshi_markets: list, fair_by_fixture: dict,
 
     # Same rule as the single-bet arms: never re-stake a leg this arm already
     # holds inside an open parlay, or the true exposure to that outcome doubles.
-    held = {(l.get("home"), l.get("away"), l.get("market"), l.get("selection"))
+    # Keyed by market, not selection: since the 1X2 NO side exists, "home" in
+    # one parlay and "not_away" in the next are nearly the same bet, and
+    # "not_home" is its opposite. One position per fixture and market.
+    held = {(l.get("home"), l.get("away"), l.get("market"))
             for p in book.get("active_parlays", []) for l in p.get("legs", [])}
-    legs = [l for l in legs
-            if (l.home, l.away, l.market, l.selection) not in held]
+    legs = [l for l in legs if (l.home, l.away, l.market) not in held]
 
     priced = enumerate_parlays(legs, score_matrices, min_edge=cfg.min_edge)
     chosen = select_parlays(priced, max_parlays=max_parlays)

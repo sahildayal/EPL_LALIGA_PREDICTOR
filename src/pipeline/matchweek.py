@@ -838,11 +838,16 @@ def run_snapshot(closing_only: bool = False) -> RunReport:
                                          m["selection"], m.get("line")): m.get("bid")
                 for m in markets if m.get("bid")}
         stamped = ledger.record_closing_prices(prices, bids=bids)
-        _shadow(report, "closes", lambda: shadow.record_closes(markets))
         report.details = {"markets": len(markets), "stamped": stamped,
                           "closing_only": closing_only}
-        if not closing_only:
-            dist = _edge_distribution(_pre_kickoff(markets))
+        _shadow(report, "closes", lambda: shadow.record_closes(markets))
+        pre = _pre_kickoff(markets)
+        if not closing_only and not pre:
+            # Nothing left to measure: a late-starting scheduled snapshot, or a
+            # break. Pricing it would spend Odds API credits on an empty set.
+            report.details["edge_distribution"] = {"n": 0, "note": "no pre-kickoff markets"}
+        elif not closing_only:
+            dist = _edge_distribution(pre)
             report.details["edge_distribution"] = dist
             report.details["odds_quota_remaining"] = odds_api.LAST_QUOTA
             # Still never fatal (the closes above are already stamped), but a
@@ -988,8 +993,16 @@ def overdue_bets(state: dict, now=None) -> list:
                 out.append([arm, b.get("home"), b.get("away"), b.get("market"),
                             b.get("selection"), str(b.get("kickoff"))])
         for p in book.get("active_parlays", []):
-            kos = [_ko(l.get("kickoff")) for l in p.get("legs", [])]
+            # A leg already graded is not stuck; only an ungraded old leg is.
+            kos = [_ko(l.get("kickoff")) for l in p.get("legs", []) if not l.get("result")]
             if any(k and k < cutoff for k in kos):
                 out.append([arm, "parlay",
                             [[l.get("home"), l.get("away")] for l in p.get("legs", [])]])
+        for o in book.get("active_orders", []):
+            ko = _ko(o.get("kickoff"))
+            # An order with no kickoff never resolves; one long past kickoff
+            # has a tape that keeps failing. Either way it holds its stake.
+            if ko is None or ko < cutoff:
+                out.append([arm, "order", o.get("home"), o.get("away"), o.get("market"),
+                            o.get("selection"), str(o.get("kickoff"))])
     return out

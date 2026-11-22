@@ -54,26 +54,51 @@ def test_no_order_outside_the_price_bounds():
     assert E.limit_price(fair=0.06, bid=0.02, ask=0.04) is None
 
 
-# --- the fill rule (agreed 2026-11-22: strictly below our price) -----------------
+# --- the fill rule (agreed 2026-11-22: strictly below our price, size-aware) ----
 
 def test_a_trade_at_our_price_is_not_a_fill():
-    assert E.first_fill(_order(), [_trade("2026-11-27T12:00:00Z", 0.48)]) is None
+    assert E.fill_from_tape(_order(), [_trade("2026-11-27T12:00:00Z", 0.48)]) is None
 
 
-def test_a_trade_below_our_price_is_a_fill():
-    hit = E.first_fill(_order(), [_trade("2026-11-27T12:00:00Z", 0.47)])
-    assert hit and hit[1] == pytest.approx(0.47)
+def test_a_trade_below_our_price_fills_only_the_size_that_traded():
+    """Review: one 0.63-contract print was booked as a full 370-contract fill."""
+    tape = [_trade("2026-11-27T12:00:00Z", 0.47)]           # 10 contracts
+    when, size = E.fill_from_tape(_order(), tape)
+    assert size == 10.0
+
+
+def test_size_is_summed_and_capped_at_the_order():
+    tape = [dict(_trade("2026-11-27T12:00:00Z", 0.47), count_fp="150"),
+            dict(_trade("2026-11-27T13:00:00Z", 0.46), count_fp="150")]
+    assert E.fill_from_tape(_order(), tape)[1] == pytest.approx(208.3333)
+
+
+def test_block_trades_and_trades_near_kickoff_do_not_count():
+    tape = [dict(_trade("2026-11-27T12:00:00Z", 0.40), is_block_trade=True),
+            _trade("2026-11-28T14:55:00Z", 0.40)]            # 5 min before kickoff
+    assert E.fill_from_tape(_order(), tape) is None
 
 
 def test_trades_before_posting_or_after_kickoff_do_not_count():
     trades = [_trade("2026-11-27T09:00:00Z", 0.40), _trade("2026-11-28T15:30:00Z", 0.30)]
-    assert E.first_fill(_order(), trades) is None
+    assert E.fill_from_tape(_order(), trades) is None
 
 
 def test_a_no_order_reads_the_no_price():
     o = _order(selection="not_home", limit=0.50)
-    assert E.first_fill(o, [_trade("2026-11-27T12:00:00Z", yes=0.45)]) is None   # NO at 0.55
-    assert E.first_fill(o, [_trade("2026-11-27T12:00:00Z", yes=0.52)]) is not None  # NO 0.48
+    assert E.fill_from_tape(o, [_trade("2026-11-27T12:00:00Z", yes=0.45)]) is None  # NO 0.55
+    assert E.fill_from_tape(o, [_trade("2026-11-27T12:00:00Z", yes=0.52)]) is not None
+
+
+def test_btts_derived_fair_carries_the_derivation_penalty_like_arm_b():
+    """Review: E rested a BTTS order at 0.49 that B's 2% bar (with penalty) refuses."""
+    from src.market.edge import DERIVATION_PENALTY
+    assert E.limit_price(fair=0.52, bid=0.48, ask=0.53) == 0.49
+    # With the penalty E rests a cent lower, where the edge net of penalty and
+    # maker fee clears 2% again, exactly B's bar.
+    price = E.limit_price(fair=0.52, bid=0.48, ask=0.53, penalty=DERIVATION_PENALTY)
+    assert price == 0.48
+    assert 0.52 - price - DERIVATION_PENALTY - maker_fee_as_fraction_of_payout(price) >= 0.02
 
 
 # --- resolution -----------------------------------------------------------------
@@ -83,11 +108,45 @@ AFTER = datetime(2026, 11, 29, tzinfo=timezone.utc)
 
 def test_filled_order_becomes_a_bet_at_the_limit_price():
     book = {"bankroll": 9900.0, "active_bets": [], "active_orders": [_order()]}
-    out = E.resolve_orders(book, lambda *a: [_trade("2026-11-27T12:00:00Z", 0.46)], now=AFTER)
+    tape = [dict(_trade("2026-11-27T12:00:00Z", 0.46), count_fp="500")]
+    out = E.resolve_orders(book, lambda *a: tape, now=AFTER)
     assert len(out["filled"]) == 1 and book["active_orders"] == []
     [bet] = book["active_bets"]
-    assert bet["price"] == 0.48 and bet["order_type"] == "maker"
+    assert bet["price"] == 0.48 and bet["order_type"] == "maker" and bet["stake"] == 100.0
     assert book["bankroll"] == 9900.0          # the stake stays committed to the bet
+
+
+def test_partial_fill_books_the_traded_size_and_refunds_the_rest():
+    book = {"bankroll": 9900.0, "active_bets": [], "active_orders": [_order()]}
+    tape = [dict(_trade("2026-11-27T12:00:00Z", 0.46), count_fp="50")]
+    out = E.resolve_orders(book, lambda *a: tape, now=AFTER)
+    [bet] = book["active_bets"]
+    assert bet["stake"] == 24.0 and bet["fill_contracts"] == 50.0      # 50 x 0.48
+    assert book["bankroll"] == 9976.0 and out["filled"][0]["status"] == "PARTIAL"
+
+
+def test_a_sliver_of_a_fill_is_treated_as_unfilled():
+    book = {"bankroll": 9900.0, "active_bets": [], "active_orders": [_order()]}
+    tape = [dict(_trade("2026-11-27T12:00:00Z", 0.46), count_fp="0.63")]
+    E.resolve_orders(book, lambda *a: tape, now=AFTER)
+    assert book["active_bets"] == [] and book["bankroll"] == 10000.0
+
+
+def test_postponed_fixture_refunds_a_resting_order():
+    ledger.place_order("E_maker_flat", _order())
+    out = ledger.void_fixture("arsenal", "chelsea", "postponed")
+    s = ledger.load_state()["arms"]["E_maker_flat"]
+    assert s["bankroll"] == 10_000.0 and s["active_orders"] == []
+    assert out[0]["order"]["status"] == "VOID"
+
+
+def test_order_without_a_kickoff_is_never_planned():
+    mk = [{"home": "arsenal", "away": "chelsea", "market": "1x2", "selection": "home",
+           "ask": 0.50, "bid": 0.47, "ticker": "T", "league": "epl", "kickoff": None}]
+    fair = {("arsenal", "chelsea"): {"1x2": {"home": 0.55, "draw": 0.25, "away": 0.20}}}
+    book = {"bankroll": 10000.0, "starting_bankroll": 10000.0, "active_bets": [],
+            "active_orders": []}
+    assert E.plan_orders(mk, fair, book) == []
 
 
 def test_unfilled_order_is_refunded_and_recorded():

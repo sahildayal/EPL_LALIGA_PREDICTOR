@@ -12,6 +12,11 @@ name: Matchweek — settle
 on:
   schedule:
     - cron: "0 9 * * 2"        # Tuesdays 09:00 UTC
+    # Backup pass. GitHub keeps one PENDING run per concurrency group and a new
+    # one cancels it, so a settle queued behind a snapshot can be cancelled by
+    # the next closer dispatch, silently. Settling is idempotent: a second pass
+    # finds nothing left, or settles what the first never got to.
+    - cron: "37 15 * * 2"      # Tuesdays 15:37 UTC
   workflow_dispatch:
 
 permissions:
