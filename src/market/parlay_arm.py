@@ -36,7 +36,7 @@ from typing import Optional
 
 from src.market.edge import CONTRACTS_PER_UNIT
 from src.market.fees import total_fee
-from src.market.grading import Bet, MARKET_1X2, MARKET_TOTALS, MARKET_BTTS
+from src.market.grading import Bet, MARKET_1X2, MARKET_TOTALS, MARKET_BTTS, NOT_1X2
 
 MIN_LEGS = 2
 MAX_LEGS = 3
@@ -152,7 +152,9 @@ def describe(parlay: "Parlay") -> str:
     for l in parlay.legs:
         h, a = l.home.title(), l.away.title()
         if l.market == MARKET_1X2:
-            pick = {"home": h, "draw": "Draw", "away": a}[l.selection]
+            names = {"home": h, "draw": "Draw", "away": a}
+            pick = (f"NOT {names[NOT_1X2[l.selection]]}" if l.selection in NOT_1X2
+                    else names[l.selection])
             parts.append(f"{h}/{a}: {pick}")
         elif l.market == MARKET_TOTALS:
             parts.append(f"{h}/{a}: {l.selection.title()} {l.line}")
@@ -184,6 +186,9 @@ def _selection_mask(market: str, selection: str, line, n: int):
             return idx_a > idx_h
         if selection == "draw":
             return idx_h == idx_a
+        if selection in NOT_1X2:
+            base = _selection_mask(market, NOT_1X2[selection], line, n)
+            return None if base is None else ~base
         return None
     if market == MARKET_TOTALS:
         if line is None:

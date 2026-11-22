@@ -57,6 +57,22 @@ def _price(market: dict, side: str = "yes"):
     return None
 
 
+def _bid(market: dict, side: str = "yes"):
+    """
+    Best bid in dollars, or None. Recorded beside the ask so a closing price can
+    be read at the midpoint: the ask alone falls as the spread tightens before
+    kickoff, which flatters every bet's CLV whether or not the line moved.
+    """
+    for key in (f"{side}_bid_dollars", f"{side}_bid"):
+        v = market.get(key)
+        if v is None:
+            continue
+        v = float(v)
+        v = v / 100.0 if v > 1.0 else v
+        return v if v > 0 else None
+    return None
+
+
 def _resolve_trailing(text: str):
     """
     Resolves a team name buried in surrounding junk words, or None.
@@ -302,27 +318,31 @@ def normalise(raw_markets: list) -> list:
             continue
 
         row = {"home": home, "away": away, "league": league, "market": market_type,
-               "ticker": ticker, "ask": ask, "kickoff": kickoff_from(m, market_type)}
+               "ticker": ticker, "ask": ask, "bid": _bid(m, "yes"),
+               "kickoff": kickoff_from(m, market_type)}
+        no_ask, no_bid = _price(m, "no"), _bid(m, "no")
 
         if market_type == MARKET_1X2:
             sel = _selection_1x2(m, home, away)
             if not sel:
                 continue
             out.append({**row, "selection": sel})
+            # NO on "Arsenal" pays on draw-or-Chelsea (see grading.NOT_1X2).
+            if no_ask is not None:
+                out.append({**row, "selection": f"not_{sel}", "ask": no_ask, "bid": no_bid})
 
         elif market_type == MARKET_TOTALS:
             line = _line(m)
             if line is None:
                 continue
             out.append({**row, "selection": "over", "line": line})
-            no_ask = _price(m, "no")
             if no_ask is not None:
-                out.append({**row, "selection": "under", "line": line, "ask": no_ask})
+                out.append({**row, "selection": "under", "line": line,
+                            "ask": no_ask, "bid": no_bid})
 
         elif market_type == MARKET_BTTS:
             out.append({**row, "selection": "yes"})
-            no_ask = _price(m, "no")
             if no_ask is not None:
-                out.append({**row, "selection": "no", "ask": no_ask})
+                out.append({**row, "selection": "no", "ask": no_ask, "bid": no_bid})
 
     return out

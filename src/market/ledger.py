@@ -425,7 +425,8 @@ def closing_price_key(home, away, market, selection, line=None) -> tuple:
             None if line is None else round(float(line), 1))
 
 
-def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
+def record_closing_prices(prices: dict, state: dict = None, now=None,
+                          bids: dict = None) -> int:
     """
     Stamps the latest observed PRE-KICKOFF Kalshi price onto every active bet.
 
@@ -452,6 +453,9 @@ def record_closing_prices(prices: dict, state: dict = None, now=None) -> int:
                                     bet.get("selection"), bet.get("line"))
             if key in prices:
                 bet["closing_price"] = float(prices[key])
+                # The bid beside it gives a midpoint close (see arm_summary).
+                bid = (bids or {}).get(key)
+                bet["closing_bid"] = None if bid is None else float(bid)
                 bet["closing_seen_utc"] = datetime.now(timezone.utc).isoformat()
                 stamped += 1
         # Parlay CLV is measured on the combined price, so a parlay only counts
@@ -566,6 +570,28 @@ def arm_summary(arm: str, state: dict = None) -> dict:
     if clv_pairs:
         clv = round(sum((c - p) / p for p, c in clv_pairs) / len(clv_pairs) * 100, 2)
 
+    # The same CLV in probability points. The percentage above divides by the
+    # entry price, so a 5c->7c longshot counts +40% and drowns forty even-money
+    # bets; per bet it varies ~13% against ~2.7 points for this form (C's 118
+    # closes, 2026-11-22). Kept alongside rather than replacing it, so the
+    # dashboard's history stays comparable.
+    clv_pts = None
+    if clv_pairs:
+        clv_pts = round(sum(c - p for p, c in clv_pairs) / len(clv_pairs) * 100, 2)
+
+    # Against the closing MIDPOINT instead of the closing ask. The ask falls as
+    # the spread tightens toward kickoff, which flatters every bet whether or
+    # not the line moved. Only bets stamped with a closing bid (from
+    # 2026-11-22) can be measured this way.
+    mid_pairs = [
+        (b["price"], (b["closing_price"] + b["closing_bid"]) / 2)
+        for b in history
+        if b.get("closing_price") not in (None, 0) and b.get("closing_bid")
+    ]
+    clv_mid_pts = None
+    if mid_pairs:
+        clv_mid_pts = round(sum(m - p for p, m in mid_pairs) / len(mid_pairs) * 100, 2)
+
     return {
         "arm": arm,
         "label": book["label"],
@@ -584,6 +610,9 @@ def arm_summary(arm: str, state: dict = None) -> dict:
         "pnl": round(pnl, 2),
         "roi_pct": round(pnl / staked * 100, 2) if staked else None,
         "clv_pct": clv,
+        "clv_pts": clv_pts,
+        "clv_mid_pts": clv_mid_pts,
+        "clv_mid_n": len(mid_pairs),
         "is_bust": book["bankroll"] < 0.01 and not all_active,
     }
 

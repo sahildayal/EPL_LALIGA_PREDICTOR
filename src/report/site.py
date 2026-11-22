@@ -138,6 +138,10 @@ def _pct(v, signed: bool = False) -> str:
     return (f"{v:+.1f}%" if signed else f"{v:.1f}%")
 
 
+def _pts(v) -> str:
+    return "—" if v is None else f"{v:+.2f}"
+
+
 def _delta_class(v) -> str:
     if v is None or abs(v) < 1e-9:
         return "flat"
@@ -220,6 +224,7 @@ def _scoreboard(latest_settle: dict, ledger: dict):
                     wins=s.get("wins", 0), settled=s.get("settled_bets", 0),
                     voided=s.get("voided_bets", 0), open=s.get("open_bets", 0),
                     exposure=s.get("exposure", 0), clv=s.get("clv_pct"),
+                    clv_pts=s.get("clv_pts"),
                 )
             )
         else:
@@ -231,7 +236,7 @@ def _scoreboard(latest_settle: dict, ledger: dict):
                     equity=arm.get("bankroll", STARTING_BANKROLL),
                     pnl=(arm.get("bankroll", STARTING_BANKROLL) - STARTING_BANKROLL),
                     roi=None, wins=0, settled=0, voided=0, open=len(arm.get("active_bets", [])),
-                    exposure=0, clv=None,
+                    exposure=0, clv=None, clv_pts=None,
                 )
             )
     losses = {key: 0 for key in ARM_KEYS}
@@ -567,6 +572,7 @@ def _scoreboard_table(rows) -> str:
             f'<td class="num {_delta_class(r["roi"])}">{_pct(r["roi"], signed=True)}</td>'
             f'<td class="num">{_esc(rec)}</td>'
             f'<td class="num {_delta_class(r["clv"])}">{_pct(r["clv"], signed=True)}</td>'
+            f'<td class="num {_delta_class(r.get("clv_pts"))}">{_pts(r.get("clv_pts"))}</td>'
             f'<td class="num">{_money(r["exposure"])}</td>'
             "</tr>"
         )
@@ -574,7 +580,9 @@ def _scoreboard_table(rows) -> str:
         '<div class="scroller"><table><thead><tr>'
         "<th>Arm</th><th class='num'>Bankroll</th><th class='num'>Equity</th>"
         "<th class='num'>P&amp;L</th><th class='num'>ROI</th><th class='num'>W&ndash;L</th>"
-        "<th class='num'>CLV</th><th class='num'>Exposure</th>"
+        "<th class='num'>CLV</th><th class='num' title='Closing-line value in "
+        "probability points, which longshots cannot dominate'>CLV pts</th>"
+        "<th class='num'>Exposure</th>"
         "</tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
     )
 

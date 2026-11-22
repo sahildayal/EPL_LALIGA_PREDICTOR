@@ -22,7 +22,7 @@ from typing import Optional
 
 from src.data.canonical_teams import canonical
 from src.market.fees import fee_as_fraction_of_payout, total_fee
-from src.market.grading import MARKET_TOTALS
+from src.market.grading import MARKET_1X2, MARKET_TOTALS, NOT_1X2
 
 SOURCE_SHARP = "sharp_consensus"
 SOURCE_DERIVED = "sharp_derived"
@@ -115,6 +115,20 @@ def _line_matches(market: str, fair_entry: dict, kalshi_line) -> bool:
     return abs(float(fair_line) - float(kalshi_line)) < 0.01
 
 
+def _prob_for(probs: dict, market: str, selection: str):
+    """
+    A selection's probability from a {selection: prob} dict, or None.
+
+    The 1X2 NO contracts are not quoted anywhere as such; NO on "home" is the
+    complement of home, so it is priced as 1 - p(home) off the same 1X2 line.
+    """
+    if selection in probs:
+        return float(probs[selection])
+    if market == MARKET_1X2 and NOT_1X2.get(selection) in probs:
+        return 1.0 - float(probs[NOT_1X2[selection]])
+    return None
+
+
 def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
                         model_probs: dict = None,
                         allow_model_priced: bool = False) -> list:
@@ -142,8 +156,9 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
         fair, source, book = None, None, None
         entry = fair_by_fixture.get(key, {})
         sharp = entry.get(market, {})
-        if selection in sharp and _line_matches(market, sharp, mkt.get("line")):
-            fair = float(sharp[selection])
+        sharp_p = _prob_for(sharp, market, selection)
+        if sharp_p is not None and _line_matches(market, sharp, mkt.get("line")):
+            fair = sharp_p
             # BTTS is not quoted by the odds feed; it is solved from the sharp
             # 1X2 and totals. Flagging it lets the edge carry the derivation
             # uncertainty rather than pretending it is a directly quoted price.
@@ -152,8 +167,9 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
             book = entry.get("_book")
         elif allow_model_priced:
             mp = model_probs.get(key, {}).get(market, {})
-            if selection in mp and _line_matches(market, mp, mkt.get("line")):
-                fair, source = float(mp[selection]), SOURCE_MODEL
+            model_p = _prob_for(mp, market, selection)
+            if model_p is not None and _line_matches(market, mp, mkt.get("line")):
+                fair, source = model_p, SOURCE_MODEL
 
         if fair is None:
             continue
@@ -163,7 +179,7 @@ def build_opportunities(kalshi_markets: list, fair_by_fixture: dict,
             fair_prob=fair, ask=float(ask), fair_source=source,
             league=mkt.get("league"), kickoff=mkt.get("kickoff"),
             line=mkt.get("line"), ticker=mkt.get("ticker"), sharp_book=book,
-            model_prob=model_probs.get(key, {}).get(market, {}).get(selection),
+            model_prob=_prob_for(model_probs.get(key, {}).get(market, {}), market, selection),
         ))
     return out
 

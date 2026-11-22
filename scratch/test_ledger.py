@@ -290,3 +290,14 @@ def test_final_pre_kickoff_price_survives_a_later_snapshot():
     ledger.record_closing_prices({key: 0.99}, now=now + timedelta(hours=5))  # in-play
     bet = ledger.load_state()["arms"]["A_divergence_kelly"]["active_bets"][0]
     assert bet["closing_price"] == 0.58
+
+
+def test_clv_in_points_and_against_the_midpoint():
+    ledger.place_bet("A_divergence_kelly", mk(stake=100.0, price=0.40))
+    ledger.record_closing_prices({("liverpool", "arsenal", "1x2", "home", None): 0.44},
+                                 bids={("liverpool", "arsenal", "1x2", "home", None): 0.40})
+    ledger.settle_match(MatchResult("liverpool", "arsenal", 1, 0))
+    s = ledger.arm_summary("A_divergence_kelly")
+    assert s["clv_pct"] == 10.0          # (0.44 - 0.40) / 0.40
+    assert s["clv_pts"] == 4.0           # 0.44 - 0.40, in points
+    assert s["clv_mid_pts"] == 2.0       # midpoint 0.42 - 0.40

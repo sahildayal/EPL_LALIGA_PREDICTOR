@@ -33,6 +33,17 @@ MARKET_PLAYER_PROP = "player_prop"
 MARKET_CORNERS = "corners"
 MARKET_ADVANCE = "advance"
 
+# The NO side of each 1X2 contract. Kalshi lists 1X2 as three binary markets
+# ("Arsenal", "Tie", "Chelsea"), and buying NO on one pays on either of the
+# other two outcomes: NO on "Arsenal" is draw-or-Chelsea. Until 2026-11-22 only
+# the YES side was ever priced, so a third of the 1X2 book went unexamined.
+NOT_1X2 = {"not_home": "home", "not_draw": "draw", "not_away": "away"}
+
+
+def is_no_side(selection: str) -> bool:
+    """True for a NO contract, whose price and fill come from the NO side of the book."""
+    return selection in ("no", "under") or selection in NOT_1X2
+
 BETTABLE_MARKETS = {MARKET_1X2, MARKET_TOTALS, MARKET_BTTS}
 ALL_MARKETS = BETTABLE_MARKETS | {MARKET_PLAYER_PROP, MARKET_CORNERS, MARKET_ADVANCE}
 
@@ -50,7 +61,8 @@ class UngradeableBet(Exception):
 class Bet:
     """A structured wager. `label` is for humans; grading never reads it."""
     market: str
-    selection: str                      # 1x2: home|draw|away · totals/corners: over|under
+    selection: str                      # 1x2: home|draw|away|not_home|not_draw|not_away
+                                        # totals/corners: over|under
                                         # btts: yes|no · player_prop: player name
                                         # advance: home|away
     home: str
@@ -102,8 +114,10 @@ def describe(bet: "Bet") -> str:
     """Human-readable label. Display only — never parsed back."""
     h, a = bet.home.title(), bet.away.title()
     if bet.market == MARKET_1X2:
-        pick = {"home": f"{h} Win", "draw": "Draw", "away": f"{a} Win"}[bet.selection]
-        return f"{h} vs {a} — Moneyline: {pick}"
+        names = {"home": f"{h} Win", "draw": "Draw", "away": f"{a} Win"}
+        if bet.selection in NOT_1X2:
+            return f"{h} vs {a} — Moneyline: NOT {names[NOT_1X2[bet.selection]]}"
+        return f"{h} vs {a} — Moneyline: {names[bet.selection]}"
     if bet.market == MARKET_TOTALS:
         return f"{h} vs {a} — {bet.selection.title()} {bet.line} Goals"
     if bet.market == MARKET_BTTS:
@@ -185,6 +199,9 @@ def grade(bet: Bet, result: MatchResult) -> bool:
             return r.away_goals > r.home_goals
         if bet.selection == "draw":
             return r.home_goals == r.away_goals
+        if bet.selection in NOT_1X2:
+            base = Bet.from_dict({**bet.to_dict(), "selection": NOT_1X2[bet.selection]})
+            return not grade(base, result)
         raise UngradeableBet(f"Unknown 1x2 selection {bet.selection!r}")
 
     if bet.market == MARKET_TOTALS:

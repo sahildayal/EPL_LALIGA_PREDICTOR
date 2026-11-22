@@ -24,7 +24,8 @@ from src.data import odds_api
 from src.data.odds_api import fetch_fair_prices, OddsUnavailable
 from src.market import arms as arms_mod
 from src.market import ledger
-from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS
+from src.market import shadow
+from src.market.grading import MARKET_1X2, MARKET_TOTALS, MARKET_BTTS, is_no_side
 from src.market.edge import Opportunity
 from src.market.kalshi_client import KalshiClient, KalshiUnavailable
 from src.models.implied_goals import derive_markets
@@ -286,9 +287,9 @@ def reprice_at_fill(plans: dict, client=None) -> tuple:
                 notes.append({"arm": arm, "bet": bet.label, "action": "dropped",
                               "reason": "no ticker, cannot verify fill price"})
                 continue
-            # BTTS NO and totals UNDER are NO contracts; their fill has to be
-            # walked from the NO side of the book, not the YES side.
-            side = "no" if opp.selection in ("no", "under") else "yes"
+            # BTTS NO, totals UNDER and the 1X2 not_* selections are NO
+            # contracts; their fill is walked from the NO side of the book.
+            side = "no" if is_no_side(opp.selection) else "yes"
             try:
                 ladder = km.ask_ladder(fetch_orderbook(client, opp.ticker), side=side)
                 fill = km.vwap_fill(ladder, bet.stake)
@@ -699,6 +700,8 @@ def run_stake(dry_run: bool = False) -> RunReport:
                 "the sharp 1X2.")
 
         if not dry_run:
+            _shadow(report, "observations",
+                    lambda: shadow.record_observations(markets, fair, model, "stake"))
             placed = {a: arms_mod.place_arm(a, ps, state=state) for a, ps in plans.items()}
             ledger.save_state(state)
             report.details["placed"] = {a: len(r["placed"]) for a, r in placed.items()}
@@ -758,6 +761,19 @@ def _edge_distribution(markets: list, fair: dict = None) -> dict:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
+def _shadow(report: RunReport, kind: str, write) -> None:
+    """
+    Writes to the shadow ledger (src/market/shadow.py). It is measurement only,
+    so a failure never stops the run, but it is a warning: a silent gap in the
+    evidence is the failure this whole repo is built to avoid.
+    """
+    try:
+        report.details.setdefault("shadow", {})[kind] = write()
+    except Exception as exc:                                   # noqa: BLE001
+        report.errors.append(f"shadow ledger ({kind}) not written: "
+                             f"{type(exc).__name__}: {exc}")
+
+
 #: Below this many Odds API credits a stake or snapshot run warns (exit 2). A
 #: week of scheduled runs costs ~36, so this is roughly one week's notice.
 QUOTA_WARN = 40
@@ -789,7 +805,11 @@ def run_snapshot(closing_only: bool = False) -> RunReport:
         prices = {ledger.closing_price_key(m["home"], m["away"], m["market"],
                                            m["selection"], m.get("line")): m["ask"]
                   for m in markets}
-        stamped = ledger.record_closing_prices(prices)
+        bids = {ledger.closing_price_key(m["home"], m["away"], m["market"],
+                                         m["selection"], m.get("line")): m.get("bid")
+                for m in markets if m.get("bid")}
+        stamped = ledger.record_closing_prices(prices, bids=bids)
+        _shadow(report, "closes", lambda: shadow.record_closes(markets))
         report.details = {"markets": len(markets), "stamped": stamped,
                           "closing_only": closing_only}
         if not closing_only:
@@ -865,6 +885,7 @@ def run_settle(results: list = None, voids: list = None) -> RunReport:
                     f"{len(collected['unknown_teams'])} fixture(s) had unrecognised team "
                     f"names and were NOT settled: {collected['unknown_teams']}")
 
+        _shadow(report, "results", lambda: shadow.record_results(results))
         overdue = overdue_bets(state)
         report.details["overdue"] = overdue
         if overdue:
